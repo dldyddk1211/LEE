@@ -493,12 +493,11 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
             page_num = 1
 
             while page_num <= max_pages:
-                # ⬇️⬇️⬇️ 중단 체크 추가 ⬇️⬇️⬇️
+                # 중단 체크
                 if stop_flag:
                     log("\n⏹️ 사용자가 수집을 중단했습니다", 'warning')
                     log(f"현재까지 수집: {len(all_data)}개", 'info')
                     break
-                # ⬆️⬆️⬆️ 중단 체크 끝 ⬆️⬆️⬆️
                 
                 log(f"\n  📄 페이지 {page_num} 수집 중...")
                 
@@ -921,5 +920,275 @@ def save_sourcing_results_to_excel(results, reason="정상종료"):
     return filepath
 
 
+def run_excel_comparison(products, callback=None):
+    """
+    엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교 (V4 하이브리드)
+    - 브라우저 1번만 열기
+    - 검색 페이지 1번만 이동
+    - 검색어만 변경하여 빠른 검색
+    - 오류 시 페이지 리로드로 안정성 확보
+    
+    Args:
+        products: 엑셀에서 읽은 상품 리스트 (dict의 list)
+        callback: 진행상황 콜백 함수
+    
+    Returns:
+        dict: {'success': True/False, 'total_items': int, 'file_path': str}
+    """
+    global LOG_CALLBACK, stop_flag
+    
+    if callback:
+        LOG_CALLBACK = callback
+    
+    # 중단 플래그 초기화
+    stop_flag = False
+    
+    try:
+        results = []
+        total = len(products)
+        
+        log(f"\n🔍 총 {total}개 상품 비교 시작 (V4 하이브리드 방식)", 'info')
+        
+        # 브라우저를 한 번만 열기
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=HEADLESS)
+            context = browser.new_context()
+            
+            # 쿠키 로드
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                    context.add_cookies(cookies)
+                    log("✅ 쿠키 로드 완료", 'success')
+                except:
+                    log("⚠️ 쿠키 로드 실패", 'warning')
+            
+            page = context.new_page()
+            
+            # [1단계] 초기 설정 (1번만)
+            log("\n[1] 포이즌 접속 및 언어 설정", 'info')
+            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+            wait_stable(page, 1000)
+            
+            # 한국어로 변경
+            lang_success = set_language_korean(page)
+            if lang_success:
+                log("  ✅ 언어를 한국어로 변경", 'success')
+            else:
+                log("  ⚠️ 언어 변경 실패 (계속 진행)", 'warning')
+            
+            wait_stable(page, 500)
+            
+            # [2단계] 각 상품 검색
+            log("\n[2] 상품 검색 시작", 'info')
+            
+            for idx, product in enumerate(products, 1):
+                # 중단 체크
+                if stop_flag:
+                    log("\n⏹️ 사용자가 비교를 중단했습니다", 'warning')
+                    log(f"현재까지 처리: {len(results)}개", 'info')
+                    break
+                
+                # 진행상황 전송
+                if callback:
+                    callback(f"PROGRESS:{idx}/{total}", 'progress')
+                
+                product_code = product.get('상품번호', '') or product.get('code', '')
+                product_name = product.get('상품명', '') or product.get('name', '')
+                
+                if not product_code and not product_name:
+                    log(f"[{idx}/{total}] ⚠️ 상품번호/상품명 없음, 건너뜀", 'warning')
+                    continue
+                
+                log(f"\n[{idx}/{total}] 🔍 검색: {product_code} - {product_name}", 'info')
+                
+                # 검색 수행 (재시도 로직 포함)
+                search_query = product_code if product_code else product_name
+                max_retries = 2
+                retry_count = 0
+                search_success = False
+                
+                while retry_count < max_retries and not search_success:
+                    try:
+                        # 재시도 시 페이지 리로드
+                        if retry_count > 0:
+                            log(f"  🔄 재시도 {retry_count}/{max_retries}", 'warning')
+                            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+                            wait_stable(page, 1000)
+                        
+                        # 검색 입력란 찾기
+                        wait_for_inputs(page)
+                        input_selector = "input[placeholder*='상품명']"
+                        
+                        # 입력란 초기화 및 검색어 입력
+                        input_field = page.locator(input_selector).first
+                        input_field.click()
+                        
+                        # 기존 텍스트 선택 및 삭제 (Ctrl+A, Delete)
+                        page.keyboard.press("Control+A")
+                        page.keyboard.press("Delete")
+                        wait_stable(page, 200)
+                        
+                        # 새 검색어 입력
+                        input_field.fill(search_query)
+                        wait_stable(page, 300)
+                        
+                        # 검색 버튼 클릭
+                        try:
+                            click_first(page, ["button:has-text('검색 및 입찰')"], "검색")
+                        except:
+                            page.keyboard.press("Enter")
+                        
+                        wait_stable(page, 1200)
+                        
+                        # 결과 확인
+                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=8000)
+                        rows = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)")
+                        
+                        if rows.count() == 0:
+                            log(f"  ⚠️ 검색 결과 없음", 'warning')
+                            combined = {**product, '상품명': '검색 결과 없음'}
+                            results.append(combined)
+                            search_success = True
+                            continue
+                        
+                        # 첫 번째 결과 추출
+                        row = rows.nth(0)
+                        cells = row.locator("td")
+                        
+                        # 이미지 URL
+                        img_url = ""
+                        try:
+                            imgs = cells.nth(1).locator("img")
+                            if imgs.count() > 0:
+                                img_url = imgs.first.get_attribute("src")
+                        except:
+                            pass
+                        
+                        # 상품 정보
+                        product_cell = cells.nth(2)
+                        item_info = product_cell.inner_text()
+                        lines = [l.strip() for l in item_info.split("\n") if l.strip()]
+                        
+                        style_id = ""
+                        item_name = ""
+                        spu_id = ""
+                        
+                        for idx_line, line in enumerate(lines):
+                            line_clean = line.strip()
+                            
+                            # 상품번호 추출
+                            if not style_id:
+                                if line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:"] and idx_line + 1 < len(lines):
+                                    style_id = lines[idx_line + 1].strip()
+                                elif ("상품번호" in line_clean or "货号" in line_clean or "번호" in line_clean) and line_clean not in ["상품 번호:", "상품번호:", "货号:", "번호:"]:
+                                    style_id = line_clean.replace("상품번호:", "").replace("상품번호：", "").replace("상품번호", "").replace("상품 번호:", "").replace("상품 번호：", "").replace("상품 번호", "").replace("货号:", "").replace("货号：", "").replace("货号", "").replace("번호:", "").replace("번호：", "").replace("번호", "").strip()
+                            
+                            # SPU_ID 추출
+                            if not spu_id:
+                                if line_clean in ["SPU_ID:", "SPU_ID：", "SPU ID:", "SPU:", "SPU："] and idx_line + 1 < len(lines):
+                                    spu_id = lines[idx_line + 1].strip()
+                                elif "SPU" in line_clean.upper() and line_clean not in ["SPU_ID:", "SPU_ID：", "SPU ID:", "SPU:", "SPU："]:
+                                    spu_id = line_clean.replace("SPU_ID：", "").replace("SPU_ID:", "").replace("SPU ID:", "").replace("SPU_ID", "").replace("SPU ID", "").replace("SPU:", "").replace("SPU：", "").replace("SPU", "").strip()
+                            
+                            # 상품명 추출
+                            if not item_name and line_clean and line_clean != style_id and "상품번호" not in line_clean and "货号" not in line_clean and "SPU" not in line_clean.upper() and "번호" not in line_clean and line_clean not in [":", "："]:
+                                item_name = line_clean
+                        
+                        # 가격 및 통계 정보
+                        avg_price_raw = cells.nth(5).inner_text()
+                        cn_exposure_raw = cells.nth(6).inner_text()
+                        cn_sales_raw = cells.nth(7).inner_text()
+                        local_sales_raw = cells.nth(8).inner_text()
+                        
+                        cn_exposure_num = extract_number(cn_exposure_raw)
+                        cn_sales_num = extract_number(cn_sales_raw)
+                        local_sales_num = extract_number(local_sales_raw)
+                        avg_price_num = extract_number(avg_price_raw)
+                        
+                        # 포이즌 데이터
+                        poizon_data = {
+                            '상품명': item_name or product_name or '-',
+                            '상품번호': style_id or product_code or '-',
+                            'SPU_ID': spu_id or '-',
+                            '평균거래가': avg_price_num,
+                            '중국노출': cn_exposure_num,
+                            '중국판매': cn_sales_num,
+                            '해외판매': local_sales_num,
+                            '이미지URL': img_url
+                        }
+                        
+                        # 엑셀 데이터 + 포이즌 데이터 결합
+                        combined = {**product, **poizon_data}
+                        results.append(combined)
+                        
+                        # 실시간 결과 전송
+                        if callback:
+                            try:
+                                callback(f"PRODUCT_RESULT:{json.dumps({'product_code': product_code, 'products': [combined]}, ensure_ascii=False)}", 'data')
+                            except:
+                                pass
+                        
+                        log(f"  ✅ 검색 완료: {item_name}", 'success')
+                        search_success = True
+                        
+                    except Exception as e:
+                        retry_count += 1
+                        
+                        if retry_count >= max_retries:
+                            # 최종 실패
+                            log(f"  ❌ 검색 실패: {e}", 'error')
+                            combined = {**product, '상품명': f'오류: {str(e)}'}
+                            results.append(combined)
+                            search_success = True  # 실패해도 다음 상품으로
+                        else:
+                            # 재시도
+                            log(f"  ⚠️ 오류 발생, 재시도 준비...", 'warning')
+                            wait_stable(page, 500)
+            
+            # [3단계] 모든 검색 완료 후 브라우저 종료
+            log("\n[3] 브라우저 종료", 'info')
+            browser.close()
+        
+        # 엑셀 저장
+        if results:
+            filepath = save_comparison_to_excel(results, products)
+            
+            reason = "중단됨" if stop_flag else "정상완료"
+            log(f"\n✅ 비교 완료 ({reason})!", 'success' if not stop_flag else 'warning')
+            log(f"📄 총 {len(results)}개 상품 처리", 'success')
+            log(f"💾 파일 저장: {filepath}", 'success')
+            
+            return {
+                'success': True,
+                'total_items': len(results),
+                'file_path': os.path.basename(filepath),
+                'results': results,
+                'stopped': stop_flag
+            }
+        else:
+            return {
+                'success': False,
+                'error': '검색 결과가 없습니다'
+            }
+            
+    except Exception as e:
+        log(f"❌ 비교 중 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+
 if __name__ == "__main__":
-    run()
+    print("=" * 60)
+    print("⚠️  이 파일은 app.py를 통해 실행해주세요!")
+    print("=" * 60)
+    print("올바른 실행 방법:")
+    print("  py -u app.py")
+    print("=" * 60)
+    # run()  # 자동 실행 금지! 26-02-17 04시 test
+    
