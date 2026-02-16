@@ -1,0 +1,33 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_141840.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK: form input:not([type='password'])
+✅ PW 입력 OK: input[type='password']
+⚠️ 로그인 버튼 못찾음 → Enter로 로그인 시도
+✅ 로그인 후 URL: https://seller.poizon.com/
+📸 screenshot saved: shots\20260213_142025_after_login.png
+
+[3] 상품 검색 페이지 이동: https://seller.poizon.com/main/goods/search
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[type='search']
+⚠️ 검색 버튼 못찾음 → Enter로 검색 시도
+
+[5] 리스트(결과 행) 확인
+ - rows count (.ant-table-tbody tr): 0
+ - rows count (table tbody tr): 0
+ - rows count (tbody tr): 0
+
+⚠️ 결과 행이 0개로 보입니다.
+가능 원인: (1) 셀렉터 불일치 (2) 검색 버튼 동작 미실행 (3) 로딩 대기 부족 (4) 결과가 진짜 0개
+📸 screenshot saved: shots\20260213_142121_no_rows_or_selector_issue.png
+
+=== TEST DONE: 로그인 + 키워드 검색 + 리스트 확인 ===

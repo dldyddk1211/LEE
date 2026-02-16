@@ -1,0 +1,37 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_162520.txt
+MODE: TEST
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+✅ English 버튼 클릭 OK: div:has-text('English')
+⚠️ 언어 변경 실패 (이미 한국어일 수 있음): Page.wait_for_selector: Timeout 4000ms exceeded.
+Call log:
+  - waiting for locator("span:has-text('한국어')") to be visible
+
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK: input nth=0
+✅ PW 입력 OK: input nth=1
+✅ 로그인 버튼 클릭 OK: button:has-text('Log In')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+📸 screenshot saved: shots\20260213_162547_after_login.png
+
+[3] 상품 검색 페이지 이동: https://seller.poizon.com/main/goods/search
+📸 screenshot saved: shots\20260213_162553_goods_search_page.png
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[placeholder*='Search by name']
+✅ 검색 버튼 클릭 OK: button:has-text('Search & List')
+📸 screenshot saved: shots\20260213_162616_after_search.png
+
+[5] 리스트(결과 행) 확인
+ - rows count (.ant-table-tbody tr): 11
+
+✅ 성공! 검색 결과 행 11개 확인 (selector: .ant-table-tbody tr)
+📸 screenshot saved: shots\20260213_162616_success_list_visible.png
+
+=== TEST DONE: 로그인 + 키워드 검색 + 리스트 확인 ===

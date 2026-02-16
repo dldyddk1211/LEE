@@ -1,0 +1,68 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_165923.txt
+MODE: TEST
+SEARCH_KEYWORD: 나이키
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+📸 screenshot saved: shots\20260213_165932_lang_dropdown_open.png
+  ✅ 한국어 변경 완료
+📸 screenshot saved: shots\20260213_165936_after_lang_change.png
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK
+✅ PW 입력 OK
+✅ 로그인 버튼 클릭 OK: button:has-text('로그인')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+
+[3] 상품 검색 페이지 이동
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[placeholder*='상품명']
+✅ 검색 버튼 클릭 OK: button:has-text('검색 및 입찰')
+
+[4-1] 중국 시장 최근 30일 판매량 내림차순 정렬
+  테이블 헤더 수: 14
+  th[0]: 
+  th[1]: 
+  th[2]: POIZON 상품 정보
+  th[3]: 브랜드/카테고리
+  th[4]: 상태
+  th[5]: 중국 시장
+  th[6]: 관심 상품
+  th[7]: 입찰 완료 여부
+  th[8]: 작업
+  th[9]: 
+  th[10]: 최근 30일 평균 거래가
+  th[11]: 중국 노출
+  th[12]: 중국 시장 최근 30일 판매량
+  th[13]: 현지 판매자 최근 30일 판매량
+📸 screenshot saved: shots\20260213_165944_before_sort.png
+  ⚠️ hover 방법 실패: Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("th").filter(has_text="판매량").last.locator(".ant-table-filter-trigger, [class*='filter-trigger']").first
+
+  ⚠️ 백업 방법도 실패: Page.wait_for_selector: Timeout 5000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-filter-trigger") to be visible
+
+📸 screenshot saved: shots\20260213_170020_sort_all_failed.png
+
+[5] 수집 시작 (MODE=TEST, 최대 1페이지)
+
+  📄 페이지 1 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    20 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 1 완료: 0개 (누계: 0개)
+
+  ⏹ TEST 모드 - 1페이지만 수집 후 종료
+
+[6] 총 0개 데이터 수집 완료
+💾 엑셀 저장 완료: D:\VisualStudio\poizon_data\poizon_나이키_20260213_170028.xlsx (0행)
+📸 screenshot saved: shots\20260213_170028_done.png
+
+=== 완료 ===

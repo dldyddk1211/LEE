@@ -1,0 +1,99 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_165431.txt
+MODE: REAL
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+✅ English 버튼 클릭 OK: //div[contains(text(),'English')]
+✅ 한국어 선택 OK: *:has-text('한국어') >> nth=0
+✅ 언어 한국어 변경 완료
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK
+✅ PW 입력 OK
+✅ 로그인 버튼 클릭 OK: button:has-text('Log In')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+
+[3] 상품 검색 페이지 이동
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[placeholder*='Search by name']
+✅ 검색 버튼 클릭 OK: button:has-text('Search & List')
+
+[4-1] 중국 시장 최근 30일 판매량 내림차순 정렬
+⚠️ 정렬 실패: Page.wait_for_selector: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-filter-trigger") to be visible
+
+📸 screenshot saved: shots\20260213_165531_sort_fail.png
+
+[5] 페이지네이션 수집 시작
+
+  📄 페이지 1 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    21 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 1 완료: 0개 수집 (누계: 0개)
+
+  📄 페이지 2 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    21 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 2 완료: 0개 수집 (누계: 0개)
+
+  📄 페이지 3 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    21 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 3 완료: 0개 수집 (누계: 0개)
+
+  📄 페이지 4 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Target page, context or browser has been closed
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    20 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 4 완료: 0개 수집 (누계: 0개)
+
+  ⏹ 다음 페이지 없음 또는 오류: Locator.count: Target page, context or browser has been closed
+
+[6] 총 0개 데이터 수집 완료
+💾 엑셀 저장 완료: output\poizon_나이키_20260213_165607.xlsx (0행)
+⚠️ screenshot failed: Page.screenshot: Target page, context or browser has been closed
+
+=== 완료 ===
+Traceback (most recent call last):
+  File "D:\VisualStudio\poizon_data\poizon_test.py", line 407, in <module>
+    run()
+    ~~~^^
+  File "D:\VisualStudio\poizon_data\poizon_test.py", line 402, in run
+    page.wait_for_timeout(1000)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\sync_api\_generated.py", line 11536, in wait_for_timeout
+    self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_page.py", line 1101, in wait_for_timeout
+    await self._main_frame.wait_for_timeout(timeout)
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_frame.py", line 862, in wait_for_timeout
+    await self._channel.send("waitForTimeout", None, {"waitTimeout": timeout})
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.wait_for_timeout: Target page, context or browser has been closed

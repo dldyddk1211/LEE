@@ -1,0 +1,20 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_180506.txt
+MODE: TEST
+SEARCH_KEYWORD: 나이키
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+  ✅ 이미 한국어
+
+[2] 로그인
+
+[3] 상품 검색 페이지 이동
+
+[4] 키워드 입력: 나이키
+⛔ Error: Page.wait_for_selector: Timeout 2000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*='상품명']") to be visible
+
+📸 screenshot saved: shots\20260213_180520_error.png

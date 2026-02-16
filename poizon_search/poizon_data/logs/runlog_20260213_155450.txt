@@ -1,0 +1,16 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_155450.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+⛔ TimeoutError: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator("input[type='tel']") to be visible
+
+📸 screenshot saved: shots\20260213_155522_timeout_error.png

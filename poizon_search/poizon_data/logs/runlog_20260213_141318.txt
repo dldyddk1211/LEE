@@ -1,0 +1,14 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_141318.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+⛔ TimeoutError: Page.wait_for_selector: Timeout 5000ms exceeded.
+Call log:
+  - waiting for locator("input[placeholder*='Email']") to be visible
+
+📸 screenshot saved: shots\20260213_141350_timeout_error.png

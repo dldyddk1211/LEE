@@ -1,0 +1,25 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260214_000906.txt
+MODE: REAL
+SEARCH_KEYWORD: 푸마 스피드캣
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+  ✅ 한국어 변경 완료
+
+[2] 로그인
+✅ 로그인 OK: button:has-text('로그인')
+
+[3] 상품 검색 페이지 이동
+⛔ Error: Page.goto: net::ERR_ABORTED at https://seller.poizon.com/main/goods/search
+Call log:
+  - navigating to "https://seller.poizon.com/main/goods/search", waiting until "domcontentloaded"
+
+📸 screenshot saved: shots\20260214_000918_error.png
+🔥 [app] /run 요청 받음
+   keyword: 푸마 스피드캣
+   mode: REAL headless: False max_pages: 3
+🚀 [poizon_search] GUI 호출됨
+   keyword = 푸마 스피드캣
+✅ [poizon_search] 실행 함수 찾음: run()

@@ -1,0 +1,27 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_161247.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK: input nth=0
+✅ PW 입력 OK: input nth=1
+✅ 로그인 버튼 클릭 OK: button:has-text('Log In')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+📸 screenshot saved: shots\20260213_161303_after_login.png
+
+[3] 상품 검색 페이지 이동: https://seller.poizon.com/main/goods/search
+📸 screenshot saved: shots\20260213_161309_goods_search_page.png
+
+[4] 키워드 입력: 나이키
+⛔ TimeoutError: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator("form input:not([type='password'])") to be visible
+    21 × locator resolved to 6 elements. Proceeding with the first one: <input type="text"/>
+
+📸 screenshot saved: shots\20260213_161411_timeout_error.png

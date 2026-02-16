@@ -1,0 +1,11 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_151251.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭

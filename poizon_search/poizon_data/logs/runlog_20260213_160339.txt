@@ -1,0 +1,49 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_160339.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK: input nth=0
+✅ PW 입력 OK: input nth=1
+⚠️ 로그인 버튼 못찾음 → Enter로 로그인 시도
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+📸 screenshot saved: shots\20260213_160416_after_login.png
+
+[3] 상품 검색 페이지 이동: https://seller.poizon.com/main/goods/search
+📸 screenshot saved: shots\20260213_160421_goods_search_page.png
+
+[4] 키워드 입력: 나이키
+⛔ Error: Page.wait_for_selector: Target page, context or browser has been closed
+⚠️ screenshot failed: Page.screenshot: Target page, context or browser has been closed
+Traceback (most recent call last):
+  File "D:\VisualStudio\poizon_data\poizon_test.py", line 270, in <module>
+    run()
+    ~~~^^
+  File "D:\VisualStudio\poizon_data\poizon_test.py", line 265, in run
+    page.wait_for_timeout(1500)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\sync_api\_generated.py", line 11536, in wait_for_timeout
+    self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_page.py", line 1101, in wait_for_timeout
+    await self._main_frame.wait_for_timeout(timeout)
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_frame.py", line 862, in wait_for_timeout
+    await self._channel.send("waitForTimeout", None, {"waitTimeout": timeout})
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\1\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.wait_for_timeout: Target page, context or browser has been closed

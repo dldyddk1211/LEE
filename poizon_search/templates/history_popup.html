@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>검색 기록</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.8em;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 14px;
+    }
+    
+    /* 통계 카드 */
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .history-stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .history-stat-value {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .history-stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    /* 컨트롤 버튼 */
+    .history-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .history-btn {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    
+    .history-btn:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .history-btn.danger {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    
+    .history-btn.danger:hover {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .history-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* 선택 컨트롤 */
+    .select-all-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .select-all-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    
+    .select-all-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .selected-count {
+      margin-left: auto;
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 600;
+    }
+    
+    /* 기록 리스트 */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .history-item {
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 15px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      align-items: center;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .history-item:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+    
+    .history-item.selected {
+      background: #e8f0ff;
+      border-color: #667eea;
+    }
+    
+    .history-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    
+    .history-info h4 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .history-info p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+    
+    .history-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .history-actions button {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .history-actions button:hover {
+      background: #f0f0f0;
+    }
+    
+    .history-actions button.delete {
+      color: #dc3545;
+      border-color: #dc3545;
+    }
+    
+    .history-actions button.delete:hover {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .history-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    /* 스크롤바 스타일 */
+    .history-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .history-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .history-list::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+    
+    .history-list::-webkit-scrollbar-thumb:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 검색 기록</h1>
+    <p class="subtitle">과거 검색 결과를 저장하고 다시 불러올 수 있습니다</p>
+    
+    <!-- 통계 카드 -->
+    <div class="history-stats">
+      <div class="history-stat-card">
+        <div class="history-stat-value" id="historyTotalCount">0</div>
+        <div class="history-stat-label">총 기록 수</div>
+      </div>
+      <div class="history-stat-card">
+        <div class="history-stat-value" id="historyKeywordCount">0</div>
+        <div class="history-stat-label">키워드 검색</div>
+      </div>
+      <div class="history-stat-card">
+        <div class="history-stat-value" id="historyCompareCount">0</div>
+        <div class="history-stat-label">리스트 비교</div>
+      </div>
+    </div>
+    
+    <!-- 컨트롤 버튼 -->
+    <div class="history-controls">
+      <button class="history-btn" onclick="refreshHistory()">🔄 새로고침</button>
+      <button class="history-btn" onclick="downloadAllHistory()">📦 전체 ZIP</button>
+      <button class="history-btn danger" id="deleteSelectedBtn" onclick="deleteSelected()" disabled>
+        🗑️ 선택 삭제
+      </button>
+    </div>
+    
+    <!-- 전체 선택 -->
+    <div class="select-all-container">
+      <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this.checked)">
+      <label for="selectAllCheckbox" class="select-all-label">전체 선택</label>
+      <span class="selected-count" id="selectedCount">0개 선택됨</span>
+    </div>
+    
+    <!-- 기록 리스트 -->
+    <div class="history-list" id="historyList">
+      <div class="history-empty">
+        <p>📭 저장된 기록이 없습니다</p>
+        <p style="font-size:13px; margin-top:8px;">검색 완료 후 자동으로 저장됩니다</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let selectedRecords = new Set();
+    let allRecords = [];
+    
+    // 페이지 로드 시 기록 불러오기
+    window.addEventListener('load', function() {
+      refreshHistory();
+    });
+    
+    // 기록 새로고침
+    async function refreshHistory() {
+      try {
+        const res = await fetch('/api/history/list');
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        allRecords = data.records;
+        renderHistoryList();
+        
+      } catch (err) {
+        console.error('기록 로드 실패:', err);
+        alert('기록을 불러올 수 없습니다');
+      }
+    }
+    
+    // 화면 렌더링
+    function renderHistoryList() {
+      const total = allRecords.length;
+      const selectedCount = selectedRecords.size;
+      
+      // 통계 업데이트
+      document.getElementById('historyTotalCount').textContent = total;
+      
+      const keywordCount = allRecords.filter(r => r.type === 'keyword').length;
+      const compareCount = allRecords.filter(r => r.type === 'compare').length;
+      
+      document.getElementById('historyKeywordCount').textContent = keywordCount;
+      document.getElementById('historyCompareCount').textContent = compareCount;
+      
+      // 선택 개수
+      document.getElementById('selectedCount').textContent = `${selectedCount}개 선택됨`;
+      document.getElementById('deleteSelectedBtn').disabled = selectedCount === 0;
+      
+      const listEl = document.getElementById('historyList');
+      
+      if (total === 0) {
+        listEl.innerHTML = `
+          <div class="history-empty">
+            <p>📭 저장된 기록이 없습니다</p>
+            <p style="font-size:13px; margin-top:8px;">검색 완료 후 자동으로 저장됩니다</p>
+          </div>
+        `;
+        selectedRecords.clear();
+        return;
+      }
+      
+      listEl.innerHTML = allRecords.map(r => {
+        const isSelected = selectedRecords.has(r.id);
+        const title = getTitle(r);
+        const date = new Date(r.timestamp).toLocaleString('ko-KR');
+        
+        return `
+          <div class="history-item ${isSelected ? 'selected' : ''}" 
+               onclick="loadRecord('${r.filename}')">
+            
+            <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                   onclick="event.stopPropagation();"
+                   onchange="toggleItem('${r.id}', this.checked)">
+            
+            <div class="history-info">
+              <h4>${title}</h4>
+              <p>
+                📅 ${date} | 
+                📊 ${r.summary.total_count}개 | 
+                💰 평균 ${r.summary.avg_price.toLocaleString()}원 | 
+                💾 ${r.size_mb}MB
+              </p>
+            </div>
+            
+            <div class="history-actions">
+              <button onclick="event.stopPropagation(); downloadFile('${r.filename}')" 
+                      title="다운로드">💾</button>
+              <button class="delete" onclick="event.stopPropagation(); deleteOne('${r.filename}')" 
+                      title="삭제">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      // 전체 선택 체크박스
+      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+      const allChecked = total > 0 && selectedCount === total;
+      const someChecked = selectedCount > 0 && selectedCount < total;
+      
+      selectAllCheckbox.checked = allChecked;
+      selectAllCheckbox.indeterminate = someChecked;
+    }
+    
+    // 제목 생성
+    function getTitle(r) {
+      const p = r.params;
+      if (r.type === 'keyword') return `🔍 ${p.keyword || '키워드'} (${p.maxPages}p)`;
+      if (r.type === 'compare') return `📋 리스트 비교 (${r.summary.total_count}개)`;
+      if (r.type === 'price') return `💰 거래금액 높은 순 (${p.maxPages}p)`;
+      if (r.type === 'growth') return `📈 거래증가 빠른 순 (${p.maxPages}p)`;
+      return '검색 기록';
+    }
+    
+    // 전체 선택/해제
+    function toggleAll(checked) {
+      if (checked) {
+        allRecords.forEach(r => selectedRecords.add(r.id));
+      } else {
+        selectedRecords.clear();
+      }
+      renderHistoryList();
+    }
+    
+    // 개별 선택
+    function toggleItem(id, checked) {
+      if (checked) {
+        selectedRecords.add(id);
+      } else {
+        selectedRecords.delete(id);
+      }
+      renderHistoryList();
+    }
+    
+    // 기록 불러오기
+    async function loadRecord(filename) {
+      try {
+        const res = await fetch(`/api/history/load/${filename}`);
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        // 부모 창에 데이터 전달
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({
+            type: 'loadHistory',
+            data: data.data.results
+          }, '*');
+          
+          alert(`✅ "${filename}" 불러오기 완료\n메인 창에서 확인하세요!`);
+        } else {
+          alert('❌ 메인 창을 찾을 수 없습니다');
+        }
+        
+      } catch (err) {
+        alert('불러오기 실패: ' + err.message);
+      }
+    }
+    
+    // 개별 다운로드
+    function downloadFile(filename) {
+      window.open(`/api/history/download/${filename}`, '_blank');
+    }
+    
+    // 전체 다운로드
+    function downloadAllHistory() {
+      if (allRecords.length === 0) {
+        alert('다운로드할 기록이 없습니다');
+        return;
+      }
+      window.open('/api/history/download-all', '_blank');
+    }
+    
+    // 개별 삭제
+    async function deleteOne(filename) {
+      if (!confirm(`"${filename}"을(를) 삭제하시겠습니까?`)) return;
+      
+      try {
+        const res = await fetch(`/api/history/delete/${filename}`, {method: 'DELETE'});
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        alert('✅ 삭제 완료');
+        await refreshHistory();
+        
+      } catch (err) {
+        alert('삭제 실패: ' + err.message);
+      }
+    }
+    
+    // 선택 삭제
+    async function deleteSelected() {
+      const count = selectedRecords.size;
+      
+      if (count === 0) {
+        alert('삭제할 항목을 선택하세요');
+        return;
+      }
+      
+      if (!confirm(`선택한 ${count}개 기록을 삭제하시겠습니까?`)) return;
+      
+      try {
+        const ids = Array.from(selectedRecords);
+        
+        const res = await fetch('/api/history/delete-selected', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({record_ids: ids})
+        });
+        
+        const data = await res.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        alert(`✅ ${data.deleted}개 기록 삭제 완료`);
+        
+        selectedRecords.clear();
+        await refreshHistory();
+        
+      } catch (err) {
+        alert('삭제 실패: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_171814.txt
+MODE: TEST
+SEARCH_KEYWORD: 나이키
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+📸 screenshot saved: shots\20260213_171820_lang_dropdown_open.png
+  ✅ 한국어 변경 완료
+📸 screenshot saved: shots\20260213_171825_after_lang_change.png
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK
+✅ PW 입력 OK
+✅ 로그인 버튼 클릭 OK: button:has-text('로그인')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+
+[3] 상품 검색 페이지 이동
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[placeholder*='상품명']
+✅ 검색 버튼 클릭 OK: button:has-text('검색 및 입찰')
+
+[4-1] 중국 시장 최근 30일 판매량 내림차순 정렬
+================================================================================
+  th[12] HTML 구조:
+<div style="width: 100%; display: flex; align-items: flex-start; justify-content: space-between; gap: 2px;" data-mutation_pc="0"><span data-mutation_pc="0">중국 시장 최근 30일 판매량<span role="img" aria-label="question-circle" class="anticon anticon-question-circle" data-mutation_pc="0"><svg viewBox="64 64 896 896" focusable="false" data-icon="question-circle" width="1em" height="1em" fill="currentColor" aria-hidden="true" data-mutation_pc="0"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" data-mutation_pc="0"></path><path d="M623.6 316.7C593.6 290.4 554 276 512 276s-81.6 14.5-111.6 40.7C369.2 344 352 380.7 352 420v7.6c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V420c0-44.1 43.1-80 96-80s96 35.9 96 80c0 31.1-22 59.6-56.1 72.7-21.2 8.1-39.2 22.3-52.1 40.9-13.1 19-19.9 41.8-19.9 64.9V620c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8v-22.7a48.3 48.3 0 0130.9-44.8c59-22.7 97.1-74.7 97.1-132.5.1-39.3-17.1-76-48.3-103.3zM472 732a40 40 0 1080 0 40 40 0 10-80 0z" data-mutation_pc="0"></path></svg></span></span><div data-mutation_pc="0"><span class="anticon" style="cursor: pointer;" data-mutation_pc="0"><svg xmlns="https://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" data-mutation_pc="0"><path d="M4.66667 9.9165H2.33333C2.16806 9.9165 2.02961 9.8605 1.918 9.7485C1.806 9.63689 1.75 9.49845 1.75 9.33317C1.75 9.16789 1.806 9.02945 1.918 8.91784C2.02961 8.80584 2.16806 8.74984 2.33333 8.74984H4.66667C4.83194 8.74984 4.97058 8.80584 5.08258 8.91784C5.19419 9.02945 5.25 9.16789 5.25 9.33317C5.25 9.49845 5.19419 9.63689 5.08258 9.7485C4.97058 9.8605 4.83194 9.9165 4.66667 9.9165ZM11.6667 4.08317H2.33333C2.16806 4.08317 2.02961 4.02736 1.918 3.91575C1.806 3.80375 1.75 3.66511 1.75 3.49984C1.75 3.33456 1.806 3.19592 1.918 3.08392C2.02961 2.97231 2.16806 2.9165 2.33333 2.9165H11.6667C11.8319 2.9165 11.9704 2.97231 12.082 3.08392C12.194 3.19592 12.25 3.33456 12.25 3.49984C12.25 3.66511 12.194 3.80375 12.082 3.91575C11.9704 4.02736 11.8319 4.08317 11.6667 4.08317ZM8.16667 6.99984H2.33333C2.16806 6.99984 2.02961 6.94384 1.918 6.83184C1.806 6.72023 1.75 6.58178 1.75 6.4165C1.75 6.25123 1.806 6.11259 1.918 6.00059C2.02961 5.88898 2.16806 5.83317 2.33333 5.83317H8.16667C8.33194 5.83317 8.47058 5.88898 8.58258 6.00059C8.69419 6.11259 8.75 6.25123 8.75 6.4165C8.75 6.58178 8.69419 6.72023 8.58258 6.83184C8.47058 6.94384 8.33194 6.99984 8.16667 6.99984Z" fill="#9E9EA3" data-mutation_pc="0"></path></svg></span></div></div>
+================================================================================
+📸 screenshot saved: shots\20260213_171833_before_sort_debug.png
+
+[5] 수집 시작 (MODE=TEST)
+
+  📄 페이지 1 수집 중...
+⚠️ scrape_current_page 오류: Page.wait_for_selector: Timeout 8000ms exceeded.
+Call log:
+  - waiting for locator(".ant-table-tbody tr") to be visible
+    21 × locator resolved to 11 elements. Proceeding with the first one: <tr aria-hidden="true" data-mutation_pc="0" class="ant-table-measure-row">…</tr>
+
+  ✅ 페이지 1 완료: 0개 (누계: 0개)
+  ⏹ TEST 모드 - 1페이지 수집 완료, 종료
+
+[6] 총 0개 데이터 수집 완료
+💾 엑셀 저장 완료: D:\VisualStudio\poizon_data\poizon_나이키_20260213_171841.xlsx (0행)
+📸 screenshot saved: shots\20260213_171841_done.png
+
+=== 완료 ===

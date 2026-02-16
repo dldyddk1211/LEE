@@ -1,0 +1,21 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_184329.txt
+MODE: REAL
+SEARCH_KEYWORD: 나이키
+Traceback (most recent call last):
+  File "poizon_nike.py", line 395, in <module>
+  File "poizon_nike.py", line 314, in run
+  File "playwright\sync_api\_generated.py", line 14566, in launch
+  File "playwright\_impl\_sync_base.py", line 115, in _sync
+  File "playwright\_impl\_browser_type.py", line 97, in launch
+  File "playwright\_impl\_connection.py", line 69, in send
+  File "playwright\_impl\_connection.py", line 559, in wrap_api_call
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at C:\Users\1\AppData\Local\Temp\_MEI3950882\playwright\driver\package\.local-browsers\chromium-1208\chrome-win64\chrome.exe
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝

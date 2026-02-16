@@ -1,0 +1,2318 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POIZON 데이터 수집기</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container{
+      background:#fff;
+      border-radius:20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding:40px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width:100%;
+    }
+
+    h1{
+      text-align:center;
+      color:#333;
+      margin-bottom:10px;
+      font-size:2em;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#666;
+      margin-bottom:30px;
+    }
+
+    .login-status{
+      padding:25px;
+      background:#fff3cd;
+      border-radius:10px;
+      margin-bottom:30px;
+      text-align:center;
+      border:3px solid #ffc107;
+    }
+    .login-status.logged-in{
+      background:#d4edda;
+      border-color:#28a745;
+    }
+    .login-status h3{
+      color:#856404;
+      margin-bottom:10px;
+      font-size:1.3em;
+    }
+    .login-status.logged-in h3{ color:#155724; }
+    .login-status p{
+      margin:10px 0;
+      font-size:15px;
+      color:#666;
+    }
+
+    #loginCheckBtn{
+      background:#ffc107;
+      color:#333;
+      border:none;
+      padding:14px 12px;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      margin:15px auto 0;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      min-width:200px;
+      max-width:300px;
+      display:block;
+      min-height: 48px;
+    }
+    #loginCheckBtn:hover:not(:disabled){
+      background:#ffb300;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    #loginCheckBtn:disabled{
+      background:#ccc;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .login-status.logged-in #loginCheckBtn{
+      background:#28a745;
+      color:#fff;
+    }
+
+    /* 수집 모드 선택 */
+    .mode-selector{
+      margin-bottom:20px;
+      padding:20px;
+      background:#f8f9fa;
+      border-radius:12px;
+    }
+    .mode-selector h3{
+      margin-bottom:15px;
+      color:#333;
+      font-size:16px;
+    }
+    .mode-buttons{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+    }
+    .mode-btn{
+      padding:16px 12px;
+      border:2px solid #e0e0e0;
+      background:#fff;
+      border-radius:10px;
+      cursor:pointer;
+      transition: all 0.3s;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      font-weight:600;
+      color:#333;
+    }
+    .mode-btn:hover:not(:disabled){
+      border-color:#667eea;
+      transform:translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+    }
+    .mode-btn:disabled{
+      opacity:0.5;
+      cursor:not-allowed;
+      transform:none;
+    }
+    .mode-btn.active{
+      border-color:#667eea;
+      background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:#fff;
+    }
+    .mode-icon{
+      font-size:24px;
+    }
+    .mode-text{
+      font-size:13px;
+      line-height:1.2;
+    }
+
+    .input-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      margin-top: 10px;
+    }
+
+    .input-group{ margin-bottom:0; }
+    label{
+      display:block;
+      margin-bottom:8px;
+      color:#333;
+      font-weight:600;
+      font-size: 14px;
+    }
+    input[type="text"], input[type="number"]{
+      width:100%;
+      padding:12px 16px;
+      border:2px solid #e0e0e0;
+      border-radius:10px;
+      font-size:16px;
+      transition: all 0.3s;
+    }
+    input:focus{
+      outline:none;
+      border-color:#667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    input:disabled{
+      background:#f5f5f5;
+      cursor:not-allowed;
+      color:#999;
+    }
+    .hint{
+      font-size:12px;
+      color:#999;
+      margin-top:6px;
+      line-height: 1.3;
+    }
+
+    .button-group{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:10px;
+      margin-top:20px;
+      margin-bottom:20px;
+    }
+    button, .download-btn, .upload-btn{
+      padding:14px 12px;
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+      transition: all 0.3s;
+      text-align:center;
+      text-decoration:none;
+      line-height:1.2;
+      min-height: 48px;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .upload-btn{
+      background:#17a2b8;
+      padding:14px 12px !important;
+      font-size:16px !important;
+      font-weight:600 !important;
+      min-height: 48px !important;
+    }
+    .upload-btn:hover{
+      background:#138496;
+      transform: translateY(-2px);
+    }
+    .compare-start-btn{
+      background:#28a745;
+      padding:14px 12px !important;
+      font-size:16px !important;
+      font-weight:600 !important;
+      min-height: 48px !important;
+    }
+    .compare-start-btn:hover{
+      background:#218838;
+      transform: translateY(-2px);
+    }
+    
+    .sourcing-btn{
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: #fff;
+      border: none;
+      padding: 6.4px 12.8px;
+      border-radius: 6px;
+      font-size: 11.2px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(245, 87, 108, 0.25);
+      min-width: 100px;
+      max-width: 140px;
+      width: auto;
+    }
+    .sourcing-btn:hover{
+      background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+      transform: scale(1.05);
+      box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
+    }
+    .sourcing-btn:disabled{
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .stop-btn{
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: #fff;
+      border: none;
+      padding: 6.4px 12.8px;
+      border-radius: 6px;
+      font-size: 11.2px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(238, 90, 36, 0.25);
+      min-width: 80px;
+      max-width: 100px;
+      width: auto;
+    }
+    .stop-btn:hover{
+      background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+      transform: scale(1.05);
+      box-shadow: 0 3px 12px rgba(238, 90, 36, 0.35);
+    }
+    
+    #startBtn{
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    #startBtn:hover:not(:disabled){
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+    }
+    #startBtn:disabled{
+      background:#ccc;
+      cursor:not-allowed;
+      transform:none;
+    }
+    
+    .stop-btn{
+      background:#dc3545;
+      display:none;
+      padding:14px 12px !important;
+      font-size:16px !important;
+      font-weight:600 !important;
+      min-height: 48px !important;
+    }
+    .stop-btn:hover{
+      background:#c82333;
+      transform: translateY(-2px);
+    }
+
+    .download-btn{
+      background:#28a745;
+      display:none;
+      padding:14px 12px !important;
+      font-size:16px !important;
+      font-weight:600 !important;
+      min-height: 48px !important;
+    }
+    .download-btn:hover{
+      background:#218838;
+      transform: translateY(-2px);
+    }
+
+    .reset-btn{
+      background:#6c757d;
+      display:none;
+      padding:14px 12px !important;
+      font-size:16px !important;
+      font-weight:600 !important;
+      min-height: 48px !important;
+    }
+    .reset-btn:hover{
+      background:#5a6268;
+      transform: translateY(-2px);
+    }
+
+    .section{
+      width:100%;
+      border-radius:14px;
+      background:#f8f9fa;
+      padding:18px;
+      margin-top:18px;
+    }
+    .section h3{
+      color:#333;
+      margin-bottom:12px;
+      font-size: 16px;
+    }
+
+    .table-controls{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:12px;
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      background:#fff;
+      border:1px solid #e0e0e0;
+      border-radius:12px;
+    }
+    .ctrl-label{
+      font-size:13px;
+      color:#555;
+      font-weight:600;
+    }
+    #pageSizeSelect{
+      padding:8px 10px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      font-size:14px;
+      background:#fff;
+      min-height:38px;
+    }
+    .page-btn{
+      padding:4px 6px;
+      border:none;
+      border-radius:6px;
+      background:#667eea;
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      min-height: 38px;
+      font-size:11px;
+      min-width:60px;
+      max-width:80px;
+    }
+    .page-btn:disabled{ background:#ccc; cursor:not-allowed; }
+    .page-info{
+      font-size:12px;
+      color:#333;
+      font-weight:700;
+      min-width:50px;
+      text-align:center;
+      line-height:38px;
+    }
+
+    .table-container{
+      max-height: 720px;
+      overflow:auto;
+      border:1px solid #e0e0e0;
+      border-radius:12px;
+      background:#fff;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* 업로드 리스트 테이블 컬럼 너비 */
+    #uploadListSection .table-container{
+      max-height: 400px;
+    }
+    #uploadListSection table{
+      table-layout: fixed;
+      width: 100%;
+    }
+    #uploadListSection th:nth-child(1) { /* 순번 */
+      width: 50px;
+    }
+    #uploadListSection th:nth-child(2) { /* 상품번호 */
+      width: 17%;
+    }
+    #uploadListSection th:nth-child(3), /* 정가 */
+    #uploadListSection th:nth-child(4), /* 할인가 */
+    #uploadListSection th:nth-child(5)  /* 재고 */
+    {
+      width: 13%;
+    }
+    #uploadListSection th:nth-child(6) { /* 제품명 */
+      width: calc(100% - 50px - 17% - 13% - 13% - 13%);
+    }
+    #uploadListSection td{
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #uploadListSection td:nth-child(6){ /* 제품명은 말줄임 */
+      white-space: normal;
+      word-break: break-word;
+    }
+    
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:#fff;
+      min-width: 850px;
+    }
+    th, td{
+      padding:10px 8px;
+      text-align:left;
+      border-bottom:1px solid #e0e0e0;
+      vertical-align:middle;
+      white-space: nowrap;
+    }
+    /* 제품명 컬럼만 말줄임 허용 */
+    td:nth-child(4) {
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th{
+      background:#f8f9fa;
+      font-weight:600;
+      color:#333;
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    td{ font-size:14px; }
+    tr:hover{ background:#f8f9fa; }
+
+    .product-img{
+      width:72px;
+      height:72px;
+      object-fit:contain;
+      border-radius:8px;
+      background:#f8f9fa;
+      padding:5px;
+    }
+    
+    /* 구매 버튼 */
+    .buy-btn{
+      background:#ff6b6b;
+      color:#fff;
+      border:none;
+      padding:6.4px 12.8px;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:11.2px;
+      font-weight:600;
+      transition: all 0.3s;
+      white-space: nowrap;
+      min-width: 60px;
+      max-width: 80px;
+      width: auto;
+    }
+    .buy-btn:hover{
+      background:#ff5252;
+      transform: scale(1.05);
+    }
+
+    /* 팝업 */
+    .popup-overlay{
+      display:none;
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.7);
+      z-index:1000;
+      justify-content:center;
+      align-items:center;
+    }
+    .popup-overlay.active{ display:flex; }
+    
+    .popup-content{
+      background:#fff;
+      border-radius:20px;
+      padding:30px;
+      max-width:600px;
+      width:90%;
+      max-height:80vh;
+      overflow-y:auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position:relative;
+    }
+    .popup-close{
+      position:absolute;
+      top:15px;
+      right:15px;
+      background:#f0f0f0;
+      border:none;
+      width:35px;
+      height:35px;
+      border-radius:50%;
+      cursor:pointer;
+      font-size:20px;
+      line-height:1;
+      transition: all 0.3s;
+    }
+    .popup-close:hover{
+      background:#e0e0e0;
+      transform:rotate(90deg);
+    }
+    
+    .popup-product-info{
+      margin-bottom:30px;
+      padding-bottom:20px;
+      border-bottom:2px solid #e0e0e0;
+    }
+    .popup-product-header{
+      display:flex;
+      gap:20px;
+      margin-bottom:15px;
+    }
+    .popup-product-img{
+      width:120px;
+      height:120px;
+      object-fit:contain;
+      border-radius:10px;
+      background:#f8f9fa;
+      padding:10px;
+    }
+    .popup-product-details{ flex:1; }
+    .popup-product-code{
+      font-size:24px;
+      font-weight:700;
+      color:#333;
+      margin-bottom:10px;
+    }
+    .popup-product-name{
+      font-size:16px;
+      color:#666;
+      margin-bottom:5px;
+    }
+    .popup-product-price{
+      font-size:18px;
+      font-weight:600;
+      color:#667eea;
+    }
+    
+    .price-compare-title{
+      font-size:20px;
+      font-weight:700;
+      color:#333;
+      margin-bottom:20px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    
+    .shopping-links{
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+    }
+    .shopping-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:15px 20px;
+      background:#f8f9fa;
+      border-radius:12px;
+      text-decoration:none;
+      transition: all 0.3s;
+      border:2px solid transparent;
+    }
+    .shopping-link:hover{
+      background:#fff;
+      border-color:#667eea;
+      transform:translateX(5px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+    }
+    .shopping-link-left{
+      display:flex;
+      align-items:center;
+      gap:15px;
+    }
+    .shopping-icon{ font-size:28px; }
+    .shopping-name{
+      font-size:18px;
+      font-weight:600;
+      color:#333;
+    }
+    .shopping-arrow{
+      font-size:24px;
+      color:#999;
+    }
+
+    .progress-bar{
+      width:100%;
+      height:28px;
+      background:#e0e0e0;
+      border-radius:14px;
+      overflow:hidden;
+      margin-top:10px;
+    }
+    .progress-fill{
+      height:100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width:0%;
+      transition: width 0.3s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-weight:700;
+      font-size: 13px;
+    }
+
+    .log{
+      background:#fff;
+      border:1px solid #e0e0e0;
+      border-radius:12px;
+      padding:14px;
+      height:260px;
+      overflow-y:auto;
+      font-family:'Courier New', monospace;
+      font-size:13px;
+      line-height:1.6;
+      margin-top:12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .log-line{ margin:3px 0; color:#333; }
+    .log-line.success{ color:#28a745; }
+    .log-line.error{ color:#dc3545; }
+    .log-line.info{ color:#007bff; }
+
+    #resultSection{ display:none; }
+    #resultSection.active{ display:block; }
+
+    @media (max-width: 1024px){
+      .container{ padding:24px; border-radius:16px; }
+      .button-group{ grid-template-columns: repeat(2, 1fr); }
+      .product-img{ width:64px; height:64px; }
+      .log{ height:240px; }
+      table{ min-width: 1000px; }
+    }
+
+    @media (max-width: 640px){
+      body{ padding:12px; }
+      .container{ padding:16px; border-radius:14px; }
+      h1{ font-size:1.5em; }
+      .subtitle{ font-size: 13px; margin-bottom: 18px; }
+      .login-status{ padding:16px; }
+      .login-status h3{ font-size:1.05em; }
+      #loginCheckBtn{ padding:12px 16px; font-size:16px; }
+      .mode-buttons{ grid-template-columns: 1fr; }
+      .input-grid{ grid-template-columns: 1fr; }
+      .button-group{ grid-template-columns: 1fr; }
+      button, .download-btn{ font-size:16px; }
+      .section{ padding:14px; }
+      .log{ height:220px; font-size:12px; }
+      .progress-bar{ height:26px; }
+      .page-info{ min-width:70px; }
+      th, td{ padding:10.8px 9px; }
+      table{ min-width: 980px; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      * { transition: none !important; }
+    }
+    
+    /* 기록 팝업 전용 스타일 */
+       /* 기록 팝업 전용 스타일 */
+    .history-popup-content {
+      background: #fff;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 1200px;  /* 기록은 더 넓게 */
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .history-header h2 {
+      font-size: 1.8em;
+      color: #333;
+      margin: 0;
+    }
+    
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .history-stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .history-stat-value {
+      font-size: 2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .history-stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .history-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .history-btn {
+      padding: 10px 18px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .history-btn:hover {
+      background: #667eea;
+      color: white;
+    }
+    
+    .history-btn.danger {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    
+    .history-btn.danger:hover {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .history-list {
+      display: grid;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .history-item {
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s;
+    }
+    
+    .history-item:hover {
+      border-color: #667eea;
+      transform: translateX(5px);
+    }
+    
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .history-item-title {
+      font-size: 1.1em;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .history-item-date {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .history-item-info {
+      display: flex;
+      gap: 15px;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .history-item-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .history-action-btn {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .history-action-btn:hover {
+      background: #f0f0f0;
+    }
+    
+    .history-action-btn.primary {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .history-action-btn.primary:hover {
+      background: #5568d3;
+    }
+    
+    .history-action-btn.delete {
+      color: #dc3545;
+      border-color: #dc3545;
+    }
+    
+    .history-action-btn.delete:hover {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .history-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .history-empty h3 {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🛍️ POIZON 데이터 수집기</h1>
+    <p class="subtitle">먼저 POIZON에 접속한 후 데이터를 수집하세요</p>
+
+    <div class="login-status" id="loginStatus" style="text-align:center;">
+      <h3>🔐 STEP 1: POIZON 접속 필수</h3>
+      <p id="loginMessage">먼저 POIZON에 접속해주세요. 브라우저가 열리고 자동으로 로그인됩니다.</p>
+      <button id="loginCheckBtn" onclick="performLogin()">🚀 POIZON 접속하기</button>
+    </div>
+
+    <!-- 수집 모드 선택 (항상 표시) -->
+    <div class="mode-selector">
+      <h3>📊 STEP 2: 수집 모드 선택</h3>
+      <div class="mode-buttons">
+        <button class="mode-btn" id="modeKeyword" onclick="selectMode('keyword')" disabled>
+          <span class="mode-icon">🔍</span>
+          <span class="mode-text">키워드 검색</span>
+        </button>
+        <button class="mode-btn" 
+                id="modePrice" 
+                onclick="event.preventDefault(); alert('💰 거래금액 높은 순 기능은 준비 중입니다');" 
+                disabled 
+                style="opacity:0.5; cursor:not-allowed;">
+          <span class="mode-icon">💰</span>
+          <span class="mode-text">거래금액 높은 순</span>
+        </button>
+        <button class="mode-btn" 
+                id="modeGrowth" 
+                onclick="event.preventDefault(); alert('📈 거래증가 빠른 순 기능은 준비 중입니다');" 
+                disabled 
+                style="opacity:0.5; cursor:not-allowed;">
+          <span class="mode-icon">📈</span>
+          <span class="mode-text">거래증가 빠른 순</span>
+        </button>
+        <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
+          <span class="mode-icon">📋</span>
+          <span class="mode-text">리스트 비교</span>
+        </button>
+        <button class="mode-btn" id="modeHistory" onclick="selectMode('history')"disabled>
+          <span class="mode-icon">📚</span>
+          <span class="mode-text">검색 기록</span>
+        </button>
+        </div>
+    </div>
+
+    <div class="input-grid">
+      <div class="input-group">
+        <label for="keyword">검색 키워드</label>
+        <input type="text" id="keyword" placeholder="예: 나이키" disabled />
+        <div class="hint">접속 완료 후 입력 가능합니다</div>
+      </div>
+
+      <div class="input-group">
+        <label for="maxPages">검색 페이지 수 (1페이지 10건)</label>
+        <input type="number" id="maxPages" min="1" max="999" value="1" disabled />
+        <div class="hint">접속 완료 후 설정 가능합니다</div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="startBtn" onclick="startCollection()" disabled>🚀 수집 시작</button>
+      <label for="excelUpload" id="uploadLabel" class="upload-btn" style="display:none;">
+        📤 엑셀 업로드
+        <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelUpload(event)">
+      </label>
+      <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
+      <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
+      <a href="#" id="downloadBtn" class="download-btn">📥 엑셀 다운로드</a>
+      <button id="resetBtn" class="reset-btn" onclick="resetAll()">🔄 리셋</button>
+    </div>
+
+    <div class="section" id="uploadListSection" style="display:none;">
+      <h3>📋 업로드 리스트 (<span id="uploadCount">0</span>개)</h3>
+
+      <div class="table-container" style="max-height: 400px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th>상품번호</th>
+              <th>제품명</th>
+              <th>정가</th>
+              <th>할인가</th>
+              <th>재고</th>
+            </tr>
+          </thead>
+          <tbody id="uploadTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        엑셀에서 업로드된 상품 목록입니다. "검색 시작" 버튼을 클릭하여 포이즌 가격 비교를 시작하세요.
+      </div>
+    </div>
+
+    <div class="section" id="resultSection">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">
+          📋 수집 결과 (<span id="resultCount">0</span>개) 
+          <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
+        </h3>
+        <div style="display: flex; gap: 8px;">
+          <button id="sourcingBtn" class="sourcing-btn" onclick="startSourcing()" style="display:none;">
+            🔍 구매처 검색
+          </button>
+          <button id="stopSourcingBtn" class="stop-btn" onclick="stopSourcing()" style="display:none;">
+            ⏹️ 멈춤
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead id="tableHeader">
+            <!-- 동적으로 생성됨 -->
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="table-controls">
+        <span class="ctrl-label">표시 개수</span>
+        <select id="pageSizeSelect">
+          <option value="20" selected>20개</option>
+          <option value="40">40개</option>
+        </select>
+        <button id="prevPageBtn" class="page-btn">← 이전</button>
+        <span id="pageInfo" class="page-info">1 / 1</span>
+        <button id="nextPageBtn" class="page-btn">다음 →</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px;">
+        작은 화면에서는 테이블이 좌우로 스크롤됩니다.
+      </div>
+    </div>
+
+    <div class="section" id="statusSection">
+      <h3>📊 진행 상황</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar">0%</div>
+      </div>
+      <div class="log" id="logBox"></div>
+    </div>
+  </div>
+
+  <!-- 가격 비교 팝업 -->
+  <div class="popup-overlay" id="pricePopup" onclick="closePopup(event)">
+    <div class="popup-content" onclick="event.stopPropagation()">
+      <button class="popup-close" onclick="closePopup()">×</button>
+      
+      <div class="popup-product-info">
+        <div class="popup-product-header">
+          <img id="popupImg" class="popup-product-img" src="" alt="상품 이미지">
+          <div class="popup-product-details">
+            <div class="popup-product-code" id="popupCode"></div>
+            <div class="popup-product-name" id="popupName"></div>
+            <div class="popup-product-spu" id="popupSPU" style="font-size:13px;color:#999;margin-top:5px;"></div>
+            <div class="popup-product-price" id="popupPrice" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="price-compare-title">💰 가격 비교</div>
+      
+      <div class="shopping-links" id="shoppingLinks"></div>
+    </div>
+  </div>
+
+  <!-- 기록 팝업 -->
+  <div class="popup-overlay" id="historyPopup" onclick="closeHistoryPopup(event)">
+    <div class="history-popup-content" onclick="event.stopPropagation()">
+      <button class="popup-close" onclick="closeHistoryPopup()">×</button>
+      
+      <div class="history-header">
+        <h2>📚 검색 기록</h2>
+      </div>
+      
+      <!-- 통계 -->
+      <div class="history-stats">
+        <div class="history-stat-card">
+          <div class="history-stat-value" id="historyTotalCount">0</div>
+          <div class="history-stat-label">총 기록 수</div>
+        </div>
+        <div class="history-stat-card">
+          <div class="history-stat-value" id="historyKeywordCount">0</div>
+          <div class="history-stat-label">키워드 검색</div>
+        </div>
+        <div class="history-stat-card">
+          <div class="history-stat-value" id="historyCompareCount">0</div>
+          <div class="history-stat-label">리스트 비교</div>
+        </div>
+      </div>
+      
+      <!-- 컨트롤 -->
+      <div class="history-controls">
+        <button class="history-btn" onclick="refreshHistoryList()">🔄 새로고침</button>
+        <button class="history-btn" onclick="downloadAllHistory()">📦 전체 다운로드</button>
+        <button class="history-btn danger" onclick="clearAllHistory()">🗑️ 전체 삭제</button>
+      </div>
+      
+      <!-- 기록 리스트 -->
+      <div class="history-list" id="historyListContent">
+        <div class="history-empty">
+          <h3>📭 저장된 기록이 없습니다</h3>
+          <p>검색 완료 후 자동으로 저장됩니다</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let eventSource = null;
+    let collectedData = [];
+    let isLoggedIn = false;
+    let idleTimer = null;
+    let pageSize = 20;
+    let currentPage = 1;
+    let selectedMode = 'keyword';
+
+    // 모드별 테이블 헤더 설정
+    function updateTableHeader(mode) {
+      const tableHeader = document.getElementById('tableHeader');
+      let headerHTML = '';
+
+      if (mode === 'compare') {
+        // 리스트 비교 모드
+        headerHTML = `
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>이미지</th>
+            <th>구매</th>
+            <th>엑셀_상품번호</th>
+            <th>상품번호</th>
+            <th>제품명</th>
+            <th>엑셀_할인가</th>
+            <th>엑셀_재고</th>
+            <th>포이즌_중국노출가</th>
+            <th style="cursor:pointer;" onclick="sortBy('가격차이')">
+              가격차이 <span id="sort가격차이">⇅</span>
+            </th>
+            <th>평균거래가</th>
+            <th style="cursor:pointer;" onclick="sortBy('판매량')">
+              판매량 <span id="sort판매량">⇅</span>
+            </th>
+            <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
+              현지판매량 <span id="sort현지판매량">⇅</span>
+            </th>
+          </tr>
+        `;
+      } else {
+        // 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순
+        headerHTML = `
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>이미지</th>
+            <th>구매</th>
+            <th>상품번호</th>
+            <th>제품명</th>
+            <th>브랜드/카테고리</th>
+            <th>상태</th>
+            <th>평균거래가</th>
+            <th>중국노출가</th>
+            <th style="cursor:pointer;" onclick="sortBy('판매량')">
+              판매량 <span id="sort판매량">⇅</span>
+            </th>
+            <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
+              현지판매량 <span id="sort현지판매량">⇅</span>
+            </th>
+          </tr>
+        `;
+      }
+
+      tableHeader.innerHTML = headerHTML;
+    }
+
+    // 초기 헤더 설정
+    updateTableHeader(selectedMode);
+
+    // 모드 버튼 활성화/비활성화
+    function setModeButtonsEnabled(enabled) {
+      const modeButtons = document.querySelectorAll('.mode-btn');
+      modeButtons.forEach(btn => {
+        btn.disabled = !enabled;
+        if (!enabled) {
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+        } else {
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        }
+      });
+    }
+    let sortColumn = null;
+    let sortDirection = 'desc';
+    let uploadedProducts = []; // 업로드된 상품 리스트 // 'asc' or 'desc' // 기본값: 키워드 검색
+
+    function addLog(message, type = 'info') {
+      const logBox = document.getElementById('logBox');
+      const line = document.createElement('div');
+      line.className = `log-line ${type}`;
+      line.textContent = message;
+      logBox.appendChild(line);
+      logBox.scrollTop = logBox.scrollHeight;
+      resetIdleTimer();
+    }
+
+    function updateProgress(current, total) {
+      const safeTotal = Math.max(1, total || 1);
+      const percent = Math.round((current / safeTotal) * 100);
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = percent + '%';
+      progressBar.textContent = percent + '%';
+    }
+
+    function resetIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        addLog('⏰ 5분간 활동이 없어 브라우저를 종료합니다', 'info');
+        fetch('/shutdown_browser').then(() => {
+          isLoggedIn = false;
+          document.getElementById('loginStatus').classList.remove('logged-in');
+          document.getElementById('loginMessage').textContent = '브라우저가 종료되었습니다. 다시 접속해주세요.';
+          document.getElementById('loginCheckBtn').textContent = '🚀 POIZON 접속하기';
+          document.getElementById('loginCheckBtn').disabled = false;
+          document.getElementById('keyword').disabled = true;
+          document.getElementById('maxPages').disabled = true;
+          document.getElementById('startBtn').disabled = true;
+        });
+      }, 5 * 60 * 1000);
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      const totalItems = collectedData.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
+
+      if (selectedMode === 'compare') {
+        // ==================== 리스트 비교 모드 ====================
+        for (const data of pageItems) {
+          const row = tbody.insertRow();
+
+          // 순번
+          const rowIndex = collectedData.indexOf(data) + 1;
+          row.insertCell().textContent = rowIndex;
+
+          // 이미지
+          const imgCell = row.insertCell();
+          if (data.이미지URL) {
+            const img = document.createElement('img');
+            img.src = data.이미지URL;
+            img.className = 'product-img';
+            img.onerror = function() {
+              this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
+            };
+            imgCell.appendChild(img);
+          } else {
+            imgCell.textContent = '-';
+          }
+
+          // 구매 버튼
+          const buyCell = row.insertCell();
+          const buyBtn = document.createElement('button');
+          buyBtn.className = 'buy-btn';
+          buyBtn.textContent = '🛒 구매';
+          buyBtn.onclick = () => openPricePopup(data);
+          buyCell.appendChild(buyBtn);
+
+          row.insertCell().textContent = data.엑셀_상품번호 || '-';
+          row.insertCell().textContent = data.상품번호 || '-';
+          
+          // 제품명
+          const nameCell = row.insertCell();
+          const fullName = data.제품명 || '-';
+          const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
+          nameCell.textContent = truncatedName;
+          nameCell.title = fullName;
+          nameCell.style.cursor = 'help';
+          
+          row.insertCell().textContent = data.엑셀_할인가 ? data.엑셀_할인가.toLocaleString() + '원' : '-';
+          row.insertCell().textContent = data.엑셀_재고 !== undefined ? data.엑셀_재고.toLocaleString() + '개' : '-';
+          row.insertCell().textContent = data.중국노출_숫자 ? data.중국노출_숫자.toLocaleString() + '원' : '-';
+          
+          // 가격차이
+          const diffCell = row.insertCell();
+          const priceDiff = data.가격차이 || 0;
+          diffCell.textContent = priceDiff.toLocaleString() + '원';
+          if (priceDiff > 0) {
+            diffCell.style.color = '#dc3545';
+          } else if (priceDiff < 0) {
+            diffCell.style.color = '#007bff';
+          }
+          
+          row.insertCell().textContent = data.최근30일평균거래가 || '-';
+          row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
+          row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
+        }
+      } else {
+        // ==================== 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순 ====================
+        for (const data of pageItems) {
+          const row = tbody.insertRow();
+
+          // 순번
+          const rowIndex = collectedData.indexOf(data) + 1;
+          row.insertCell().textContent = rowIndex;
+
+          // 이미지
+          const imgCell = row.insertCell();
+          if (data.이미지URL) {
+            const img = document.createElement('img');
+            img.src = data.이미지URL;
+            img.className = 'product-img';
+            img.onerror = function() {
+              this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
+            };
+            imgCell.appendChild(img);
+          } else {
+            imgCell.textContent = '-';
+          }
+
+          // 구매 버튼
+          const buyCell = row.insertCell();
+          const buyBtn = document.createElement('button');
+          buyBtn.className = 'buy-btn';
+          buyBtn.textContent = '🛒 구매';
+          buyBtn.onclick = () => openPricePopup(data);
+          buyCell.appendChild(buyBtn);
+
+          // 상품번호
+          row.insertCell().textContent = data.상품번호 || '-';
+          
+          // 제품명
+          const nameCell = row.insertCell();
+          const fullName = data.제품명 || '-';
+          const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
+          nameCell.textContent = truncatedName;
+          nameCell.title = fullName;
+          nameCell.style.cursor = 'help';
+          
+          // 브랜드/카테고리
+          row.insertCell().textContent = data.브랜드카테고리 || '-';
+          
+          // 상태
+          row.insertCell().textContent = data.상태 || '-';
+          
+          // 평균거래가
+          row.insertCell().textContent = data.최근30일평균거래가 || '-';
+          
+          // 중국노출가
+          row.insertCell().textContent = data.중국노출 || '-';
+          
+          // 판매량
+          row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
+          
+          // 현지판매량
+          row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
+        }
+      }
+
+      document.getElementById('resultCount').textContent = totalItems;
+      document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
+      document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
+      document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
+    }
+
+    function addDataRow(data) {
+      collectedData.push(data);
+      renderTable();
+    }
+
+    function openPricePopup(data) {
+      document.getElementById('popupCode').textContent = data.상품번호 || '-';
+      document.getElementById('popupName').textContent = data.제품명 || '-';
+      
+      // SPU_ID - 있을 때만 표시
+      const spuElement = document.getElementById('popupSPU');
+      if (data.SPU_ID && data.SPU_ID.trim()) {
+        spuElement.textContent = 'SPU ID: ' + data.SPU_ID;
+        spuElement.style.display = 'block';
+      } else {
+        spuElement.textContent = '';
+        spuElement.style.display = 'none';
+      }
+      
+      document.getElementById('popupPrice').textContent = '중국 노출가: ' + (data.중국노출 || '-');
+      
+      const popupImg = document.getElementById('popupImg');
+      if (data.이미지URL) {
+        popupImg.src = data.이미지URL;
+      } else {
+        popupImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120"%3E%3Crect fill="%23f0f0f0" width="120" height="120"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3ENo IMG%3C/text%3E%3C/svg%3E';
+      }
+      
+      // 검색어: 상품번호 우선, 없으면 제품명
+      const productCode = data.상품번호 || '';
+      const productName = data.제품명 || '';
+      const searchQuery = productCode || productName;
+      
+      const shoppingLinks = [
+        { icon: '🟢', name: '네이버쇼핑', url: `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(searchQuery)}` },
+        { icon: '🟣', name: '무신사', url: `https://www.musinsa.com/search/musinsa/goods?q=${encodeURIComponent(searchQuery)}` },
+        { icon: '🔵', name: 'ABC마트', url: `https://www.abcmart.co.kr/search?search_text=${encodeURIComponent(searchQuery)}` }
+      ];
+      
+      const linksContainer = document.getElementById('shoppingLinks');
+      linksContainer.innerHTML = '';
+      
+      shoppingLinks.forEach(shop => {
+        const link = document.createElement('a');
+        link.className = 'shopping-link';
+        link.href = shop.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.innerHTML = `
+          <div class="shopping-link-left">
+            <span class="shopping-icon">${shop.icon}</span>
+            <span class="shopping-name">${shop.name}</span>
+          </div>
+          <span class="shopping-arrow">→</span>
+        `;
+        linksContainer.appendChild(link);
+      });
+      
+      document.getElementById('pricePopup').classList.add('active');
+    }
+
+    function closePopup(event) {
+      if (!event || event.target.id === 'pricePopup') {
+        document.getElementById('pricePopup').classList.remove('active');
+      }
+    }
+
+    async function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      addLog(`📤 엑셀 파일 업로드 중: ${file.name}`, 'info');
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const response = await fetch('/upload_excel', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          addLog(`✅ 엑셀 파일 업로드 완료: ${result.count}개 상품`, 'success');
+          
+          // 업로드된 상품 저장
+          uploadedProducts = result.products;
+          
+          // 업로드 리스트 먼저 표시
+          showUploadedList(result.products);
+          
+          addLog(`📋 업로드된 상품 목록을 확인하고 "검색 시작" 버튼을 클릭하세요`, 'info');
+          
+          // "검색 시작" 버튼 표시
+          document.getElementById('startCompareBtn').style.display = 'block';
+          
+        } else {
+          addLog(`❌ 업로드 실패: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        addLog(`❌ 업로드 오류: ${error}`, 'error');
+      }
+      
+      // 파일 선택 초기화
+      event.target.value = '';
+    }
+
+    function showUploadedList(products) {
+      addLog(`\n📋 === 업로드 리스트 (${products.length}개) ===`, 'info');
+      
+      // 업로드 리스트 테이블에 표시
+      const uploadTableBody = document.getElementById('uploadTableBody');
+      uploadTableBody.innerHTML = '';
+      
+      products.forEach((product, index) => {
+        const row = uploadTableBody.insertRow();
+        row.insertCell().textContent = index + 1;  // 순번
+        row.insertCell().textContent = product.code || '-';
+        row.insertCell().textContent = product.name || '-';
+        row.insertCell().textContent = product.original_price ? product.original_price.toLocaleString() + '원' : '-';
+        row.insertCell().textContent = product.sale_price ? product.sale_price.toLocaleString() + '원' : '-';
+        row.insertCell().textContent = product.stock !== undefined ? product.stock.toLocaleString() + '개' : '-';
+        
+        addLog(`  ${index + 1}. ${product.code} - ${product.name} (할인가: ${product.sale_price.toLocaleString()}원, 재고: ${product.stock || 0}개)`, 'info');
+      });
+      
+      // 업로드 리스트 섹션 표시
+      document.getElementById('uploadCount').textContent = products.length;
+      document.getElementById('uploadListSection').style.display = 'block';
+      
+      // 수집 결과는 숨김 (검색 전)
+      document.getElementById('resultSection').classList.remove('active');
+      collectedData = [];
+      renderTable();
+      
+      addLog(`📋 === 업로드 리스트 끝 ===\n`, 'info');
+    }
+
+    async function startComparison(products) {
+      // 서버 작업 상태 체크
+      try {
+        const statusRes = await fetch('/check_status');
+        const status = await statusRes.json();
+        
+        if (status.working) {
+          const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
+          alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n경과 시간: ${status.elapsed_minutes}분\n\n약 ${status.remaining_minutes}분 후 사용 가능합니다.`);
+          return;
+        }
+      } catch (err) {
+        console.error('상태 체크 실패:', err);
+      }
+      
+      collectedData = [];
+      currentPage = 1;
+      
+      // 업로드 리스트 숨김
+      document.getElementById('uploadListSection').style.display = 'none';
+      
+      // 수집 결과 섹션 표시
+      document.getElementById('resultSection').classList.add('active');
+      
+      // 모든 모드 버튼 비활성화
+      setModeButtonsEnabled(false);
+      
+      document.getElementById('uploadLabel').style.display = 'none';
+      document.getElementById('startCompareBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'block';
+      
+      addLog(`🔍 ${products.length}개 상품 포이즌 가격 조회 중...`, 'info');
+      
+      try {
+        // POST로 products 전송
+        const response = await fetch('/compare_prices', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ products: products })
+        });
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6);
+              if (jsonStr.trim()) {
+                try {
+                  const data = JSON.parse(jsonStr);
+                  
+                  if (data.type === 'log') addLog(data.message, data.level || 'info');
+                  if (data.type === 'progress') updateProgress(data.current, data.total);
+                  
+                  if (data.type === 'data') {
+                    // 기존 업로드 리스트에서 해당 상품 찾아서 업데이트
+                    const index = collectedData.findIndex(item => 
+                      item.엑셀_상품번호 === data.item.엑셀_상품번호
+                    );
+                    
+                    if (index !== -1) {
+                      // 기존 항목 업데이트 (실시간으로 포이즌 정보 채워짐)
+                      collectedData[index] = { ...collectedData[index], ...data.item };
+                    } else {
+                      // 새 항목 추가
+                      collectedData.push(data.item);
+                    }
+                    
+                    renderTable();
+                  }
+                  
+                  if (data.type === 'complete') {
+                    addLog('✅ 가격 비교 완료!', 'success');
+                    addLog(`총 ${data.total_items}개 상품 비교 완료`, 'success');
+                    
+                    sortBy('판매량');
+                    
+                    if (data.file_path) {
+                      const downloadBtn = document.getElementById('downloadBtn');
+                      downloadBtn.href = `/download/${encodeURIComponent(data.file_path)}`;
+                      downloadBtn.style.display = 'block';
+                    }
+                    
+                    // 구매처 검색 버튼 표시
+                    document.getElementById('sourcingBtn').style.display = 'block';
+                    
+                    // 모드 버튼 재활성화
+                    setModeButtonsEnabled(true);
+                    
+                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('resetBtn').style.display = 'block';
+                    document.getElementById('uploadLabel').style.display = 'block';
+                    return;
+                  }
+                  
+                  if (data.type === 'error') {
+                    addLog('❌ 오류: ' + data.message, 'error');
+                    
+                    // 모드 버튼 재활성화
+                    setModeButtonsEnabled(true);
+                    
+                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('resetBtn').style.display = 'block';
+                    document.getElementById('uploadLabel').style.display = 'block';
+                    return;
+                  }
+                } catch (e) {
+                  // JSON 파싱 오류 무시
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        addLog('❌ 연결 오류: ' + error, 'error');
+        
+        // 모드 버튼 재활성화
+        setModeButtonsEnabled(true);
+        
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'block';
+        document.getElementById('uploadLabel').style.display = 'block';
+      }
+    }
+
+    function startComparisonFromUpload() {
+      if (uploadedProducts.length === 0) {
+        alert('업로드된 상품이 없습니다!');
+        return;
+      }
+      
+      addLog(`\n🚀 포이즌 검색 시작 (${uploadedProducts.length}개)`, 'info');
+      startComparison(uploadedProducts);
+    }
+
+    function sortBy(column) {
+      // 같은 컬럼 클릭 시 방향 전환
+      if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = column;
+        sortDirection = 'desc'; // 새 컬럼은 내림차순부터
+      }
+      
+      // 정렬 아이콘 업데이트 (모든 아이콘 초기화)
+      const sortIcons = ['sort판매량', 'sort현지판매량', 'sort가격차이'];
+      sortIcons.forEach(iconId => {
+        const element = document.getElementById(iconId);
+        if (element) {
+          element.textContent = '⇅';
+        }
+      });
+      
+      // 선택된 컬럼 아이콘 업데이트
+      const selectedIcon = document.getElementById('sort' + column);
+      if (selectedIcon) {
+        selectedIcon.textContent = sortDirection === 'asc' ? '↑' : '↓';
+      }
+      
+      // 데이터 정렬
+      collectedData.sort((a, b) => {
+        let valA, valB;
+        
+        if (column === '판매량') {
+          valA = a.중국시장최근30일판매량 || 0;
+          valB = b.중국시장최근30일판매량 || 0;
+        } else if (column === '현지판매량') {
+          valA = a.현지판매자최근30일판매량 || 0;
+          valB = b.현지판매자최근30일판매량 || 0;
+        } else if (column === '가격차이') {
+          valA = a.가격차이 || 0;
+          valB = b.가격차이 || 0;
+        }
+        
+        return sortDirection === 'asc' ? valA - valB : valB - valA;
+      });
+      
+      currentPage = 1;
+      renderTable();
+    }
+
+    function selectMode(mode) {
+      if (!isLoggedIn && mode !== 'history') {
+        alert('먼저 POIZON 접속을 해주세요!');
+        return;
+      }
+      
+      // 기록 모드는 팝업 열기
+      if (mode === 'history') {
+        openHistoryPopup();
+        return;
+      }
+      
+      // 작업 중이면 모드 변경 차단
+      fetch('/check_status')
+        .then(res => res.json())
+        .then(status => {
+          if (status.working) {
+            const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
+            alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n\n작업이 완료될 때까지 모드를 변경할 수 없습니다.`);
+            return;
+          }
+          
+          // 모드 변경 실행
+          selectModeProcess(mode);
+        })
+        .catch(err => {
+          console.error('상태 체크 실패:', err);
+          selectModeProcess(mode);
+        });
+    }
+    
+    function selectModeProcess(mode) {
+      selectedMode = mode;
+
+      // 모드 변경시 수집결과 리셋
+      collectedData = [];
+      currentData = [];
+      document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('resultCount').textContent = '0';
+      document.getElementById('downloadBtn').style.display = 'none';
+      document.getElementById('sourcingBtn').style.display = 'none';
+      addLog('🔄 이전 결과를 초기화했습니다', 'info');
+      
+      // 테이블 헤더 업데이트
+      updateTableHeader(mode);
+      
+      // 모든 버튼 비활성화
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // 선택된 버튼 활성화
+      const modeId = 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
+      document.getElementById(modeId).classList.add('active');
+      
+      // 키워드 입력란 제어
+      const keywordInput = document.getElementById('keyword');
+      if (mode === 'keyword') {
+        keywordInput.disabled = false;
+        keywordInput.parentElement.style.display = 'block';
+        document.getElementById('startBtn').style.display = 'block';
+        document.getElementById('uploadLabel').style.display = 'none';
+      } else if (mode === 'compare') {
+        // 리스트 비교 모드
+        keywordInput.disabled = true;
+        keywordInput.value = '';
+        keywordInput.parentElement.style.display = 'none';
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('uploadLabel').style.display = 'block';
+      } else {
+        // 거래금액, 거래증가 모드
+        keywordInput.disabled = true;
+        keywordInput.value = '';
+        document.getElementById('startBtn').style.display = 'block';
+        document.getElementById('uploadLabel').style.display = 'none';
+      }
+      
+      const modeText = mode === 'keyword' ? '키워드 검색' : 
+                       mode === 'price' ? '거래금액 높은 순' : 
+                       mode === 'growth' ? '거래증가 빠른 순' : 
+                       '리스트 비교';
+      addLog(`📊 수집 모드 선택: ${modeText}`, 'info');
+    }
+
+    // ==========================================
+    // ✨ 구매처 검색 - 팝업 버전 (NEW!)
+    // ==========================================
+    function startSourcing() {
+      // 수집된 상품이 있는지 확인
+      if (collectedData.length === 0) {
+        alert('❌ 수집된 데이터가 없습니다.\n먼저 키워드 검색을 실행하세요.');
+        return;
+      }
+      
+      // 상품번호만 추출
+      const productCodes = collectedData
+        .map(item => item.상품번호)
+        .filter(code => code && code !== '-' && code !== '상품 없음');
+      
+      if (productCodes.length === 0) {
+        alert('❌ 검색 가능한 상품번호가 없습니다.');
+        return;
+      }
+      
+      addLog(`🛒 구매처 검색 시작: ${productCodes.length}개 상품`, 'info');
+      
+      // 서버에 검색 요청
+      fetch('/start_sourcing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_codes: productCodes })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          // ========================================
+          // ✨ 새 창(팝업) 열기
+          // ========================================
+          const width = 1400;
+          const height = 900;
+          const left = (screen.width - width) / 2;
+          const top = (screen.height - height) / 2;
+          
+          const popup = window.open(
+            result.popup_url,
+            'sourcing_results',
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,toolbar=yes`
+          );
+          
+          if (!popup) {
+            alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.\n\n[Chrome/Edge 설정]\n1. 주소창 오른쪽 아이콘 클릭\n2. "항상 팝업 허용" 선택');
+          } else {
+            addLog('✅ 구매처 검색 창이 열렸습니다!', 'success');
+            addLog('💡 팝업 창에서 실시간 결과를 확인하세요', 'info');
+          }
+        } else {
+          addLog('❌ 검색 시작 실패: ' + result.error, 'error');
+          alert('❌ 검색 시작 실패:\n\n' + result.error);
+        }
+      })
+      .catch(error => {
+        addLog('❌ 오류 발생: ' + error, 'error');
+        alert('❌ 오류가 발생했습니다:\n\n' + error.message);
+      });
+    }
+
+    
+    function stopSourcing() {
+      if (!confirm('⚠️ 구매처 검색을 중단하시겠습니까?')) {
+        return;
+      }
+      
+      addLog('⏹️ 사용자가 검색 중단 요청', 'warning');
+      
+      // 백엔드에 중단 요청
+      fetch('/stop_sourcing', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          addLog('✅ 검색이 중단되었습니다', 'success');
+          
+          // 버튼 상태 복원
+          document.getElementById('sourcingBtn').disabled = false; document.getElementById('stopSourcingBtn').style.display = 'none';
+          document.getElementById('sourcingBtn').textContent = '🔍 구매처 검색';
+          document.getElementById('stopSourcingBtn').style.display = 'none';
+        })
+        .catch(err => {
+          addLog('❌ 중단 요청 실패: ' + err, 'error');
+        });
+    }
+    
+    function resetAll() {
+      // 서버에 중단 요청 (백그라운드 작업 강제 종료)
+      fetch('/stop', { method: 'POST' })
+        .then(() => addLog('⏹️ 백그라운드 작업 중단 (리셋)', 'warning'))
+        .catch(err => console.error('중단 요청 실패:', err));
+      
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+      
+      document.getElementById('logBox').innerHTML = '';
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('uploadTableBody').innerHTML = '';
+      document.getElementById('downloadBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('sourcingBtn').style.display = 'none';  // 구매처 검색 버튼 숨김
+      document.getElementById('uploadListSection').style.display = 'none';
+      document.getElementById('resultSection').classList.remove('active');
+      collectedData = [];
+      currentPage = 1;
+      pageSize = parseInt(document.getElementById('pageSizeSelect').value, 10) || 20;
+      renderTable();
+      updateProgress(0, 100);
+      
+      if (isLoggedIn) document.getElementById('startBtn').disabled = false;
+    }
+
+    function stopCollection() {
+      // 서버에 중단 요청
+      fetch('/stop', { method: 'POST' })
+        .then(() => addLog('⏹️ 백그라운드 작업 중단 요청 전송', 'warning'))
+        .catch(err => console.error('중단 요청 실패:', err));
+      
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+      addLog('⏹️ 사용자가 수집을 중단했습니다.', 'error');
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'block';
+      document.getElementById('uploadLabel').style.display = selectedMode === 'compare' ? 'block' : 'none';
+      document.getElementById('startCompareBtn').style.display = 'none';
+    }
+
+    function performLogin() {
+      const loginCheckBtn = document.getElementById('loginCheckBtn');
+      const loginMessage = document.getElementById('loginMessage');
+      const loginStatus = document.getElementById('loginStatus');
+
+      loginCheckBtn.disabled = true;
+      loginCheckBtn.textContent = '접속 중...';
+      loginMessage.textContent = 'POIZON에 접속하고 있습니다... 브라우저가 열립니다.';
+
+      addLog('🔄 POIZON 접속 시작...', 'info');
+      addLog('🌐 브라우저가 열리고 자동 로그인을 시도합니다', 'info');
+
+      fetch('/check_login')
+        .then(r => r.json())
+        .then(data => {
+          if (data.logged_in) {
+            isLoggedIn = true;
+            loginStatus.classList.add('logged-in');
+            loginMessage.textContent = '✅ POIZON 접속 완료! 이제 수집 모드를 선택하세요.';
+            loginCheckBtn.textContent = '✅ 접속 완료';
+            loginCheckBtn.style.background = '#28a745';
+            addLog('✅ POIZON 로그인 성공!', 'success');
+            addLog('💡 수집 모드를 선택하고 키워드를 입력하세요', 'info');
+            
+            // 모드 버튼 활성화
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+              btn.disabled = false;
+            });
+            
+            // 기본 모드 선택 (키워드 검색)
+            selectMode('keyword');
+            
+            document.getElementById('maxPages').disabled = false;
+            document.getElementById('startBtn').disabled = false;
+            resetIdleTimer();
+          } else {
+            isLoggedIn = false;
+            loginStatus.classList.remove('logged-in');
+            loginMessage.textContent = '❌ 접속 실패: ' + (data.message || '알 수 없는 오류');
+            loginCheckBtn.textContent = '🚀 다시 접속하기';
+            loginCheckBtn.disabled = false;
+            addLog('❌ 접속 실패: ' + (data.message || '알 수 없는 오류'), 'error');
+          }
+        })
+        .catch(err => {
+          loginMessage.textContent = '❌ 접속 오류: ' + err;
+          loginCheckBtn.textContent = '🚀 다시 접속하기';
+          loginCheckBtn.disabled = false;
+          addLog('❌ 접속 오류: ' + err, 'error');
+        });
+    }
+
+    function startCollection() {
+      const keyword = document.getElementById('keyword').value.trim();
+      const maxPages = parseInt(document.getElementById('maxPages').value, 10);
+      
+      if (selectedMode === 'keyword' && !keyword) {
+        return alert('키워드를 입력해주세요!');
+      }
+      
+      if (!isLoggedIn) return alert('먼저 POIZON 접속을 해주세요!');
+
+      // 서버 작업 상태 체크
+      fetch('/check_status')
+        .then(res => res.json())
+        .then(status => {
+          if (status.working) {
+            const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
+            alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n경과 시간: ${status.elapsed_minutes}분\n\n약 ${status.remaining_minutes}분 후 사용 가능합니다.`);
+            return;
+          }
+          
+          // 작업 시작
+          startCollectionProcess(keyword, maxPages);
+        })
+        .catch(err => {
+          console.error('상태 체크 실패:', err);
+          startCollectionProcess(keyword, maxPages);
+        });
+    }
+
+    function startCollectionProcess(keyword, maxPages) {
+      resetAll();
+      
+      // 모든 모드 버튼 비활성화
+      setModeButtonsEnabled(false);
+      
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').style.display = 'block';
+      addLog('🔄 수집 준비 중...', 'info');
+      updateProgress(0, 100);
+
+      // 모드에 따라 URL 생성
+      let url = `/start?mode=${selectedMode}&max_pages=${maxPages}&skip_login=true`;
+      if (selectedMode === 'keyword') {
+        url += `&keyword=${encodeURIComponent(keyword)}`;
+      }
+
+      eventSource = new EventSource(url);
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'log') {
+          addLog(data.message, data.level || 'info');
+          
+          // 검색 시간 추출 및 표시
+          if (data.message.includes('⏱️ 총 검색 시간:')) {
+            const timeMatch = data.message.match(/⏱️ 총 검색 시간: (.+)/);
+            if (timeMatch) {
+              document.getElementById('searchTime').textContent = `| ⏱️ ${timeMatch[1]}`;
+            }
+          }
+        }
+        if (data.type === 'progress') updateProgress(data.current, data.total);
+        if (data.type === 'data') addDataRow(data.item);
+
+        if (data.type === 'complete') {
+          addLog('✅ 모든 작업 완료!', 'success');
+          addLog(`총 ${data.total_items}개 상품 수집 완료 (${data.pages}페이지)`, 'success');
+          
+          // 데이터 저장 및 테이블 표시
+          if (data.data && Array.isArray(data.data)) {
+            collectedData = data.data;
+            currentData = data.data;
+            
+            // 결과 섹션 표시
+            document.getElementById('resultSection').classList.add('active');
+            
+            // 결과 개수 업데이트
+            document.getElementById('resultCount').textContent = data.data.length;
+            
+            console.log('📊 데이터 저장:', data.data.length, '개');
+          }
+          
+          // 자동으로 판매량 내림차순 정렬
+          addLog('📊 판매량 기준 내림차순 정렬 중...', 'info');
+          sortBy('판매량');
+          addLog('✅ 정렬 완료!', 'success');
+          
+          if (data.file_path) {
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.href = `/download/${encodeURIComponent(data.file_path)}`;
+            downloadBtn.style.display = 'block';
+          }
+          
+          // 구매처 검색 버튼 표시
+          document.getElementById('sourcingBtn').style.display = 'block';
+          
+          // 모드 버튼 재활성화
+          setModeButtonsEnabled(true);
+          
+          document.getElementById('stopBtn').style.display = 'none';
+          document.getElementById('resetBtn').style.display = 'block';
+          document.getElementById('startBtn').disabled = false;
+          eventSource.close();
+          eventSource = null;
+        }
+
+        if (data.type === 'error') {
+          addLog('❌ 오류: ' + data.message, 'error');
+          
+          // 모드 버튼 재활성화
+          setModeButtonsEnabled(true);
+          
+          document.getElementById('stopBtn').style.display = 'none';
+          document.getElementById('resetBtn').style.display = 'block';
+          document.getElementById('startBtn').disabled = false;
+          eventSource.close();
+          eventSource = null;
+        }
+      };
+
+      eventSource.onerror = () => {
+        addLog('❌ 연결 오류 발생', 'error');
+        
+        // 모드 버튼 재활성화
+        setModeButtonsEnabled(true);
+        
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'block';
+        document.getElementById('startBtn').disabled = false;
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+      };
+    }
+
+    window.onload = () => {
+      addLog('👋 환영합니다!', 'info');
+      addLog('📌 먼저 "POIZON 접속하기" 버튼을 클릭해주세요', 'info');
+
+      document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        pageSize = parseInt(e.target.value, 10) || 20;
+        currentPage = 1;
+        renderTable();
+      });
+
+      document.getElementById('prevPageBtn').addEventListener('click', () => {
+        currentPage -= 1;
+        renderTable();
+      });
+
+      document.getElementById('nextPageBtn').addEventListener('click', () => {
+        currentPage += 1;
+        renderTable();
+      });
+    };
+    
+    // ==========================================
+    // 📚 기록 팝업 기능
+    // ==========================================
+      // 기록 팝업 열기
+      function openHistoryPopup() {
+        document.getElementById('historyPopup').classList.add('active');
+        refreshHistoryList();
+        addLog('📚 기록 팝업 열림', 'info');
+      }
+
+      // 기록 팝업 닫기
+      function closeHistoryPopup(event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById('historyPopup').classList.remove('active');
+      }
+
+      let allHistoryRecords = [];
+
+      // 기록 목록 새로고침
+      async function refreshHistoryList() {
+        try {
+          const res = await fetch('/api/history/list');
+          const data = await res.json();
+          
+          if (!data.success) throw new Error(data.error);
+          
+          allHistoryRecords = data.records;
+          renderHistoryList();
+          
+          console.log('✅ 기록 로드:', allHistoryRecords.length, '개');
+          
+        } catch (err) {
+          console.error('기록 로드 실패:', err);
+          alert('기록을 불러올 수 없습니다: ' + err.message);
+        }
+      }
+
+      // 기록 목록 렌더링
+      function renderHistoryList() {
+        const total = allHistoryRecords.length;
+        const keywordCount = allHistoryRecords.filter(r => r.type === 'keyword').length;
+        const compareCount = allHistoryRecords.filter(r => r.type === 'compare').length;
+        
+        // 통계 업데이트
+        document.getElementById('historyTotalCount').textContent = total;
+        document.getElementById('historyKeywordCount').textContent = keywordCount;
+        document.getElementById('historyCompareCount').textContent = compareCount;
+        
+        const listEl = document.getElementById('historyListContent');
+        
+        if (total === 0) {
+          listEl.innerHTML = `
+            <div class="history-empty">
+              <h3>📭 저장된 기록이 없습니다</h3>
+              <p>검색 완료 후 자동으로 저장됩니다</p>
+            </div>
+          `;
+          return;
+        }
+        
+        listEl.innerHTML = allHistoryRecords.map(r => {
+          const title = getHistoryTitle(r);
+          const date = new Date(r.timestamp).toLocaleString('ko-KR');
+          
+          return `
+            <div class="history-item">
+              <div class="history-item-header">
+                <div class="history-item-title">${title}</div>
+                <div class="history-item-date">${date}</div>
+              </div>
+              <div class="history-item-info">
+                <span>📊 ${r.summary.total_count}개</span>
+                <span>💰 평균 ${r.summary.avg_price.toLocaleString()}원</span>
+                <span>💾 ${r.size_mb}MB</span>
+              </div>
+              <div class="history-item-actions">
+                <button class="history-action-btn primary" onclick="loadHistoryRecord('${r.filename}')">
+                  📤 불러오기
+                </button>
+                <button class="history-action-btn" onclick="downloadHistoryFile('${r.filename}')">
+                  💾 다운로드
+                </button>
+                <button class="history-action-btn delete" onclick="deleteHistoryRecord('${r.filename}')">
+                  🗑️ 삭제
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 기록 제목 생성
+      function getHistoryTitle(r) {
+        const p = r.params;
+        if (r.type === 'keyword') return `🔍 ${p.keyword || '키워드'} (${p.maxPages}p)`;
+        if (r.type === 'compare') return `📋 리스트 비교 (${r.summary.total_count}개)`;
+        if (r.type === 'price') return `💰 거래금액 높은 순 (${p.maxPages}p)`;
+        if (r.type === 'growth') return `📈 거래증가 빠른 순 (${p.maxPages}p)`;
+        return '검색 기록';
+      }
+
+      // 기록 불러오기
+      async function loadHistoryRecord(filename) {
+        try {
+          const res = await fetch(`/api/history/load/${filename}`);
+          const data = await res.json();
+          
+          if (!data.success) throw new Error(data.error);
+          
+          // 데이터 저장
+          collectedData = data.data.results;
+          currentData = data.data.results;
+          
+          // 결과 섹션 표시
+          document.getElementById('resultSection').classList.add('active');
+          document.getElementById('resultCount').textContent = collectedData.length;
+          
+          // 테이블 렌더링
+          renderTable();
+          
+          // 팝업 닫기
+          closeHistoryPopup();
+          
+          addLog(`✅ 기록 불러오기 완료: ${collectedData.length}개`, 'success');
+          
+        } catch (err) {
+          console.error('불러오기 실패:', err);
+          alert('불러오기 실패: ' + err.message);
+        }
+      }
+
+      // 파일 다운로드
+      function downloadHistoryFile(filename) {
+        window.open(`/api/history/download/${filename}`, '_blank');
+      }
+
+      // 전체 다운로드
+      function downloadAllHistory() {
+        if (allHistoryRecords.length === 0) {
+          alert('다운로드할 기록이 없습니다');
+          return;
+        }
+        window.open('/api/history/download-all', '_blank');
+      }
+
+      // 개별 삭제
+      async function deleteHistoryRecord(filename) {
+        if (!confirm(`"${filename}"을(를) 삭제하시겠습니까?`)) return;
+        
+        try {
+          const res = await fetch(`/api/history/delete/${filename}`, {method: 'DELETE'});
+          const data = await res.json();
+          
+          if (!data.success) throw new Error(data.error);
+          
+          alert('✅ 삭제 완료');
+          await refreshHistoryList();
+          
+        } catch (err) {
+          console.error('삭제 실패:', err);
+          alert('삭제 실패: ' + err.message);
+        }
+      }
+
+      // 전체 삭제
+      async function clearAllHistory() {
+        if (allHistoryRecords.length === 0) {
+          alert('삭제할 기록이 없습니다');
+          return;
+        }
+        
+        if (!confirm(`⚠️ 전체 ${allHistoryRecords.length}개 기록을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!`)) return;
+        
+        try {
+          const ids = allHistoryRecords.map(r => r.id);
+          
+          const res = await fetch('/api/history/delete-selected', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({record_ids: ids})
+          });
+          
+          const data = await res.json();
+          
+          if (!data.success) throw new Error(data.error);
+          
+          alert(`✅ ${data.deleted}개 기록 삭제 완료`);
+          await refreshHistoryList();
+          
+        } catch (err) {
+          console.error('전체 삭제 실패:', err);
+          alert('전체 삭제 실패: ' + err.message);
+        }
+      }
+  </script>
+</body>
+</html>

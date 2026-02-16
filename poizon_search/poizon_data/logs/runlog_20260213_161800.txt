@@ -1,0 +1,32 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_161800.txt
+MODE: TEST
+HEADLESS: False
+SEARCH_KEYWORD: 나이키
+POIZON_ID: sionejj@naver.com
+POIZON_PW: (hidden)
+
+[1] 접속: https://seller.poizon.com/
+
+[2] 로그인 입력/클릭
+✅ ID 입력 OK: input nth=0
+✅ PW 입력 OK: input nth=1
+✅ 로그인 버튼 클릭 OK: button:has-text('Log In')
+✅ 로그인 후 URL: https://seller.poizon.com/main/dataBoard
+📸 screenshot saved: shots\20260213_161816_after_login.png
+
+[3] 상품 검색 페이지 이동: https://seller.poizon.com/main/goods/search
+📸 screenshot saved: shots\20260213_161821_goods_search_page.png
+
+[4] 키워드 입력: 나이키
+✅ 키워드 입력 OK: input[placeholder*='Search by name']
+✅ 검색 버튼 클릭 OK: button:has-text('Search & List')
+📸 screenshot saved: shots\20260213_161904_after_search.png
+
+[5] 리스트(결과 행) 확인
+ - rows count (.ant-table-tbody tr): 11
+
+✅ 성공! 검색 결과 행 11개 확인 (selector: .ant-table-tbody tr)
+📸 screenshot saved: shots\20260213_161904_success_list_visible.png
+
+=== TEST DONE: 로그인 + 키워드 검색 + 리스트 확인 ===

@@ -1,0 +1,19 @@
+=== RUN START ===
+LOG PATH: logs\runlog_20260213_181409.txt
+MODE: TEST
+SEARCH_KEYWORD: 나이키
+
+[1] 접속: https://seller.poizon.com/
+
+[1-1] 언어 한국어로 변경
+  ✅ 한국어 변경 완료
+
+[2] 로그인
+✅ 로그인 OK: button:has-text('로그인')
+
+[3] 상품 검색 페이지 이동
+⛔ Error: Page.goto: net::ERR_ABORTED at https://seller.poizon.com/main/goods/search
+Call log:
+  - navigating to "https://seller.poizon.com/main/goods/search", waiting until "domcontentloaded"
+
+📸 screenshot saved: shots\20260213_181417_error.png
