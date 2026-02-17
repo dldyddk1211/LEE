@@ -42,15 +42,26 @@ def log_callback(message, level='info'):
             'product_code': product_code
         })
     elif message.startswith("PRODUCT_RESULT:"):
+        print(f"[DEBUG] PRODUCT_RESULT 받음!")  # 터미널 출력
         try:
-            data = json.loads(message.split(":", 1)[1])
+            json_str = message.split(":", 1)[1]
+            print(f"[DEBUG] JSON 길이: {len(json_str)}")
+            
+            data = json.loads(json_str)
+            print(f"[DEBUG] JSON 파싱 성공!")
+            print(f"[DEBUG] product_code: {data.get('product_code')}")
+            print(f"[DEBUG] products 개수: {len(data.get('products', []))}")
+            
             log_queue.put({
                 'type': 'product_result',
                 'product_code': data['product_code'],
                 'products': data['products']
             })
-        except:
-            pass
+            print(f"[DEBUG] log_queue에 전송 완료!")
+        except Exception as e:
+            print(f"[DEBUG] PRODUCT_RESULT 처리 오류: {e}")
+            import traceback
+            traceback.print_exc()
     elif message.startswith("DATA:"):
         try:
             import json as json_module

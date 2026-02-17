@@ -918,33 +918,17 @@ def save_sourcing_results_to_excel(results, reason="정상종료"):
     log(f"{'='*60}\n")
     
     return filepath
-
-
 def run_excel_comparison(products, callback=None):
     """
-    엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교 (V5 FINAL)
+    엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교
     
-    V5 FINAL 최적화 기능:
-    - 브라우저 1번만 열기
-    - 타이핑 방식 (delay=48ms) - 사람처럼
-    - 90-100개마다 쿠키 갱신 (랜덤) - 세션 유지
-    - 다음 상품 대기 1-2초 (랜덤) - 봇 회피
-    - 스마트 결과 확인 (최대 2회 재시도)
-    - 검색 페이지 재사용 (빠른 속도)
-    
-    Args:
-        products: 엑셀에서 읽은 상품 리스트 (dict의 list)
-        callback: 진행상황 콜백 함수
-    
-    Returns:
-        dict: {'success': True/False, 'total_items': int, 'file_path': str}
+    inner_text() 대신 evaluate()와 textContent 사용 (안정적!)
     """
     global LOG_CALLBACK, stop_flag
     
     if callback:
         LOG_CALLBACK = callback
     
-    # 중단 플래그 초기화
     stop_flag = False
     
     import time as time_module
@@ -954,10 +938,9 @@ def run_excel_comparison(products, callback=None):
         results = []
         total = len(products)
         
-        log(f"\n🔍 총 {total}개 상품 비교 시작 (V5 FINAL 랜덤 최적화)", 'info')
-        log(f"⚡ 최적화: 타이핑 방식 + 랜덤 쿠키 갱신 + 랜덤 대기", 'info')
+        log(f"\n🔍 총 {total}개 상품 비교 시작", 'info')
         
-        # 브라우저를 한 번만 열기
+        # 브라우저 열기
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=HEADLESS)
             context = browser.new_context()
@@ -968,348 +951,271 @@ def run_excel_comparison(products, callback=None):
                     with open(COOKIE_FILE, 'r') as f:
                         cookies = json.load(f)
                     context.add_cookies(cookies)
-                    log("✅ 쿠키 로드 완료", 'success')
+                    log("✅ 쿠키 로드", 'success')
                 except:
-                    log("⚠️ 쿠키 로드 실패", 'warning')
+                    pass
             
             page = context.new_page()
             
-            # [1단계] 초기 설정 (1번만)
-            log("\n[1] 포이즌 접속 및 언어 설정", 'info')
+            # 초기 설정
+            log("\n[1] 포이즌 접속", 'info')
             page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+            wait_stable(page, 2000)
+            
+            # 한국어 설정
+            set_language_korean(page)
             wait_stable(page, 1000)
             
-            # 한국어로 변경
-            lang_success = set_language_korean(page)
-            if lang_success:
-                log("  ✅ 언어를 한국어로 변경", 'success')
-            else:
-                log("  ⚠️ 언어 변경 실패 (계속 진행)", 'warning')
-            
-            wait_stable(page, 500)
-            
-            # [2단계] 각 상품 검색
+            # 각 상품 검색
             log("\n[2] 상품 검색 시작", 'info')
             
-            # 🎲 쿠키 갱신 주기를 랜덤으로 설정 (90-100 사이)
-            cookie_refresh_interval = random.randint(90, 100)
-            log(f"⚙️ 쿠키 갱신 주기: {cookie_refresh_interval}개마다", 'info')
-            
             for idx, product in enumerate(products, 1):
-                # 중단 체크
                 if stop_flag:
-                    log("\n⏹️ 사용자가 비교를 중단했습니다", 'warning')
-                    log(f"현재까지 처리: {len(results)}개", 'info')
                     break
                 
-                # 🎲 90-100개마다 쿠키 갱신 (랜덤)
-                if idx % cookie_refresh_interval == 0:
-                    log(f"\n[⏰ {idx}개 처리 완료] 쿠키 갱신 중...", 'warning')
-                    try:
-                        # 현재 쿠키 저장
-                        cookies = context.cookies()
-                        with open(COOKIE_FILE, 'w') as f:
-                            json.dump(cookies, f)
-                        
-                        # 페이지 새로고침
-                        page.reload(wait_until="domcontentloaded")
-                        wait_stable(page, 1500)
-                        
-                        # 언어 재설정
-                        set_language_korean(page)
-                        
-                        # 다음 갱신 주기도 랜덤으로 재설정
-                        cookie_refresh_interval = random.randint(90, 100)
-                        log(f"  ✅ 쿠키 갱신 완료, 다음 갱신: {cookie_refresh_interval}개 후", 'success')
-                    except Exception as e:
-                        log(f"  ⚠️ 쿠키 갱신 실패: {e}", 'error')
-                
-                # 진행상황 전송
+                # 진행상황
                 if callback:
                     callback(f"PROGRESS:{idx}/{total}", 'progress')
                 
-                product_code = product.get('상품번호', '') or product.get('code', '')
-                product_name = product.get('상품명', '') or product.get('name', '')
+                product_code = product.get('code', product.get('상품번호', ''))
+                product_name = product.get('name', product.get('상품명', ''))
                 
                 if not product_code and not product_name:
-                    log(f"[{idx}/{total}] ⚠️ 상품번호/상품명 없음, 건너뜀", 'warning')
                     continue
                 
-                log(f"\n[{idx}/{total}] 🔍 검색: {product_code} - {product_name}", 'info')
+                log(f"\n[{idx}/{total}] 🔍 검색: {product_code}", 'info')
                 
-                # 검색 수행 (재시도 로직 포함)
                 search_query = product_code if product_code else product_name
-                max_retries = 2
-                retry_count = 0
-                search_success = False
                 
-                while retry_count < max_retries and not search_success:
+                try:
+                    # 검색창 찾기
+                    search_input = None
+                    for selector in ["input[placeholder*='상품명']", "input[type='text']"]:
+                        try:
+                            search_input = page.locator(selector).first
+                            break
+                        except:
+                            continue
+                    
+                    if not search_input:
+                        log(f"  ❌ 검색창 없음")
+                        continue
+                    
+                    # 검색창 클리어
                     try:
-                        # 재시도 시 페이지 리로드
-                        if retry_count > 0:
-                            log(f"  🔄 재시도 {retry_count}/{max_retries}", 'warning')
-                            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
-                            wait_stable(page, 1000)
-                        
-                        # 검색 입력란 찾기 (여러 선택자 시도)
-                        search_input = None
-                        selectors = [
-                            "input[placeholder*='상품명']",
-                            "input[placeholder*='商品']",
-                            "input[placeholder*='搜索']",
-                            "input[type='text']",
-                            ".ant-input",
-                            "input.ant-input"
-                        ]
-                        
-                        for selector in selectors:
-                            try:
-                                if page.locator(selector).count() > 0:
-                                    search_input = page.locator(selector).first
-                                    log(f"  ✓ 검색창 발견: {selector}")
-                                    break
-                            except:
-                                continue
-                        
-                        if not search_input:
-                            log(f"  ❌ 검색창을 찾을 수 없습니다")
-                            retry_count += 1
-                            continue
-                        
-                        # 검색창 클리어 (JavaScript)
-                        try:
-                            page.evaluate("""
-                                const input = document.querySelector('input[placeholder*="상품명"]') || 
-                                             document.querySelector('input[placeholder*="商品"]') ||
-                                             document.querySelector('input[type="text"]') ||
-                                             document.querySelector('.ant-input');
-                                if (input) {
-                                    input.value = '';
-                                    input.focus();
-                                }
-                            """)
-                            wait_stable(page, 100)
-                        except:
-                            pass
-                        
-                        # 🎲 타이핑 방식 (사람처럼, 48ms/글자)
-                        try:
-                            search_input.click(force=True, timeout=3000)
-                            wait_stable(page, 100)
+                        search_input.click()
+                        page.keyboard.press("Control+A")
+                        page.keyboard.press("Delete")
+                        wait_stable(page, 100)
+                    except:
+                        pass
+                    
+                    # 검색어 입력
+                    search_input.type(search_query, delay=30)
+                    wait_stable(page, 200)
+                    
+                    # Enter로 검색
+                    page.keyboard.press("Enter")
+                    log(f"  ✓ 검색 실행")
+                    
+                    # 키워드 검색처럼 충분히 대기!
+                    wait_stable(page, 2000)  # ← 2초!
+                    
+                    # 테이블 대기
+                    try:
+                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=10000)
+                    except:
+                        log(f"  ⚠️ 검색 결과 없음")
+                        fail_data = create_fail_data(product, '검색 결과 없음')
+                        results.append(fail_data)
+                        send_result(callback, product_code, fail_data)
+                        continue
+                    
+                    # evaluate로 데이터 추출 (inner_text 대신!)
+                    data = page.evaluate("""
+                        () => {
+                            const rows = document.querySelectorAll('.ant-table-tbody tr:not(.ant-table-measure-row)');
+                            if (rows.length === 0) return null;
                             
-                            # 한 글자씩 타이핑
-                            search_input.type(search_query, delay=48)
-                            log(f"  ✓ 검색어 입력: {search_query} (타이핑 방식)")
-                            wait_stable(page, 300)
-                        except Exception as e:
-                            log(f"  ⚠️ 타이핑 실패, JavaScript로 재시도")
+                            const row = rows[0];
+                            const cells = row.querySelectorAll('td');
                             
-                            # JavaScript로 값 설정 (폴백)
-                            page.evaluate(f"""
-                                const input = document.querySelector('input[type="text"]');
-                                if (input) {{
-                                    input.value = '{search_query}';
-                                    input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                                    input.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                                }}
-                            """)
-                            wait_stable(page, 300)
-                        
-                        # Enter 키로 검색 (가장 자연스러움)
-                        page.keyboard.press("Enter")
-                        log(f"  ✓ 검색 실행 (Enter)")
-                        
-                        # 🎯 스마트 결과 확인 (최대 2회 시도)
-                        search_start_time = time_module.time()
-                        wait_stable(page, 400)
-                        
-                        result_found = False
-                        for attempt in range(2):
-                            try:
-                                page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=400)
-                                
-                                # 첫 번째 행의 상품번호 확인
-                                first_row = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)").first
-                                first_cell_text = first_row.locator("td").nth(2).inner_text()
-                                
-                                # 검색어가 결과에 포함되어 있는지 확인
-                                if search_query.upper() in first_cell_text.upper():
-                                    elapsed = (time_module.time() - search_start_time) * 1000
-                                    log(f"  ✅ 검색 결과 일치 확인 (총 대기: {elapsed:.0f}ms)")
-                                    result_found = True
-                                    break
-                                else:
-                                    # 일치하지 않으면 계속 대기
-                                    log(f"  ⏳ 시도 {attempt + 1}: 결과 불일치, 0.5초 대기...")
-                                    time_module.sleep(0.3)
-                            except:
-                                time_module.sleep(0.3)
-                        
-                            # ⚠️ 결과 없으면 빠르게 처리하고 다음 상품으로!
-                            if not result_found:
-                                total_elapsed = (time_module.time() - search_start_time) * 1000
-                                log(f"  ⚠️ 검색 결과 없음 (총 대기: {total_elapsed:.0f}ms)", 'warning')
-                                
-                                combined = {**product, '상품명': '검색 결과 없음'}
-                                results.append(combined)
-                                
-                                # 🎲 찾았을 때와 동일한 랜덤 대기 (1-2초)
-                                next_delay = random.uniform(1.0, 2.0)
-                                log(f"  ⏱️ 다음 상품 대기: {next_delay:.1f}초", 'info')
-                                time_module.sleep(next_delay)
-                                
-                                search_success = True  # ← 성공으로 표시!
-                                break  # ← while 루프 탈출! (다음 상품으로)
-                        
-                        # 추가 안정화 대기
-                        random_delay = random.uniform(0.15, 0.25)
-                        time_module.sleep(random_delay)
-                        
-                        # 결과 확인
-                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=8000)
-                        rows = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)")
-                        
-                        if rows.count() == 0:
-                            log(f"  ⚠️ 검색 결과 없음", 'warning')
-                            combined = {**product, '상품명': '검색 결과 없음'}
-                            results.append(combined)
-                            search_success = True
-                            continue
-                        
-                        # 첫 번째 결과 추출
-                        row = rows.nth(0)
-                        cells = row.locator("td")
-                        
-                        # 이미지 URL
-                        img_url = ""
-                        try:
-                            imgs = cells.nth(1).locator("img")
-                            if imgs.count() > 0:
-                                img_url = imgs.first.get_attribute("src")
-                        except:
-                            pass
-                        
-                        # 상품 정보
-                        product_cell = cells.nth(2)
-                        item_info = product_cell.inner_text()
-                        lines = [l.strip() for l in item_info.split("\n") if l.strip()]
-                        
-                        style_id = ""
-                        item_name = ""
-                        spu_id = ""
-                        
-                        for idx_line, line in enumerate(lines):
-                            line_clean = line.strip()
+                            // 이미지
+                            let img_url = '';
+                            const img = cells[1]?.querySelector('img');
+                            if (img) img_url = img.src || '';
                             
-                            # 상품번호 추출
-                            if not style_id:
-                                if line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:"] and idx_line + 1 < len(lines):
-                                    style_id = lines[idx_line + 1].strip()
-                                elif ("상품번호" in line_clean or "货号" in line_clean or "번호" in line_clean) and line_clean not in ["상품 번호:", "상품번호:", "货号:", "번호:"]:
-                                    style_id = line_clean.replace("상품번호:", "").replace("상품번호：", "").replace("상품번호", "").replace("상품 번호:", "").replace("상품 번호：", "").replace("상품 번호", "").replace("货号:", "").replace("货号：", "").replace("货号", "").replace("번호:", "").replace("번호：", "").replace("번호", "").strip()
+                            // 상품 정보 (textContent 사용!)
+                            const product_text = cells[2]?.textContent || '';
                             
-                            # SPU_ID 추출
-                            if not spu_id:
-                                if line_clean in ["SPU_ID:", "SPU_ID：", "SPU ID:", "SPU:", "SPU："] and idx_line + 1 < len(lines):
-                                    spu_id = lines[idx_line + 1].strip()
-                                elif "SPU" in line_clean.upper() and line_clean not in ["SPU_ID:", "SPU_ID：", "SPU ID:", "SPU:", "SPU："]:
-                                    spu_id = line_clean.replace("SPU_ID：", "").replace("SPU_ID:", "").replace("SPU ID:", "").replace("SPU_ID", "").replace("SPU ID", "").replace("SPU:", "").replace("SPU：", "").replace("SPU", "").strip()
+                            // 나머지 정보
+                            const brand = cells[3]?.textContent || '-';
+                            const status = cells[4]?.textContent || '-';
+                            const avg_price = cells[5]?.textContent || '-';
+                            const cn_exposure = cells[6]?.textContent || '-';
+                            const cn_sales = cells[7]?.textContent || '0';
+                            const local_sales = cells[8]?.textContent || '0';
                             
-                            # 상품명 추출
-                            if not item_name and line_clean and line_clean != style_id and "상품번호" not in line_clean and "货号" not in line_clean and "SPU" not in line_clean.upper() and "번호" not in line_clean and line_clean not in [":", "："]:
-                                item_name = line_clean
-                        
-                        # 가격 및 통계 정보
-                        avg_price_raw = cells.nth(5).inner_text()
-                        cn_exposure_raw = cells.nth(6).inner_text()
-                        cn_sales_raw = cells.nth(7).inner_text()
-                        local_sales_raw = cells.nth(8).inner_text()
-                        
-                        cn_exposure_num = extract_number(cn_exposure_raw)
-                        cn_sales_num = extract_number(cn_sales_raw)
-                        local_sales_num = extract_number(local_sales_raw)
-                        avg_price_num = extract_number(avg_price_raw)
-                        
-                        # 포이즌 데이터
-                        poizon_data = {
-                            '상품명': item_name or product_name or '-',
-                            '상품번호': style_id or product_code or '-',
-                            'SPU_ID': spu_id or '-',
-                            '평균거래가': avg_price_num,
-                            '중국노출': cn_exposure_num,
-                            '중국판매': cn_sales_num,
-                            '해외판매': local_sales_num,
-                            '이미지URL': img_url
+                            return {
+                                img_url: img_url,
+                                product_text: product_text,
+                                brand: brand,
+                                status: status,
+                                avg_price: avg_price,
+                                cn_exposure: cn_exposure,
+                                cn_sales: cn_sales,
+                                local_sales: local_sales
+                            };
                         }
+                    """)
+                    
+                    if not data:
+                        log(f"  ⚠️ 데이터 없음")
+                        fail_data = create_fail_data(product, '데이터 없음')
+                        results.append(fail_data)
+                        send_result(callback, product_code, fail_data)
+                        continue
+                    
+                    # 상품 정보 파싱
+                    lines = [l.strip() for l in data['product_text'].split("\n") if l.strip()]
+                    
+                    style_id = ""
+                    item_name = ""
+                    spu_id = ""
+                    
+                    for idx_line, line in enumerate(lines):
+                        line_clean = line.strip()
                         
-                        # 엑셀 데이터 + 포이즌 데이터 결합
-                        combined = {**product, **poizon_data}
-                        results.append(combined)
+                        # 상품번호
+                        if not style_id:
+                            if line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:"] and idx_line + 1 < len(lines):
+                                style_id = lines[idx_line + 1].strip()
+                            elif "상품번호" in line_clean or "货号" in line_clean or "번호" in line_clean:
+                                style_id = line_clean.replace("상품번호:", "").replace("상품번호", "").replace("货号:", "").replace("货号", "").replace("번호:", "").replace("번호", "").strip()
                         
-                        # 실시간 결과 전송
-                        if callback:
-                            try:
-                                callback(f"PRODUCT_RESULT:{json.dumps({'product_code': product_code, 'products': [combined]}, ensure_ascii=False)}", 'data')
-                            except:
-                                pass
+                        # SPU_ID
+                        if not spu_id:
+                            if "SPU" in line_clean.upper():
+                                spu_id = line_clean.replace("SPU_ID:", "").replace("SPU:", "").replace("SPU", "").strip()
                         
-                        log(f"  ✅ 검색 완료: {item_name}", 'success')
-                        search_success = True
-                        
-                        # 🎲 다음 상품으로 넘어가기 전 랜덤 딜레이 (1-2초)
-                        next_delay = random.uniform(1.0, 2.0)
-                        log(f"  ⏱️ 다음 상품 대기: {next_delay:.1f}초", 'info')
-                        time_module.sleep(next_delay)
-                        
-                    except Exception as e:
-                        retry_count += 1
-                        
-                        if retry_count >= max_retries:
-                            # 최종 실패
-                            log(f"  ❌ 검색 실패: {e}", 'error')
-                            combined = {**product, '상품명': f'오류: {str(e)}'}
-                            results.append(combined)
-                            search_success = True  # 실패해도 다음 상품으로
-                        else:
-                            # 재시도
-                            log(f"  ⚠️ 오류 발생, 재시도 준비...", 'warning')
-                            wait_stable(page, 500)
+                        # 제품명
+                        if not item_name and line_clean and line_clean != style_id and "상품번호" not in line_clean and "SPU" not in line_clean.upper():
+                            item_name = line_clean
+                    
+                    log(f"  ✨ {style_id} / {item_name}")
+                    
+                    # 숫자 추출
+                    avg_price_num = extract_number(data['avg_price'])
+                    cn_sales_num = extract_number(data['cn_sales'])
+                    local_sales_num = extract_number(data['local_sales'])
+                    
+                    # 데이터 구성
+                    combined = {
+                        **product,
+                        '제품명': item_name or product_name or '-',
+                        '상품번호': style_id or product_code or '-',
+                        'SPU_ID': spu_id or '-',
+                        '브랜드카테고리': data['brand'].replace("\n", " / "),
+                        '상태': data['status'],
+                        '최근30일평균거래가': data['avg_price'],
+                        '중국노출': data['cn_exposure'],
+                        '중국노출_숫자': avg_price_num,
+                        '중국시장최근30일판매량': cn_sales_num,
+                        '현지판매자최근30일판매량': local_sales_num,
+                        '이미지URL': data['img_url'],
+                        '엑셀_상품번호': product.get('code', '-'),
+                        '엑셀_할인가': product.get('sale_price', 0),
+                        '엑셀_재고': product.get('stock', 0),
+                        '가격차이': (product.get('sale_price', 0) - avg_price_num) if avg_price_num else 0,
+                    }
+                    
+                    results.append(combined)
+                    log(f"  ✅ 완료", 'success')
+                    
+                    # 실시간 전송
+                    send_result(callback, product_code, combined)
+                    
+                except Exception as e:
+                    log(f"  ❌ 오류: {e}", 'error')
+                    fail_data = create_fail_data(product, f'오류: {str(e)}')
+                    results.append(fail_data)
+                    send_result(callback, product_code, fail_data)
+                
+                # 다음 상품 대기
+                time_module.sleep(random.uniform(1.0, 2.0))
             
-            # [3단계] 모든 검색 완료 후 브라우저 종료
-            log("\n[3] 브라우저 종료", 'info')
+            # 브라우저 종료
             browser.close()
         
         # 엑셀 저장
         if results:
             filepath = save_comparison_to_excel(results, products)
             
-            reason = "중단됨" if stop_flag else "정상완료"
-            log(f"\n✅ 비교 완료 ({reason})!", 'success' if not stop_flag else 'warning')
-            log(f"📄 총 {len(results)}개 상품 처리", 'success')
-            log(f"💾 파일 저장: {filepath}", 'success')
+            log(f"\n✅ 비교 완료!", 'success')
             
             return {
                 'success': True,
                 'total_items': len(results),
                 'file_path': os.path.basename(filepath),
-                'results': results,
-                'stopped': stop_flag
+                'results': results
             }
         else:
-            return {
-                'success': False,
-                'error': '검색 결과가 없습니다'
-            }
+            return {'success': False, 'error': '결과 없음'}
             
     except Exception as e:
-        log(f"❌ 비교 중 오류: {e}", 'error')
-        import traceback
-        traceback.print_exc()
-        return {
-            'success': False,
-            'error': str(e)
-        }
+        log(f"❌ 오류: {e}", 'error')
+        return {'success': False, 'error': str(e)}
 
+
+def create_fail_data(product, reason):
+    """실패 데이터 생성"""
+    return {
+        **product,
+        '제품명': reason,
+        '상품번호': '-',
+        'SPU_ID': '-',
+        '브랜드카테고리': '-',
+        '상태': '-',
+        '최근30일평균거래가': '-',
+        '중국노출': '-',
+        '중국노출_숫자': 0,
+        '중국시장최근30일판매량': 0,
+        '현지판매자최근30일판매량': 0,
+        '이미지URL': '',
+        '엑셀_상품번호': product.get('code', '-'),
+        '엑셀_할인가': product.get('sale_price', 0),
+        '엑셀_재고': product.get('stock', 0),
+        '가격차이': 0,
+    }
+
+
+def send_result(callback, product_code, data):
+    """실시간 전송"""
+    print(f"[SEND_RESULT] 함수 시작!")  # ← 직접 print!
+    print(f"[SEND_RESULT] callback 존재: {callback is not None}")
+    
+    if callback:
+        try:
+            # 🔍 디버깅: 전송할 데이터 확인
+            log(f"  🔍 [DEBUG] send_result 호출됨", 'info')
+            log(f"  🔍 [DEBUG] product_code: {product_code}", 'info')
+            log(f"  🔍 [DEBUG] data 키: {list(data.keys())}", 'info')
+            log(f"  🔍 [DEBUG] 제품명: {data.get('제품명', 'KEY_MISSING')}", 'info')
+            
+            json_data = json.dumps({'product_code': product_code, 'products': [data]}, ensure_ascii=False)
+            log(f"  🔍 [DEBUG] JSON 생성 성공: {len(json_data)}자", 'info')
+            
+            print(f"[SEND_RESULT] callback 호출 직전!")  # ← 직접 print!
+            callback(f"PRODUCT_RESULT:{json_data}", 'data')
+            print(f"[SEND_RESULT] callback 호출 완료!")  # ← 직접 print!
+            
+            log(f"  ✅ [DEBUG] callback 호출 완료!", 'success')
+        except Exception as e:
+            print(f"[SEND_RESULT] 오류 발생: {e}")  # ← 직접 print!
+            log(f"  ❌ [DEBUG] send_result 오류: {e}", 'error')
+            import traceback
+            log(f"  ❌ [DEBUG] traceback: {traceback.format_exc()}", 'error')
+            traceback.print_exc()  # ← 직접 print!
 
 if __name__ == "__main__":
     print("=" * 60)
@@ -1319,4 +1225,3 @@ if __name__ == "__main__":
     print("  py -u app.py")
     print("=" * 60)
     # run()  # 자동 실행 금지! 26-02-17 04시 test
-    

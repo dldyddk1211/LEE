@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1503,6 +1502,13 @@
     }
 
     async function startComparison(products) {
+      // 🔍 리스트 비교 모드로 설정! (디버깅!)
+      console.log('🔍 [DEBUG] startComparison 시작!');
+      selectedMode = 'compare';
+      console.log('🔍 [DEBUG] selectedMode 설정:', selectedMode);
+      updateTableHeader(selectedMode);
+      console.log('🔍 [DEBUG] updateTableHeader 완료!');
+      
       // 서버 작업 상태 체크
       try {
         const statusRes = await fetch('/check_status');
@@ -1564,6 +1570,36 @@
                   
                   if (data.type === 'log') addLog(data.message, data.level || 'info');
                   if (data.type === 'progress') updateProgress(data.current, data.total);
+                  
+                  // 🔍 product_result 처리 (디버깅!)
+                  if (data.type === 'product_result') {
+                    console.log('🔍 [DEBUG] product_result 받음!', data);
+                    console.log('🔍 [DEBUG] product_code:', data.product_code);
+                    console.log('🔍 [DEBUG] products:', data.products);
+                    
+                    if (data.products && Array.isArray(data.products)) {
+                      console.log('🔍 [DEBUG] products 배열 OK, 개수:', data.products.length);
+                      
+                      data.products.forEach((product, idx) => {
+                        console.log(`🔍 [DEBUG] product[${idx}]:`, product);
+                        console.log(`🔍 [DEBUG] product[${idx}] 제품명:`, product.제품명);
+                        
+                        collectedData.push(product);
+                        console.log(`🔍 [DEBUG] collectedData에 추가! 현재 개수:`, collectedData.length);
+                      });
+                      
+                      // 결과 섹션 표시
+                      document.getElementById('resultSection').classList.add('active');
+                      document.getElementById('resultCount').textContent = collectedData.length;
+                      
+                      // 테이블 렌더링
+                      console.log('🔍 [DEBUG] renderTable 호출!');
+                      renderTable();
+                      console.log('🔍 [DEBUG] renderTable 완료!');
+                    } else {
+                      console.warn('⚠️ [DEBUG] products가 배열이 아님!', data);
+                    }
+                  }
                   
                   if (data.type === 'data') {
                     // 기존 업로드 리스트에서 해당 상품 찾아서 업데이트
