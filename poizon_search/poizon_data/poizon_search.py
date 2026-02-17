@@ -1001,17 +1001,23 @@ def run_excel_comparison(products, callback=None):
                         log(f"  ❌ 검색창 없음")
                         continue
                     
-                    # 검색창 클리어
+                    # 🔄 검색창 완전 초기화 (크로스 플랫폼 호환)
                     try:
-                        search_input.click()
-                        page.keyboard.press("Control+A")
-                        page.keyboard.press("Delete")
-                        wait_stable(page, 100)
-                    except:
-                        pass
+                        # 방법 1: fill('')로 완전 클리어
+                        search_input.fill('')
+                        wait_stable(page, 200)
+                        log(f"  ✓ 검색창 초기화")
+                    except Exception as e:
+                        log(f"  ⚠️ 검색창 클리어 실패: {e}", 'warning')
                     
                     # 검색어 입력
-                    search_input.type(search_query, delay=30)
+                    try:
+                        search_input.fill(search_query)  # fill()이 가장 확실함
+                        wait_stable(page, 100)
+                        log(f"  ✓ 검색어 입력: {search_query}")
+                    except Exception as e:
+                        log(f"  ❌ 검색어 입력 실패: {e}", 'error')
+                        continue
                     wait_stable(page, 200)
                     
                     # Enter로 검색
