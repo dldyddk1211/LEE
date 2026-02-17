@@ -922,11 +922,15 @@ def save_sourcing_results_to_excel(results, reason="정상종료"):
 
 def run_excel_comparison(products, callback=None):
     """
-    엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교 (V4 하이브리드)
+    엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교 (V5 FINAL)
+    
+    V5 FINAL 최적화 기능:
     - 브라우저 1번만 열기
-    - 검색 페이지 1번만 이동
-    - 검색어만 변경하여 빠른 검색
-    - 오류 시 페이지 리로드로 안정성 확보
+    - 타이핑 방식 (delay=48ms) - 사람처럼
+    - 90-100개마다 쿠키 갱신 (랜덤) - 세션 유지
+    - 다음 상품 대기 1-2초 (랜덤) - 봇 회피
+    - 스마트 결과 확인 (최대 2회 재시도)
+    - 검색 페이지 재사용 (빠른 속도)
     
     Args:
         products: 엑셀에서 읽은 상품 리스트 (dict의 list)
@@ -943,11 +947,15 @@ def run_excel_comparison(products, callback=None):
     # 중단 플래그 초기화
     stop_flag = False
     
+    import time as time_module
+    import random
+    
     try:
         results = []
         total = len(products)
         
-        log(f"\n🔍 총 {total}개 상품 비교 시작 (V4 하이브리드 방식)", 'info')
+        log(f"\n🔍 총 {total}개 상품 비교 시작 (V5 FINAL 랜덤 최적화)", 'info')
+        log(f"⚡ 최적화: 타이핑 방식 + 랜덤 쿠키 갱신 + 랜덤 대기", 'info')
         
         # 브라우저를 한 번만 열기
         with sync_playwright() as p:
@@ -983,12 +991,38 @@ def run_excel_comparison(products, callback=None):
             # [2단계] 각 상품 검색
             log("\n[2] 상품 검색 시작", 'info')
             
+            # 🎲 쿠키 갱신 주기를 랜덤으로 설정 (90-100 사이)
+            cookie_refresh_interval = random.randint(90, 100)
+            log(f"⚙️ 쿠키 갱신 주기: {cookie_refresh_interval}개마다", 'info')
+            
             for idx, product in enumerate(products, 1):
                 # 중단 체크
                 if stop_flag:
                     log("\n⏹️ 사용자가 비교를 중단했습니다", 'warning')
                     log(f"현재까지 처리: {len(results)}개", 'info')
                     break
+                
+                # 🎲 90-100개마다 쿠키 갱신 (랜덤)
+                if idx % cookie_refresh_interval == 0:
+                    log(f"\n[⏰ {idx}개 처리 완료] 쿠키 갱신 중...", 'warning')
+                    try:
+                        # 현재 쿠키 저장
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                        
+                        # 페이지 새로고침
+                        page.reload(wait_until="domcontentloaded")
+                        wait_stable(page, 1500)
+                        
+                        # 언어 재설정
+                        set_language_korean(page)
+                        
+                        # 다음 갱신 주기도 랜덤으로 재설정
+                        cookie_refresh_interval = random.randint(90, 100)
+                        log(f"  ✅ 쿠키 갱신 완료, 다음 갱신: {cookie_refresh_interval}개 후", 'success')
+                    except Exception as e:
+                        log(f"  ⚠️ 쿠키 갱신 실패: {e}", 'error')
                 
                 # 진행상황 전송
                 if callback:
@@ -1017,30 +1051,119 @@ def run_excel_comparison(products, callback=None):
                             page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
                             wait_stable(page, 1000)
                         
-                        # 검색 입력란 찾기
-                        wait_for_inputs(page)
-                        input_selector = "input[placeholder*='상품명']"
+                        # 검색 입력란 찾기 (여러 선택자 시도)
+                        search_input = None
+                        selectors = [
+                            "input[placeholder*='상품명']",
+                            "input[placeholder*='商品']",
+                            "input[placeholder*='搜索']",
+                            "input[type='text']",
+                            ".ant-input",
+                            "input.ant-input"
+                        ]
                         
-                        # 입력란 초기화 및 검색어 입력
-                        input_field = page.locator(input_selector).first
-                        input_field.click()
+                        for selector in selectors:
+                            try:
+                                if page.locator(selector).count() > 0:
+                                    search_input = page.locator(selector).first
+                                    log(f"  ✓ 검색창 발견: {selector}")
+                                    break
+                            except:
+                                continue
                         
-                        # 기존 텍스트 선택 및 삭제 (Ctrl+A, Delete)
-                        page.keyboard.press("Control+A")
-                        page.keyboard.press("Delete")
-                        wait_stable(page, 200)
+                        if not search_input:
+                            log(f"  ❌ 검색창을 찾을 수 없습니다")
+                            retry_count += 1
+                            continue
                         
-                        # 새 검색어 입력
-                        input_field.fill(search_query)
-                        wait_stable(page, 300)
-                        
-                        # 검색 버튼 클릭
+                        # 검색창 클리어 (JavaScript)
                         try:
-                            click_first(page, ["button:has-text('검색 및 입찰')"], "검색")
+                            page.evaluate("""
+                                const input = document.querySelector('input[placeholder*="상품명"]') || 
+                                             document.querySelector('input[placeholder*="商品"]') ||
+                                             document.querySelector('input[type="text"]') ||
+                                             document.querySelector('.ant-input');
+                                if (input) {
+                                    input.value = '';
+                                    input.focus();
+                                }
+                            """)
+                            wait_stable(page, 100)
                         except:
-                            page.keyboard.press("Enter")
+                            pass
                         
-                        wait_stable(page, 1200)
+                        # 🎲 타이핑 방식 (사람처럼, 48ms/글자)
+                        try:
+                            search_input.click(force=True, timeout=3000)
+                            wait_stable(page, 100)
+                            
+                            # 한 글자씩 타이핑
+                            search_input.type(search_query, delay=48)
+                            log(f"  ✓ 검색어 입력: {search_query} (타이핑 방식)")
+                            wait_stable(page, 300)
+                        except Exception as e:
+                            log(f"  ⚠️ 타이핑 실패, JavaScript로 재시도")
+                            
+                            # JavaScript로 값 설정 (폴백)
+                            page.evaluate(f"""
+                                const input = document.querySelector('input[type="text"]');
+                                if (input) {{
+                                    input.value = '{search_query}';
+                                    input.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                                    input.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                                }}
+                            """)
+                            wait_stable(page, 300)
+                        
+                        # Enter 키로 검색 (가장 자연스러움)
+                        page.keyboard.press("Enter")
+                        log(f"  ✓ 검색 실행 (Enter)")
+                        
+                        # 🎯 스마트 결과 확인 (최대 2회 시도)
+                        search_start_time = time_module.time()
+                        wait_stable(page, 400)
+                        
+                        result_found = False
+                        for attempt in range(2):
+                            try:
+                                page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=400)
+                                
+                                # 첫 번째 행의 상품번호 확인
+                                first_row = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)").first
+                                first_cell_text = first_row.locator("td").nth(2).inner_text()
+                                
+                                # 검색어가 결과에 포함되어 있는지 확인
+                                if search_query.upper() in first_cell_text.upper():
+                                    elapsed = (time_module.time() - search_start_time) * 1000
+                                    log(f"  ✅ 검색 결과 일치 확인 (총 대기: {elapsed:.0f}ms)")
+                                    result_found = True
+                                    break
+                                else:
+                                    # 일치하지 않으면 계속 대기
+                                    log(f"  ⏳ 시도 {attempt + 1}: 결과 불일치, 0.5초 대기...")
+                                    time_module.sleep(0.3)
+                            except:
+                                time_module.sleep(0.3)
+                        
+                            # ⚠️ 결과 없으면 빠르게 처리하고 다음 상품으로!
+                            if not result_found:
+                                total_elapsed = (time_module.time() - search_start_time) * 1000
+                                log(f"  ⚠️ 검색 결과 없음 (총 대기: {total_elapsed:.0f}ms)", 'warning')
+                                
+                                combined = {**product, '상품명': '검색 결과 없음'}
+                                results.append(combined)
+                                
+                                # 🎲 찾았을 때와 동일한 랜덤 대기 (1-2초)
+                                next_delay = random.uniform(1.0, 2.0)
+                                log(f"  ⏱️ 다음 상품 대기: {next_delay:.1f}초", 'info')
+                                time_module.sleep(next_delay)
+                                
+                                search_success = True  # ← 성공으로 표시!
+                                break  # ← while 루프 탈출! (다음 상품으로)
+                        
+                        # 추가 안정화 대기
+                        random_delay = random.uniform(0.15, 0.25)
+                        time_module.sleep(random_delay)
                         
                         # 결과 확인
                         page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=8000)
@@ -1132,6 +1255,11 @@ def run_excel_comparison(products, callback=None):
                         
                         log(f"  ✅ 검색 완료: {item_name}", 'success')
                         search_success = True
+                        
+                        # 🎲 다음 상품으로 넘어가기 전 랜덤 딜레이 (1-2초)
+                        next_delay = random.uniform(1.0, 2.0)
+                        log(f"  ⏱️ 다음 상품 대기: {next_delay:.1f}초", 'info')
+                        time_module.sleep(next_delay)
                         
                     except Exception as e:
                         retry_count += 1
