@@ -238,7 +238,20 @@ def scrape_current_page(page):
         for i in range(count):
             try:
                 row = rows.nth(i)
+                
+                # 행이 로드될 때까지 대기
+                try:
+                    row.wait_for(state="visible", timeout=5000)
+                except:
+                    pass
+                
                 cells = row.locator("td")
+                
+                # 셀이 로드될 때까지 대기
+                try:
+                    cells.first.wait_for(state="visible", timeout=3000)
+                except:
+                    pass
                 
                 img_url = ""
                 try:
@@ -257,8 +270,26 @@ def scrape_current_page(page):
                         pass
 
                 try:
+                    # 타임아웃 증가 및 안전한 접근
                     product_cell = cells.nth(2)
-                    item_info = product_cell.inner_text()
+                    
+                    # 셀이 존재하는지 먼저 확인
+                    if product_cell.count() == 0:
+                        log(f"    ⚠️ 행 {i+1}: 상품 정보 셀을 찾을 수 없음", 'warning')
+                        continue
+                    
+                    # 타임아웃을 60초로 증가
+                    try:
+                        item_info = product_cell.inner_text(timeout=60000)
+                    except Exception as e:
+                        log(f"    ⚠️ 행 {i+1}: 텍스트 추출 실패 - {str(e)}", 'warning')
+                        # JavaScript로 텍스트 추출 시도
+                        try:
+                            item_info = product_cell.evaluate("el => el.textContent")
+                        except:
+                            log(f"    ⚠️ 행 {i+1}: JavaScript 추출도 실패, 건너뜀", 'warning')
+                            continue
+                    
                     lines = [l.strip() for l in item_info.split("\n") if l.strip()]
                     
                     style_id = ""
@@ -413,8 +444,18 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
     setup_logging()
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=HEADLESS)
-        context = browser.new_context()
+        browser = p.chromium.launch(
+            headless=HEADLESS,
+            channel='chrome',  # 설치된 Chrome 사용 (더 안정적)
+            args=[
+                '--start-maximized',  # 최대화 모드
+                '--disable-blink-features=AutomationControlled',  # 자동화 감지 우회
+            ]
+        )
+        context = browser.new_context(
+            viewport=None,  # 전체 화면 사용
+            no_viewport=True  # viewport 제한 없음
+        )
         
         need_login = True
         if skip_login and os.path.exists(COOKIE_FILE):
@@ -474,9 +515,41 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
             log("\n[3] 상품 검색 페이지 이동")
             page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
             wait_stable(page, 1000)
+            
+            # 키워드 검색 탭 클릭 (기본 선택되도록)
+            try:
+                log("  → 키워드 검색 탭 활성화 중...")
+                # 여러 선택자 시도
+                keyword_tab_selectors = [
+                    "text='상품명'",
+                    "span:has-text('상품명')",
+                    ".ant-tabs-tab:has-text('상품명')",
+                    "[role='tab']:has-text('상품명')",
+                ]
+                for selector in keyword_tab_selectors:
+                    try:
+                        tab = page.locator(selector).first
+                        if tab.count() > 0:
+                            tab.click()
+                            log(f"  ✅ 키워드 검색 탭 클릭 완료 (선택자: {selector})")
+                            wait_stable(page, 500)
+                            break
+                    except:
+                        continue
+            except Exception as e:
+                log(f"  ⚠️ 탭 클릭 실패 (계속 진행): {e}", 'warning')
 
             log(f"\n[4] 키워드 입력: {SEARCH_KEYWORD}")
             wait_for_inputs(page)
+            
+            # 검색창 클릭하여 활성화
+            try:
+                search_input = page.locator("input[placeholder*='상품명']").first
+                search_input.click()
+                wait_stable(page, 300)
+            except:
+                pass
+            
             fill_first(page, ["input[placeholder*='상품명']"], SEARCH_KEYWORD, "키워드")
 
             try:
@@ -503,7 +576,7 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
                 
                 if LOG_CALLBACK:
                     try:
-                        LOG_CALLBACK(f"PROGRESS:{page_num}/{max_pages}", 'progress')
+                        LOG_CALLBACK(f"PROGRESS:{page_num}/{max_pages}|PAGE:{page_num}/{max_pages}", 'progress')
                     except:
                         pass
                 
@@ -591,8 +664,12 @@ def perform_login():
                 }
         
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=HEADLESS)
-            context = browser.new_context()
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+            )
+            context = browser.new_context(viewport=None, no_viewport=True)
             page = context.new_page()
             
             log("\n[1] POIZON 접속 중...", 'info')
@@ -664,8 +741,12 @@ def compare_product_price(product_code, product_name, callback=None):
     
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=HEADLESS)
-            context = browser.new_context()
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+            )
+            context = browser.new_context(viewport=None, no_viewport=True)
             
             if os.path.exists(COOKIE_FILE):
                 try:
@@ -704,7 +785,20 @@ def compare_product_price(product_code, product_name, callback=None):
                     return None
                 
                 row = rows.nth(0)
+                
+                # 행이 로드될 때까지 대기
+                try:
+                    row.wait_for(state="visible", timeout=5000)
+                except:
+                    pass
+                
                 cells = row.locator("td")
+                
+                # 셀이 로드될 때까지 대기
+                try:
+                    cells.first.wait_for(state="visible", timeout=3000)
+                except:
+                    pass
                 
                 img_url = ""
                 try:
@@ -715,8 +809,33 @@ def compare_product_price(product_code, product_name, callback=None):
                     log(f"  이미지 추출 실패: {e}")
                     pass
                 
-                product_cell = cells.nth(2)
-                item_info = product_cell.inner_text()
+                # 타임아웃 증가 및 안전한 접근
+                try:
+                    product_cell = cells.nth(2)
+                    
+                    # 셀이 존재하는지 확인
+                    if product_cell.count() == 0:
+                        log(f"  ⚠️ 상품 정보 셀을 찾을 수 없음", 'warning')
+                        browser.close()
+                        return None
+                    
+                    # 타임아웃을 60초로 증가
+                    try:
+                        item_info = product_cell.inner_text(timeout=60000)
+                    except Exception as e:
+                        log(f"  ⚠️ 텍스트 추출 실패: {str(e)}", 'warning')
+                        # JavaScript로 텍스트 추출 시도
+                        try:
+                            item_info = product_cell.evaluate("el => el.textContent")
+                        except:
+                            log(f"  ❌ JavaScript 추출도 실패", 'error')
+                            browser.close()
+                            return None
+                except Exception as e:
+                    log(f"  ❌ 상품 셀 접근 실패: {str(e)}", 'error')
+                    browser.close()
+                    return None
+                
                 lines = [l.strip() for l in item_info.split("\n") if l.strip()]
                 
                 style_id = ""
@@ -942,8 +1061,12 @@ def run_excel_comparison(products, callback=None):
         
         # 브라우저 열기
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=HEADLESS)
-            context = browser.new_context()
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+            )
+            context = browser.new_context(viewport=None, no_viewport=True)
             
             # 쿠키 로드
             if os.path.exists(COOKIE_FILE):
@@ -1001,23 +1124,17 @@ def run_excel_comparison(products, callback=None):
                         log(f"  ❌ 검색창 없음")
                         continue
                     
-                    # 🔄 검색창 완전 초기화 (크로스 플랫폼 호환)
+                    # 검색창 클리어
                     try:
-                        # 방법 1: fill('')로 완전 클리어
-                        search_input.fill('')
-                        wait_stable(page, 200)
-                        log(f"  ✓ 검색창 초기화")
-                    except Exception as e:
-                        log(f"  ⚠️ 검색창 클리어 실패: {e}", 'warning')
+                        search_input.click()
+                        page.keyboard.press("Control+A")
+                        page.keyboard.press("Delete")
+                        wait_stable(page, 100)
+                    except:
+                        pass
                     
                     # 검색어 입력
-                    try:
-                        search_input.fill(search_query)  # fill()이 가장 확실함
-                        wait_stable(page, 100)
-                        log(f"  ✓ 검색어 입력: {search_query}")
-                    except Exception as e:
-                        log(f"  ❌ 검색어 입력 실패: {e}", 'error')
-                        continue
+                    search_input.type(search_query, delay=30)
                     wait_stable(page, 200)
                     
                     # Enter로 검색

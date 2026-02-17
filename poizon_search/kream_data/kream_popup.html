@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>크림(KREAM) 검색</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        .header h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .controls .count {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        .table-container {
+            max-height: 600px;
+            overflow: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 6px;
+            background: #f8f9fa;
+            padding: 3px;
+        }
+        .kream-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .kream-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
+        }
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-searching {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-done {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        /* 디버그 로그 패널 */
+        .debug-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        .debug-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .debug-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .debug-log {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .debug-entry {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        .debug-time {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 크림(KREAM) 검색</h1>
+            <p>포이즌에서 수집한 상품을 크림에서 검색합니다</p>
+        </div>
+
+        <div class="controls">
+            <div class="count">
+                총 <strong id="totalCount">0</strong>개 상품
+            </div>
+            <button class="btn btn-primary" onclick="startKreamSearch()" id="searchBtn">
+                🔍 크림 검색 시작
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th style="width: 80px;">이미지</th>
+                        <th style="width: 100px;">크림</th>
+                        <th style="width: 150px;">상품번호</th>
+                        <th>제품명</th>
+                        <th style="width: 120px;">평균거래가</th>
+                        <th style="width: 120px;">중국노출가</th>
+                        <th style="width: 100px;">판매량</th>
+                        <th style="width: 100px;">상태</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
+                            ⏳ 데이터 로딩 중...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 디버그 로그 패널 -->
+        <div class="debug-panel">
+            <div class="debug-header">
+                <div class="debug-title">🔍 디버그 로그 (실시간)</div>
+                <label class="debug-toggle">
+                    <input type="checkbox" id="showDebugToggle" onchange="toggleDebugView()" checked>
+                    <span>로그 표시</span>
+                </label>
+            </div>
+            <div id="debugLog" class="debug-log">
+                <!-- 로그가 여기 추가됨 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let collectedData = [];
+        
+        // 디버그 로그 함수
+        function addDebugLog(message, color = '#0f0') {
+            const logDiv = document.getElementById('debugLog');
+            const time = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'debug-entry';
+            logEntry.innerHTML = `<span class="debug-time">[${time}]</span> <span style="color: ${color}">${message}</span>`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${time}] ${message}`);
+        }
+        
+        // 토글 함수
+        function toggleDebugView() {
+            const debugLog = document.getElementById('debugLog');
+            const checkbox = document.getElementById('showDebugToggle');
+            debugLog.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // sessionStorage에서 데이터 읽기
+        window.addEventListener('load', function() {
+            addDebugLog('🚀 크림 팝업 페이지 로드 시작', '#0ff');
+            addDebugLog(`📍 URL: ${window.location.href}`);
+            addDebugLog(`📍 Opener: ${window.opener ? 'O' : 'X'}`);
+            
+            const dataStr = sessionStorage.getItem('kreamSearchData');
+            addDebugLog(`1️⃣ sessionStorage 확인...`);
+            addDebugLog(`   ├─ 키 존재: ${!!dataStr}`, dataStr ? '#0f0' : '#f00');
+            
+            if (!dataStr) {
+                addDebugLog(`   └─ ❌ sessionStorage에 kreamSearchData 없음!`, '#f00');
+                addDebugLog(`🔍 전체 키 목록: ${JSON.stringify(Object.keys(sessionStorage))}`, '#ff0');
+                
+                // opener(메인 창)에서 데이터 가져오기 시도
+                if (window.opener && window.opener.collectedData) {
+                    addDebugLog(`2️⃣ opener에서 데이터 가져오기 시도...`, '#ff0');
+                    try {
+                        collectedData = window.opener.collectedData;
+                        addDebugLog(`   ├─ ✅ opener에서 데이터 가져옴!`, '#0f0');
+                        addDebugLog(`   └─ 상품 개수: ${collectedData.length}`, '#0ff');
+                        
+                        // sessionStorage에 저장
+                        sessionStorage.setItem('kreamSearchData', JSON.stringify(collectedData));
+                        addDebugLog(`   └─ sessionStorage에 저장 완료`, '#0f0');
+                        
+                        displayProducts(collectedData);
+                        addDebugLog(`✅ 전체 로딩 완료!`, '#0f0');
+                        
+                    } catch (e) {
+                        addDebugLog(`   ❌ opener 접근 오류: ${e.message}`, '#f00');
+                        showNoDataMessage();
+                    }
+                } else {
+                    addDebugLog(`❌ opener도 없고 sessionStorage도 없음`, '#f00');
+                    showNoDataMessage();
+                }
+                return;
+            }
+            
+            // sessionStorage에 데이터 있음
+            addDebugLog(`   ├─ 데이터 크기: ${dataStr.length} bytes`, '#0ff');
+            addDebugLog(`   └─ 미리보기: ${dataStr.substring(0, 80)}...`, '#888');
+            
+            try {
+                addDebugLog('2️⃣ JSON 파싱 시도...', '#ff0');
+                collectedData = JSON.parse(dataStr);
+                addDebugLog(`   ├─ ✅ 파싱 성공!`, '#0f0');
+                addDebugLog(`   ├─ 상품 개수: ${collectedData.length}`, '#0ff');
+                
+                if (collectedData.length > 0) {
+                    const first = collectedData[0];
+                    addDebugLog(`   ├─ 첫 상품번호: ${first?.상품번호}`, '#0ff');
+                    addDebugLog(`   └─ 첫 제품명: ${first?.제품명?.substring(0, 30)}...`, '#0ff');
+                }
+                
+                addDebugLog('3️⃣ 테이블 렌더링...', '#ff0');
+                displayProducts(collectedData);
+                
+                const tbody = document.getElementById('productTableBody');
+                const rows = tbody.querySelectorAll('tr').length;
+                addDebugLog(`   └─ ✅ 테이블에 ${rows}행 생성됨`, '#0f0');
+                
+                addDebugLog('✅ 전체 로딩 완료!', '#0f0');
+                
+            } catch (e) {
+                addDebugLog(`❌ 파싱 오류: ${e.message}`, '#f00');
+                addDebugLog(`   Stack: ${e.stack?.substring(0, 200)}`, '#f00');
+                console.error('데이터 파싱 오류:', e);
+                showNoDataMessage();
+            }
+        });
+        
+        function showNoDataMessage() {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 50px;">
+                        <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+                        <div style="font-size: 18px; font-weight: 600; color: #dc3545; margin-bottom: 10px;">
+                            데이터가 없습니다
+                        </div>
+                        <div style="font-size: 14px; color: #666;">
+                            메인 창에서 먼저 키워드 검색을 실행하세요
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function displayProducts(data) {
+            const tbody = document.getElementById('productTableBody');
+            const totalCount = document.getElementById('totalCount');
+            
+            addDebugLog(`📋 displayProducts() 호출: ${data.length}개`, '#0ff');
+            
+            totalCount.textContent = data.length;
+            
+            if (data.length === 0) {
+                addDebugLog(`   ⚠️ 데이터가 비어있음`, '#ff0');
+                showNoDataMessage();
+                return;
+            }
+            
+            tbody.innerHTML = data.map((item, index) => {
+                // 첫 3개만 로그 출력
+                if (index < 3) {
+                    addDebugLog(`   행 #${index+1}: ${item.상품번호} - ${item.제품명?.substring(0, 20)}`, '#888');
+                }
+                
+                return `
+                <tr id="row-${index}">
+                    <td>${index + 1}</td>
+                    <td>
+                        ${item.이미지URL ? 
+                            `<img src="${item.이미지URL}" class="product-img" onerror="this.style.display='none'">` : 
+                            '-'}
+                    </td>
+                    <td>
+                        <button class="kream-btn" onclick="searchKream('${item.상품번호}', ${index})" id="btn-${index}">
+                            🔍 검색
+                        </button>
+                    </td>
+                    <td>${item.상품번호 || '-'}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;" title="${item.제품명 || '-'}">
+                        ${item.제품명 || '-'}
+                    </td>
+                    <td>${item.최근30일평균거래가 || '-'}</td>
+                    <td>${item.중국노출 || '-'}</td>
+                    <td>${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}</td>
+                    <td>
+                        <span class="status status-pending" id="status-${index}">대기</span>
+                    </td>
+                </tr>
+            `}).join('');
+            
+            addDebugLog(`   ✅ ${data.length}행 HTML 생성 완료`, '#0f0');
+        }
+
+        async function startKreamSearch() {
+            if (collectedData.length === 0) {
+                alert('검색할 상품이 없습니다.');
+                return;
+            }
+            
+            const btn = document.getElementById('searchBtn');
+            btn.disabled = true;
+            btn.textContent = '검색 중...';
+            
+            addDebugLog('🔍 크림 검색 시작', '#0ff');
+            
+            try {
+                addDebugLog('🔐 크림 로그인 확인...', '#ff0');
+                const loginRes = await fetch('/kream_login', {
+                    method: 'POST'
+                });
+                const loginData = await loginRes.json();
+                
+                if (!loginData.success) {
+                    addDebugLog(`❌ 로그인 실패: ${loginData.error}`, '#f00');
+                    alert('크림 로그인 실패: ' + loginData.error);
+                    btn.disabled = false;
+                    btn.textContent = '🔍 크림 검색 시작';
+                    return;
+                }
+                
+                addDebugLog('✅ 로그인 성공', '#0f0');
+                
+                for (let i = 0; i < collectedData.length; i++) {
+                    const item = collectedData[i];
+                    const productCode = item.상품번호;
+                    
+                    if (!productCode || productCode === '-') {
+                        addDebugLog(`⏭️ #${i+1} 스킵`, '#888');
+                        continue;
+                    }
+                    
+                    addDebugLog(`🔍 #${i+1}/${collectedData.length}: ${productCode}`, '#0ff');
+                    await searchKream(productCode, i);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                btn.disabled = false;
+                btn.textContent = '✅ 검색 완료';
+                addDebugLog('✅ 전체 검색 완료!', '#0f0');
+                
+            } catch (error) {
+                addDebugLog(`❌ 오류: ${error.message}`, '#f00');
+                alert('오류 발생: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = '🔍 크림 검색 시작';
+            }
+        }
+
+        async function searchKream(productCode, index) {
+            const statusEl = document.getElementById(`status-${index}`);
+            const btnEl = document.getElementById(`btn-${index}`);
+            
+            statusEl.className = 'status status-searching';
+            statusEl.textContent = '검색중';
+            btnEl.disabled = true;
+            
+            try {
+                const response = await fetch('/search_kream_product', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_code: productCode })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.model_number) {
+                    statusEl.className = 'status status-done';
+                    statusEl.textContent = '완료';
+                    addDebugLog(`   ✅ #${index+1} 완료: ${result.model_number}`, '#0f0');
+                } else {
+                    statusEl.className = 'status';
+                    statusEl.style.background = '#f8d7da';
+                    statusEl.style.color = '#721c24';
+                    statusEl.textContent = '실패';
+                    addDebugLog(`   ❌ #${index+1} 실패`, '#f00');
+                }
+                
+            } catch (error) {
+                statusEl.textContent = '오류';
+                addDebugLog(`   ❌ #${index+1} 오류: ${error.message}`, '#f00');
+            } finally {
+                btnEl.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

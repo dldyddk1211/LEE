@@ -139,6 +139,19 @@
       background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color:#fff;
     }
+    /* 🔒 준비 중 버튼 - 절대 활성화 방지 */
+    .mode-btn.coming-soon-btn,
+    .mode-btn.coming-soon-btn:hover,
+    .mode-btn.coming-soon-btn.active {
+      opacity: 0.4 !important;
+      cursor: not-allowed !important;
+      pointer-events: auto !important;
+      transform: none !important;
+      box-shadow: none !important;
+      border-color: #ddd !important;
+      background: #f8f9fa !important;
+      color: #999 !important;
+    }
     .mode-icon{
       font-size:24px;
     }
@@ -498,6 +511,27 @@
       background:#ff5252;
       transform: scale(1.05);
     }
+    
+    .kream-btn{
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:#fff;
+      border:none;
+      padding:6.4px 12.8px;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:11.2px;
+      font-weight:600;
+      transition: all 0.3s;
+      white-space: nowrap;
+      min-width: 60px;
+      max-width: 80px;
+      width: auto;
+    }
+    .kream-btn:hover{
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
 
     /* 팝업 */
     .popup-overlay{
@@ -647,6 +681,34 @@
       color:#fff;
       font-weight:700;
       font-size: 13px;
+    }
+
+    /* 통계 카드 */
+    .stat-card {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+      font-family: 'Courier New', monospace;
     }
 
     .log{
@@ -907,21 +969,25 @@
           <span class="mode-icon">🔍</span>
           <span class="mode-text">키워드 검색</span>
         </button>
-        <button class="mode-btn" 
+        <button class="mode-btn coming-soon-btn" 
                 id="modePrice" 
+                data-coming-soon="true"
                 onclick="event.preventDefault(); alert('💰 거래금액 높은 순 기능은 준비 중입니다');" 
                 disabled 
-                style="opacity:0.5; cursor:not-allowed;">
+                style="opacity:0.4; cursor:not-allowed; pointer-events:auto;">
           <span class="mode-icon">💰</span>
           <span class="mode-text">거래금액 높은 순</span>
+          <span style="font-size:10px; color:#999; display:block; margin-top:2px;">🔒 준비 중</span>
         </button>
-        <button class="mode-btn" 
+        <button class="mode-btn coming-soon-btn" 
                 id="modeGrowth" 
+                data-coming-soon="true"
                 onclick="event.preventDefault(); alert('📈 거래증가 빠른 순 기능은 준비 중입니다');" 
                 disabled 
-                style="opacity:0.5; cursor:not-allowed;">
+                style="opacity:0.4; cursor:not-allowed; pointer-events:auto;">
           <span class="mode-icon">📈</span>
           <span class="mode-text">거래증가 빠른 순</span>
+          <span style="font-size:10px; color:#999; display:block; margin-top:2px;">🔒 준비 중</span>
         </button>
         <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
           <span class="mode-icon">📋</span>
@@ -991,10 +1057,10 @@
           <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
         </h3>
         <div style="display: flex; gap: 8px;">
-          <button id="sourcingBtn" class="sourcing-btn" onclick="startKreamSearch()" style="display:none;">
-            🛒 크림 검색
+          <button id="sourcingBtn" class="sourcing-btn" onclick="startSourcing()" style="display:none;">
+            🔍 크림검색
           </button>
-          <button id="stopSourcingBtn" class="stop-btn" onclick="stopKreamSearch()" style="display:none;">
+          <button id="stopSourcingBtn" class="stop-btn" onclick="stopSourcing()" style="display:none;">
             ⏹️ 멈춤
           </button>
         </div>
@@ -1027,9 +1093,33 @@
 
     <div class="section" id="statusSection">
       <h3>📊 진행 상황</h3>
+      
+      <!-- 진행률 바 -->
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar">0%</div>
       </div>
+      
+      <!-- 상세 통계 (숨김) -->
+      <div style="display:none;">
+        <div class="stat-card">
+          <div class="stat-label">현재 페이지</div>
+          <div class="stat-value" id="currentPage">0 / 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">수집된 상품</div>
+          <div class="stat-value" id="collectedCount">0개</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">현재 작업</div>
+          <div class="stat-value" id="currentTask">대기 중</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">경과 시간</div>
+          <div class="stat-value" id="elapsedTime">00:00</div>
+        </div>
+      </div>
+      
+      <!-- 로그 -->
       <div class="log" id="logBox"></div>
     </div>
   </div>
@@ -1130,10 +1220,10 @@
               가격차이 <span id="sort가격차이">⇅</span>
             </th>
             <th style="cursor:pointer;" onclick="sortBy('판매량')">
-              판매량 <span id="sort판매량">⇅</span>
+              중국시장판매량 <span id="sort판매량">⇅</span>
             </th>
             <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
-              현지판매량 <span id="sort현지판매량">⇅</span>
+              현지판매자량 <span id="sort현지판매량">⇅</span>
             </th>
           </tr>
         `;
@@ -1146,15 +1236,15 @@
             <th>크림</th>
             <th>상품번호</th>
             <th>제품명</th>
-            <th>브랜드/카테고리</th>
-            <th>상태</th>
+            <th style="display:none;">브랜드/카테고리</th>
+            <th style="display:none;">상태</th>
             <th>평균거래가</th>
             <th>중국노출가</th>
             <th style="cursor:pointer;" onclick="sortBy('판매량')">
-              판매량 <span id="sort판매량">⇅</span>
+              중국시장판매량 <span id="sort판매량">⇅</span>
             </th>
             <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
-              현지판매량 <span id="sort현지판매량">⇅</span>
+              현지판매자량 <span id="sort현지판매량">⇅</span>
             </th>
           </tr>
         `;
@@ -1170,6 +1260,13 @@
     function setModeButtonsEnabled(enabled) {
       const modeButtons = document.querySelectorAll('.mode-btn');
       modeButtons.forEach(btn => {
+        // 🔒 준비 중 버튼은 항상 비활성화 유지
+        if (btn.dataset.comingSoon === 'true') {
+          btn.disabled = true;
+          btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+          return;
+        }
         btn.disabled = !enabled;
         if (!enabled) {
           btn.style.opacity = '0.5';
@@ -1194,6 +1291,52 @@
       resetIdleTimer();
     }
 
+    // 경과 시간 타이머
+    let startTime = null;
+    let elapsedTimer = null;
+    
+    function startElapsedTimer() {
+      startTime = Date.now();
+      if (elapsedTimer) clearInterval(elapsedTimer);
+      
+      elapsedTimer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.getElementById('elapsedTime').textContent = timeStr;
+      }, 1000);
+    }
+    
+    function stopElapsedTimer() {
+      if (elapsedTimer) {
+        clearInterval(elapsedTimer);
+        elapsedTimer = null;
+      }
+    }
+    
+    // 현재 작업 업데이트
+    function updateCurrentTask(message) {
+      const taskEl = document.getElementById('currentTask');
+      
+      if (message.includes('페이지') && message.includes('검색')) {
+        taskEl.textContent = '페이지 검색 중';
+      } else if (message.includes('상품 정보 수집')) {
+        taskEl.textContent = '상품 정보 수집';
+      } else if (message.includes('다음 페이지')) {
+        taskEl.textContent = '페이지 이동 중';
+      } else if (message.includes('로그인')) {
+        taskEl.textContent = '로그인 중';
+      } else if (message.includes('접속')) {
+        taskEl.textContent = 'POIZON 접속';
+      } else if (message.includes('저장')) {
+        taskEl.textContent = '데이터 저장 중';
+      } else if (message.includes('완료')) {
+        taskEl.textContent = '완료';
+        stopElapsedTimer();
+      }
+    }
+
     function updateProgress(current, total) {
       const safeTotal = Math.max(1, total || 1);
       const percent = Math.round((current / safeTotal) * 100);
@@ -1205,7 +1348,7 @@
     function resetIdleTimer() {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
-        addLog('⏰ 10분간 활동이 없어 브라우저를 종료합니다', 'info');
+        addLog('⏰ 5분간 활동이 없어 브라우저를 종료합니다', 'info');
         fetch('/shutdown_browser').then(() => {
           isLoggedIn = false;
           document.getElementById('loginStatus').classList.remove('logged-in');
@@ -1216,7 +1359,7 @@
           document.getElementById('maxPages').disabled = true;
           document.getElementById('startBtn').disabled = true;
         });
-      }, 10 * 60 * 1000);  // 10분으로 변경
+      }, 5 * 60 * 1000);
     }
 
     function renderTable() {
@@ -1255,12 +1398,20 @@
           }
 
           // 크림 버튼
-          const buyCell = row.insertCell();
-          const buyBtn = document.createElement('button');
-          buyBtn.className = 'buy-btn';
-          buyBtn.textContent = '🛒 크림';
-          buyBtn.onclick = () => openPricePopup(data);
-          buyCell.appendChild(buyBtn);
+          const kreamCell = row.insertCell();
+          const kreamBtn = document.createElement('button');
+          kreamBtn.className = 'kream-btn';
+          kreamBtn.textContent = '🛒 크림';
+          kreamBtn.onclick = () => {
+            const productCode = data.상품번호 || data.엑셀_상품번호;
+            if (productCode && productCode !== '-') {
+              const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
+              window.open(kreamUrl, '_blank');
+            } else {
+              alert('상품번호가 없습니다.');
+            }
+          };
+          kreamCell.appendChild(kreamBtn);
 
           row.insertCell().textContent = data.엑셀_상품번호 || '-';
           row.insertCell().textContent = data.상품번호 || '-';
@@ -1315,12 +1466,20 @@
           }
 
           // 크림 버튼
-          const buyCell = row.insertCell();
-          const buyBtn = document.createElement('button');
-          buyBtn.className = 'buy-btn';
-          buyBtn.textContent = '🛒 크림';
-          buyBtn.onclick = () => openPricePopup(data);
-          buyCell.appendChild(buyBtn);
+          const kreamCell = row.insertCell();
+          const kreamBtn = document.createElement('button');
+          kreamBtn.className = 'kream-btn';
+          kreamBtn.textContent = '🛒 크림';
+          kreamBtn.onclick = () => {
+            const productCode = data.상품번호;
+            if (productCode && productCode !== '-') {
+              const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
+              window.open(kreamUrl, '_blank');
+            } else {
+              alert('상품번호가 없습니다.');
+            }
+          };
+          kreamCell.appendChild(kreamBtn);
 
           // 상품번호
           row.insertCell().textContent = data.상품번호 || '-';
@@ -1333,11 +1492,15 @@
           nameCell.title = fullName;
           nameCell.style.cursor = 'help';
           
-          // 브랜드/카테고리
-          row.insertCell().textContent = data.브랜드카테고리 || '-';
+          // 브랜드/카테고리 (숨김)
+          const brandCell = row.insertCell();
+          brandCell.textContent = data.브랜드카테고리 || '-';
+          brandCell.style.display = 'none';
           
-          // 상태
-          row.insertCell().textContent = data.상태 || '-';
+          // 상태 (숨김)
+          const statusCell = row.insertCell();
+          statusCell.textContent = data.상태 || '-';
+          statusCell.style.display = 'none';
           
           // 평균거래가
           row.insertCell().textContent = data.최근30일평균거래가 || '-';
@@ -1629,7 +1792,7 @@
                       downloadBtn.style.display = 'block';
                     }
                     
-                    // 구매처 검색 버튼 표시
+                    // 크림검색 버튼 표시
                     document.getElementById('sourcingBtn').style.display = 'block';
                     
                     // 모드 버튼 재활성화
@@ -1759,10 +1922,24 @@
     }
     
     function selectModeProcess(mode) {
-      // 🔄 모드 변경 시 resetAll() 자동 실행!
-      resetAll();
-      
       selectedMode = mode;
+
+      // 🔄 모드 변경 시 모든 상태 리셋!
+      collectedData = [];
+      currentData = [];
+      currentPage = 1;
+      
+      // 수집 결과 섹션 리셋
+      document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('resultCount').textContent = '0';
+      document.getElementById('downloadBtn').style.display = 'none';
+      document.getElementById('sourcingBtn').style.display = 'none';
+      
+      // 진행 상황 리셋
+      document.getElementById('progress').textContent = '0%';
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('progressBar').className = 'progress-bar';
       
       // 업로드 리스트 리셋 (리스트 비교에서 다른 모드로 변경 시)
       if (mode !== 'compare') {
@@ -1802,9 +1979,9 @@
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
       } else {
-        // 거래금액, 거래증가 모드
-        keywordInput.disabled = true;
-        keywordInput.value = '';
+        // 거래금액, 거래증가 모드 - 키워드 입력 가능
+        keywordInput.disabled = false;  // ✅ 활성화
+        keywordInput.parentElement.style.display = 'block';  // ✅ 표시
         document.getElementById('startBtn').style.display = 'block';
         document.getElementById('uploadLabel').style.display = 'none';
       }
@@ -1817,62 +1994,70 @@
     }
 
     // ==========================================
-    // ✨ 크림(KREAM) 검색
+    // ✨ 크림검색 - 팝업 버전 (NEW!)
     // ==========================================
-    function startKreamSearch() {
+    function startSourcing() {
       // 수집된 상품이 있는지 확인
       if (collectedData.length === 0) {
         alert('❌ 수집된 데이터가 없습니다.\n먼저 키워드 검색을 실행하세요.');
         return;
       }
       
-      addLog(`🛒 크림 검색 준비 중: ${collectedData.length}개 상품`, 'info');
+      // 상품번호만 추출
+      const productCodes = collectedData
+        .map(item => item.상품번호)
+        .filter(code => code && code !== '-' && code !== '상품 없음');
       
-      // ========================================
-      // ✨ 새 창(팝업) 열기 - 수집 데이터 전달
-      // ========================================
-      const width = 1600;
-      const height = 900;
-      const left = (screen.width - width) / 2;
-      const top = (screen.height - height) / 2;
-      
-      // 데이터를 sessionStorage에 저장 (팝업에서 읽을 수 있도록)
-      sessionStorage.setItem('kreamSearchData', JSON.stringify(collectedData));
-      
-      // 팝업 열기
-      const popup = window.open(
-        '/kream_popup',
-        'kream_results',
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,toolbar=yes`
-      );
-      
-      if (!popup) {
-        alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.\n\n[Chrome/Edge 설정]\n1. 주소창 오른쪽 아이콘 클릭\n2. "항상 팝업 허용" 선택');
+      if (productCodes.length === 0) {
+        alert('❌ 검색 가능한 상품번호가 없습니다.');
         return;
       }
       
-      addLog('✅ 크림 검색 창이 열렸습니다!', 'success');
-      addLog('💡 팝업 창에서 상품 목록을 확인하세요', 'info');
+      addLog(`🛒 크림 검색 시작: ${productCodes.length}개 상품`, 'info');
+      
+      // ========================================
+      // ✨ 크림 검색 팝업 열기 (새 방식)
+      // ========================================
+      const width = 1600;
+      const height = 1000;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      
+      // sessionStorage에 데이터 저장
+      sessionStorage.setItem('kreamSearchData', JSON.stringify(collectedData));
+      
+      // 크림 검색 팝업 직접 열기
+      const popup = window.open(
+        '/kream_popup',              // ✅ 크림 팝업 경로
+        'kream_search_popup',        // ✅ 팝업 이름
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
+      
+      if (!popup) {
+        alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.');
+      } else {
+        addLog('✅ 크림 검색 창이 열렸습니다!', 'success');
+        addLog('💡 팝업 창에서 "크림 검색 시작" 버튼을 클릭하세요', 'info');
+      }
     }
 
     
-    function stopKreamSearch() {
-      if (!confirm('⚠️ 크림 검색을 중단하시겠습니까?')) {
+    function stopSourcing() {
+      if (!confirm('⚠️ 크림검색을 중단하시겠습니까?')) {
         return;
       }
       
       addLog('⏹️ 사용자가 검색 중단 요청', 'warning');
       
       // 백엔드에 중단 요청
-      fetch('/stop_kream_search', { method: 'POST' })
+      fetch('/stop_sourcing', { method: 'POST' })
         .then(res => res.json())
         .then(data => {
           addLog('✅ 검색이 중단되었습니다', 'success');
           
           // 버튼 상태 복원
-          document.getElementById('sourcingBtn').disabled = false;
-          document.getElementById('stopSourcingBtn').style.display = 'none';
-          document.getElementById('sourcingBtn').textContent = '🛒 크림 검색';
+          document.getElementById('sourcingBtn').disabled = false; document.getElementById('stopSourcingBtn').style.display = 'none';
+          document.getElementById('sourcingBtn').textContent = '🔍 크림검색';
           document.getElementById('stopSourcingBtn').style.display = 'none';
         })
         .catch(err => {
@@ -1897,7 +2082,7 @@
       document.getElementById('downloadBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
       document.getElementById('stopBtn').style.display = 'none';
-      document.getElementById('sourcingBtn').style.display = 'none';  // 구매처 검색 버튼 숨김
+      document.getElementById('sourcingBtn').style.display = 'none';  // 크림검색 버튼 숨김
       document.getElementById('uploadListSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
       collectedData = [];
@@ -1906,11 +2091,7 @@
       renderTable();
       updateProgress(0, 100);
       
-      // 🔄 모드 버튼 재활성화 (로그인 상태일 때)
-      if (isLoggedIn) {
-        setModeButtonsEnabled(true);
-        document.getElementById('startBtn').disabled = false;
-      }
+      if (isLoggedIn) document.getElementById('startBtn').disabled = false;
     }
 
     function stopCollection() {
@@ -1924,12 +2105,6 @@
         eventSource = null;
       }
       addLog('⏹️ 사용자가 수집을 중단했습니다.', 'error');
-      
-      // 🔄 모드 버튼 재활성화
-      if (isLoggedIn) {
-        setModeButtonsEnabled(true);
-      }
-      
       document.getElementById('startBtn').disabled = false;
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
@@ -1961,10 +2136,21 @@
             addLog('✅ POIZON 로그인 성공!', 'success');
             addLog('💡 수집 모드를 선택하고 키워드를 입력하세요', 'info');
             
-            // 모드 버튼 활성화
+            // 모드 버튼 활성화 (준비 중 버튼 제외)
             document.querySelectorAll('.mode-btn').forEach(btn => {
-              btn.disabled = false;
+              if (btn.dataset.comingSoon === 'true') {
+                btn.disabled = true;
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+              } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+              }
             });
+            
+            // 키워드 입력란 활성화
+            document.getElementById('keyword').disabled = false;
             
             // 기본 모드 선택 (키워드 검색)
             selectMode('keyword');
@@ -2028,6 +2214,15 @@
       document.getElementById('stopBtn').style.display = 'block';
       addLog('🔄 수집 준비 중...', 'info');
       updateProgress(0, 100);
+      
+      // 통계 초기화
+      document.getElementById('currentPage').textContent = '0 / 0';
+      document.getElementById('collectedCount').textContent = '0개';
+      document.getElementById('currentTask').textContent = '준비 중';
+      document.getElementById('elapsedTime').textContent = '00:00';
+      
+      // 경과 시간 타이머 시작
+      startElapsedTimer();
 
       // 모드에 따라 URL 생성
       let url = `/start?mode=${selectedMode}&max_pages=${maxPages}&skip_login=true`;
@@ -2049,13 +2244,33 @@
               document.getElementById('searchTime').textContent = `| ⏱️ ${timeMatch[1]}`;
             }
           }
+          
+          // 현재 작업 업데이트
+          updateCurrentTask(data.message);
         }
-        if (data.type === 'progress') updateProgress(data.current, data.total);
-        if (data.type === 'data') addDataRow(data.item);
+        if (data.type === 'progress') {
+          updateProgress(data.current, data.total);
+          
+          // 페이지 정보 업데이트
+          if (data.page && data.total_pages) {
+            document.getElementById('currentPage').textContent = `${data.page} / ${data.total_pages}`;
+          }
+        }
+        if (data.type === 'data') {
+          addDataRow(data.item);
+          
+          // 수집된 상품 수 업데이트
+          const count = document.querySelectorAll('#tableBody tr').length;
+          document.getElementById('collectedCount').textContent = `${count}개`;
+        }
 
         if (data.type === 'complete') {
           addLog('✅ 모든 작업 완료!', 'success');
           addLog(`총 ${data.total_items}개 상품 수집 완료 (${data.pages}페이지)`, 'success');
+          
+          // 최종 통계 업데이트
+          document.getElementById('currentTask').textContent = '완료';
+          document.getElementById('collectedCount').textContent = `${data.total_items}개`;
           
           // 데이터 저장 및 테이블 표시
           if (data.data && Array.isArray(data.data)) {
@@ -2082,7 +2297,7 @@
             downloadBtn.style.display = 'block';
           }
           
-          // 크림 검색 버튼 표시
+          // 크림검색 버튼 표시
           document.getElementById('sourcingBtn').style.display = 'block';
           
           // 모드 버튼 재활성화
@@ -2097,6 +2312,9 @@
 
         if (data.type === 'error') {
           addLog('❌ 오류: ' + data.message, 'error');
+          
+          // 통계 초기화
+          document.getElementById('currentTask').textContent = '오류';
           
           // 모드 버튼 재활성화
           setModeButtonsEnabled(true);

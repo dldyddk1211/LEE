@@ -628,13 +628,128 @@ def test_kream_search():
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
+def search_kream_sourcing(product_codes, callback=None):
+    """
+    크림 소싱 검색 - app.py의 /kream_sourcing 라우트에서 호출
+    
+    Args:
+        product_codes: 상품번호 리스트 ['ABC123', 'DEF456', ...]
+        callback: 로그 콜백 함수
+    
+    Returns:
+        dict: {
+            'success': True/False,
+            'results': {product_code: [검색결과], ...},
+            'total_searched': 검색된 상품 수
+        }
+    """
+    global LOG_CALLBACK, stop_flag
+    LOG_CALLBACK = callback
+    stop_flag = False
+    
+    log("\n" + "=" * 60, 'info')
+    log("🛒 크림(KREAM) 소싱 검색 시작", 'info')
+    log("=" * 60, 'info')
+    
+    total = len(product_codes)
+    log(f"📊 총 {total}개 상품 검색 예정\n", 'info')
+    
+    results = {}
+    searched_count = 0
+    
+    try:
+        with sync_playwright() as p:
+            # 브라우저 실행
+            log("🌐 브라우저 시작...", 'info')
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+            )
+            context = browser.new_context(
+                viewport=None,
+                no_viewport=True,
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            )
+            
+            # 쿠키 로드 (있으면)
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                        context.add_cookies(cookies)
+                        log("  ✓ 쿠키 로드 완료", 'success')
+                except:
+                    pass
+            
+            page = context.new_page()
+            
+            # 각 상품 검색
+            for idx, product_code in enumerate(product_codes, 1):
+                if stop_flag:
+                    log("\n⏹️ 사용자가 검색을 중단했습니다.", 'warning')
+                    break
+                
+                # 진행률 전송
+                if callback:
+                    callback(f"PROGRESS:{idx}/{total}", 'progress')
+                
+                log(f"\n[{idx}/{total}] 상품: {product_code}", 'info')
+                
+                try:
+                    # 검색 실행
+                    search_results = search_kream_product(product_code, page, callback)
+                    
+                    if search_results:
+                        results[product_code] = search_results
+                        searched_count += 1
+                        log(f"  ✅ {len(search_results)}개 결과 발견", 'success')
+                    else:
+                        results[product_code] = []
+                        log(f"  ⚠️ 검색 결과 없음", 'warning')
+                    
+                    # 검색 간격 (서버 부하 방지)
+                    if idx < total:
+                        delay = random.uniform(1.0, 2.0)
+                        time.sleep(delay)
+                
+                except Exception as e:
+                    log(f"  ❌ 오류: {e}", 'error')
+                    results[product_code] = []
+            
+            # 브라우저 종료
+            browser.close()
+        
+        log("\n" + "=" * 60, 'success')
+        log(f"✅ 크림 검색 완료! 총 {searched_count}개 상품", 'success')
+        log("=" * 60, 'success')
+        
+        return {
+            'success': True,
+            'results': results,
+            'total_searched': searched_count
+        }
+        
+    except Exception as e:
+        log(f"\n❌ 크림 검색 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            'success': False,
+            'error': str(e),
+            'results': results,
+            'total_searched': searched_count
+        }
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print("🛒 KREAM 검색 엔진")
     print("=" * 60)
     print("\n이 파일은 app.py를 통해 실행됩니다.")
     print("\n직접 테스트하려면:")
-    print("  python kream_search.py")
+    print("  python kream_search.py test")
     print("=" * 60)
     
     # 테스트 실행 여부 확인

@@ -42,6 +42,18 @@ except ImportError:
 
 app = Flask(__name__)
 
+# ✅ 캐시 비활성화 설정 (개발 중 브라우저 캐시 문제 해결)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+@app.after_request
+def add_no_cache_header(response):
+    """모든 응답에 캐시 방지 헤더 추가"""
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 log_queue = queue.Queue()
 result_data = {}
 stop_flag = False  # 중단 플래그
@@ -61,14 +73,33 @@ def log_callback(message, level='info'):
     
     if message.startswith("PROGRESS:"):
         parts = message.split(":")
-        if len(parts) == 2:
-            current, total = parts[1].split("/")
+        if len(parts) >= 2:
+            progress_part = parts[1]
+            
+            # 페이지 정보 추출
+            page_info = None
+            total_pages = None
+            if "|PAGE:" in progress_part:
+                main_part, page_part = progress_part.split("|PAGE:")
+                current, total = main_part.split("/")
+                page_info, total_pages = page_part.split("/")
+            else:
+                current, total = progress_part.split("/")
+            
             current_items = int(current)  # 현재 진행 상황 업데이트
-            log_queue.put({
+            
+            log_data = {
                 'type': 'progress',
                 'current': int(current),
                 'total': int(total)
-            })
+            }
+            
+            # 페이지 정보가 있으면 추가
+            if page_info and total_pages:
+                log_data['page'] = int(page_info)
+                log_data['total_pages'] = int(total_pages)
+            
+            log_queue.put(log_data)
     elif message.startswith("PRODUCT_START:"):
         product_code = message.split(":", 1)[1]
         log_queue.put({
@@ -588,8 +619,16 @@ def run_sourcing_background_stream(product_codes, session_id):
     
     try:
         print("DEBUG: sourcing_search 모듈 import 시도...")
-        from poizon_data.sourcing_search import run_sourcing_for_products
-        print("DEBUG: import 성공!")
+        try:
+            from poizon_data.sourcing_search import run_sourcing_for_products
+            print("DEBUG: import 성공!")
+        except ImportError as ie:
+            print(f"⚠️ 경고: sourcing_search 모듈을 찾을 수 없습니다: {ie}")
+            log_queue.put({
+                'type': 'error',
+                'message': '구매처 검색 모듈이 설치되어 있지 않습니다.\n\n크림 검색 팝업을 사용하세요.'
+            })
+            return
         
         print("DEBUG: run_sourcing_for_products 호출 시작...")
         result = run_sourcing_for_products(product_codes, callback=log_callback)
@@ -1015,728 +1054,93 @@ SOURCING_RESULTS_HTML = '''
 # ==========================================
 
 # 크림 팝업 HTML (수집 데이터 표시)
-KREAM_POPUP_HTML = '''
+
+# ==========================================
+# 크림 팝업 HTML 로드 함수
+# ==========================================
+def load_kream_popup_html():
+    """kream_data/kream_popup.html 파일을 읽어서 반환"""
+    html_path = os.path.join(os.path.dirname(__file__), 'kream_data', 'kream_popup.html')
+    try:
+        with open(html_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return '''
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>크림(KREAM) 검색</title>
+    <title>파일 없음</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 1600px;
-            margin: 0 auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .header {
+            font-family: sans-serif;
+            padding: 50px;
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-        }
-        .header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-        .controls .count {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #333;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
-        }
-        .table-container {
-            max-height: 700px;
-            overflow: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            background: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1200px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        tr:hover {
-            background: #f8f9fa;
-        }
-        .product-img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            border-radius: 6px;
-            background: #f8f9fa;
-            padding: 3px;
-        }
-        .kream-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .kream-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
-        }
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-searching {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        .status-done {
-            background: #d4edda;
-            color: #155724;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🛒 크림(KREAM) 검색</h1>
-            <p>포이즌에서 수집한 상품을 크림에서 검색합니다</p>
-        </div>
-
-        <div class="controls">
-            <div class="count">
-                총 <strong id="totalCount">0</strong>개 상품
-            </div>
-            <button class="btn btn-primary" onclick="startKreamSearch()">
-                🔍 크림 검색 시작
-            </button>
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">#</th>
-                        <th style="width: 80px;">이미지</th>
-                        <th style="width: 100px;">크림</th>
-                        <th style="width: 150px;">상품번호</th>
-                        <th>제품명</th>
-                        <th style="width: 120px;">평균거래가</th>
-                        <th style="width: 120px;">중국노출가</th>
-                        <th style="width: 100px;">판매량</th>
-                        <th style="width: 100px;">상태</th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody">
-                    <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
-                            데이터를 불러오는 중...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <script>
-        let collectedData = [];
-
-        // sessionStorage에서 데이터 읽기
-        window.addEventListener('load', function() {
-            const dataStr = sessionStorage.getItem('kreamSearchData');
-            if (dataStr) {
-                try {
-                    collectedData = JSON.parse(dataStr);
-                    displayProducts(collectedData);
-                } catch (e) {
-                    console.error('데이터 파싱 오류:', e);
-                }
-            }
-        });
-
-        function displayProducts(data) {
-            const tbody = document.getElementById('productTableBody');
-            const totalCount = document.getElementById('totalCount');
-            
-            totalCount.textContent = data.length;
-            
-            if (data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
-                            표시할 상품이 없습니다
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = data.map((item, index) => `
-                <tr id="row-${index}">
-                    <td>${index + 1}</td>
-                    <td>
-                        ${item.이미지URL ? 
-                            `<img src="${item.이미지URL}" class="product-img" onerror="this.style.display='none'">` : 
-                            '-'}
-                    </td>
-                    <td>
-                        <button class="kream-btn" onclick="searchKream('${item.상품번호}', ${index})" id="btn-${index}">
-                            🔍 검색
-                        </button>
-                    </td>
-                    <td>${item.상품번호 || '-'}</td>
-                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;" title="${item.제품명 || '-'}">
-                        ${item.제품명 || '-'}
-                    </td>
-                    <td>${item.최근30일평균거래가 || '-'}</td>
-                    <td>${item.중국노출 || '-'}</td>
-                    <td>${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}</td>
-                    <td>
-                        <span class="status status-pending" id="status-${index}">대기</span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function startKreamSearch() {
-            if (collectedData.length === 0) {
-                alert('검색할 상품이 없습니다.');
-                return;
-            }
-            
-            const btn = event.target;
-            btn.disabled = true;
-            btn.textContent = '검색 중...';
-            
-            // 크림 로그인 확인
-            try {
-                const loginRes = await fetch('/kream_login', {
-                    method: 'POST'
-                });
-                const loginData = await loginRes.json();
-                
-                if (!loginData.success) {
-                    alert('크림 로그인 실패: ' + loginData.error);
-                    btn.disabled = false;
-                    btn.textContent = '🔍 크림 검색 시작';
-                    return;
-                }
-                
-                // 순차적으로 검색
-                for (let i = 0; i < collectedData.length; i++) {
-                    const item = collectedData[i];
-                    const productCode = item.상품번호;
-                    
-                    if (!productCode || productCode === '-') continue;
-                    
-                    await searchKream(productCode, i);
-                    
-                    // 0.5초 대기 (크림 차단 방지)
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-                
-                btn.disabled = false;
-                btn.textContent = '✅ 검색 완료';
-                
-            } catch (error) {
-                alert('오류 발생: ' + error.message);
-                btn.disabled = false;
-                btn.textContent = '🔍 크림 검색 시작';
-            }
-        }
-
-        async function searchKream(productCode, index) {
-            const statusEl = document.getElementById(`status-${index}`);
-            const btnEl = document.getElementById(`btn-${index}`);
-            
-            if (!productCode || productCode === '-') {
-                statusEl.className = 'status';
-                statusEl.style.background = '#e0e0e0';
-                statusEl.style.color = '#666';
-                statusEl.textContent = '스킵';
-                return;
-            }
-            
-            statusEl.className = 'status status-searching';
-            statusEl.textContent = '검색중';
-            btnEl.disabled = true;
-            
-            try {
-                const response = await fetch('/search_kream_product', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_code: productCode })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.model_number) {
-                    statusEl.className = 'status status-done';
-                    statusEl.textContent = '완료';
-                    statusEl.title = `모델번호: ${result.model_number}`;
-                    
-                    // 행에 결과 추가
-                    const row = document.getElementById(`row-${index}`);
-                    const newCell = row.insertCell();
-                    newCell.innerHTML = `<strong>${result.model_number}</strong>`;
-                    newCell.style.color = '#667eea';
-                    
-                } else {
-                    statusEl.className = 'status';
-                    statusEl.style.background = '#f8d7da';
-                    statusEl.style.color = '#721c24';
-                    statusEl.textContent = '실패';
-                    statusEl.title = result.error || '검색 결과 없음';
-                }
-                
-            } catch (error) {
-                console.error('검색 오류:', error);
-                statusEl.className = 'status';
-                statusEl.style.background = '#f8d7da';
-                statusEl.style.color = '#721c24';
-                statusEl.textContent = '오류';
-            } finally {
-                btnEl.disabled = false;
-            }
-        }
-    </script>
-</body>
-</html>
-'''
-
-# 크림 검색 결과 팝업 HTML
-KREAM_RESULTS_HTML = '''
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>크림(KREAM) 검색 결과</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-        }
-        .header h1 {
-            font-size: 2em;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-        .status {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .status-badge {
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .status-searching { background: #ffc107; color: #333; }
-        .status-complete { background: #28a745; color: white; }
-        .status-error { background: #dc3545; color: white; }
-        .progress-container {
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: #e0e0e0;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
         }
-        .product-card {
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-        }
-        .product-card:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.2);
-        }
-        .product-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #ddd;
-        }
-        .product-code {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #333;
-        }
-        .product-status {
-            font-size: 14px;
-            color: #666;
-        }
-        .product-items {
-            display: grid;
-            gap: 12px;
-        }
-        .item-row {
-            display: grid;
-            grid-template-columns: 80px 120px 1fr 150px 150px 120px;
-            gap: 15px;
-            align-items: center;
-            padding: 15px;
+        .error-box {
             background: white;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            transition: all 0.2s;
-        }
-        .item-row:hover {
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102,126,234,0.15);
-        }
-        .item-image {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            border-radius: 6px;
-            background: #f8f9fa;
-            padding: 5px;
-        }
-        .item-brand {
-            font-size: 12px;
-            color: #999;
-            font-weight: 600;
-        }
-        .item-name {
-            font-size: 14px;
-            font-weight: 600;
             color: #333;
-            line-height: 1.4;
-        }
-        .item-price {
-            font-size: 18px;
-            font-weight: 700;
-            color: #667eea;
-        }
-        .item-size {
-            font-size: 13px;
-            color: #666;
-        }
-        .item-link {
-            background: #667eea;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .item-link:hover {
-            background: #5568d3;
-            transform: scale(1.05);
-        }
-        .no-results {
-            text-align: center;
             padding: 40px;
-            color: #999;
+            border-radius: 20px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        .log-container {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-        .log-item {
-            padding: 8px 12px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            font-size: 13px;
+        h1 { color: #dc3545; margin-bottom: 20px; }
+        .path { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 20px 0;
             font-family: 'Courier New', monospace;
+            word-break: break-all;
         }
-        .log-info { background: #d1ecf1; color: #0c5460; }
-        .log-success { background: #d4edda; color: #155724; }
-        .log-warning { background: #fff3cd; color: #856404; }
-        .log-error { background: #f8d7da; color: #721c24; }
+        .instructions {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🛒 크림(KREAM) 검색 결과</h1>
-            <p>실시간 검색 진행 중</p>
+    <div class="error-box">
+        <h1>⚠️ 파일을 찾을 수 없습니다</h1>
+        <p><strong>kream_popup.html</strong> 파일이 없습니다.</p>
+        
+        <div class="path">
+            <strong>찾는 위치:</strong><br>
+            {}
         </div>
-
-        <div class="status">
-            <div>
-                <span class="status-badge status-searching" id="statusBadge">
-                    검색 중...
-                </span>
-            </div>
-            <div>
-                <strong>진행:</strong> <span id="progressText">0/0</span>
-            </div>
-        </div>
-
-        <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
-            </div>
-        </div>
-
-        <div id="resultsContainer">
-            <div class="no-results">
-                <p>🔍 검색을 시작합니다...</p>
-            </div>
-        </div>
-
-        <div class="log-container" id="logContainer">
-            <div class="log-item log-info">시스템 준비 완료</div>
+        
+        <div class="instructions">
+            <strong>📋 해결 방법:</strong>
+            <ol style="margin: 10px 0; padding-left: 20px;">
+                <li>kream_popup.html 파일을 다운로드</li>
+                <li>kream_data 폴더에 저장</li>
+                <li>서버 재시작</li>
+            </ol>
         </div>
     </div>
-
-    <script>
-        const eventSource = new EventSource('/kream_search_stream/{{ session_id }}');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const logContainer = document.getElementById('logContainer');
-        const statusBadge = document.getElementById('statusBadge');
-        const progressText = document.getElementById('progressText');
-        const progressFill = document.getElementById('progressFill');
-
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-
-            if (data.type === 'log') {
-                addLog(data.message, data.level || 'info');
-            }
-            else if (data.type === 'progress') {
-                updateProgress(data.current, data.total);
-            }
-            else if (data.type === 'product_start') {
-                addProductCard(data.product_code);
-            }
-            else if (data.type === 'product_result') {
-                updateProductCard(data.product_code, data.products);
-            }
-            else if (data.type === 'complete') {
-                completeSearch();
-            }
-            else if (data.type === 'error') {
-                showError(data.message);
-            }
-        };
-
-        function addLog(message, level) {
-            const logItem = document.createElement('div');
-            logItem.className = `log-item log-${level}`;
-            logItem.textContent = `[${new Date().toLocaleTimeString('ko-KR')}] ${message}`;
-            logContainer.appendChild(logItem);
-            logContainer.scrollTop = logContainer.scrollHeight;
-        }
-
-        function updateProgress(current, total) {
-            const percentage = Math.round((current / total) * 100);
-            progressText.textContent = `${current}/${total}`;
-            progressFill.style.width = `${percentage}%`;
-            progressFill.textContent = `${percentage}%`;
-        }
-
-        function addProductCard(productCode) {
-            if (resultsContainer.querySelector('.no-results')) {
-                resultsContainer.innerHTML = '';
-            }
-
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.id = `product-${productCode}`;
-            card.innerHTML = `
-                <div class="product-header">
-                    <span class="product-code">${productCode}</span>
-                    <span class="product-status">검색 중...</span>
-                </div>
-                <div class="product-items">
-                    <div class="no-results">
-                        <p>🔍 상품 정보를 검색하고 있습니다...</p>
-                    </div>
-                </div>
-            `;
-            resultsContainer.appendChild(card);
-        }
-
-        function updateProductCard(productCode, products) {
-            const card = document.getElementById(`product-${productCode}`);
-            if (!card) return;
-
-            const header = card.querySelector('.product-header');
-            const itemsContainer = card.querySelector('.product-items');
-
-            if (products && products.length > 0) {
-                header.querySelector('.product-status').innerHTML = `✅ ${products.length}개 발견`;
-                
-                itemsContainer.innerHTML = products.map(product => `
-                    <div class="item-row">
-                        <img src="${product.image_url || ''}" 
-                             alt="상품 이미지" 
-                             class="item-image"
-                             onerror="this.style.display='none'">
-                        <div>
-                            <div class="item-brand">${product.brand || 'KREAM'}</div>
-                            <div class="item-size">${product.size || '-'}</div>
-                        </div>
-                        <div class="item-name">${product.name || '상품명 없음'}</div>
-                        <div class="item-price">${product.price || '-'}</div>
-                        <div style="font-size:12px;color:#999;">${product.source || 'KREAM'}</div>
-                        <a href="${product.link}" target="_blank" class="item-link">
-                            상세보기 →
-                        </a>
-                    </div>
-                `).join('');
-            } else {
-                header.querySelector('.product-status').innerHTML = '❌ 결과 없음';
-                itemsContainer.innerHTML = `
-                    <div class="no-results">
-                        <p>😢 검색 결과가 없습니다</p>
-                    </div>
-                `;
-            }
-        }
-
-        function completeSearch() {
-            statusBadge.className = 'status-badge status-complete';
-            statusBadge.innerHTML = '✅ 검색 완료';
-            addLog('모든 상품 검색이 완료되었습니다!', 'success');
-            eventSource.close();
-        }
-
-        function showError(message) {
-            statusBadge.className = 'status-badge status-error';
-            statusBadge.innerHTML = '❌ 오류 발생';
-            addLog(`오류: ${message}`, 'error');
-            eventSource.close();
-        }
-
-        eventSource.onerror = function() {
-            if (statusBadge.className.includes('status-searching')) {
-                showError('서버 연결이 끊어졌습니다');
-            }
-        };
-    </script>
 </body>
 </html>
-'''
+        '''.format(html_path)
 
 
 # ==========================================
-# 크림(KREAM) 검색 엔드포인트
+# 크림 팝업 라우트
 # ==========================================
-
-# 크림 검색 세션 관리
-kream_sessions = {}
-
 @app.route('/kream_popup')
 def kream_popup():
-    """크림 검색 팝업 페이지 - 수집 데이터 표시"""
-    return render_template_string(KREAM_POPUP_HTML)
-
+    """크림 검색 팝업 페이지"""
+    html_content = load_kream_popup_html()
+    return render_template_string(html_content)
 
 @app.route('/kream_login', methods=['POST'])
 def kream_login():
