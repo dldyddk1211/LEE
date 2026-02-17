@@ -1759,17 +1759,21 @@
     }
     
     function selectModeProcess(mode) {
+      // 🔄 모드 변경 시 resetAll() 자동 실행!
+      resetAll();
+      
       selectedMode = mode;
-
-      // 모드 변경시 수집결과 리셋
-      collectedData = [];
-      currentData = [];
-      document.getElementById('resultSection').classList.remove('active');
-      document.getElementById('tableBody').innerHTML = '';
-      document.getElementById('resultCount').textContent = '0';
-      document.getElementById('downloadBtn').style.display = 'none';
-      document.getElementById('sourcingBtn').style.display = 'none';
-      addLog('🔄 이전 결과를 초기화했습니다', 'info');
+      
+      // 업로드 리스트 리셋 (리스트 비교에서 다른 모드로 변경 시)
+      if (mode !== 'compare') {
+        document.getElementById('uploadListSection').style.display = 'none';
+        document.getElementById('uploadTableBody').innerHTML = '';
+        document.getElementById('uploadCount').textContent = '0';
+        uploadedProducts = [];
+        document.getElementById('startCompareBtn').style.display = 'none';
+      }
+      
+      addLog('🔄 모드 변경 - 이전 결과 초기화', 'info');
       
       // 테이블 헤더 업데이트
       updateTableHeader(mode);
@@ -1924,7 +1928,11 @@
       renderTable();
       updateProgress(0, 100);
       
-      if (isLoggedIn) document.getElementById('startBtn').disabled = false;
+      // 🔄 모드 버튼 재활성화 (로그인 상태일 때)
+      if (isLoggedIn) {
+        setModeButtonsEnabled(true);
+        document.getElementById('startBtn').disabled = false;
+      }
     }
 
     function stopCollection() {
@@ -1938,6 +1946,12 @@
         eventSource = null;
       }
       addLog('⏹️ 사용자가 수집을 중단했습니다.', 'error');
+      
+      // 🔄 모드 버튼 재활성화
+      if (isLoggedIn) {
+        setModeButtonsEnabled(true);
+      }
+      
       document.getElementById('startBtn').disabled = false;
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
