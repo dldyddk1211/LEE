@@ -1076,7 +1076,7 @@ def run_excel_comparison(products, callback=None):
                         send_result(callback, product_code, fail_data)
                         continue
                     
-                    # 상품 정보 파싱
+                    # 상품 정보 파싱 (개선!)
                     lines = [l.strip() for l in data['product_text'].split("\n") if l.strip()]
                     
                     style_id = ""
@@ -1086,23 +1086,36 @@ def run_excel_comparison(products, callback=None):
                     for idx_line, line in enumerate(lines):
                         line_clean = line.strip()
                         
-                        # 상품번호
+                        # 상품번호 추출
                         if not style_id:
                             if line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:"] and idx_line + 1 < len(lines):
                                 style_id = lines[idx_line + 1].strip()
                             elif "상품번호" in line_clean or "货号" in line_clean or "번호" in line_clean:
-                                style_id = line_clean.replace("상품번호:", "").replace("상품번호", "").replace("货号:", "").replace("货号", "").replace("번호:", "").replace("번호", "").strip()
+                                # "상품번호: ABC123" 형식
+                                temp = line_clean.replace("상품번호:", "").replace("상품번호", "").replace("货号:", "").replace("货号", "").replace("번호:", "").replace("번호", "").strip()
+                                # "상품 " 같은 접두어 제거
+                                if temp and not temp.startswith("상품"):
+                                    style_id = temp
                         
-                        # SPU_ID
+                        # SPU_ID 추출 (데이터로만 사용, 표시 안 함)
                         if not spu_id:
                             if "SPU" in line_clean.upper():
-                                spu_id = line_clean.replace("SPU_ID:", "").replace("SPU:", "").replace("SPU", "").strip()
+                                spu_id = line_clean.replace("SPU_ID:", "").replace("SPU_ID：", "").replace("SPU:", "").replace("SPU：", "").replace("SPU", "").strip()
                         
-                        # 제품명
-                        if not item_name and line_clean and line_clean != style_id and "상품번호" not in line_clean and "SPU" not in line_clean.upper():
-                            item_name = line_clean
+                        # 제품명 추출 (깔끔하게!)
+                        if not item_name and line_clean:
+                            # 제외할 조건들
+                            is_style_id = (line_clean == style_id)
+                            has_keyword = any(k in line_clean for k in ["상품번호", "货号", "번호:", "SPU", "상품 "])
+                            is_label = line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:", "SPU_ID:", "SPU:"]
+                            
+                            # 깔끔한 제품명만 추출
+                            if not is_style_id and not has_keyword and not is_label:
+                                item_name = line_clean
+                                break  # 첫 번째 깔끔한 이름을 찾으면 멈춤
                     
-                    log(f"  ✨ {style_id} / {item_name}")
+                    log(f"  ✨ 상품번호: {style_id}")
+                    log(f"  ✨ 제품명: {item_name}")
                     
                     # 숫자 추출
                     avg_price_num = extract_number(data['avg_price'])

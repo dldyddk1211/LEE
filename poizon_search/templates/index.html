@@ -1114,14 +1114,14 @@
       let headerHTML = '';
 
       if (mode === 'compare') {
-        // 리스트 비교 모드
+        // 리스트 비교 모드 (간결하게!)
         headerHTML = `
           <tr>
             <th style="width: 50px;">#</th>
             <th>이미지</th>
             <th>구매</th>
             <th>엑셀_상품번호</th>
-            <th>상품번호</th>
+            <th>포이즌_상품번호</th>
             <th>제품명</th>
             <th>엑셀_할인가</th>
             <th>엑셀_재고</th>
@@ -1129,7 +1129,6 @@
             <th style="cursor:pointer;" onclick="sortBy('가격차이')">
               가격차이 <span id="sort가격차이">⇅</span>
             </th>
-            <th>평균거래가</th>
             <th style="cursor:pointer;" onclick="sortBy('판매량')">
               판매량 <span id="sort판매량">⇅</span>
             </th>
@@ -1288,7 +1287,7 @@
             diffCell.style.color = '#007bff';
           }
           
-          row.insertCell().textContent = data.최근30일평균거래가 || '-';
+          // 판매량 (평균거래가 제거!)
           row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
           row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
         }
