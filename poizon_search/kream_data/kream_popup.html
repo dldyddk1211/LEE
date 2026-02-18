@@ -190,6 +190,33 @@
             display: flex;
             gap: 10px;
         }
+        /* 정렬 버튼 */
+        .sort-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #667eea;
+            margin-left: 5px;
+            padding: 2px 5px;
+            transition: all 0.2s;
+        }
+
+        .sort-btn:hover {
+            background: #667eea;
+            color: white;
+            border-radius: 3px;
+        }
+
+        .sort-btn.asc::after {
+            content: ' ▲';
+        }
+
+        .sort-btn.desc::after {
+            content: ' ▼';
+        }
+
+
     </style>
 </head>
 <body>
@@ -222,10 +249,19 @@
                         <th style="width: 300px;">제품명</th>
                         <th style="width: 120px;">평균거래가</th>
                         <th style="width: 120px;">중국노출가</th>
-                        <th style="width: 100px;">판매량</th>
-                        <th style="width: 100px;">현지판매량</th>
+                        <th style="width: 100px;">
+                            판매량
+                            <button class="sort-btn" onclick="sortTable('판매량')" title="정렬">⇅</button>
+                        </th>
+                        <th style="width: 100px;">
+                            현지판매량
+                            <button class="sort-btn" onclick="sortTable('현지판매량')" title="정렬">⇅</button>
+                        </th>
                         <th style="width: 120px;">크림평균가</th>
-                        <th style="width: 100px;">크림판매량</th>
+                        <th style="width: 100px;">
+                            크림판매량
+                            <button class="sort-btn" onclick="sortTable('크림판매량')" title="정렬">⇅</button>
+                        </th>
                         <th style="width: 100px;">비교</th>
                     </tr>
                 </thead>
@@ -256,6 +292,9 @@
 
     <script>
         let collectedData = [];
+        // 정렬 관련 전역 변수
+        let currentSortColumn = null;
+        let currentSortOrder = 'asc'; // 'asc' or 'desc'
         
         // 디버그 로그 함수
         function addDebugLog(message, color = '#0f0') {
@@ -364,7 +403,7 @@
                     </td>
                 </tr>
             `;
-        }
+                }
         function displayProducts(data) {
             const tbody = document.getElementById('productTableBody');
             const totalCount = document.getElementById('totalCount');
@@ -374,15 +413,16 @@
             totalCount.textContent = data.length;
             
             if (data.length === 0) {
-                addDebugLog(`   ⚠️ 데이터가 비어있음`, '#ff0');
                 showNoDataMessage();
                 return;
             }
             
             tbody.innerHTML = data.map((item, index) => {
-                // 첫 3개만 로그 출력
+                // 첫 3개만 로그 + 데이터 확인
                 if (index < 3) {
-                    addDebugLog(`   행 #${index+1}: ${item.상품번호} - ${item.제품명?.substring(0, 20)}`, '#888');
+                    addDebugLog(`   행 #${index+1}: ${item.상품번호}`, '#888');
+                    addDebugLog(`      → 판매량: ${item.포이즌판매량}`, '#888');
+                    addDebugLog(`      → 현지판매량: ${item.중국시장최근30일판매량}`, '#888');
                 }
                 
                 return `
@@ -404,18 +444,23 @@
                     </td>
                     <td>${item.최근30일평균거래가 || '-'}</td>
                     <td class="cn-price" id="cn-price-${index}">${item.중국노출 || '-'}</td>
-                    <td>${item.포이즌판매량 || '0'}개</td>
-                    <td>${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}</td>
-                    <td class="kream-avg-price" id="kream-avg-${index}" style="color: #4CAF50; font-weight: 600;">-</td>
-                    <td class="kream-sales" id="kream-sales-${index}" style="color: #2196F3; font-weight: 600;">-</td>
+                    <td data-sales="${item.포이즌판매량 || 0}">
+                        ${item.포이즌판매량 ? item.포이즌판매량.toLocaleString() + '개' : '0개'}
+                    </td>
+                    <td data-local-sales="${item.중국시장최근30일판매량 || 0}">
+                        ${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}
+                    </td>
+                    <td class="kream-avg-price" id="kream-avg-${index}">-</td>
+                    <td class="kream-sales" id="kream-sales-${index}" data-kream-sales="0">-</td>
                     <td class="comparison" id="comparison-${index}" style="font-weight: 600;">-</td>
-            </tr>
-
-
-
-            `}).join('');
+                </tr>
+                `;
+            }).join('');
             
-            addDebugLog(`   ✅ ${data.length}행 HTML 생성 완료`, '#0f0');
+            addDebugLog(`   ✅ ${data.length}행 생성 완료`, '#0f0');
+            
+            // 전역 변수에 저장
+            window.collectedData = data;
         }
         async function startKreamSearch() {
             if (collectedData.length === 0) {
@@ -561,6 +606,72 @@
             }
         }
 
+        // ==========================================
+        // 정렬 함수 (판매량 3개만)
+        // ==========================================
+        function sortTable(column) {
+            addDebugLog(`🔄 정렬: ${column}`, '#0ff');
+            
+            // 같은 컬럼 클릭 시 오름차순 ↔ 내림차순 토글
+            if (currentSortColumn === column) {
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortOrder = 'asc';
+            }
+            
+            // 정렬 버튼 UI 업데이트
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.className = 'sort-btn';
+            });
+            
+            const activeBtn = event.target;
+            activeBtn.className = `sort-btn ${currentSortOrder}`;
+            
+            // 테이블의 모든 행 가져오기
+            const tbody = document.getElementById('productTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // 정렬
+            rows.sort((rowA, rowB) => {
+                let aVal = 0, bVal = 0;
+                
+                switch(column) {
+                    case '판매량':
+                        // 8번째 td의 data-sales 속성
+                        aVal = parseInt(rowA.cells[7].getAttribute('data-sales')) || 0;
+                        bVal = parseInt(rowB.cells[7].getAttribute('data-sales')) || 0;
+                        break;
+                    
+                    case '현지판매량':
+                        // 9번째 td의 data-local-sales 속성
+                        aVal = parseInt(rowA.cells[8].getAttribute('data-local-sales')) || 0;
+                        bVal = parseInt(rowB.cells[8].getAttribute('data-local-sales')) || 0;
+                        break;
+                    
+                    case '크림판매량':
+                        // 11번째 td의 data-kream-sales 속성
+                        aVal = parseInt(rowA.cells[10].getAttribute('data-kream-sales')) || 0;
+                        bVal = parseInt(rowB.cells[10].getAttribute('data-kream-sales')) || 0;
+                        break;
+                    
+                    default:
+                        return 0;
+                }
+                
+                return currentSortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+            });
+            
+            // 정렬된 순서대로 다시 추가
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1; // 번호 재설정
+                tbody.appendChild(row);
+            });
+            
+            addDebugLog(`   ✅ 정렬 완료: ${currentSortOrder === 'asc' ? '오름차순 ▲' : '내림차순 ▼'}`, '#0f0');
+        }
+
+
         // 테이블 행에 검색 결과 표시
 
         function updateRowResult(index, result) {
@@ -572,9 +683,6 @@
                 statusEl.className = 'status status-done';
                 statusEl.textContent = '완료';
                 
-                // ==========================================
-                // 크림 데이터 업데이트
-                // ==========================================
                 if (result.kream_data) {
                     // 크림 평균가
                     const avgPriceEl = document.getElementById(`kream-avg-${index}`);
@@ -583,7 +691,6 @@
                     if (avgPriceEl && result.kream_data.avg_price) {
                         avgPriceEl.textContent = result.kream_data.avg_price;
                         
-                        // 숫자만 추출 (₩150,000 → 150000)
                         const priceStr = result.kream_data.avg_price.replace(/[₩,]/g, '');
                         kreamPrice = parseInt(priceStr) || 0;
                     }
@@ -591,44 +698,43 @@
                     // 크림 판매량
                     const salesEl = document.getElementById(`kream-sales-${index}`);
                     if (salesEl && result.kream_data.sales) {
-                        salesEl.textContent = result.kream_data.sales + '개';
+                        const salesNum = parseInt(result.kream_data.sales.toString().replace(/,/g, '')) || 0;
+                        salesEl.textContent = salesNum.toLocaleString() + '개';
+                        
+                        // ✅ data 속성 업데이트 (정렬용)
+                        salesEl.setAttribute('data-kream-sales', salesNum);
+                        
+                        addDebugLog(`   → 크림판매량: ${salesNum.toLocaleString()}개`, '#0f0');
                     }
                     
-                    // ==========================================
-                    // 비교 계산 (중국노출가 - 크림평균가)
-                    // ==========================================
+                    // 비교 계산
                     const cnPriceEl = document.getElementById(`cn-price-${index}`);
                     const comparisonEl = document.getElementById(`comparison-${index}`);
                     
                     if (cnPriceEl && comparisonEl && kreamPrice > 0) {
                         const cnPriceText = cnPriceEl.textContent;
-                        
-                        // 중국 가격 숫자 추출
                         const cnPriceStr = cnPriceText.replace(/[₩,원]/g, '');
                         const cnPrice = parseInt(cnPriceStr) || 0;
                         
                         if (cnPrice > 0) {
                             const diff = cnPrice - kreamPrice;
-                            const diffFormatted = diff.toLocaleString();
+                            const diffFormatted = Math.abs(diff).toLocaleString();
                             
                             if (diff > 0) {
-                                // 중국이 더 비쌈 (유리함)
                                 comparisonEl.textContent = `+₩${diffFormatted}`;
-                                comparisonEl.style.color = '#4CAF50'; // 녹색
+                                comparisonEl.style.color = '#4CAF50';
                                 comparisonEl.title = '중국이 더 비쌈 (유리)';
                             } else if (diff < 0) {
-                                // 크림이 더 비쌈 (불리함)
-                                comparisonEl.textContent = `₩${diffFormatted}`;
-                                comparisonEl.style.color = '#f44336'; // 빨간색
+                                comparisonEl.textContent = `-₩${diffFormatted}`;
+                                comparisonEl.style.color = '#f44336';
                                 comparisonEl.title = '크림이 더 비쌈 (불리)';
                             } else {
-                                // 같음
                                 comparisonEl.textContent = '₩0';
                                 comparisonEl.style.color = '#666';
                                 comparisonEl.title = '가격 동일';
                             }
                             
-                            addDebugLog(`   → 비교: 중국(₩${cnPrice.toLocaleString()}) - 크림(₩${kreamPrice.toLocaleString()}) = ₩${diffFormatted}`, '#0ff');
+                            addDebugLog(`   → 비교: ${diff > 0 ? '+' : ''}₩${diffFormatted}`, '#0ff');
                         }
                     }
                 }
@@ -638,8 +744,7 @@
                 statusEl.style.color = '#721c24';
                 statusEl.textContent = '실패';
             }
-        }      
-
+        }
         // ==========================================
         // 창 닫기 + 백그라운드 작업 중단
         // ==========================================
