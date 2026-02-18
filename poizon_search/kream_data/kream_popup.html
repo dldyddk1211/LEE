@@ -177,6 +177,19 @@
         .debug-time {
             color: #888;
         }
+               .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+            color: white;
+            margin-left: 10px;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -192,6 +205,9 @@
             </div>
             <button class="btn btn-primary" onclick="startKreamSearch()" id="searchBtn">
                 🔍 크림 검색 시작
+            </button>
+            <button class="btn btn-danger" onclick="closeKreamWindow()" id="closeBtn">
+                    ❌ 창 닫기
             </button>
         </div>
 
@@ -395,7 +411,6 @@
             
             addDebugLog(`   ✅ ${data.length}행 HTML 생성 완료`, '#0f0');
         }
-
         async function startKreamSearch() {
             if (collectedData.length === 0) {
                 alert('검색할 상품이 없습니다.');
@@ -404,49 +419,46 @@
             
             const btn = document.getElementById('searchBtn');
             btn.disabled = true;
-            btn.textContent = '검색 중...';
+            btn.textContent = '검색 준비 중...';
             
             addDebugLog('🔍 크림 검색 시작', '#0ff');
             
             try {
-                addDebugLog('🔐 크림 로그인 확인...', '#ff0');
-                const loginRes = await fetch('/kream_login', {
-                    method: 'POST'
-                });
-                const loginData = await loginRes.json();
+                // 상품번호 리스트 추출
+                const productCodes = collectedData
+                    .map(item => item.상품번호)
+                    .filter(code => code && code !== '-');
                 
-                if (!loginData.success) {
-                    addDebugLog(`❌ 로그인 실패: ${loginData.error}`, '#f00');
-                    alert('크림 로그인 실패: ' + loginData.error);
+                addDebugLog(`📦 검색할 상품: ${productCodes.length}개`, '#0ff');
+                
+                // 서버로 전송
+                const response = await fetch('/start_kream_search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_codes: productCodes,
+                        total_count: collectedData.length
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    addDebugLog(`❌ 요청 실패: ${result.error}`, '#f00');
+                    alert('검색 시작 실패: ' + result.error);
                     btn.disabled = false;
                     btn.textContent = '🔍 크림 검색 시작';
                     return;
                 }
                 
-                addDebugLog('✅ 로그인 성공', '#0f0');
+                addDebugLog(`✅ 백그라운드 검색 시작`, '#0f0');
+                btn.textContent = '🔄 검색 중...';
                 
-                for (let i = 0; i < collectedData.length; i++) {
-                    const item = collectedData[i];
-                    const productCode = item.상품번호;
-                    
-                    if (!productCode || productCode === '-') {
-                        addDebugLog(`⏭️ #${i+1} 스킵`, '#888');
-                        continue;
-                    }
-                    
-                    addDebugLog(`🔍 #${i+1}/${collectedData.length}: ${productCode}`, '#0ff');
-                    await searchKream(productCode, i);
-                    
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-                
-                btn.disabled = false;
-                btn.textContent = '✅ 검색 완료';
-                addDebugLog('✅ 전체 검색 완료!', '#0f0');
+                // SSE 스트림 연결
+                startProgressStream(result.task_id);
                 
             } catch (error) {
                 addDebugLog(`❌ 오류: ${error.message}`, '#f00');
-                alert('오류 발생: ' + error.message);
                 btn.disabled = false;
                 btn.textContent = '🔍 크림 검색 시작';
             }
@@ -486,6 +498,133 @@
                 addDebugLog(`   ❌ #${index+1} 오류: ${error.message}`, '#f00');
             } finally {
                 btnEl.disabled = false;
+            }
+        }
+                async function searchKream(productCode, index) {
+            // ... 기존 코드 (그대로 유지) ...
+        }
+
+        // ==========================================
+        // ✅ 여기부터 새로 추가되는 부분!
+        // ==========================================
+        
+        // SSE 스트림으로 실시간 진행 상황 받기
+        function startProgressStream(taskId) {
+            addDebugLog('📡 진행 상황 스트림 연결 중...', '#0ff');
+            
+            const eventSource = new EventSource(`/kream_search_progress/${taskId}`);
+            
+            eventSource.addEventListener('progress', function(e) {
+                const data = JSON.parse(e.data);
+                addDebugLog(`📊 ${data.current}/${data.total}: ${data.product_code}`, '#0ff');
+                updateRowStatus(data.index, 'searching', '검색중');
+            });
+            
+            eventSource.addEventListener('result', function(e) {
+                const data = JSON.parse(e.data);
+                addDebugLog(`✅ #${data.index + 1} 완료`, '#0f0');
+                updateRowResult(data.index, data.result);
+            });
+            
+            eventSource.addEventListener('complete', function(e) {
+                const data = JSON.parse(e.data);
+                addDebugLog(`🎉 전체 검색 완료!`, '#0f0');
+                eventSource.close();
+                
+                const btn = document.getElementById('searchBtn');
+                btn.disabled = false;
+                btn.textContent = '✅ 검색 완료';
+            });
+            
+            eventSource.addEventListener('error', function(e) {
+                addDebugLog(`❌ SSE 오류`, '#f00');
+                eventSource.close();
+                
+                const btn = document.getElementById('searchBtn');
+                btn.disabled = false;
+                btn.textContent = '🔍 크림 검색 시작';
+            });
+        }
+
+        // 테이블 행 상태 업데이트
+        function updateRowStatus(index, status, text) {
+            const statusEl = document.getElementById(`status-${index}`);
+            if (statusEl) {
+                statusEl.className = `status status-${status}`;
+                statusEl.textContent = text;
+            }
+        }
+
+        // 테이블 행에 검색 결과 표시
+        function updateRowResult(index, result) {
+            const statusEl = document.getElementById(`status-${index}`);
+            const row = document.getElementById(`row-${index}`);
+            
+            if (!statusEl || !row) return;
+            
+            if (result.success) {
+                statusEl.className = 'status status-done';
+                statusEl.textContent = '완료';
+                statusEl.title = `모델: ${result.model_number}`;
+                
+                if (row.cells.length === 9) {
+                    const cell = row.insertCell();
+                    cell.innerHTML = `<strong>${result.model_number}</strong>`;
+                    cell.style.color = '#667eea';
+                }
+            } else {
+                statusEl.className = 'status';
+                statusEl.style.background = '#f8d7da';
+                statusEl.style.color = '#721c24';
+                statusEl.textContent = '실패';
+                statusEl.title = result.error || '검색 실패';
+            }
+        }        
+
+        // ==========================================
+        // 창 닫기 + 백그라운드 작업 중단
+        // ==========================================
+        function closeKreamWindow() {
+            addDebugLog('🛑 창 닫기 요청...', '#ff0');
+            
+            if (confirm('작업을 중단하고 창을 닫으시겠습니까?\n\n백그라운드 검색도 중단됩니다.')) {
+                addDebugLog('✅ 사용자 확인 완료', '#0f0');
+                
+                // 1. 백그라운드 작업 중단 요청
+                addDebugLog('📡 백그라운드 작업 중단 요청 전송...', '#0ff');
+                
+                fetch('/stop_kream_search', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addDebugLog(`✅ 중단 요청 완료: ${data.message}`, '#0f0');
+                })
+                .catch(error => {
+                    addDebugLog(`⚠️ 중단 요청 실패: ${error.message}`, '#ff0');
+                });
+                
+                // 2. 브라우저 종료 요청
+                addDebugLog('🌐 크림 브라우저 종료 요청...', '#0ff');
+                
+                fetch('/close_kream_browser', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addDebugLog(`✅ 브라우저 종료: ${data.message}`, '#0f0');
+                })
+                .catch(error => {
+                    addDebugLog(`⚠️ 브라우저 종료 실패: ${error.message}`, '#ff0');
+                });
+                
+                // 3. 창 닫기
+                setTimeout(() => {
+                    addDebugLog('👋 창을 닫습니다...', '#0f0');
+                    window.close();
+                }, 1000);
+            } else {
+                addDebugLog('❌ 사용자가 취소함', '#888');
             }
         }
     </script>

@@ -1,10 +1,23 @@
-from flask import Flask, render_template, request, Response, send_file, jsonify, render_template_string
+from flask import (
+    Flask,
+    render_template,
+    request,
+    Response,
+    send_file,
+    jsonify,
+    render_template_string,
+    stream_with_context
+)
 import json
 import os
 import threading
 import queue
 import openpyxl
 import uuid
+
+
+# 전역 변수: 진행 상황 추적
+kream_search_tasks = {}  # {task_id: {'status': ..., 'queue': ...}}
 
 # 크림 검색 모듈 import
 kream_search = None
@@ -582,7 +595,10 @@ def start_sourcing_stream(session_id):
             log_queue.get()
         
         # 백그라운드 스레드 시작
-        thread = threading.Thread(target=run_sourcing_background_stream, args=(product_codes, session_id))
+        thread = threading.Thread(target=run_sourcing_background_stream, 
+        args=(product_codes, session_id))
+
+        
         thread.daemon = True
         thread.start()
         
@@ -1182,40 +1198,142 @@ def search_kream_product():
         return jsonify({'success': False, 'error': str(e)})
 
 
+# ==========================================
+# 크림 검색 시작 (백그라운드)
+# ==========================================
 @app.route('/start_kream_search', methods=['POST'])
 def start_kream_search():
-    """크림 검색 시작 (기존 방식 - 사용 안 함)"""
+    """크림 검색 백그라운드 시작"""
     try:
-        if kream_search is None:
-            return jsonify({
-                'success': False, 
-                'error': 'kream_search 모듈이 로드되지 않았습니다.\nkream_data/kream_search.py 파일을 확인하세요.'
-            }), 500
-        
         data = request.json
         product_codes = data.get('product_codes', [])
+        total_count = data.get('total_count', len(product_codes))
         
         if not product_codes:
-            return jsonify({'success': False, 'error': '상품 코드가 없습니다'})
+            return jsonify({
+                'success': False,
+                'error': '검색할 상품이 없습니다'
+            })
         
-        # 세션 ID 생성
-        session_id = str(uuid.uuid4())
+        # kream_search 모듈 확인
+        if kream_search is None:
+            return jsonify({
+                'success': False,
+                'error': 'kream_search 모듈을 찾을 수 없습니다'
+            })
+        
+        # Task ID 생성
+        task_id = str(uuid.uuid4())
+        
+        # 진행 상황 큐 생성
+        progress_queue = queue.Queue()
+        
+        # Task 정보 저장
+        kream_search_tasks[task_id] = {
+            'status': 'running',
+            'queue': progress_queue,
+            'product_codes': product_codes,
+            'total': len(product_codes),
+            'current': 0
+        }
+        
+        # 백그라운드 스레드 시작
+        thread = threading.Thread(
+            target=kream_search.background_kream_search,  # ← 수정!
+            args=(task_id, product_codes, progress_queue)
+        )
+        thread.daemon = True
+        thread.start()
         
         return jsonify({
             'success': True,
-            'session_id': session_id,
-            'popup_url': f'/kream_results/{session_id}'
+            'task_id': task_id,
+            'total_products': len(product_codes),
+            'message': '백그라운드 검색이 시작되었습니다'
         })
         
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"❌ start_kream_search 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
+# ==========================================
+# SSE 스트림 (진행 상황 실시간 전송)
+# ==========================================
+@app.route('/kream_search_progress/<task_id>')
+def kream_search_progress(task_id):
+    """SSE로 진행 상황 스트리밍"""
+    
+    def generate():
+        if task_id not in kream_search_tasks:
+            yield f"event: error\ndata: {json.dumps({'error': 'Task not found'})}\n\n"
+            return
+        
+        task = kream_search_tasks[task_id]
+        progress_queue = task['queue']
+        
+        try:
+            while True:
+                # 큐에서 메시지 가져오기 (타임아웃 30초)
+                try:
+                    message = progress_queue.get(timeout=30)
+                except queue.Empty:
+                    # 타임아웃 - keep-alive 전송
+                    yield f": keep-alive\n\n"
+                    continue
+                
+                # 메시지 전송
+                event = message.get('event', 'message')
+                data = message.get('data', {})
+                
+                yield f"event: {event}\ndata: {json.dumps(data)}\n\n"
+                
+                # 완료 또는 에러 시 종료
+                if event in ('complete', 'error'):
+                    break
+                    
+        except GeneratorExit:
+            print(f"📡 SSE 연결 종료 (Task: {task_id})")
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
+        }
+    )
+
+# ==========================================
+# 크림 검색 상태 확인 (옵션)
+# ==========================================
+@app.route('/kream_search_status/<task_id>')
+def kream_search_status(task_id):
+    """Task 상태 조회"""
+    if task_id not in kream_search_tasks:
+        return jsonify({
+            'success': False,
+            'error': 'Task not found'
+        })
+    
+    task = kream_search_tasks[task_id]
+    
+    return jsonify({
+        'success': True,
+        'status': task['status'],
+        'current': task.get('current', 0),
+        'total': task['total']
+    })
 
 
 @app.route('/kream_results/<session_id>')
 def kream_results(session_id):
     """크림 검색 결과 팝업 페이지"""
     return render_template_string(KREAM_RESULTS_HTML, session_id=session_id)
-
 
 @app.route('/kream_search_stream/<session_id>')
 def kream_search_stream(session_id):
