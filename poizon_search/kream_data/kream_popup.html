@@ -66,6 +66,19 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
+            color: white;
+            margin-left: 10px;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
         .table-container {
             max-height: 600px;
             overflow: auto;
@@ -135,6 +148,27 @@
             background: #d4edda;
             color: #155724;
         }
+        .sort-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #667eea;
+            margin-left: 5px;
+            padding: 2px 5px;
+            transition: all 0.2s;
+        }
+        .sort-btn:hover {
+            background: #667eea;
+            color: white;
+            border-radius: 3px;
+        }
+        .sort-btn.asc::after {
+            content: ' ▲';
+        }
+        .sort-btn.desc::after {
+            content: ' ▼';
+        }
         
         /* 디버그 로그 패널 */
         .debug-panel {
@@ -177,46 +211,6 @@
         .debug-time {
             color: #888;
         }
-               .btn-danger {
-            background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
-            color: white;
-            margin-left: 10px;
-        }
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-        /* 정렬 버튼 */
-        .sort-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            color: #667eea;
-            margin-left: 5px;
-            padding: 2px 5px;
-            transition: all 0.2s;
-        }
-
-        .sort-btn:hover {
-            background: #667eea;
-            color: white;
-            border-radius: 3px;
-        }
-
-        .sort-btn.asc::after {
-            content: ' ▲';
-        }
-
-        .sort-btn.desc::after {
-            content: ' ▼';
-        }
-
-
     </style>
 </head>
 <body>
@@ -230,12 +224,14 @@
             <div class="count">
                 총 <strong id="totalCount">0</strong>개 상품
             </div>
-            <button class="btn btn-primary" onclick="startKreamSearch()" id="searchBtn">
-                🔍 크림 검색 시작
-            </button>
-            <button class="btn btn-danger" onclick="closeKreamWindow()" id="closeBtn">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="startKreamSearch()" id="searchBtn">
+                    🔍 크림 검색 시작
+                </button>
+                <button class="btn btn-danger" onclick="closeKreamWindow()" id="closeBtn">
                     ❌ 창 닫기
-            </button>
+                </button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -250,12 +246,12 @@
                         <th style="width: 120px;">평균거래가</th>
                         <th style="width: 120px;">중국노출가</th>
                         <th style="width: 100px;">
-                            판매량
-                            <button class="sort-btn" onclick="sortTable('판매량')" title="정렬">⇅</button>
+                            중국판매량
+                            <button class="sort-btn" onclick="sortTable('중국판매량')" title="정렬">⇅</button>
                         </th>
                         <th style="width: 100px;">
-                            현지판매량
-                            <button class="sort-btn" onclick="sortTable('현지판매량')" title="정렬">⇅</button>
+                            현업자판매량
+                            <button class="sort-btn" onclick="sortTable('현업자판매량')" title="정렬">⇅</button>
                         </th>
                         <th style="width: 120px;">크림평균가</th>
                         <th style="width: 100px;">
@@ -292,11 +288,12 @@
 
     <script>
         let collectedData = [];
-        // 정렬 관련 전역 변수
         let currentSortColumn = null;
-        let currentSortOrder = 'asc'; // 'asc' or 'desc'
+        let currentSortOrder = 'asc';
         
+        // ==========================================
         // 디버그 로그 함수
+        // ==========================================
         function addDebugLog(message, color = '#0f0') {
             const logDiv = document.getElementById('debugLog');
             const time = new Date().toLocaleTimeString();
@@ -308,14 +305,15 @@
             console.log(`[${time}] ${message}`);
         }
         
-        // 토글 함수
         function toggleDebugView() {
             const debugLog = document.getElementById('debugLog');
             const checkbox = document.getElementById('showDebugToggle');
             debugLog.style.display = checkbox.checked ? 'block' : 'none';
         }
 
-        // sessionStorage에서 데이터 읽기
+        // ==========================================
+        // 페이지 로드 및 데이터 불러오기
+        // ==========================================
         window.addEventListener('load', function() {
             addDebugLog('🚀 크림 팝업 페이지 로드 시작', '#0ff');
             addDebugLog(`📍 URL: ${window.location.href}`);
@@ -329,7 +327,6 @@
                 addDebugLog(`   └─ ❌ sessionStorage에 kreamSearchData 없음!`, '#f00');
                 addDebugLog(`🔍 전체 키 목록: ${JSON.stringify(Object.keys(sessionStorage))}`, '#ff0');
                 
-                // opener(메인 창)에서 데이터 가져오기 시도
                 if (window.opener && window.opener.collectedData) {
                     addDebugLog(`2️⃣ opener에서 데이터 가져오기 시도...`, '#ff0');
                     try {
@@ -337,7 +334,6 @@
                         addDebugLog(`   ├─ ✅ opener에서 데이터 가져옴!`, '#0f0');
                         addDebugLog(`   └─ 상품 개수: ${collectedData.length}`, '#0ff');
                         
-                        // sessionStorage에 저장
                         sessionStorage.setItem('kreamSearchData', JSON.stringify(collectedData));
                         addDebugLog(`   └─ sessionStorage에 저장 완료`, '#0f0');
                         
@@ -355,7 +351,6 @@
                 return;
             }
             
-            // sessionStorage에 데이터 있음
             addDebugLog(`   ├─ 데이터 크기: ${dataStr.length} bytes`, '#0ff');
             addDebugLog(`   └─ 미리보기: ${dataStr.substring(0, 80)}...`, '#888');
             
@@ -403,7 +398,11 @@
                     </td>
                 </tr>
             `;
-                }
+        }
+
+        // ==========================================
+        // 테이블에 상품 데이터 표시
+        // ==========================================
         function displayProducts(data) {
             const tbody = document.getElementById('productTableBody');
             const totalCount = document.getElementById('totalCount');
@@ -418,11 +417,11 @@
             }
             
             tbody.innerHTML = data.map((item, index) => {
-                // 첫 3개만 로그 + 데이터 확인
+                // 첫 3개만 디버그 로그
                 if (index < 3) {
                     addDebugLog(`   행 #${index+1}: ${item.상품번호}`, '#888');
-                    addDebugLog(`      → 판매량: ${item.포이즌판매량}`, '#888');
-                    addDebugLog(`      → 현지판매량: ${item.중국시장최근30일판매량}`, '#888');
+                    addDebugLog(`      → 중국판매량: ${item.중국시장최근30일판매량}`, '#888');
+                    addDebugLog(`      → 현업자판매량: ${item.현지판매자최근30일판매량}`, '#888');
                 }
                 
                 return `
@@ -444,11 +443,11 @@
                     </td>
                     <td>${item.최근30일평균거래가 || '-'}</td>
                     <td class="cn-price" id="cn-price-${index}">${item.중국노출 || '-'}</td>
-                    <td data-sales="${item.포이즌판매량 || 0}">
-                        ${item.포이즌판매량 ? item.포이즌판매량.toLocaleString() + '개' : '0개'}
-                    </td>
-                    <td data-local-sales="${item.중국시장최근30일판매량 || 0}">
+                    <td data-sales="${item.중국시장최근30일판매량 || 0}">
                         ${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}
+                    </td>
+                    <td data-local-sales="${item.현지판매자최근30일판매량 || 0}">
+                        ${item.현지판매자최근30일판매량 ? item.현지판매자최근30일판매량.toLocaleString() + '개' : '0개'}
                     </td>
                     <td class="kream-avg-price" id="kream-avg-${index}">-</td>
                     <td class="kream-sales" id="kream-sales-${index}" data-kream-sales="0">-</td>
@@ -458,10 +457,12 @@
             }).join('');
             
             addDebugLog(`   ✅ ${data.length}행 생성 완료`, '#0f0');
-            
-            // 전역 변수에 저장
             window.collectedData = data;
         }
+
+        // ==========================================
+        // 크림 검색 시작
+        // ==========================================
         async function startKreamSearch() {
             if (collectedData.length === 0) {
                 alert('검색할 상품이 없습니다.');
@@ -475,14 +476,12 @@
             addDebugLog('🔍 크림 검색 시작', '#0ff');
             
             try {
-                // 상품번호 리스트 추출
                 const productCodes = collectedData
                     .map(item => item.상품번호)
                     .filter(code => code && code !== '-');
                 
                 addDebugLog(`📦 검색할 상품: ${productCodes.length}개`, '#0ff');
                 
-                // 서버로 전송
                 const response = await fetch('/start_kream_search', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -505,7 +504,6 @@
                 addDebugLog(`✅ 백그라운드 검색 시작`, '#0f0');
                 btn.textContent = '🔄 검색 중...';
                 
-                // SSE 스트림 연결
                 startProgressStream(result.task_id);
                 
             } catch (error) {
@@ -515,51 +513,9 @@
             }
         }
 
-        async function searchKream(productCode, index) {
-            const statusEl = document.getElementById(`status-${index}`);
-            const btnEl = document.getElementById(`btn-${index}`);
-            
-            statusEl.className = 'status status-searching';
-            statusEl.textContent = '검색중';
-            btnEl.disabled = true;
-            
-            try {
-                const response = await fetch('/search_kream_product', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_code: productCode })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.model_number) {
-                    statusEl.className = 'status status-done';
-                    statusEl.textContent = '완료';
-                    addDebugLog(`   ✅ #${index+1} 완료: ${result.model_number}`, '#0f0');
-                } else {
-                    statusEl.className = 'status';
-                    statusEl.style.background = '#f8d7da';
-                    statusEl.style.color = '#721c24';
-                    statusEl.textContent = '실패';
-                    addDebugLog(`   ❌ #${index+1} 실패`, '#f00');
-                }
-                
-            } catch (error) {
-                statusEl.textContent = '오류';
-                addDebugLog(`   ❌ #${index+1} 오류: ${error.message}`, '#f00');
-            } finally {
-                btnEl.disabled = false;
-            }
-        }
-                async function searchKream(productCode, index) {
-            // ... 기존 코드 (그대로 유지) ...
-        }
-
         // ==========================================
-        // ✅ 여기부터 새로 추가되는 부분!
-        // ==========================================
-        
         // SSE 스트림으로 실시간 진행 상황 받기
+        // ==========================================
         function startProgressStream(taskId) {
             addDebugLog('📡 진행 상황 스트림 연결 중...', '#0ff');
             
@@ -568,7 +524,6 @@
             eventSource.addEventListener('progress', function(e) {
                 const data = JSON.parse(e.data);
                 addDebugLog(`📊 ${data.current}/${data.total}: ${data.product_code}`, '#0ff');
-                updateRowStatus(data.index, 'searching', '검색중');
             });
             
             eventSource.addEventListener('result', function(e) {
@@ -597,22 +552,103 @@
             });
         }
 
-        // 테이블 행 상태 업데이트
-        function updateRowStatus(index, status, text) {
-            const statusEl = document.getElementById(`status-${index}`);
-            if (statusEl) {
-                statusEl.className = `status status-${status}`;
-                statusEl.textContent = text;
+        // ==========================================
+        // 테이블 행에 검색 결과 표시 (크림 평균가, 판매량)
+        // ==========================================
+        function updateRowResult(index, result) {
+            addDebugLog(`📝 행 #${index + 1} 결과 업데이트 중...`, '#0ff');
+            
+            if (!result.success) {
+                addDebugLog(`   ❌ 검색 실패`, '#f00');
+                return;
             }
+            
+            // 크림 데이터 확인
+            if (!result.kream_data) {
+                addDebugLog(`   ⚠️ kream_data 없음`, '#ff0');
+                return;
+            }
+            
+            addDebugLog(`   ✅ 크림 데이터 수신`, '#0f0');
+            
+            // 1. 크림 평균가 업데이트
+            const avgPriceEl = document.getElementById(`kream-avg-${index}`);
+            let kreamPrice = 0;
+            
+            if (avgPriceEl && result.kream_data.avg_price) {
+                avgPriceEl.textContent = result.kream_data.avg_price;
+                avgPriceEl.style.fontWeight = '600';
+                avgPriceEl.style.color = '#667eea';
+                
+                // 숫자만 추출 (비교용)
+                const priceStr = result.kream_data.avg_price.replace(/[₩,원\s]/g, '');
+                kreamPrice = parseInt(priceStr) || 0;
+                
+                addDebugLog(`   → 크림평균가: ${result.kream_data.avg_price} (${kreamPrice})`, '#0f0');
+            }
+            
+            // 2. 크림 판매량 업데이트
+            const salesEl = document.getElementById(`kream-sales-${index}`);
+            if (salesEl && result.kream_data.sales) {
+                // 판매량 문자열에서 숫자만 추출
+                let salesNum = 0;
+                if (typeof result.kream_data.sales === 'string') {
+                    salesNum = parseInt(result.kream_data.sales.replace(/[^0-9]/g, '')) || 0;
+                } else {
+                    salesNum = parseInt(result.kream_data.sales) || 0;
+                }
+                
+                salesEl.textContent = salesNum.toLocaleString() + '개';
+                salesEl.style.fontWeight = '600';
+                salesEl.style.color = '#667eea';
+                
+                // data 속성 업데이트 (정렬용)
+                salesEl.setAttribute('data-kream-sales', salesNum);
+                
+                addDebugLog(`   → 크림판매량: ${salesNum.toLocaleString()}개`, '#0f0');
+            }
+            
+            // 3. 가격 비교 계산
+            const cnPriceEl = document.getElementById(`cn-price-${index}`);
+            const comparisonEl = document.getElementById(`comparison-${index}`);
+            
+            if (cnPriceEl && comparisonEl && kreamPrice > 0) {
+                const cnPriceText = cnPriceEl.textContent;
+                const cnPriceStr = cnPriceText.replace(/[₩,원\s]/g, '');
+                const cnPrice = parseInt(cnPriceStr) || 0;
+                
+                if (cnPrice > 0) {
+                    const diff = cnPrice - kreamPrice;
+                    const diffFormatted = Math.abs(diff).toLocaleString();
+                    
+                    if (diff > 0) {
+                        comparisonEl.textContent = `+₩${diffFormatted}`;
+                        comparisonEl.style.color = '#4CAF50';
+                        comparisonEl.title = '중국이 더 비쌈 (유리)';
+                        addDebugLog(`   → 비교: +₩${diffFormatted} (중국이 더 비쌈)`, '#0f0');
+                    } else if (diff < 0) {
+                        comparisonEl.textContent = `-₩${diffFormatted}`;
+                        comparisonEl.style.color = '#f44336';
+                        comparisonEl.title = '크림이 더 비쌈 (불리)';
+                        addDebugLog(`   → 비교: -₩${diffFormatted} (크림이 더 비쌈)`, '#ff0');
+                    } else {
+                        comparisonEl.textContent = '₩0';
+                        comparisonEl.style.color = '#666';
+                        comparisonEl.title = '가격 동일';
+                        addDebugLog(`   → 비교: ₩0 (동일)`, '#0ff');
+                    }
+                }
+            }
+            
+            addDebugLog(`   ✅ 행 #${index + 1} 업데이트 완료`, '#0f0');
         }
 
         // ==========================================
-        // 정렬 함수 (판매량 3개만)
+        // 정렬 함수
         // ==========================================
         function sortTable(column) {
             addDebugLog(`🔄 정렬: ${column}`, '#0ff');
             
-            // 같은 컬럼 클릭 시 오름차순 ↔ 내림차순 토글
             if (currentSortColumn === column) {
                 currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
             } else {
@@ -620,7 +656,6 @@
                 currentSortOrder = 'asc';
             }
             
-            // 정렬 버튼 UI 업데이트
             document.querySelectorAll('.sort-btn').forEach(btn => {
                 btn.className = 'sort-btn';
             });
@@ -628,29 +663,24 @@
             const activeBtn = event.target;
             activeBtn.className = `sort-btn ${currentSortOrder}`;
             
-            // 테이블의 모든 행 가져오기
             const tbody = document.getElementById('productTableBody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
             
-            // 정렬
             rows.sort((rowA, rowB) => {
                 let aVal = 0, bVal = 0;
                 
                 switch(column) {
-                    case '판매량':
-                        // 8번째 td의 data-sales 속성
+                    case '중국판매량':
                         aVal = parseInt(rowA.cells[7].getAttribute('data-sales')) || 0;
                         bVal = parseInt(rowB.cells[7].getAttribute('data-sales')) || 0;
                         break;
                     
-                    case '현지판매량':
-                        // 9번째 td의 data-local-sales 속성
+                    case '현업자판매량':
                         aVal = parseInt(rowA.cells[8].getAttribute('data-local-sales')) || 0;
                         bVal = parseInt(rowB.cells[8].getAttribute('data-local-sales')) || 0;
                         break;
                     
                     case '크림판매량':
-                        // 11번째 td의 data-kream-sales 속성
                         aVal = parseInt(rowA.cells[10].getAttribute('data-kream-sales')) || 0;
                         bVal = parseInt(rowB.cells[10].getAttribute('data-kream-sales')) || 0;
                         break;
@@ -662,91 +692,16 @@
                 return currentSortOrder === 'asc' ? aVal - bVal : bVal - aVal;
             });
             
-            // 정렬된 순서대로 다시 추가
             rows.forEach((row, index) => {
-                row.cells[0].textContent = index + 1; // 번호 재설정
+                row.cells[0].textContent = index + 1;
                 tbody.appendChild(row);
             });
             
             addDebugLog(`   ✅ 정렬 완료: ${currentSortOrder === 'asc' ? '오름차순 ▲' : '내림차순 ▼'}`, '#0f0');
         }
 
-
-        // 테이블 행에 검색 결과 표시
-
-        function updateRowResult(index, result) {
-            const statusEl = document.getElementById(`status-${index}`);
-            
-            if (!statusEl) return;
-            
-            if (result.success) {
-                statusEl.className = 'status status-done';
-                statusEl.textContent = '완료';
-                
-                if (result.kream_data) {
-                    // 크림 평균가
-                    const avgPriceEl = document.getElementById(`kream-avg-${index}`);
-                    let kreamPrice = 0;
-                    
-                    if (avgPriceEl && result.kream_data.avg_price) {
-                        avgPriceEl.textContent = result.kream_data.avg_price;
-                        
-                        const priceStr = result.kream_data.avg_price.replace(/[₩,]/g, '');
-                        kreamPrice = parseInt(priceStr) || 0;
-                    }
-                    
-                    // 크림 판매량
-                    const salesEl = document.getElementById(`kream-sales-${index}`);
-                    if (salesEl && result.kream_data.sales) {
-                        const salesNum = parseInt(result.kream_data.sales.toString().replace(/,/g, '')) || 0;
-                        salesEl.textContent = salesNum.toLocaleString() + '개';
-                        
-                        // ✅ data 속성 업데이트 (정렬용)
-                        salesEl.setAttribute('data-kream-sales', salesNum);
-                        
-                        addDebugLog(`   → 크림판매량: ${salesNum.toLocaleString()}개`, '#0f0');
-                    }
-                    
-                    // 비교 계산
-                    const cnPriceEl = document.getElementById(`cn-price-${index}`);
-                    const comparisonEl = document.getElementById(`comparison-${index}`);
-                    
-                    if (cnPriceEl && comparisonEl && kreamPrice > 0) {
-                        const cnPriceText = cnPriceEl.textContent;
-                        const cnPriceStr = cnPriceText.replace(/[₩,원]/g, '');
-                        const cnPrice = parseInt(cnPriceStr) || 0;
-                        
-                        if (cnPrice > 0) {
-                            const diff = cnPrice - kreamPrice;
-                            const diffFormatted = Math.abs(diff).toLocaleString();
-                            
-                            if (diff > 0) {
-                                comparisonEl.textContent = `+₩${diffFormatted}`;
-                                comparisonEl.style.color = '#4CAF50';
-                                comparisonEl.title = '중국이 더 비쌈 (유리)';
-                            } else if (diff < 0) {
-                                comparisonEl.textContent = `-₩${diffFormatted}`;
-                                comparisonEl.style.color = '#f44336';
-                                comparisonEl.title = '크림이 더 비쌈 (불리)';
-                            } else {
-                                comparisonEl.textContent = '₩0';
-                                comparisonEl.style.color = '#666';
-                                comparisonEl.title = '가격 동일';
-                            }
-                            
-                            addDebugLog(`   → 비교: ${diff > 0 ? '+' : ''}₩${diffFormatted}`, '#0ff');
-                        }
-                    }
-                }
-            } else {
-                statusEl.className = 'status';
-                statusEl.style.background = '#f8d7da';
-                statusEl.style.color = '#721c24';
-                statusEl.textContent = '실패';
-            }
-        }
         // ==========================================
-        // 창 닫기 + 백그라운드 작업 중단
+        // 창 닫기
         // ==========================================
         function closeKreamWindow() {
             addDebugLog('🛑 창 닫기 요청...', '#ff0');
@@ -754,35 +709,16 @@
             if (confirm('작업을 중단하고 창을 닫으시겠습니까?\n\n백그라운드 검색도 중단됩니다.')) {
                 addDebugLog('✅ 사용자 확인 완료', '#0f0');
                 
-                // 1. 백그라운드 작업 중단 요청
-                addDebugLog('📡 백그라운드 작업 중단 요청 전송...', '#0ff');
+                fetch('/stop_kream_search', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => addDebugLog(`✅ 중단 요청 완료: ${data.message}`, '#0f0'))
+                    .catch(error => addDebugLog(`⚠️ 중단 요청 실패: ${error.message}`, '#ff0'));
                 
-                fetch('/stop_kream_search', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    addDebugLog(`✅ 중단 요청 완료: ${data.message}`, '#0f0');
-                })
-                .catch(error => {
-                    addDebugLog(`⚠️ 중단 요청 실패: ${error.message}`, '#ff0');
-                });
+                fetch('/close_kream_browser', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => addDebugLog(`✅ 브라우저 종료: ${data.message}`, '#0f0'))
+                    .catch(error => addDebugLog(`⚠️ 브라우저 종료 실패: ${error.message}`, '#ff0'));
                 
-                // 2. 브라우저 종료 요청
-                addDebugLog('🌐 크림 브라우저 종료 요청...', '#0ff');
-                
-                fetch('/close_kream_browser', {
-                    method: 'POST'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    addDebugLog(`✅ 브라우저 종료: ${data.message}`, '#0f0');
-                })
-                .catch(error => {
-                    addDebugLog(`⚠️ 브라우저 종료 실패: ${error.message}`, '#ff0');
-                });
-                
-                // 3. 창 닫기
                 setTimeout(() => {
                     addDebugLog('👋 창을 닫습니다...', '#0f0');
                     window.close();

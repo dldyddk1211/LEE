@@ -1924,8 +1924,9 @@ if __name__ == "__main__":
 # 이 함수 1개만 kream_search.py 파일 맨 끝에 추가하세요
 # ==========================================
 
+
 def background_kream_search(task_id, product_codes, progress_queue):
-    """백그라운드 크림 검색 - 로그인 포함"""
+    """백그라운드 크림 검색 - 자동 로그인 포함"""
     global stop_flag, browser, context, page
     
     try:
@@ -1936,22 +1937,23 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         stop_flag = False
         
-        # 첫 번째 상품번호
+        # 첫 번째 상품 정보
         first_product = product_codes[0] if product_codes else None
+        first_index = 0
+        
         if not first_product:
             error_msg = "검색할 상품이 없습니다"
             print(f"❌ {error_msg}")
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
         
-        print(f"🎯 검색할 상품번호: {first_product}")
+        print(f"🎯 검색할 상품번호: {first_product} (인덱스: {first_index})")
         
-        # 준비: 기존 브라우저 완전 종료
+        # ==========================================
+        # 준비: 기존 브라우저 종료
+        # ==========================================
         print("\n🎯 [준비] 기존 브라우저 확인 및 종료")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[준비] 기존 브라우저 종료 중...'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': '[준비] 기존 브라우저 종료 중...'}})
         
         if browser is not None:
             try:
@@ -1965,12 +1967,11 @@ def background_kream_search(task_id, product_codes, progress_queue):
         context = None
         page = None
         
-        # 1단계: 새 브라우저 열기
+        # ==========================================
+        # 1단계: 브라우저 실행
+        # ==========================================
         print("\n🎯 [1단계] 새 브라우저 열기")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[1단계] 브라우저 실행 중...'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': '[1단계] 브라우저 실행 중...'}})
         
         playwright = sync_playwright().start()
         
@@ -1991,21 +1992,19 @@ def background_kream_search(task_id, product_codes, progress_queue):
             timezone_id='Asia/Seoul'
         )
         
-        # 쿠키 로드 (이전 로그인 세션)
+        # 쿠키 로드
         if os.path.exists(COOKIE_FILE):
             try:
                 with open(COOKIE_FILE, 'r') as f:
                     cookies = json.load(f)
                     context.add_cookies(cookies)
-                print("  ✅ 쿠키 로드 완료 (이전 세션)")
+                print("  ✅ 쿠키 로드 완료")
             except:
                 print("  ⚠️ 쿠키 로드 실패")
         
         page = context.new_page()
-        print("  ✅ 새 브라우저 열림 (오른쪽 위)")
+        print("  ✅ 새 브라우저 열림")
         
-        # 메인 페이지
-        print("  📱 크림 메인 페이지로 이동...")
         page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
         time.sleep(2)
         
@@ -2013,56 +2012,75 @@ def background_kream_search(task_id, product_codes, progress_queue):
         progress_queue.put({'event': 'message', 'data': {'message': '[1단계 완료] ✅'}})
         
         # ==========================================
-        # ✨ 로그인 체크 & 대기 (새로 추가!)
+        # 자동 로그인
         # ==========================================
-        print("\n🔐 [로그인 체크] 로그인 상태 확인")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[로그인] 상태 확인 중...'}
-        })
+        print("\n🔐 [자동 로그인] 로그인 시도")
+        progress_queue.put({'event': 'message', 'data': {'message': '[로그인] 상태 확인 중...'}})
         
         try:
-            # 로그인 상태 확인 (My 페이지 링크 존재 여부)
-            page.wait_for_selector('a[href*="my"]', timeout=3000)
-            print("  ✅ 이미 로그인되어 있음!")
-            progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 로그인 완료'}})
+            login_link = page.locator('a[href="/login"]').first
             
-        except:
-            # 로그인 필요
-            print("  ⚠️ 로그인이 필요합니다")
-            print("\n" + "="*60)
-            print("💡 수동 로그인 필요")
-            print("="*60)
-            print("1. 브라우저에서 크림 로그인 버튼 클릭")
-            print("2. 이메일/비밀번호 입력")
-            print("3. 로그인 완료 후 아무 키나 누르세요...")
-            print("="*60)
-            
-            progress_queue.put({
-                'event': 'message',
-                'data': {'message': '[로그인] ⚠️ 수동 로그인 필요 - 브라우저 확인'}
-            })
-            
-            # 사용자 입력 대기 (엔터 키)
-            input("\n👉 로그인 완료 후 Enter를 눌러주세요...")
-            
-            print("\n  ✅ 로그인 완료 확인!")
-            
-            # 쿠키 저장 (다음에 자동 로그인)
-            try:
-                cookies = context.cookies()
-                with open(COOKIE_FILE, 'w') as f:
-                    json.dump(cookies, f)
-                print("  ✅ 쿠키 저장 완료 (다음에 자동 로그인)")
-            except Exception as e:
-                print(f"  ⚠️ 쿠키 저장 실패: {e}")
-            
-            progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 완료'}})
+            if login_link.count() > 0 and login_link.is_visible():
+                print("  ⚠️ 로그인이 필요합니다")
+                print("  🔐 자동 로그인 시도 중...")
+                
+                page.goto('https://kream.co.kr/login', wait_until='domcontentloaded', timeout=30000)
+                time.sleep(2)
+                
+                # 이메일 입력
+                email_input = page.locator('input[type="email"], input[name="email"]').first
+                if email_input.count() > 0:
+                    email_input.fill(KREAM_EMAIL)
+                    time.sleep(0.5)
+                
+                # 비밀번호 입력
+                password_input = page.locator('input[type="password"]').first
+                if password_input.count() > 0:
+                    password_input.fill(KREAM_PASSWORD)
+                    time.sleep(0.5)
+                
+                # 로그인 버튼 클릭
+                login_button = page.locator('button:has-text("로그인")').first
+                if login_button.count() > 0:
+                    login_button.click()
+                    time.sleep(3)
+                
+                # 로그인 확인
+                page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
+                time.sleep(2)
+                
+                login_link_after = page.locator('a[href="/login"]').first
+                
+                if login_link_after.count() == 0 or not login_link_after.is_visible():
+                    print("  ✅ 자동 로그인 성공!")
+                    
+                    # 쿠키 저장
+                    try:
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                        print("  ✅ 쿠키 저장 완료")
+                    except Exception as e:
+                        print(f"  ⚠️ 쿠키 저장 실패: {e}")
+                    
+                    progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 완료'}})
+                else:
+                    print("  ❌ 자동 로그인 실패")
+                    progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ⚠️ 실패'}})
+                    
+            else:
+                print("  ✅ 이미 로그인되어 있음!")
+                progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 완료'}})
+                
+        except Exception as e:
+            print(f"  ❌ 자동 로그인 오류: {e}")
+            print("  → 로그인 없이 계속 진행합니다...")
+            progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ⚠️ 실패'}})
         
-        print("  ✅ [로그인 체크 완료]")
-        
+        # ==========================================
         # 2단계: 검색 버튼 찾기
-        print("\n🎯 [2단계] 검색 버튼(돋보기) 찾기")
+        # ==========================================
+        print("\n🎯 [2단계] 검색 버튼 찾기")
         progress_queue.put({'event': 'message', 'data': {'message': '[2단계] 검색 버튼 찾기 중...'}})
         
         button_selectors = [
@@ -2077,7 +2095,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
                 temp = page.locator(selector).first
                 if temp.count() > 0 and temp.is_visible():
                     search_button = temp
-                    print(f"  ✅ 검색 버튼 발견! ({selector})")
+                    print(f"  ✅ 검색 버튼 발견!")
                     break
             except:
                 continue
@@ -2091,21 +2109,16 @@ def background_kream_search(task_id, product_codes, progress_queue):
         print("  ✅ [2단계 완료]")
         progress_queue.put({'event': 'message', 'data': {'message': '[2단계 완료] ✅'}})
         
-        # 3단계: 검색 URL로 직접 이동
+        # ==========================================
+        # 3단계: 검색 페이지로 이동
+        # ==========================================
         print(f"\n🎯 [3단계] 검색 URL로 이동: {first_product}")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': f'[3단계] {first_product} 검색 중...'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': f'[3단계] {first_product} 검색 중...'}})
         
-        # 검색 URL 생성
         search_url = f"https://kream.co.kr/search?keyword={first_product}"
         print(f"  📍 검색 URL: {search_url}")
         
-        # 자연스러운 대기
         time.sleep(random.uniform(0.5, 1.0))
-        
-        # 검색 페이지로 이동
         page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
         time.sleep(2)
         
@@ -2118,14 +2131,12 @@ def background_kream_search(task_id, product_codes, progress_queue):
         print(f"  ✅ [3단계 완료]")
         progress_queue.put({'event': 'message', 'data': {'message': '[3단계 완료] ✅'}})
         
-        # 4단계: 첫 번째 상품 클릭 및 모델번호 확인
-        print(f"\n🎯 [4단계] 첫 번째 상품 클릭 및 모델번호 확인")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[4단계] 상품 선택 중...'}
-        })
+        # ==========================================
+        # 4단계: 첫 번째 상품 클릭
+        # ==========================================
+        print(f"\n🎯 [4단계] 첫 번째 상품 클릭")
+        progress_queue.put({'event': 'message', 'data': {'message': '[4단계] 상품 선택 중...'}})
         
-        # 검색 결과 대기
         try:
             print("  ⏳ 검색 결과 대기 중...")
             page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
@@ -2136,11 +2147,8 @@ def background_kream_search(task_id, product_codes, progress_queue):
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
         
-        # 첫 번째 상품 찾기 및 클릭
         try:
             print("  🔍 첫 번째 상품 찾기...")
-            
-            # 실제 HTML 구조에 맞는 선택자
             first_product_link = page.locator('a.product_card[href*="/products/"]').first
             
             if first_product_link.count() == 0:
@@ -2150,24 +2158,18 @@ def background_kream_search(task_id, product_codes, progress_queue):
                 return
             
             print("  ✅ 첫 번째 상품 발견!")
+            print("  🖱️  상품 클릭...")
             
-            # 자연스럽게 hover 후 클릭
-            print("  🖱️  상품에 마우스 올리기...")
             first_product_link.hover()
             time.sleep(random.uniform(0.3, 0.7))
-            
-            print("  🖱️  상품 클릭...")
             first_product_link.click()
-            
-            # 페이지 전환 대기
             time.sleep(2)
             
-            # 현재 URL 확인
             product_url = page.url
             print(f"  📍 상품 페이지 URL: {product_url}")
             
             if '/products/' in product_url:
-                print(f"  ✅ 상품 상세 페이지로 이동 완료!")
+                print(f"  ✅ 상품 상세 페이지 이동 완료!")
             
         except Exception as e:
             error_msg = f"상품 클릭 실패: {e}"
@@ -2177,121 +2179,97 @@ def background_kream_search(task_id, product_codes, progress_queue):
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
         
-        # 모델번호 확인
-        print(f"\n  🔍 모델번호 확인 중...")
+        # ==========================================
+        # 5단계: 모델번호 확인
+        # ==========================================
+        print(f"\n🎯 [5단계] 모델번호 확인")
         print(f"  🎯 찾는 상품번호: {first_product}")
+        progress_queue.put({'event': 'message', 'data': {'message': '[5단계] 모델번호 확인 중...'}})
         
         try:
-            # JavaScript로 모델번호 추출
+            print("  → 페이지에서 모델번호 찾기...")
+            
             model_info = page.evaluate("""
                 () => {
-                    let model_number = '';
+                    let model_numbers = [];
+                    let full_text = '';
                     
-                    // 1. p.text-lookup 태그에서 찾기
+                    // p.text-lookup 태그에서 "모델번호" 찾기
                     const pTags = document.querySelectorAll('p.text-lookup');
+                    
                     for (let p of pTags) {
                         const text = p.textContent.trim();
                         if (text.includes('모델번호')) {
-                            model_number = text;
+                            full_text = text;
+                            const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                            const matches = text.match(pattern);
+                            
+                            if (matches) {
+                                model_numbers = [...new Set(matches)];
+                            }
                             break;
                         }
                     }
                     
-                    // 2. 못 찾으면 전체 요소 검색
-                    if (!model_number) {
+                    // 못 찾으면 전체 요소 검색
+                    if (model_numbers.length === 0) {
                         const allElements = document.querySelectorAll('*');
+                        
                         for (let el of allElements) {
                             const text = el.textContent;
-                            if (text && text.includes('모델번호') && text.length < 100) {
-                                model_number = text.trim();
-                                break;
+                            if (text && text.includes('모델번호') && text.length < 200) {
+                                full_text = text.trim();
+                                const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                                const matches = text.match(pattern);
+                                
+                                if (matches) {
+                                    model_numbers = [...new Set(matches)];
+                                    break;
+                                }
                             }
                         }
                     }
                     
                     return {
-                        full_text: model_number,
-                        clean_number: model_number.replace('모델번호', '').trim()
+                        found: model_numbers.length > 0,
+                        model_numbers: model_numbers,
+                        full_text: full_text
                     };
                 }
             """)
             
+            model_found = model_info.get('found', False)
+            model_numbers = model_info.get('model_numbers', [])
             model_text = model_info.get('full_text', '')
-            model_clean = model_info.get('clean_number', '')
             
-            print(f"  📋 모델번호 텍스트: {model_text}")
-            print(f"  🔢 모델번호만: {model_clean}")
+            print(f"  📋 발견된 모델번호 텍스트: {model_text}")
+            print(f"  📋 추출된 모델번호: {model_numbers}")
             
-            # 상품번호 포함 여부 확인 (대소문자 무시)
-            if first_product.upper() in model_text.upper():
-                print(f"  ✅ 모델번호 일치! ({first_product})")
-                print(f"\n  {'='*50}")
-                print(f"  🎉 상품 찾기 성공!")
-                print(f"  📍 상품번호: {first_product}")
-                print(f"  📍 모델번호: {model_text}")
-                print(f"  📍 URL: {product_url}")
-                print(f"  {'='*50}\n")
-                
-                progress_queue.put({
-                    'event': 'message',
-                    'data': {'message': f'[4단계 완료] 모델번호 일치 ✅'}
-                })
-                
-                # 멈춤 (성공)
-                print("\n" + "="*60)
-                print("⏹️  4단계까지 완료! 모델번호 일치 확인")
-                print("="*60)
-                print("💡 브라우저 확인:")
-                print(f"   ✅ 검색어: {first_product}")
-                print(f"   ✅ 로그인 상태: 로그인됨")
-                print(f"   ✅ 첫 번째 상품 클릭됨")
-                print(f"   ✅ 모델번호: {model_text}")
-                print(f"   ✅ 일치 여부: 일치!")
-                print("\n💡 다음 단계:")
-                print("   → 상품 상세 정보 추출")
-                print("="*60 + "\n")
-                
-                progress_queue.put({
-                    'event': 'complete',
-                    'data': {
-                        'message': f'✅ 상품 찾기 성공 - {first_product}',
-                        'product_code': first_product,
-                        'model_number': model_clean,
-                        'url': product_url,
-                        'match': True
-                    }
-                })
-                
+            # 상품번호 매칭 확인
+            is_match = False
+            matched_model = None
+            
+            if model_found and model_numbers:
+                for model in model_numbers:
+                    if first_product.upper() == model.upper():
+                        is_match = True
+                        matched_model = model
+                        print(f"  ✅ 모델번호 일치! ({first_product} == {model})")
+                        break
+            
+            if not is_match and model_text:
+                if first_product.upper() in model_text.upper():
+                    is_match = True
+                    matched_model = first_product
+                    print(f"  ✅ 모델번호 포함 일치! ({first_product} in {model_text})")
+            
+            if is_match:
+                print(f"  ✅ [5단계 완료] 모델번호 확인 완료!")
+                progress_queue.put({'event': 'message', 'data': {'message': f'[5단계 완료] ✅'}})
             else:
                 print(f"  ❌ 모델번호 불일치!")
-                print(f"  🔍 찾는 상품: {first_product}")
-                print(f"  📋 페이지 모델: {model_text}")
+                progress_queue.put({'event': 'message', 'data': {'message': f'[5단계] ❌ 불일치'}})
                 
-                progress_queue.put({
-                    'event': 'message',
-                    'data': {'message': f'[4단계] 모델번호 불일치'}
-                })
-                
-                # 멈춤 (불일치)
-                print("\n" + "="*60)
-                print("⏹️  4단계까지 완료! 모델번호 불일치")
-                print("="*60)
-                print("💡 다음 단계:")
-                print("   → 뒤로가기")
-                print("   → 두 번째 상품 클릭")
-                print("="*60 + "\n")
-                
-                progress_queue.put({
-                    'event': 'complete',
-                    'data': {
-                        'message': f'⚠️ 모델번호 불일치 - {first_product}',
-                        'product_code': first_product,
-                        'model_number': model_clean,
-                        'url': product_url,
-                        'match': False
-                    }
-                })
-            
         except Exception as e:
             error_msg = f"모델번호 확인 실패: {e}"
             print(f"  ❌ {error_msg}")
@@ -2299,22 +2277,158 @@ def background_kream_search(task_id, product_codes, progress_queue):
             traceback.print_exc()
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
         
+        # ==========================================
+        # 6단계: 거래 정보 추출
+        # ==========================================
+        print(f"\n🎯 [6단계] 거래 정보 추출")
+        progress_queue.put({'event': 'message', 'data': {'message': '[6단계] 거래 정보 추출 중...'}})
+        
+        try:
+            print("  → 거래 테이블에서 데이터 추출 중...")
+            
+            trade_info = page.evaluate("""
+                () => {
+                    let prices = [];
+                    let trade_dates = [];
+                    
+                    const allElements = document.querySelectorAll('*');
+                    
+                    for (let el of allElements) {
+                        const text = el.textContent.trim();
+                        const priceMatch = text.match(/^([0-9,]+)원$/);
+                        
+                        if (priceMatch && prices.length < 5) {
+                            const priceText = priceMatch[1].replace(/,/g, '');
+                            const price = parseInt(priceText);
+                            
+                            if (price >= 10000 && price <= 1000000000) {
+                                prices.push(price);
+                            }
+                        }
+                    }
+                    
+                    for (let el of allElements) {
+                        const text = el.textContent.trim();
+                        
+                        if (text.match(/^\\d{2}\\/\\d{2}\\/\\d{2}$|^\\d+일 전$|^방금 전$|^오늘$|^어제$/)) {
+                            if (trade_dates.length === 0) {
+                                trade_dates.push(text);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    let avg_price = 0;
+                    if (prices.length > 0) {
+                        const sum = prices.reduce((a, b) => a + b, 0);
+                        avg_price = Math.round(sum / prices.length);
+                    }
+                    
+                    return {
+                        prices: prices.slice(0, 5),
+                        count: Math.min(prices.length, 5),
+                        avg_price: avg_price,
+                        first_trade_date: trade_dates.length > 0 ? trade_dates[0] : ''
+                    };
+                }
+            """)
+            
+            prices = trade_info.get('prices', [])
+            count = trade_info.get('count', 0)
+            avg_price = trade_info.get('avg_price', 0)
+            first_trade_date = trade_info.get('first_trade_date', 'N/A')
+            
+            print(f"  📋 추출된 거래가: {prices}")
+            print(f"  📊 거래가 개수: {count}개")
+            print(f"  💰 평균가: {avg_price:,}원")
+            print(f"  📅 첫 번째 거래일: {first_trade_date}")
+            
+            # 포맷팅
+            kream_avg_price = f"{avg_price:,}원" if avg_price > 0 else "N/A"
+            kream_sales = first_trade_date if first_trade_date else "N/A"
+            
+            # 결과 전송
+            if count > 0:
+                print(f"\n  {'='*50}")
+                print(f"  🎉 거래 정보 추출 완료!")
+                print(f"  📍 상품번호: {first_product}")
+                print(f"  📍 인덱스: {first_index}")
+                print(f"  💰 크림 평균가: {kream_avg_price}")
+                print(f"  📦 크림 판매량: {kream_sales}")
+                print(f"  {'='*50}\n")
+                
+                # 프론트엔드로 데이터 전송
+                print(f"  📡 프론트엔드로 데이터 전송 중...")
+                print(f"     → 인덱스: {first_index}")
+                print(f"     → 평균가: {kream_avg_price}")
+                print(f"     → 판매량: {kream_sales}")
+                
+                progress_queue.put({
+                    'event': 'result',
+                    'data': {
+                        'index': first_index,
+                        'result': {
+                            'success': True,
+                            'kream_data': {
+                                'avg_price': kream_avg_price,
+                                'sales': kream_sales
+                            }
+                        }
+                    }
+                })
+                
+                print(f"  ✅ 프론트엔드로 전송 완료!")
+                
+                progress_queue.put({
+                    'event': 'complete',
+                    'data': {
+                        'message': f'✅ 검색 완료 - {first_product}',
+                        'total': 1
+                    }
+                })
+                
+            else:
+                print(f"\n  {'='*50}")
+                print(f"  ⚠️ 거래가를 찾을 수 없습니다")
+                print(f"  {'='*50}\n")
+                
+                progress_queue.put({
+                    'event': 'result',
+                    'data': {
+                        'index': first_index,
+                        'result': {
+                            'success': False,
+                            'kream_data': None
+                        }
+                    }
+                })
+                
+                progress_queue.put({
+                    'event': 'complete',
+                    'data': {
+                        'message': f'⚠️ 거래가 없음 - {first_product}',
+                        'total': 1
+                    }
+                })
+            
+        except Exception as e:
+            error_msg = f"거래 정보 추출 실패: {e}"
+            print(f"  ❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+    
     except Exception as e:
         error_msg = f"오류 발생: {str(e)}"
         print(f"\n❌ {error_msg}")
         import traceback
         traceback.print_exc()
-        
-        progress_queue.put({
-            'event': 'error',
-            'data': {'error': error_msg}
-        })
+        progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
     
     finally:
         print("\n🔚 검색 프로세스 종료")
-# ==========================================
-# close_browser_safe() 함수
-# ==========================================
+
+
 def close_browser_safe():
     """브라우저 안전하게 종료"""
     global browser, context, page
@@ -2347,7 +2461,6 @@ def close_browser_safe():
     except Exception as e:
         print(f"  ⚠️ 브라우저 종료 실패: {e}")
     
-    # 전역 변수 초기화
     browser = None
     context = None
     page = None
