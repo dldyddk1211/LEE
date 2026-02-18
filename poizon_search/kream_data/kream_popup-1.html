@@ -190,6 +190,34 @@
             display: flex;
             gap: 10px;
         }
+
+        /* 제품명 스타일 */
+        .product-name:hover {
+            white-space: normal !important;
+            overflow: visible !important;
+            position: relative;
+            z-index: 10;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            padding: 8px !important;
+        }
+
+        /* 크림 데이터 강조 */
+        .kream-avg-price {
+            color: #4CAF50 !important;
+            font-weight: 600;
+        }
+
+        .kream-sales {
+            color: #2196F3 !important;
+            font-weight: 600;
+        }
+
+        /* 상태 컬럼 숨김 */
+        .status-cell {
+            display: none !important;
+        }
+
     </style>
 </head>
 <body>
@@ -219,19 +247,18 @@
                         <th style="width: 80px;">이미지</th>
                         <th style="width: 100px;">크림</th>
                         <th style="width: 150px;">상품번호</th>
-                        <th style="width: 300px;">제품명</th>
+                        <th style="width: 250px;">제품명</th>  <!-- 축소! -->
                         <th style="width: 120px;">평균거래가</th>
                         <th style="width: 120px;">중국노출가</th>
                         <th style="width: 100px;">판매량</th>
-                        <th style="width: 100px;">현지판매량</th>
-                        <th style="width: 120px;">크림평균가</th>
-                        <th style="width: 100px;">크림판매량</th>
-                        <th style="width: 100px;">비교</th>
+                        <th style="width: 120px;">크림평균가</th>  <!-- 새로 추가! -->
+                        <th style="width: 100px;">크림판매량</th>  <!-- 새로 추가! -->
+                        <th style="width: 100px; display: none;">상태</th>  <!-- 숨김! -->
                     </tr>
                 </thead>
                 <tbody id="productTableBody">
                     <tr>
-                        <td colspan="12" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
                             ⏳ 데이터 로딩 중...
                         </td>
                     </tr>
@@ -353,7 +380,7 @@
             const tbody = document.getElementById('productTableBody');
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="12" style="text-align: center; padding: 50px;">
+                    <td colspan="9" style="text-align: center; padding: 50px;">
                         <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
                         <div style="font-size: 18px; font-weight: 600; color: #dc3545; margin-bottom: 10px;">
                             데이터가 없습니다
@@ -365,6 +392,8 @@
                 </tr>
             `;
         }
+
+
         function displayProducts(data) {
             const tbody = document.getElementById('productTableBody');
             const totalCount = document.getElementById('totalCount');
@@ -386,7 +415,7 @@
                 }
                 
                 return `
-                <tr id="row-${index}" data-index="${index}">
+                <tr id="row-${index}" data-index="${index}" data-product-code="${item.상품번호}">
                     <td>${index + 1}</td>
                     <td>
                         ${item.이미지URL ? 
@@ -394,82 +423,32 @@
                             '-'}
                     </td>
                     <td>
-                        <button class="kream-btn" disabled style="opacity: 0.5; cursor: not-allowed;" title="전체 검색 버튼을 사용하세요" id="btn-${index}">
+                        <button class="kream-btn" disabled style="opacity: 0.5; cursor: not-allowed;" title="전체 검색 버튼을 사용하세요">
                             🔍 검색
                         </button>
                     </td>
                     <td>${item.상품번호 || '-'}</td>
-                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;" title="${item.제품명 || '-'}">
+                    <td class="product-name" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.제품명 || '-'}">
                         ${item.제품명 || '-'}
                     </td>
                     <td>${item.최근30일평균거래가 || '-'}</td>
-                    <td class="cn-price" id="cn-price-${index}">${item.중국노출 || '-'}</td>
-                    <td>${item.포이즌판매량 || '0'}개</td>
+                    <td>${item.중국노출 || '-'}</td>
                     <td>${item.중국시장최근30일판매량 ? item.중국시장최근30일판매량.toLocaleString() + '개' : '0개'}</td>
                     <td class="kream-avg-price" id="kream-avg-${index}" style="color: #4CAF50; font-weight: 600;">-</td>
                     <td class="kream-sales" id="kream-sales-${index}" style="color: #2196F3; font-weight: 600;">-</td>
-                    <td class="comparison" id="comparison-${index}" style="font-weight: 600;">-</td>
-            </tr>
-
-
-
-            `}).join('');
+                    <td class="status-cell" style="display: none;">
+                        <span class="status status-pending" id="status-${index}">대기</span>
+                    </td>
+                </tr>
+                `;            
+                
+            }).join('');
             
             addDebugLog(`   ✅ ${data.length}행 HTML 생성 완료`, '#0f0');
+            
+            // 전역 변수에 저장 (검색 결과 업데이트용)
+            window.collectedData = data;
         }
-        async function startKreamSearch() {
-            if (collectedData.length === 0) {
-                alert('검색할 상품이 없습니다.');
-                return;
-            }
-            
-            const btn = document.getElementById('searchBtn');
-            btn.disabled = true;
-            btn.textContent = '검색 준비 중...';
-            
-            addDebugLog('🔍 크림 검색 시작', '#0ff');
-            
-            try {
-                // 상품번호 리스트 추출
-                const productCodes = collectedData
-                    .map(item => item.상품번호)
-                    .filter(code => code && code !== '-');
-                
-                addDebugLog(`📦 검색할 상품: ${productCodes.length}개`, '#0ff');
-                
-                // 서버로 전송
-                const response = await fetch('/start_kream_search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        product_codes: productCodes,
-                        total_count: collectedData.length
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    addDebugLog(`❌ 요청 실패: ${result.error}`, '#f00');
-                    alert('검색 시작 실패: ' + result.error);
-                    btn.disabled = false;
-                    btn.textContent = '🔍 크림 검색 시작';
-                    return;
-                }
-                
-                addDebugLog(`✅ 백그라운드 검색 시작`, '#0f0');
-                btn.textContent = '🔄 검색 중...';
-                
-                // SSE 스트림 연결
-                startProgressStream(result.task_id);
-                
-            } catch (error) {
-                addDebugLog(`❌ 오류: ${error.message}`, '#f00');
-                btn.disabled = false;
-                btn.textContent = '🔍 크림 검색 시작';
-            }
-        }
-
         async function searchKream(productCode, index) {
             const statusEl = document.getElementById(`status-${index}`);
             const btnEl = document.getElementById(`btn-${index}`);
@@ -560,86 +539,165 @@
                 statusEl.textContent = text;
             }
         }
-
-        // 테이블 행에 검색 결과 표시
-
         function updateRowResult(index, result) {
-            const statusEl = document.getElementById(`status-${index}`);
+            addDebugLog(`[updateRowResult] index=${index}`, '#0ff');
             
-            if (!statusEl) return;
+            // 상태 업데이트 (숨겨져 있지만 데이터는 유지)
+            const statusSpan = document.getElementById(`status-${index}`);
+            if (statusSpan) {
+                if (result.success) {
+                    statusSpan.textContent = '완료';
+                    statusSpan.className = 'status status-success';
+                } else {
+                    statusSpan.textContent = '실패';
+                    statusSpan.className = 'status status-error';
+                }
+            }
             
-            if (result.success) {
-                statusEl.className = 'status status-done';
-                statusEl.textContent = '완료';
+            // ==========================================
+            // ✅ 크림 데이터 업데이트 (새로 추가!)
+            // ==========================================
+            if (result.success && result.kream_data) {
+                addDebugLog(`   → 크림 데이터 업데이트: ${JSON.stringify(result.kream_data)}`, '#0f0');
                 
-                // ==========================================
-                // 크림 데이터 업데이트
-                // ==========================================
-                if (result.kream_data) {
-                    // 크림 평균가
-                    const avgPriceEl = document.getElementById(`kream-avg-${index}`);
-                    let kreamPrice = 0;
-                    
-                    if (avgPriceEl && result.kream_data.avg_price) {
-                        avgPriceEl.textContent = result.kream_data.avg_price;
-                        
-                        // 숫자만 추출 (₩150,000 → 150000)
-                        const priceStr = result.kream_data.avg_price.replace(/[₩,]/g, '');
-                        kreamPrice = parseInt(priceStr) || 0;
-                    }
-                    
-                    // 크림 판매량
-                    const salesEl = document.getElementById(`kream-sales-${index}`);
-                    if (salesEl && result.kream_data.sales) {
-                        salesEl.textContent = result.kream_data.sales + '개';
-                    }
-                    
-                    // ==========================================
-                    // 비교 계산 (중국노출가 - 크림평균가)
-                    // ==========================================
-                    const cnPriceEl = document.getElementById(`cn-price-${index}`);
-                    const comparisonEl = document.getElementById(`comparison-${index}`);
-                    
-                    if (cnPriceEl && comparisonEl && kreamPrice > 0) {
-                        const cnPriceText = cnPriceEl.textContent;
-                        
-                        // 중국 가격 숫자 추출
-                        const cnPriceStr = cnPriceText.replace(/[₩,원]/g, '');
-                        const cnPrice = parseInt(cnPriceStr) || 0;
-                        
-                        if (cnPrice > 0) {
-                            const diff = cnPrice - kreamPrice;
-                            const diffFormatted = diff.toLocaleString();
-                            
-                            if (diff > 0) {
-                                // 중국이 더 비쌈 (유리함)
-                                comparisonEl.textContent = `+₩${diffFormatted}`;
-                                comparisonEl.style.color = '#4CAF50'; // 녹색
-                                comparisonEl.title = '중국이 더 비쌈 (유리)';
-                            } else if (diff < 0) {
-                                // 크림이 더 비쌈 (불리함)
-                                comparisonEl.textContent = `₩${diffFormatted}`;
-                                comparisonEl.style.color = '#f44336'; // 빨간색
-                                comparisonEl.title = '크림이 더 비쌈 (불리)';
-                            } else {
-                                // 같음
-                                comparisonEl.textContent = '₩0';
-                                comparisonEl.style.color = '#666';
-                                comparisonEl.title = '가격 동일';
-                            }
-                            
-                            addDebugLog(`   → 비교: 중국(₩${cnPrice.toLocaleString()}) - 크림(₩${kreamPrice.toLocaleString()}) = ₩${diffFormatted}`, '#0ff');
-                        }
-                    }
+                // 크림 평균 거래가
+                const avgPriceCell = document.getElementById(`kream-avg-${index}`);
+                if (avgPriceCell && result.kream_data.avg_price) {
+                    avgPriceCell.textContent = result.kream_data.avg_price;
+                    addDebugLog(`   → 평균가: ${result.kream_data.avg_price}`, '#0f0');
+                }
+                
+                // 크림 판매량
+                const salesCell = document.getElementById(`kream-sales-${index}`);
+                if (salesCell && result.kream_data.sales) {
+                    salesCell.textContent = result.kream_data.sales + '개';
+                    addDebugLog(`   → 판매량: ${result.kream_data.sales}개`, '#0f0');
                 }
             } else {
-                statusEl.className = 'status';
-                statusEl.style.background = '#f8d7da';
-                statusEl.style.color = '#721c24';
-                statusEl.textContent = '실패';
+                addDebugLog(`   ⚠️ 크림 데이터 없음`, '#ff0');
             }
-        }      
+        }
+     
+        // ==========================================
+        // 개별 상품 크림 검색
+        // ==========================================
+        function searchSingleKream(productCode, index) {
+            addDebugLog(`🔍 개별 검색: ${productCode}`, '#0ff');
+            
+            const btn = document.getElementById(`btn-${index}`);
+            const statusEl = document.getElementById(`status-${index}`);
+            
+            // 버튼 비활성화
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '검색중...';
+            }
+            
+            // 상태 업데이트
+            if (statusEl) {
+                statusEl.className = 'status status-searching';
+                statusEl.textContent = '검색중';
+            }
+            
+            // 백그라운드 검색 시작 (1개만)
+            fetch('/start_kream_search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_codes: [productCode],  // 1개만
+                    total_count: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addDebugLog(`✅ 개별 검색 시작: ${data.task_id}`, '#0f0');
+                    
+                    // SSE 스트림 연결 (개별용)
+                    startSingleProgressStream(data.task_id, index);
+                } else {
+                    addDebugLog(`❌ 개별 검색 실패: ${data.error}`, '#f00');
+                    
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '🔍 검색';
+                    }
+                    
+                    if (statusEl) {
+                        statusEl.className = 'status status-error';
+                        statusEl.textContent = '실패';
+                    }
+                }
+            })
+            .catch(error => {
+                addDebugLog(`❌ 오류: ${error.message}`, '#f00');
+                
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🔍 검색';
+                }
+                
+                if (statusEl) {
+                    statusEl.className = 'status status-error';
+                    statusEl.textContent = '오류';
+                }
+            });
+        }
 
+        // 개별 검색용 SSE 스트림
+        function startSingleProgressStream(taskId, targetIndex) {
+            const eventSource = new EventSource(`/kream_search_progress/${taskId}`);
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    switch(data.event) {
+                        case 'result':
+                            const { index, result } = data.data;
+                            updateRowResult(targetIndex, result);
+                            break;
+                            
+                        case 'complete':
+                            addDebugLog('✅ 개별 검색 완료!', '#0f0');
+                            eventSource.close();
+                            
+                            const btn = document.getElementById(`btn-${targetIndex}`);
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.textContent = '✅ 완료';
+                            }
+                            break;
+                            
+                        case 'error':
+                            addDebugLog(`❌ 오류: ${data.data.error}`, '#f00');
+                            eventSource.close();
+                            
+                            const btnErr = document.getElementById(`btn-${targetIndex}`);
+                            if (btnErr) {
+                                btnErr.disabled = false;
+                                btnErr.textContent = '❌ 실패';
+                            }
+                            break;
+                    }
+                } catch (error) {
+                    addDebugLog(`❌ SSE 파싱 오류: ${error.message}`, '#f00');
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                addDebugLog('❌ SSE 오류', '#f00');
+                eventSource.close();
+                
+                const btn = document.getElementById(`btn-${targetIndex}`);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🔍 검색';
+                }
+            };
+        }
         // ==========================================
         // 창 닫기 + 백그라운드 작업 중단
         // ==========================================
@@ -686,6 +744,7 @@
                 addDebugLog('❌ 사용자가 취소함', '#888');
             }
         }
+
     </script>
 </body>
 </html>

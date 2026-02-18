@@ -910,7 +910,7 @@ if __name__ == "__main__":
 # 백그라운드 검색 함수 (app.py에서 호출)
 # ==========================================
 def background_kream_search(task_id, product_codes, progress_queue):
-    """백그라운드 크림 검색 - 매번 새 브라우저"""
+    """백그라운드 크림 검색 - 6단계까지 (Enter까지)"""
     global stop_flag, browser, context, page
     
     try:
@@ -921,10 +921,20 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         stop_flag = False
         
+        # 첫 번째 상품번호
+        first_product = product_codes[0] if product_codes else None
+        if not first_product:
+            error_msg = "검색할 상품이 없습니다"
+            print(f"❌ {error_msg}")
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+            return
+        
+        print(f"🎯 첫 번째 상품: {first_product}")
+        
         # ==========================================
         # 준비: 기존 브라우저 완전 종료
         # ==========================================
-        print("🎯 [준비] 기존 브라우저 확인 및 종료")
+        print("\n🎯 [준비] 기존 브라우저 확인 및 종료")
         progress_queue.put({
             'event': 'message',
             'data': {'message': '[준비] 기존 브라우저 종료 중...'}
@@ -936,17 +946,11 @@ def background_kream_search(task_id, product_codes, progress_queue):
                 browser.close()
                 print("  ✅ 기존 브라우저 종료 완료")
             except Exception as e:
-                print(f"  ⚠️ 브라우저 종료 실패 (이미 종료됨): {e}")
+                print(f"  ⚠️ 브라우저 종료 실패: {e}")
         
-        # 전역 변수 초기화
         browser = None
         context = None
         page = None
-        
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[준비 완료] 기존 브라우저 종료 ✅'}
-        })
         
         # ==========================================
         # 1단계: 새 브라우저 열기
@@ -959,9 +963,8 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         playwright = sync_playwright().start()
         
-        # 브라우저 실행 (화면 보임)
         browser = playwright.chromium.launch(
-            headless=False,  # ← False: 화면 보임 (디버깅용)
+            headless=False,
             channel='chrome',
             args=[
                 '--window-size=960,540',
@@ -980,120 +983,175 @@ def background_kream_search(task_id, product_codes, progress_queue):
         page = context.new_page()
         print("  ✅ 새 브라우저 열림 (오른쪽 위)")
         
-        # 메인 페이지 접속
+        # 메인 페이지
         print("  📱 크림 메인 페이지로 이동...")
         page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
         time.sleep(2)
         
         print("  ✅ [1단계 완료] 메인 페이지 로드 성공!")
-        
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[1단계 완료] 메인 페이지 로드 ✅'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': '[1단계 완료] ✅'}})
         
         # ==========================================
         # 2단계: 검색 버튼 찾기
         # ==========================================
         print("\n🎯 [2단계] 검색 버튼(돋보기) 찾기")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[2단계] 검색 버튼 찾기 중...'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': '[2단계] 검색 버튼 찾기 중...'}})
         
-        # 실제 크림 버튼 선택자
         button_selectors = [
             'button.btn_search.header-search-button',
             'button.btn_search',
             'button.header-search-button',
-            'button[data-v-32ec60ef]',
-            'button:has(svg)',
         ]
         
         search_button = None
-        found_btn_selector = None
-        
         for selector in button_selectors:
             try:
-                print(f"  → 시도: {selector}")
                 temp = page.locator(selector).first
                 if temp.count() > 0 and temp.is_visible():
                     search_button = temp
-                    found_btn_selector = selector
-                    print(f"  ✅ 검색 버튼 발견! (선택자: {selector})")
+                    print(f"  ✅ 검색 버튼 발견! ({selector})")
                     break
-            except Exception as e:
-                print(f"  ⚠️ 오류: {e}")
+            except:
                 continue
         
         if not search_button:
             error_msg = "검색 버튼을 찾을 수 없습니다"
-            print(f"\n  ❌ {error_msg}")
-            
-            # 스크린샷
-            try:
-                screenshot_path = f"error_no_button_{int(time.time())}.png"
-                page.screenshot(path=screenshot_path)
-                print(f"  📸 스크린샷 저장: {screenshot_path}")
-            except:
-                pass
-            
-            progress_queue.put({
-                'event': 'error',
-                'data': {'error': error_msg}
-            })
+            print(f"  ❌ {error_msg}")
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
         
-        print("  ✅ [2단계 완료] 검색 버튼 찾기 성공!")
-        
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[2단계 완료] 검색 버튼 찾기 성공 ✅'}
-        })
+        print("  ✅ [2단계 완료]")
+        progress_queue.put({'event': 'message', 'data': {'message': '[2단계 완료] ✅'}})
         
         # ==========================================
         # 3단계: 검색 버튼 클릭
         # ==========================================
         print("\n🎯 [3단계] 검색 버튼 클릭")
-        progress_queue.put({
-            'event': 'message',
-            'data': {'message': '[3단계] 검색 버튼 클릭 중...'}
-        })
+        progress_queue.put({'event': 'message', 'data': {'message': '[3단계] 검색 버튼 클릭 중...'}})
         
-        # 버튼 클릭
         print("  🖱️  검색 버튼 클릭...")
         search_button.click()
-        
-        # 클릭 후 대기
         time.sleep(0.8)
         
         print("  ✅ [3단계 완료] 검색 버튼 클릭 성공!")
+        progress_queue.put({'event': 'message', 'data': {'message': '[3단계 완료] ✅'}})
         
+        # ==========================================
+        # 4단계: 검색창 찾기
+        # ==========================================
+        print("\n🎯 [4단계] 검색창 찾기")
+        progress_queue.put({'event': 'message', 'data': {'message': '[4단계] 검색창 찾기 중...'}})
+        
+        input_selectors = [
+            'input[type="search"]',
+            'input[placeholder*="검색"]',
+            'input.search_input',
+            '.search-input-wrapper input',
+        ]
+        
+        search_input = None
+        found_input_selector = None
+        
+        for selector in input_selectors:
+            try:
+                print(f"  → 시도: {selector}")
+                temp = page.locator(selector).first
+                if temp.count() > 0 and temp.is_visible():
+                    search_input = temp
+                    found_input_selector = selector
+                    print(f"  ✅ 검색창 발견! ({selector})")
+                    break
+            except:
+                continue
+        
+        if not search_input:
+            error_msg = "검색창을 찾을 수 없습니다"
+            print(f"  ❌ {error_msg}")
+            
+            # 스크린샷
+            try:
+                page.screenshot(path=f"error_no_input_{int(time.time())}.png")
+                print(f"  📸 스크린샷 저장됨")
+            except:
+                pass
+            
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+            return
+        
+        print("  ✅ [4단계 완료] 검색창 찾기 성공!")
+        progress_queue.put({'event': 'message', 'data': {'message': '[4단계 완료] ✅'}})
+        
+        # ==========================================
+        # 5단계: 검색어 입력
+        # ==========================================
+        print(f"\n🎯 [5단계] 검색어 입력: {first_product}")
         progress_queue.put({
             'event': 'message',
-            'data': {'message': '[3단계 완료] 검색 버튼 클릭 성공 ✅'}
+            'data': {'message': f'[5단계] 검색어 입력 중... ({first_product})'}
         })
+        
+        # 검색창 클릭 및 초기화
+        print("  → 검색창 클릭...")
+        search_input.click()
+        time.sleep(0.3)
+        
+        print("  → 기존 내용 지우기...")
+        page.keyboard.press("Control+A")
+        page.keyboard.press("Delete")
+        time.sleep(0.2)
+        
+        # 한 글자씩 타이핑 (포이즌 방식)
+        print(f"  ⌨️  타이핑 시작: '{first_product}'")
+        for i, char in enumerate(first_product, 1):
+            search_input.type(char, delay=50)  # 50ms 간격
+            if i % 5 == 0:  # 5글자마다 로그
+                print(f"    [{i}/{len(first_product)}] '{first_product[:i]}'")
+        
+        print(f"  ✅ 타이핑 완료: '{first_product}'")
+        time.sleep(0.3)
+        
+        print("  ✅ [5단계 완료] 검색어 입력 성공!")
+        progress_queue.put({
+            'event': 'message',
+            'data': {'message': f'[5단계 완료] "{first_product}" 입력 ✅'}
+        })
+        
+        # ==========================================
+        # 6단계: Enter 키 입력
+        # ==========================================
+        print("\n🎯 [6단계] Enter 키 입력 (검색 실행)")
+        progress_queue.put({'event': 'message', 'data': {'message': '[6단계] 검색 실행 중...'}})
+        
+        print("  ⌨️  Enter 키 입력...")
+        page.keyboard.press("Enter")
+        
+        print("  ⏱️  검색 결과 대기 중... (2초)")
+        time.sleep(2)
+        
+        print("  ✅ [6단계 완료] 검색 실행 성공!")
+        progress_queue.put({'event': 'message', 'data': {'message': '[6단계 완료] 검색 실행 ✅'}})
         
         # ==========================================
         # ⏹️ 여기서 멈춤!
         # ==========================================
         print("\n" + "="*60)
-        print("⏹️  3단계까지 완료! 여기서 멈춥니다.")
+        print("⏹️  6단계까지 완료! 여기서 멈춥니다.")
         print("="*60)
         print("💡 브라우저 확인:")
-        print("   ✅ 새 브라우저가 열렸습니다")
-        print("   ✅ 돋보기 버튼을 클릭했습니다")
-        print("   ✅ 검색창이 나타났나요?")
-        print(f"   ✅ 버튼 선택자: {found_btn_selector}")
-        print("\n💡 브라우저 종료:")
-        print("   → 팝업의 '창 닫기' 버튼으로 종료하세요")
+        print(f"   ✅ 검색어: {first_product}")
+        print("   ✅ Enter 키 입력됨")
+        print("   ✅ 검색 결과 페이지가 보이나요?")
+        print("\n💡 다음 단계:")
+        print("   → 첫 번째 검색 결과 찾기")
+        print("   → 상품 페이지로 이동")
         print("="*60 + "\n")
         
         progress_queue.put({
             'event': 'complete',
             'data': {
-                'message': '✅ 3단계까지 완료 - 검색 버튼 클릭됨!',
-                'button_selector': found_btn_selector,
+                'message': f'✅ 6단계까지 완료 - "{first_product}" 검색됨!',
+                'product_code': first_product,
+                'input_selector': found_input_selector,
                 'total_processed': 0
             }
         })
@@ -1109,7 +1167,6 @@ def background_kream_search(task_id, product_codes, progress_queue):
             'event': 'error',
             'data': {'error': str(e)}
         })
-
 
 # ==========================================
 # 추가: close_browser_safe() 함수
