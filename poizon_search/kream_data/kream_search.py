@@ -910,7 +910,7 @@ if __name__ == "__main__":
 # 백그라운드 검색 함수 (app.py에서 호출)
 # ==========================================
 def background_kream_search(task_id, product_codes, progress_queue):
-    """백그라운드 크림 검색 - 브라우저 재사용 또는 새로 열기"""
+    """백그라운드 크림 검색 - 매번 새 브라우저"""
     global stop_flag, browser, context, page
     
     try:
@@ -922,79 +922,74 @@ def background_kream_search(task_id, product_codes, progress_queue):
         stop_flag = False
         
         # ==========================================
-        # 1단계: 메인 페이지 열기 (또는 재사용)
+        # 준비: 기존 브라우저 완전 종료
         # ==========================================
-        print("🎯 [1단계] 크림 브라우저 확인")
+        print("🎯 [준비] 기존 브라우저 확인 및 종료")
         progress_queue.put({
             'event': 'message',
-            'data': {'message': '[1단계] 브라우저 확인 중...'}
+            'data': {'message': '[준비] 기존 브라우저 종료 중...'}
         })
         
-        # 브라우저가 이미 열려있는지 확인
-        browser_exists = False
-        if browser is not None and page is not None:
+        if browser is not None:
             try:
-                # 페이지가 살아있는지 테스트
-                page.url
-                browser_exists = True
-                print("  ✅ 기존 브라우저 재사용")
-            except:
-                # 브라우저가 죽어있으면 None으로 초기화
-                print("  ⚠️ 기존 브라우저 종료됨, 새로 열기")
-                browser = None
-                context = None
-                page = None
+                print("  → 기존 브라우저 종료 중...")
+                browser.close()
+                print("  ✅ 기존 브라우저 종료 완료")
+            except Exception as e:
+                print(f"  ⚠️ 브라우저 종료 실패 (이미 종료됨): {e}")
         
-        # 브라우저가 없으면 새로 열기
-        if browser is None:
-            print("  📱 새 브라우저 열기...")
-            playwright = sync_playwright().start()
-            
-            browser = playwright.chromium.launch(
-                headless=False,
-                channel='chrome',
-                args=[
-                    '--window-size=960,540',
-                    '--window-position=960,0',
-                    '--disable-blink-features=AutomationControlled'
-                ]
-            )
-            
-            context = browser.new_context(
-                viewport=None,
-                no_viewport=True,
-                locale='ko-KR',
-                timezone_id='Asia/Seoul'
-            )
-            
-            page = context.new_page()
-            print("  ✅ 브라우저 열림 (오른쪽 위)")
-            
-            # 메인 페이지 접속
-            print("  📱 크림 메인 페이지로 이동...")
-            page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
-            time.sleep(2)
-            
-            print("  ✅ [1단계 완료] 메인 페이지 로드 성공!")
-        else:
-            # 기존 브라우저 재사용
-            print("  🔄 기존 브라우저 재사용")
-            
-            # 현재 URL 확인
-            current_url = page.url
-            print(f"  → 현재 URL: {current_url[:50]}...")
-            
-            # 크림 메인이 아니면 이동
-            if 'kream.co.kr' not in current_url or 'search' in current_url:
-                print("  📱 크림 메인 페이지로 이동...")
-                page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
-                time.sleep(2)
-            
-            print("  ✅ [1단계 완료] 브라우저 준비됨!")
+        # 전역 변수 초기화
+        browser = None
+        context = None
+        page = None
         
         progress_queue.put({
             'event': 'message',
-            'data': {'message': '[1단계 완료] 브라우저 준비 ✅'}
+            'data': {'message': '[준비 완료] 기존 브라우저 종료 ✅'}
+        })
+        
+        # ==========================================
+        # 1단계: 새 브라우저 열기
+        # ==========================================
+        print("\n🎯 [1단계] 새 브라우저 열기")
+        progress_queue.put({
+            'event': 'message',
+            'data': {'message': '[1단계] 새 브라우저 열기 중...'}
+        })
+        
+        playwright = sync_playwright().start()
+        
+        # 브라우저 실행 (화면 보임)
+        browser = playwright.chromium.launch(
+            headless=False,  # ← False: 화면 보임 (디버깅용)
+            channel='chrome',
+            args=[
+                '--window-size=960,540',
+                '--window-position=960,0',
+                '--disable-blink-features=AutomationControlled'
+            ]
+        )
+        
+        context = browser.new_context(
+            viewport=None,
+            no_viewport=True,
+            locale='ko-KR',
+            timezone_id='Asia/Seoul'
+        )
+        
+        page = context.new_page()
+        print("  ✅ 새 브라우저 열림 (오른쪽 위)")
+        
+        # 메인 페이지 접속
+        print("  📱 크림 메인 페이지로 이동...")
+        page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
+        time.sleep(2)
+        
+        print("  ✅ [1단계 완료] 메인 페이지 로드 성공!")
+        
+        progress_queue.put({
+            'event': 'message',
+            'data': {'message': '[1단계 완료] 메인 페이지 로드 ✅'}
         })
         
         # ==========================================
@@ -1020,23 +1015,26 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         for selector in button_selectors:
             try:
+                print(f"  → 시도: {selector}")
                 temp = page.locator(selector).first
                 if temp.count() > 0 and temp.is_visible():
                     search_button = temp
                     found_btn_selector = selector
                     print(f"  ✅ 검색 버튼 발견! (선택자: {selector})")
                     break
-            except:
+            except Exception as e:
+                print(f"  ⚠️ 오류: {e}")
                 continue
         
         if not search_button:
             error_msg = "검색 버튼을 찾을 수 없습니다"
-            print(f"  ❌ {error_msg}")
+            print(f"\n  ❌ {error_msg}")
             
             # 스크린샷
             try:
-                page.screenshot(path=f"error_no_button_{int(time.time())}.png")
-                print(f"  📸 스크린샷 저장됨")
+                screenshot_path = f"error_no_button_{int(time.time())}.png"
+                page.screenshot(path=screenshot_path)
+                print(f"  📸 스크린샷 저장: {screenshot_path}")
             except:
                 pass
             
@@ -1050,7 +1048,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         progress_queue.put({
             'event': 'message',
-            'data': {'message': f'[2단계 완료] 검색 버튼 찾기 성공 ✅'}
+            'data': {'message': '[2단계 완료] 검색 버튼 찾기 성공 ✅'}
         })
         
         # ==========================================
@@ -1083,13 +1081,12 @@ def background_kream_search(task_id, product_codes, progress_queue):
         print("⏹️  3단계까지 완료! 여기서 멈춥니다.")
         print("="*60)
         print("💡 브라우저 확인:")
+        print("   ✅ 새 브라우저가 열렸습니다")
         print("   ✅ 돋보기 버튼을 클릭했습니다")
         print("   ✅ 검색창이 나타났나요?")
         print(f"   ✅ 버튼 선택자: {found_btn_selector}")
-        if browser_exists:
-            print("   🔄 기존 브라우저를 재사용했습니다")
-        else:
-            print("   🆕 새 브라우저를 열었습니다")
+        print("\n💡 브라우저 종료:")
+        print("   → 팝업의 '창 닫기' 버튼으로 종료하세요")
         print("="*60 + "\n")
         
         progress_queue.put({
@@ -1097,7 +1094,6 @@ def background_kream_search(task_id, product_codes, progress_queue):
             'data': {
                 'message': '✅ 3단계까지 완료 - 검색 버튼 클릭됨!',
                 'button_selector': found_btn_selector,
-                'browser_reused': browser_exists,
                 'total_processed': 0
             }
         })
@@ -1114,6 +1110,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
             'data': {'error': str(e)}
         })
 
+
 # ==========================================
 # 추가: close_browser_safe() 함수
 # ==========================================
@@ -1121,33 +1118,43 @@ def close_browser_safe():
     """브라우저 안전하게 종료"""
     global browser, context, page
     
+    print("\n🔒 브라우저 종료 중...")
+    
+    closed_count = 0
+    
     try:
         if page:
             page.close()
             print("  ✓ 페이지 종료")
-    except:
-        pass
+            closed_count += 1
+    except Exception as e:
+        print(f"  ⚠️ 페이지 종료 실패: {e}")
     
     try:
         if context:
             context.close()
             print("  ✓ 컨텍스트 종료")
-    except:
-        pass
+            closed_count += 1
+    except Exception as e:
+        print(f"  ⚠️ 컨텍스트 종료 실패: {e}")
     
     try:
         if browser:
             browser.close()
             print("  ✓ 브라우저 종료")
-    except:
-        pass
+            closed_count += 1
+    except Exception as e:
+        print(f"  ⚠️ 브라우저 종료 실패: {e}")
     
     # 전역 변수 초기화
     browser = None
     context = None
     page = None
     
-    print("✅ 브라우저 완전 종료")
+    if closed_count > 0:
+        print(f"✅ 브라우저 완전 종료 ({closed_count}개 객체)")
+    else:
+        print("ℹ️  브라우저가 이미 종료되어 있음")
 
 
 def stop_search():
