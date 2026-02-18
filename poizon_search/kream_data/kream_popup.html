@@ -208,6 +208,31 @@
             margin-bottom: 5px;
             line-height: 1.5;
         }
+        /* 비교 열 기본 스타일 */
+        td.comparison {
+            background-color: #f8f9fa;  /* 기본 연한 그레이 */
+            font-weight: 600;
+        }
+
+        /* 10,000원 이상 유리할 때 연한 녹색 */
+        td.comparison.profit-high {
+            background-color: #e8f5e9;  /* 연한 녹색 */
+        }
+
+        /* 호버 시 */
+        tr:hover td.comparison {
+            background-color: #e9ecef;
+        }
+
+        tr:hover td.comparison.profit-high {
+            background-color: #d4edda;  /* 호버 시 조금 더 진한 녹색 */
+        }
+        
+        /* 디버그 로그 패널 */
+        .debug-panel {
+            margin-top: 20px;
+            /* ... */
+        }
         .debug-time {
             color: #888;
         }
@@ -611,7 +636,7 @@
             // 3. 가격 비교 계산
             const cnPriceEl = document.getElementById(`cn-price-${index}`);
             const comparisonEl = document.getElementById(`comparison-${index}`);
-            
+
             if (cnPriceEl && comparisonEl && kreamPrice > 0) {
                 const cnPriceText = cnPriceEl.textContent;
                 const cnPriceStr = cnPriceText.replace(/[₩,원\s]/g, '');
@@ -621,11 +646,22 @@
                     const diff = cnPrice - kreamPrice;
                     const diffFormatted = Math.abs(diff).toLocaleString();
                     
+                    // 기본 클래스 설정
+                    comparisonEl.className = 'comparison';
+                    
                     if (diff > 0) {
                         comparisonEl.textContent = `+₩${diffFormatted}`;
                         comparisonEl.style.color = '#4CAF50';
                         comparisonEl.title = '중국이 더 비쌈 (유리)';
-                        addDebugLog(`   → 비교: +₩${diffFormatted} (중국이 더 비쌈)`, '#0f0');
+                        
+                        // ✅ 10,000원 이상 차이 날 때만 녹색 배경
+                        if (diff >= 10000) {
+                            comparisonEl.className = 'comparison profit-high';
+                            addDebugLog(`   → 비교: +₩${diffFormatted} (10,000원 이상 차이!)`, '#0f0');
+                        } else {
+                            addDebugLog(`   → 비교: +₩${diffFormatted}`, '#0ff');
+                        }
+                        
                     } else if (diff < 0) {
                         comparisonEl.textContent = `-₩${diffFormatted}`;
                         comparisonEl.style.color = '#f44336';

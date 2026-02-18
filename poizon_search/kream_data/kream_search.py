@@ -1924,9 +1924,34 @@ if __name__ == "__main__":
 # 이 함수 1개만 kream_search.py 파일 맨 끝에 추가하세요
 # ==========================================
 
+"""
+크림(KREAM) 검색 모듈
+- 백그라운드 다중 상품 검색
+- 모델번호 확인
+- 거래 정보 추출
+- 자동 브라우저 종료
+"""
+
+import os
+import json
+import random
+import time
+from playwright.sync_api import sync_playwright
+
+# 전역 변수
+browser = None
+context = None
+page = None
+stop_flag = False
+
+# 크림 로그인 정보
+KREAM_EMAIL = "yaglobal@naver.com"
+KREAM_PASSWORD = "dyddk1309!"
+COOKIE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kream_cookies.json")
+
 
 def background_kream_search(task_id, product_codes, progress_queue):
-    """백그라운드 크림 검색 - 자동 로그인 포함"""
+    """백그라운드 크림 검색 - 여러 상품 반복 검색"""
     global stop_flag, browser, context, page
     
     try:
@@ -1937,17 +1962,11 @@ def background_kream_search(task_id, product_codes, progress_queue):
         
         stop_flag = False
         
-        # 첫 번째 상품 정보
-        first_product = product_codes[0] if product_codes else None
-        first_index = 0
-        
-        if not first_product:
+        if not product_codes:
             error_msg = "검색할 상품이 없습니다"
             print(f"❌ {error_msg}")
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
-        
-        print(f"🎯 검색할 상품번호: {first_product} (인덱스: {first_index})")
         
         # ==========================================
         # 준비: 기존 브라우저 종료
@@ -2027,25 +2046,21 @@ def background_kream_search(task_id, product_codes, progress_queue):
                 page.goto('https://kream.co.kr/login', wait_until='domcontentloaded', timeout=30000)
                 time.sleep(2)
                 
-                # 이메일 입력
                 email_input = page.locator('input[type="email"], input[name="email"]').first
                 if email_input.count() > 0:
                     email_input.fill(KREAM_EMAIL)
                     time.sleep(0.5)
                 
-                # 비밀번호 입력
                 password_input = page.locator('input[type="password"]').first
                 if password_input.count() > 0:
                     password_input.fill(KREAM_PASSWORD)
                     time.sleep(0.5)
                 
-                # 로그인 버튼 클릭
                 login_button = page.locator('button:has-text("로그인")').first
                 if login_button.count() > 0:
                     login_button.click()
                     time.sleep(3)
                 
-                # 로그인 확인
                 page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
                 time.sleep(2)
                 
@@ -2054,7 +2069,6 @@ def background_kream_search(task_id, product_codes, progress_queue):
                 if login_link_after.count() == 0 or not login_link_after.is_visible():
                     print("  ✅ 자동 로그인 성공!")
                     
-                    # 쿠키 저장
                     try:
                         cookies = context.cookies()
                         with open(COOKIE_FILE, 'w') as f:
@@ -2078,345 +2092,386 @@ def background_kream_search(task_id, product_codes, progress_queue):
             progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ⚠️ 실패'}})
         
         # ==========================================
-        # 2단계: 검색 버튼 찾기
+        # 상품 반복 검색
         # ==========================================
-        print("\n🎯 [2단계] 검색 버튼 찾기")
-        progress_queue.put({'event': 'message', 'data': {'message': '[2단계] 검색 버튼 찾기 중...'}})
+        print(f"\n{'='*60}")
+        print(f"🔁 상품 반복 검색 시작: {len(product_codes)}개")
+        print(f"{'='*60}\n")
         
-        button_selectors = [
-            'button.btn_search.header-search-button',
-            'button.btn_search',
-            'button.header-search-button',
-        ]
+        success_count = 0
+        fail_count = 0
         
-        search_button = None
-        for selector in button_selectors:
-            try:
-                temp = page.locator(selector).first
-                if temp.count() > 0 and temp.is_visible():
-                    search_button = temp
-                    print(f"  ✅ 검색 버튼 발견!")
-                    break
-            except:
-                continue
-        
-        if not search_button:
-            error_msg = "검색 버튼을 찾을 수 없습니다"
-            print(f"  ❌ {error_msg}")
-            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
-            return
-        
-        print("  ✅ [2단계 완료]")
-        progress_queue.put({'event': 'message', 'data': {'message': '[2단계 완료] ✅'}})
-        
-        # ==========================================
-        # 3단계: 검색 페이지로 이동
-        # ==========================================
-        print(f"\n🎯 [3단계] 검색 URL로 이동: {first_product}")
-        progress_queue.put({'event': 'message', 'data': {'message': f'[3단계] {first_product} 검색 중...'}})
-        
-        search_url = f"https://kream.co.kr/search?keyword={first_product}"
-        print(f"  📍 검색 URL: {search_url}")
-        
-        time.sleep(random.uniform(0.5, 1.0))
-        page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
-        time.sleep(2)
-        
-        current_url = page.url
-        print(f"  📍 현재 URL: {current_url}")
-        
-        if 'search' in current_url.lower():
-            print(f"  ✅ 검색 페이지 이동 완료!")
-        
-        print(f"  ✅ [3단계 완료]")
-        progress_queue.put({'event': 'message', 'data': {'message': '[3단계 완료] ✅'}})
-        
-        # ==========================================
-        # 4단계: 첫 번째 상품 클릭
-        # ==========================================
-        print(f"\n🎯 [4단계] 첫 번째 상품 클릭")
-        progress_queue.put({'event': 'message', 'data': {'message': '[4단계] 상품 선택 중...'}})
-        
-        try:
-            print("  ⏳ 검색 결과 대기 중...")
-            page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
-            print("  ✅ 검색 결과 발견!")
-        except Exception as e:
-            error_msg = f"검색 결과를 찾을 수 없습니다: {e}"
-            print(f"  ❌ {error_msg}")
-            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
-            return
-        
-        try:
-            print("  🔍 첫 번째 상품 찾기...")
-            first_product_link = page.locator('a.product_card[href*="/products/"]').first
-            
-            if first_product_link.count() == 0:
-                error_msg = "상품 카드를 찾을 수 없습니다"
-                print(f"  ❌ {error_msg}")
-                progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
-                return
-            
-            print("  ✅ 첫 번째 상품 발견!")
-            print("  🖱️  상품 클릭...")
-            
-            first_product_link.hover()
-            time.sleep(random.uniform(0.3, 0.7))
-            first_product_link.click()
-            time.sleep(2)
-            
-            product_url = page.url
-            print(f"  📍 상품 페이지 URL: {product_url}")
-            
-            if '/products/' in product_url:
-                print(f"  ✅ 상품 상세 페이지 이동 완료!")
-            
-        except Exception as e:
-            error_msg = f"상품 클릭 실패: {e}"
-            print(f"  ❌ {error_msg}")
-            import traceback
-            traceback.print_exc()
-            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
-            return
-        
-        # ==========================================
-        # 5단계: 모델번호 확인
-        # ==========================================
-        print(f"\n🎯 [5단계] 모델번호 확인")
-        print(f"  🎯 찾는 상품번호: {first_product}")
-        progress_queue.put({'event': 'message', 'data': {'message': '[5단계] 모델번호 확인 중...'}})
-        
-        try:
-            print("  → 페이지에서 모델번호 찾기...")
-            
-            model_info = page.evaluate("""
-                () => {
-                    let model_numbers = [];
-                    let full_text = '';
-                    
-                    // p.text-lookup 태그에서 "모델번호" 찾기
-                    const pTags = document.querySelectorAll('p.text-lookup');
-                    
-                    for (let p of pTags) {
-                        const text = p.textContent.trim();
-                        if (text.includes('모델번호')) {
-                            full_text = text;
-                            const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
-                            const matches = text.match(pattern);
-                            
-                            if (matches) {
-                                model_numbers = [...new Set(matches)];
-                            }
-                            break;
-                        }
-                    }
-                    
-                    // 못 찾으면 전체 요소 검색
-                    if (model_numbers.length === 0) {
-                        const allElements = document.querySelectorAll('*');
-                        
-                        for (let el of allElements) {
-                            const text = el.textContent;
-                            if (text && text.includes('모델번호') && text.length < 200) {
-                                full_text = text.trim();
-                                const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
-                                const matches = text.match(pattern);
-                                
-                                if (matches) {
-                                    model_numbers = [...new Set(matches)];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    return {
-                        found: model_numbers.length > 0,
-                        model_numbers: model_numbers,
-                        full_text: full_text
-                    };
-                }
-            """)
-            
-            model_found = model_info.get('found', False)
-            model_numbers = model_info.get('model_numbers', [])
-            model_text = model_info.get('full_text', '')
-            
-            print(f"  📋 발견된 모델번호 텍스트: {model_text}")
-            print(f"  📋 추출된 모델번호: {model_numbers}")
-            
-            # 상품번호 매칭 확인
-            is_match = False
-            matched_model = None
-            
-            if model_found and model_numbers:
-                for model in model_numbers:
-                    if first_product.upper() == model.upper():
-                        is_match = True
-                        matched_model = model
-                        print(f"  ✅ 모델번호 일치! ({first_product} == {model})")
-                        break
-            
-            if not is_match and model_text:
-                if first_product.upper() in model_text.upper():
-                    is_match = True
-                    matched_model = first_product
-                    print(f"  ✅ 모델번호 포함 일치! ({first_product} in {model_text})")
-            
-            if is_match:
-                print(f"  ✅ [5단계 완료] 모델번호 확인 완료!")
-                progress_queue.put({'event': 'message', 'data': {'message': f'[5단계 완료] ✅'}})
-            else:
-                print(f"  ❌ 모델번호 불일치!")
-                progress_queue.put({'event': 'message', 'data': {'message': f'[5단계] ❌ 불일치'}})
-                
-        except Exception as e:
-            error_msg = f"모델번호 확인 실패: {e}"
-            print(f"  ❌ {error_msg}")
-            import traceback
-            traceback.print_exc()
-            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
-        
-        # ==========================================
-        # 6단계: 거래 정보 추출
-        # ==========================================
-        print(f"\n🎯 [6단계] 거래 정보 추출")
-        progress_queue.put({'event': 'message', 'data': {'message': '[6단계] 거래 정보 추출 중...'}})
-        
-        try:
-            print("  → 거래 테이블에서 데이터 추출 중...")
-            
-            trade_info = page.evaluate("""
-                () => {
-                    let prices = [];
-                    let trade_dates = [];
-                    
-                    const allElements = document.querySelectorAll('*');
-                    
-                    for (let el of allElements) {
-                        const text = el.textContent.trim();
-                        const priceMatch = text.match(/^([0-9,]+)원$/);
-                        
-                        if (priceMatch && prices.length < 5) {
-                            const priceText = priceMatch[1].replace(/,/g, '');
-                            const price = parseInt(priceText);
-                            
-                            if (price >= 10000 && price <= 1000000000) {
-                                prices.push(price);
-                            }
-                        }
-                    }
-                    
-                    for (let el of allElements) {
-                        const text = el.textContent.trim();
-                        
-                        if (text.match(/^\\d{2}\\/\\d{2}\\/\\d{2}$|^\\d+일 전$|^방금 전$|^오늘$|^어제$/)) {
-                            if (trade_dates.length === 0) {
-                                trade_dates.push(text);
-                                break;
-                            }
-                        }
-                    }
-                    
-                    let avg_price = 0;
-                    if (prices.length > 0) {
-                        const sum = prices.reduce((a, b) => a + b, 0);
-                        avg_price = Math.round(sum / prices.length);
-                    }
-                    
-                    return {
-                        prices: prices.slice(0, 5),
-                        count: Math.min(prices.length, 5),
-                        avg_price: avg_price,
-                        first_trade_date: trade_dates.length > 0 ? trade_dates[0] : ''
-                    };
-                }
-            """)
-            
-            prices = trade_info.get('prices', [])
-            count = trade_info.get('count', 0)
-            avg_price = trade_info.get('avg_price', 0)
-            first_trade_date = trade_info.get('first_trade_date', 'N/A')
-            
-            print(f"  📋 추출된 거래가: {prices}")
-            print(f"  📊 거래가 개수: {count}개")
-            print(f"  💰 평균가: {avg_price:,}원")
-            print(f"  📅 첫 번째 거래일: {first_trade_date}")
-            
-            # 포맷팅
-            kream_avg_price = f"{avg_price:,}원" if avg_price > 0 else "N/A"
-            kream_sales = first_trade_date if first_trade_date else "N/A"
-            
-            # 결과 전송
-            if count > 0:
-                print(f"\n  {'='*50}")
-                print(f"  🎉 거래 정보 추출 완료!")
-                print(f"  📍 상품번호: {first_product}")
-                print(f"  📍 인덱스: {first_index}")
-                print(f"  💰 크림 평균가: {kream_avg_price}")
-                print(f"  📦 크림 판매량: {kream_sales}")
-                print(f"  {'='*50}\n")
-                
-                # 프론트엔드로 데이터 전송
-                print(f"  📡 프론트엔드로 데이터 전송 중...")
-                print(f"     → 인덱스: {first_index}")
-                print(f"     → 평균가: {kream_avg_price}")
-                print(f"     → 판매량: {kream_sales}")
-                
-                progress_queue.put({
-                    'event': 'result',
-                    'data': {
-                        'index': first_index,
-                        'result': {
-                            'success': True,
-                            'kream_data': {
-                                'avg_price': kream_avg_price,
-                                'sales': kream_sales
-                            }
-                        }
-                    }
-                })
-                
-                print(f"  ✅ 프론트엔드로 전송 완료!")
-                
+        for index, product_code in enumerate(product_codes):
+            if stop_flag:
+                print(f"\n🛑 검색 중단됨 (진행: {index}/{len(product_codes)})")
                 progress_queue.put({
                     'event': 'complete',
                     'data': {
-                        'message': f'✅ 검색 완료 - {first_product}',
-                        'total': 1
+                        'message': f'🛑 중단됨 - {success_count}개 성공, {fail_count}개 실패',
+                        'total': len(product_codes),
+                        'success': success_count,
+                        'fail': fail_count
                     }
                 })
                 
-            else:
-                print(f"\n  {'='*50}")
-                print(f"  ⚠️ 거래가를 찾을 수 없습니다")
-                print(f"  {'='*50}\n")
+                # 중단 시 브라우저 종료
+                print("\n🔒 크림 브라우저 종료 중...")
+                time.sleep(1)
+                close_browser_safe()
+                break
+            
+            print(f"\n{'='*60}")
+            print(f"🔍 [{index + 1}/{len(product_codes)}] 상품 검색: {product_code}")
+            print(f"{'='*60}\n")
+            
+            progress_queue.put({
+                'event': 'progress',
+                'data': {
+                    'current': index + 1,
+                    'total': len(product_codes),
+                    'product_code': product_code,
+                    'index': index
+                }
+            })
+            
+            try:
+                # 검색 페이지로 이동
+                print(f"  → 검색 URL로 이동...")
+                search_url = f"https://kream.co.kr/search?keyword={product_code}"
+                
+                time.sleep(random.uniform(1.0, 2.0))
+                page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
+                time.sleep(2)
+                
+                print(f"  ✅ 검색 페이지 이동 완료")
+                
+                # 검색 결과 확인
+                try:
+                    print("  → 검색 결과 대기 중...")
+                    page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
+                    print("  ✅ 검색 결과 발견!")
+                except Exception as e:
+                    print(f"  ❌ 검색 결과 없음: {e}")
+                    fail_count += 1
+                    
+                    progress_queue.put({
+                        'event': 'result',
+                        'data': {
+                            'index': index,
+                            'result': {
+                                'success': False,
+                                'error': '검색 결과 없음',
+                                'kream_data': None
+                            }
+                        }
+                    })
+                    continue
+                
+                # 첫 번째 상품 클릭
+                try:
+                    print("  → 첫 번째 상품 클릭...")
+                    first_product_link = page.locator('a.product_card[href*="/products/"]').first
+                    
+                    if first_product_link.count() == 0:
+                        print(f"  ❌ 상품 카드 없음")
+                        fail_count += 1
+                        
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'index': index,
+                                'result': {
+                                    'success': False,
+                                    'error': '상품 카드 없음',
+                                    'kream_data': None
+                                }
+                            }
+                        })
+                        continue
+                    
+                    first_product_link.hover()
+                    time.sleep(random.uniform(0.3, 0.7))
+                    first_product_link.click()
+                    time.sleep(2)
+                    
+                    product_url = page.url
+                    print(f"  ✅ 상품 페이지 이동: {product_url}")
+                    
+                except Exception as e:
+                    print(f"  ❌ 상품 클릭 실패: {e}")
+                    fail_count += 1
+                    
+                    progress_queue.put({
+                        'event': 'result',
+                        'data': {
+                            'index': index,
+                            'result': {
+                                'success': False,
+                                'error': '상품 클릭 실패',
+                                'kream_data': None
+                            }
+                        }
+                    })
+                    continue
+                
+                # 모델번호 확인
+                print(f"  → 모델번호 확인 중...")
+                
+                try:
+                    model_info = page.evaluate("""
+                        () => {
+                            let model_numbers = [];
+                            let full_text = '';
+                            
+                            const pTags = document.querySelectorAll('p.text-lookup');
+                            
+                            for (let p of pTags) {
+                                const text = p.textContent.trim();
+                                if (text.includes('모델번호')) {
+                                    full_text = text;
+                                    const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                                    const matches = text.match(pattern);
+                                    
+                                    if (matches) {
+                                        model_numbers = [...new Set(matches)];
+                                    }
+                                    break;
+                                }
+                            }
+                            
+                            if (model_numbers.length === 0) {
+                                const allElements = document.querySelectorAll('*');
+                                
+                                for (let el of allElements) {
+                                    const text = el.textContent;
+                                    if (text && text.includes('모델번호') && text.length < 200) {
+                                        full_text = text.trim();
+                                        const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                                        const matches = text.match(pattern);
+                                        
+                                        if (matches) {
+                                            model_numbers = [...new Set(matches)];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            return {
+                                found: model_numbers.length > 0,
+                                model_numbers: model_numbers,
+                                full_text: full_text
+                            };
+                        }
+                    """)
+                    
+                    model_found = model_info.get('found', False)
+                    model_numbers = model_info.get('model_numbers', [])
+                    model_text = model_info.get('full_text', '')
+                    
+                    is_match = False
+                    
+                    if model_found and model_numbers:
+                        for model in model_numbers:
+                            if product_code.upper() == model.upper():
+                                is_match = True
+                                print(f"  ✅ 모델번호 일치!")
+                                break
+                    
+                    if not is_match and model_text:
+                        if product_code.upper() in model_text.upper():
+                            is_match = True
+                            print(f"  ✅ 모델번호 포함 일치!")
+                    
+                    # 모델번호 불일치 시 바로 다음으로
+                    if not is_match:
+                        print(f"  ❌ 모델번호 불일치! 다음 상품으로 이동...")
+                        print(f"     찾는 번호: {product_code}")
+                        print(f"     페이지 번호: {', '.join(model_numbers) if model_numbers else '없음'}")
+                        
+                        fail_count += 1
+                        
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'index': index,
+                                'result': {
+                                    'success': False,
+                                    'error': '모델번호 불일치',
+                                    'kream_data': None
+                                }
+                            }
+                        })
+                        continue
+                    
+                except Exception as e:
+                    print(f"  ⚠️ 모델번호 확인 실패: {e}")
+                    fail_count += 1
+                    
+                    progress_queue.put({
+                        'event': 'result',
+                        'data': {
+                            'index': index,
+                            'result': {
+                                'success': False,
+                                'error': '모델번호 확인 실패',
+                                'kream_data': None
+                            }
+                        }
+                    })
+                    continue
+                
+                # 거래 정보 추출 (모델번호 일치할 때만)
+                print(f"  → 거래 정보 추출 중...")
+                
+                try:
+                    trade_info = page.evaluate("""
+                        () => {
+                            let prices = [];
+                            let trade_dates = [];
+                            
+                            const allElements = document.querySelectorAll('*');
+                            
+                            for (let el of allElements) {
+                                const text = el.textContent.trim();
+                                const priceMatch = text.match(/^([0-9,]+)원$/);
+                                
+                                if (priceMatch && prices.length < 5) {
+                                    const priceText = priceMatch[1].replace(/,/g, '');
+                                    const price = parseInt(priceText);
+                                    
+                                    if (price >= 10000 && price <= 1000000000) {
+                                        prices.push(price);
+                                    }
+                                }
+                            }
+                            
+                            for (let el of allElements) {
+                                const text = el.textContent.trim();
+                                
+                                if (text.match(/^\\d{2}\\/\\d{2}\\/\\d{2}$|^\\d+일 전$|^방금 전$|^오늘$|^어제$/)) {
+                                    if (trade_dates.length === 0) {
+                                        trade_dates.push(text);
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            let avg_price = 0;
+                            if (prices.length > 0) {
+                                const sum = prices.reduce((a, b) => a + b, 0);
+                                avg_price = Math.round(sum / prices.length);
+                            }
+                            
+                            return {
+                                prices: prices.slice(0, 5),
+                                count: Math.min(prices.length, 5),
+                                avg_price: avg_price,
+                                first_trade_date: trade_dates.length > 0 ? trade_dates[0] : ''
+                            };
+                        }
+                    """)
+                    
+                    prices = trade_info.get('prices', [])
+                    count = trade_info.get('count', 0)
+                    avg_price = trade_info.get('avg_price', 0)
+                    first_trade_date = trade_info.get('first_trade_date', 'N/A')
+                    
+                    kream_avg_price = f"{avg_price:,}원" if avg_price > 0 else "N/A"
+                    kream_sales = first_trade_date if first_trade_date else "N/A"
+                    
+                    if count > 0:
+                        print(f"  ✅ 거래 정보 추출 완료!")
+                        print(f"     💰 크림 평균가: {kream_avg_price}")
+                        print(f"     📦 크림 판매량: {kream_sales}")
+                        
+                        success_count += 1
+                        
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'index': index,
+                                'result': {
+                                    'success': True,
+                                    'kream_data': {
+                                        'avg_price': kream_avg_price,
+                                        'sales': kream_sales
+                                    }
+                                }
+                            }
+                        })
+                    else:
+                        print(f"  ⚠️ 거래가 없음")
+                        fail_count += 1
+                        
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'index': index,
+                                'result': {
+                                    'success': False,
+                                    'error': '거래가 없음',
+                                    'kream_data': None
+                                }
+                            }
+                        })
+                    
+                except Exception as e:
+                    print(f"  ❌ 거래 정보 추출 실패: {e}")
+                    fail_count += 1
+                    
+                    progress_queue.put({
+                        'event': 'result',
+                        'data': {
+                            'index': index,
+                            'result': {
+                                'success': False,
+                                'error': '거래 정보 추출 실패',
+                                'kream_data': None
+                            }
+                        }
+                    })
+                
+            except Exception as e:
+                print(f"  ❌ 오류 발생: {e}")
+                fail_count += 1
                 
                 progress_queue.put({
                     'event': 'result',
                     'data': {
-                        'index': first_index,
+                        'index': index,
                         'result': {
                             'success': False,
+                            'error': str(e),
                             'kream_data': None
                         }
                     }
                 })
-                
-                progress_queue.put({
-                    'event': 'complete',
-                    'data': {
-                        'message': f'⚠️ 거래가 없음 - {first_product}',
-                        'total': 1
-                    }
-                })
-            
-        except Exception as e:
-            error_msg = f"거래 정보 추출 실패: {e}"
-            print(f"  ❌ {error_msg}")
-            import traceback
-            traceback.print_exc()
-            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+        
+        # ==========================================
+        # 전체 검색 완료
+        # ==========================================
+        print(f"\n{'='*60}")
+        print(f"🎉 전체 검색 완료!")
+        print(f"   ✅ 성공: {success_count}개")
+        print(f"   ❌ 실패: {fail_count}개")
+        print(f"   📊 전체: {len(product_codes)}개")
+        print(f"{'='*60}\n")
+        
+        progress_queue.put({
+            'event': 'complete',
+            'data': {
+                'message': f'✅ 전체 검색 완료 - {success_count}개 성공, {fail_count}개 실패',
+                'total': len(product_codes),
+                'success': success_count,
+                'fail': fail_count
+            }
+        })
+        
+        # 브라우저 자동 종료
+        print("\n🔒 크림 브라우저 자동 종료 중...")
+        time.sleep(2)  # 결과 확인 대기
+        close_browser_safe()
     
     except Exception as e:
         error_msg = f"오류 발생: {str(e)}"
@@ -2427,6 +2482,9 @@ def background_kream_search(task_id, product_codes, progress_queue):
     
     finally:
         print("\n🔚 검색 프로세스 종료")
+        # finally에서도 브라우저 종료 보장
+        if browser:
+            close_browser_safe()
 
 
 def close_browser_safe():
