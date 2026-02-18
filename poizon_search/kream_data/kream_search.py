@@ -958,8 +958,974 @@ if __name__ == "__main__":
 # 수정된 background_kream_search() 함수
 # kream_search.py 파일의 해당 함수를 이것으로 교체하세요
 
+# 기존 background_kream_search() 함수에 4단계만 추가
+# kream_data/kream_search.py 파일에서 background_kream_search() 함수를 이것으로 교체
+
+import os
+import sys
+import json
+import random
+import time
+from datetime import datetime
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
+
+# 전역 변수
+browser = None
+context = None
+page = None
+
+# 중단 플래그
+stop_flag = False
+
+# 로그 콜백 함수
+LOG_CALLBACK = None
+
+def log(message, level='info'):
+    """터미널 + GUI 로그 출력"""
+    print(message)
+    if LOG_CALLBACK:
+        try:
+            LOG_CALLBACK(message, level)
+        except:
+            pass
+
+############################
+# ===== KREAM CONFIG ===== #
+############################
+
+KREAM_BASE_URL = "https://kream.co.kr"
+KREAM_SEARCH_URL = "https://kream.co.kr"
+KREAM_LOGIN_URL = "https://kream.co.kr"
+HEADLESS = False
+
+# 크림 로그인 정보
+KREAM_EMAIL = "yaglobal@naver.com"
+KREAM_PASSWORD = "dyddk1309!"
+
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output_data")
+COOKIE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kream_cookies.json")
+
+# 전역 브라우저 객체 (세션 유지용)
+_playwright = None
+_browser = None
+_context = None
+_page = None
+
+############################
+
+
+def wait_stable(page, ms=600):
+    """페이지 안정화 대기"""
+    try:
+        page.wait_for_load_state("domcontentloaded")
+    except:
+        pass
+    page.wait_for_timeout(ms)
+
+
+def safe_screenshot(page, name: str):
+    """스크린샷 저장"""
+    shots_dir = "shots_kream"
+    os.makedirs(shots_dir, exist_ok=True)
+    path = os.path.join(shots_dir, f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.png")
+    try:
+        page.screenshot(path=path, full_page=True)
+        log(f"📸 스크린샷 저장: {path}")
+    except Exception as e:
+        log(f"⚠️ 스크린샷 실패: {e}", 'error')
+
+
+def get_browser():
+    """브라우저 인스턴스 가져오기 (싱글톤)"""
+    global _playwright, _browser, _context, _page
+    
+    if _browser is None or _page is None:
+        if _playwright is None:
+            _playwright = sync_playwright().start()
+        
+        _browser = _playwright.chromium.launch(headless=HEADLESS)
+        _context = _browser.new_context(
+            viewport={'width': 1920, 'height': 1080},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        )
+        
+        # 쿠키 로드
+        if os.path.exists(COOKIE_FILE):
+            try:
+                with open(COOKIE_FILE, 'r') as f:
+                    cookies = json.load(f)
+                    _context.add_cookies(cookies)
+                    log("  ✓ 쿠키 로드 완료", 'success')
+            except:
+                pass
+        
+        _page = _context.new_page()
+    
+    return _page
+
+
+def save_cookies():
+    """쿠키 저장"""
+    global _context
+    if _context:
+        try:
+            cookies = _context.cookies()
+            with open(COOKIE_FILE, 'w') as f:
+                json.dump(cookies, f)
+            log("✓ 쿠키 저장 완료", 'success')
+        except Exception as e:
+            log(f"⚠️ 쿠키 저장 실패: {e}", 'warning')
+
+
+# ==========================================
+# 크림 로그인 (기존 함수 유지)
+# ==========================================
+
+def login_kream():
+    """크림 로그인 - 포이즌 방식 봇 감지 방지"""
+    global browser, context, page
+    
+    try:
+        print("🔐 크림 검색 준비 중...")
+        
+        if browser is None:
+            playwright = sync_playwright().start()
+            
+            # ==========================================
+            # ✅ 포이즌과 동일한 브라우저 설정
+            # ==========================================
+            browser = playwright.chromium.launch(
+                headless=False,
+                channel='chrome',  # 설치된 Chrome 사용 (안정적!)
+                args=[
+                    '--window-size=960,540',                      # 크기
+                    '--window-position=960,0',                     # 오른쪽 위
+                    '--disable-blink-features=AutomationControlled'  # 봇 감지 방지
+                ]
+            )
+            
+            # ✅ 포이즌 방식: viewport=None, no_viewport=True
+            context = browser.new_context(
+                viewport=None,          # 포이즌 방식
+                no_viewport=True,       # 포이즌 방식
+                locale='ko-KR',
+                timezone_id='Asia/Seoul'
+            )
+            
+            page = context.new_page()
+            
+            print("✅ 브라우저 열림 (오른쪽 위, Chrome)")
+        
+        # ==========================================
+        # 크림 메인 페이지 접속
+        # ==========================================
+        print("📱 크림 메인 페이지로 이동...")
+        page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
+        
+        # ✅ 포이즌 방식: wait_stable 사용
+        wait_stable(page, 2000)  # 2초 대기
+        
+        # ==========================================
+        # 자연스러운 페이지 탐색 (스크롤)
+        # ==========================================
+        print("🖱️  페이지 자연스럽게 탐색 중...")
+        
+        # 랜덤 스크롤 1
+        scroll_y = random.randint(200, 400)
+        page.evaluate(f"window.scrollTo({{top: {scroll_y}, behavior: 'smooth'}})")
+        time.sleep(random.uniform(1.0, 2.0))
+        
+        # 랜덤 스크롤 2
+        scroll_y = random.randint(500, 700)
+        page.evaluate(f"window.scrollTo({{top: {scroll_y}, behavior: 'smooth'}})")
+        time.sleep(random.uniform(1.0, 2.0))
+        
+        # 맨 위로
+        page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
+        time.sleep(random.uniform(0.5, 1.0))
+        
+        print("✅ 크림 메인 페이지 로드 완료")
+        
+        # ==========================================
+        # 로그인 상태 확인
+        # ==========================================
+        print("🔍 로그인 상태 확인...")
+        try:
+            page.wait_for_selector('a[href*="my"]', timeout=3000)
+            print("✅ 이미 로그인되어 있음")
+            return True
+        except:
+            print("⚠️ 로그인 필요")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("💡 브라우저에서 수동으로 로그인하세요")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            return True
+            
+    except Exception as e:
+        print(f"❌ 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+    
+# ==========================================
+# 2. wait_stable() 함수 추가 (포이즌 방식)
+# ==========================================
+def wait_stable(page, ms=600):
+    """페이지 안정화 대기 - 포이즌 방식"""
+    try:
+        page.wait_for_load_state("domcontentloaded")
+    except:
+        pass
+    page.wait_for_timeout(ms)
+
+# ==========================================
+# 크림 전용 상품 검색 (URL 직접 이동 방식)
+# ==========================================
+def search_product(product_code):
+    """크림에서 상품 검색 - URL 직접 이동 방식"""
+    global page
+    
+    try:
+        if page is None:
+            return {'success': False, 'error': '브라우저 없음'}
+        
+        print(f"🔍 상품 검색: {product_code}")
+        
+        # ==========================================
+        # ✅ URL 직접 이동 (검색창 찾기 불필요!)
+        # ==========================================
+        search_url = f"https://kream.co.kr/search?keyword={product_code}"
+        print(f"  📍 검색 URL: {search_url}")
+        
+        # 자연스러운 대기
+        time.sleep(random.uniform(0.3, 0.7))
+        
+        # 검색 페이지로 이동
+        page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
+        print(f"  ✓ 검색 페이지 이동 완료")
+        
+        # 페이지 로딩 대기
+        wait_stable(page, 2000)
+        
+        # ==========================================
+        # 검색 결과 대기
+        # ==========================================
+        try:
+            page.wait_for_selector('.search_result_item, .product_card, a[href*="/products/"]', timeout=10000)
+            print(f"  ✓ 검색 결과 발견")
+        except:
+            return {'success': False, 'error': '검색 결과 없음'}
+        
+        # ==========================================
+        # 첫 번째 결과 클릭
+        # ==========================================
+        try:
+            print("  📦 첫 번째 결과 클릭...")
+            
+            first_product = page.locator('.search_result_item, .product_card, a[href*="/products/"]').first
+            
+            # 자연스럽게 hover 후 클릭
+            first_product.hover()
+            time.sleep(random.uniform(0.3, 0.7))
+            first_product.click()
+            
+            wait_stable(page, 2000)
+            
+            # ==========================================
+            # ✅ 상품 정보 추출
+            # ==========================================
+            data = page.evaluate("""
+                () => {
+                    // 모델번호 찾기
+                    let model_number = '';
+                    const elements = document.querySelectorAll('*');
+                    for (let el of elements) {
+                        const text = el.textContent;
+                        if (text && text.includes('모델번호')) {
+                            const match = text.match(/모델번호[:\\s]+([A-Z0-9-]+)/i);
+                            if (match) {
+                                model_number = match[1];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 상품명 찾기
+                    let product_name = '';
+                    const h1 = document.querySelector('h1');
+                    if (h1) product_name = h1.textContent.trim();
+                    
+                    // 가격 찾기 (즉시 구매가)
+                    let price = '';
+                    const priceEl = document.querySelector('.price, .product_price, .amount');
+                    if (priceEl) price = priceEl.textContent.trim();
+                    
+                    // 거래량 찾기
+                    let sales = '';
+                    const salesEl = document.querySelector('[class*="sale"], [class*="count"]');
+                    if (salesEl) sales = salesEl.textContent.trim();
+                    
+                    return {
+                        model_number: model_number,
+                        product_name: product_name,
+                        price: price,
+                        sales: sales
+                    };
+                }
+            """)
+            
+            if not data or not data.get('model_number'):
+                data = {
+                    'model_number': product_code, 
+                    'product_name': 'N/A', 
+                    'price': 'N/A',
+                    'sales': 'N/A'
+                }
+            
+            result = {
+                'success': True,
+                'model_number': data['model_number'],
+                'product_name': data['product_name'],
+                'price': data['price'],
+                'sales': data.get('sales', 'N/A')
+            }
+            
+            print(f"✅ 검색 완료: {result['model_number']}")
+            return result
+            
+        except Exception as e:
+            print(f"⚠️ 결과 클릭 실패: {e}")
+            return {'success': False, 'error': str(e)}
+            
+    except Exception as e:
+        print(f"❌ 검색 오류: {e}")
+        return {'success': False, 'error': str(e)}
+
+# ==========================================
+# 상품 정보 추출 (개선 버전)
+# ==========================================
+def extract_product_info(page, product_code):
+    """상품 상세 페이지에서 정보 추출
+    
+    Args:
+        page: Playwright page 객체
+        product_code (str): 검색한 상품번호
+    
+    Returns:
+        dict: 추출된 상품 정보 (모델번호, 상품명, 가격, 판매량)
+    """
+    try:
+        print(f"  🔍 상품 정보 추출 중...")
+        
+        # JavaScript로 한 번에 모든 정보 추출
+        data = page.evaluate("""
+            () => {
+                // 모델번호 찾기
+                let model_number = '';
+                const elements = document.querySelectorAll('*');
+                
+                for (let el of elements) {
+                    const text = el.textContent;
+                    if (text && text.includes('모델번호')) {
+                        // 패턴 매칭
+                        const match = text.match(/모델번호[:\\s]+([A-Z0-9-]+)/i);
+                        if (match) {
+                            model_number = match[1];
+                            break;
+                        }
+                        
+                        // 다음 형제 요소 확인
+                        const parent = el.parentElement;
+                        const siblings = Array.from(parent.children);
+                        const index = siblings.indexOf(el);
+                        if (index < siblings.length - 1) {
+                            const nextText = siblings[index + 1].textContent.trim();
+                            if (/^[A-Z0-9-]+$/i.test(nextText)) {
+                                model_number = nextText;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // dl/dt/dd 구조 확인
+                if (!model_number) {
+                    const dts = document.querySelectorAll('dt');
+                    for (let dt of dts) {
+                        if (dt.textContent.includes('모델번호')) {
+                            const dd = dt.nextElementSibling;
+                            if (dd && dd.tagName === 'DD') {
+                                model_number = dd.textContent.trim();
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // 상품명 찾기
+                let product_name = '';
+                const h1 = document.querySelector('h1, .product_title, .product-title');
+                if (h1) product_name = h1.textContent.trim();
+                
+                // 가격 찾기 (즉시 구매가)
+                let avg_price = '';
+                const priceSelectors = [
+                    '.price',
+                    '.product_price', 
+                    '.amount',
+                    '.buy_price',
+                    '[class*="price"]'
+                ];
+                
+                for (let selector of priceSelectors) {
+                    const priceEl = document.querySelector(selector);
+                    if (priceEl && priceEl.textContent.includes('원')) {
+                        avg_price = priceEl.textContent.trim();
+                        break;
+                    }
+                }
+                
+                // 거래량/판매량 찾기
+                let sales = '';
+                const salesSelectors = [
+                    '[class*="sale"]',
+                    '[class*="count"]',
+                    '[class*="trade"]',
+                    'dd:has-text("거래")',
+                ];
+                
+                for (let selector of salesSelectors) {
+                    const salesEl = document.querySelector(selector);
+                    if (salesEl) {
+                        const text = salesEl.textContent.trim();
+                        // 숫자 추출
+                        const match = text.match(/([0-9,]+)/);
+                        if (match) {
+                            sales = match[1];
+                            break;
+                        }
+                    }
+                }
+                
+                return {
+                    model_number: model_number,
+                    product_name: product_name,
+                    avg_price: avg_price,
+                    sales: sales
+                };
+            }
+        """)
+        
+        # 모델번호가 없으면 원래 코드 사용
+        if not data.get('model_number'):
+            data['model_number'] = product_code
+        
+        # 결과 구성
+        result = {
+            'success': True,
+            'model_number': data.get('model_number', product_code),
+            'product_name': data.get('product_name', 'N/A'),
+            'avg_price': data.get('avg_price', 'N/A'),
+            'sales': data.get('sales', 'N/A')
+        }
+        
+        print(f"  ✅ 추출 완료: {result['model_number']}")
+        print(f"     상품명: {result['product_name'][:30]}...")
+        print(f"     가격: {result['avg_price']}")
+        print(f"     판매량: {result['sales']}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"  ❌ 정보 추출 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            'success': False,
+            'model_number': product_code,
+            'error': f'정보 추출 실패: {str(e)}'
+        }
+# ==========================================
+# 브라우저 종료 (기존 함수 통합)
+# ==========================================
+def close_browser():
+    """브라우저 종료"""
+    global browser, context, page
+    global _playwright, _browser, _context, _page
+    
+    # 팝업용 브라우저 종료
+    try:
+        if page:
+            page.close()
+            page = None
+        if context:
+            context.close()
+            context = None
+        if browser:
+            browser.close()
+            browser = None
+    except Exception as e:
+        print(f"⚠️ 팝업 브라우저 종료 오류: {e}")
+    
+    # 백그라운드용 브라우저 종료
+    try:
+        if _page:
+            _page.close()
+            _page = None
+        if _context:
+            _context.close()
+            _context = None
+        if _browser:
+            _browser.close()
+            _browser = None
+        if _playwright:
+            _playwright.stop()
+            _playwright = None
+    except Exception as e:
+        print(f"⚠️ 백그라운드 브라우저 종료 오류: {e}")
+    
+    print("✅ 브라우저 종료")
+
+
+# ==========================================
+# 기존 함수들 (그대로 유지)
+# ==========================================
+
+def search_kream_product_detail(product_code):
+    """크림에서 상품 검색하고 모델번호 추출 (기존 함수 유지)"""
+    try:
+        log(f"\n🔍 크림 검색: {product_code}", 'info')
+        
+        page = get_browser()
+        
+        search_url = f"{KREAM_SEARCH_URL}?keyword={product_code}&tab=products&footer=home"
+        log(f"  → URL: {search_url}")
+        
+        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+        wait_stable(page, 2000)
+        
+        try:
+            first_product = page.wait_for_selector('.search_result_item, .product_card, .item_inner', timeout=10000)
+            log(f"  ✓ 검색 결과 발견")
+            first_product.click()
+            wait_stable(page, 2000)
+            
+        except Exception as e:
+            log(f"  ⚠️ 검색 결과 없음: {e}", 'warning')
+            safe_screenshot(page, f"search_no_result_{product_code}")
+            return {'success': False, 'error': '검색 결과 없음'}
+        
+        try:
+            current_url = page.url
+            product_id = current_url.split('/products/')[-1].split('?')[0] if '/products/' in current_url else None
+            
+            log(f"  → 상품 페이지: {current_url}")
+            if product_id:
+                log(f"  → Product ID: {product_id}")
+            
+            # 모델번호 추출
+            model_number = page.evaluate("""
+                () => {
+                    const elements = document.querySelectorAll('*');
+                    for (let el of elements) {
+                        const text = el.textContent;
+                        if (text && text.includes('모델번호')) {
+                            const parent = el.parentElement;
+                            const siblings = Array.from(parent.children);
+                            const index = siblings.indexOf(el);
+                            
+                            if (index < siblings.length - 1) {
+                                return siblings[index + 1].textContent.trim();
+                            }
+                            
+                            const match = text.match(/모델번호[:\\s]+([A-Z0-9-]+)/i);
+                            if (match) return match[1];
+                        }
+                    }
+                    
+                    const dts = document.querySelectorAll('dt');
+                    for (let dt of dts) {
+                        if (dt.textContent.includes('모델번호')) {
+                            const dd = dt.nextElementSibling;
+                            if (dd && dd.tagName === 'DD') {
+                                return dd.textContent.trim();
+                            }
+                        }
+                    }
+                    return null;
+                }
+            """)
+            
+            if model_number:
+                log(f"  ✅ 모델번호 발견: {model_number}", 'success')
+                
+                if model_number.upper() == product_code.upper():
+                    log(f"  ✅ 모델번호 일치!", 'success')
+                    safe_screenshot(page, f"match_{product_code}")
+                    
+                    return {
+                        'success': True,
+                        'model_number': model_number,
+                        'product_id': product_id,
+                        'url': current_url
+                    }
+                else:
+                    log(f"  ⚠️ 모델번호 불일치: {model_number} != {product_code}", 'warning')
+                    safe_screenshot(page, f"mismatch_{product_code}")
+                    
+                    return {
+                        'success': False,
+                        'model_number': model_number,
+                        'product_id': product_id,
+                        'url': current_url,
+                        'error': f'모델번호 불일치 ({model_number})'
+                    }
+            else:
+                log(f"  ❌ 모델번호를 찾을 수 없습니다", 'error')
+                safe_screenshot(page, f"no_model_{product_code}")
+                
+                return {
+                    'success': False,
+                    'product_id': product_id,
+                    'url': current_url,
+                    'error': '모델번호 없음'
+                }
+                
+        except Exception as e:
+            log(f"  ❌ 상품 정보 추출 실패: {e}", 'error')
+            safe_screenshot(page, f"extract_error_{product_code}")
+            import traceback
+            traceback.print_exc()
+            
+            return {'success': False, 'error': str(e)}
+        
+    except Exception as e:
+        log(f"❌ 검색 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        return {'success': False, 'error': str(e)}
+
+
+def search_kream_product(product_code, page, callback=None):
+    """크림에서 상품 검색 (기존 함수 유지)"""
+    global LOG_CALLBACK
+    LOG_CALLBACK = callback
+    
+    try:
+        log(f"\n🔍 크림 검색: {product_code}", 'info')
+        
+        search_url = f"{KREAM_SEARCH_URL}?keyword={product_code}"
+        log(f"  → URL: {search_url}")
+        
+        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+        wait_stable(page, 2000)
+        
+        try:
+            page.wait_for_selector(".product_card, .item_inner, .product-item", timeout=10000)
+            log(f"  ✓ 검색 결과 로드됨")
+        except:
+            log(f"  ⚠️ 검색 결과 없음", 'warning')
+            return []
+        
+        results = page.evaluate("""
+            () => {
+                const products = [];
+                const cards = document.querySelectorAll('.product_card, .item_inner, .product-item');
+                
+                cards.forEach((card, index) => {
+                    if (index >= 10) return;
+                    
+                    try {
+                        const nameEl = card.querySelector('.product_name, .name, h3, .title');
+                        const name = nameEl ? nameEl.textContent.trim() : '';
+                        
+                        const priceEl = card.querySelector('.price, .amount, .product_price');
+                        let price = '';
+                        if (priceEl) {
+                            price = priceEl.textContent.trim();
+                        }
+                        
+                        const imgEl = card.querySelector('img');
+                        const image_url = imgEl ? (imgEl.src || imgEl.dataset.src || '') : '';
+                        
+                        const linkEl = card.querySelector('a');
+                        let link = '';
+                        if (linkEl) {
+                            link = linkEl.href || '';
+                            if (link && !link.startsWith('http')) {
+                                link = 'https://kream.co.kr' + link;
+                            }
+                        }
+                        
+                        const sizeEl = card.querySelector('.size, .product_size');
+                        const size = sizeEl ? sizeEl.textContent.trim() : '';
+                        
+                        const brandEl = card.querySelector('.brand, .product_brand');
+                        const brand = brandEl ? brandEl.textContent.trim() : '';
+                        
+                        if (name) {
+                            products.push({
+                                name: name,
+                                price: price,
+                                image_url: image_url,
+                                link: link,
+                                size: size,
+                                brand: brand,
+                                source: 'KREAM'
+                            });
+                        }
+                    } catch (e) {
+                        console.error('상품 파싱 오류:', e);
+                    }
+                });
+                
+                return products;
+            }
+        """)
+        
+        log(f"  ✅ {len(results)}개 상품 발견", 'success')
+        
+        for idx, product in enumerate(results, 1):
+            log(f"    {idx}. {product.get('name', 'N/A')[:50]} - {product.get('price', 'N/A')}")
+        
+        return results
+        
+    except Exception as e:
+        log(f"  ❌ 크림 검색 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        return []
+
+
+def search_kream_products_batch(product_codes, callback=None):
+    """여러 상품을 크림에서 일괄 검색 (기존 함수 유지)"""
+    global LOG_CALLBACK, stop_flag
+    LOG_CALLBACK = callback
+    stop_flag = False
+    
+    log("\n" + "=" * 60, 'info')
+    log("🛒 크림(KREAM) 일괄 검색 시작", 'info')
+    log("=" * 60, 'info')
+    
+    total = len(product_codes)
+    log(f"📊 총 {total}개 상품 검색 예정\n", 'info')
+    
+    results = {}
+    
+    try:
+        with sync_playwright() as p:
+            log("🌐 브라우저 시작...", 'info')
+            browser = p.chromium.launch(headless=HEADLESS)
+            context = browser.new_context(
+                viewport={'width': 1920, 'height': 1080},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            )
+            
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                        context.add_cookies(cookies)
+                        log("  ✓ 쿠키 로드 완료", 'success')
+                except:
+                    pass
+            
+            page = context.new_page()
+            
+            for idx, product_code in enumerate(product_codes, 1):
+                if stop_flag:
+                    log("\n⏹️ 사용자가 검색을 중단했습니다.", 'warning')
+                    break
+                
+                if callback:
+                    callback(f"PROGRESS:{idx}/{total}", 'progress')
+                
+                log(f"\n[{idx}/{total}] 상품: {product_code}", 'info')
+                
+                if callback:
+                    callback(f"PRODUCT_START:{product_code}", 'info')
+                
+                product_results = search_kream_product(product_code, page, callback)
+                results[product_code] = product_results
+                
+                if callback:
+                    result_data = {
+                        'product_code': product_code,
+                        'products': product_results
+                    }
+                    callback(f"PRODUCT_RESULT:{json.dumps(result_data, ensure_ascii=False)}", 'data')
+                
+                if idx < total:
+                    delay = random.uniform(2.0, 4.0)
+                    log(f"  💤 {delay:.1f}초 대기...", 'info')
+                    time.sleep(delay)
+            
+            try:
+                cookies = context.cookies()
+                with open(COOKIE_FILE, 'w') as f:
+                    json.dump(cookies, f)
+                log("\n✓ 쿠키 저장 완료", 'success')
+            except:
+                pass
+            
+            browser.close()
+        
+        log("\n" + "=" * 60, 'success')
+        log(f"✅ 크림 검색 완료! 총 {len(results)}개 상품", 'success')
+        log("=" * 60, 'success')
+        
+        return {
+            'success': True,
+            'results': results,
+            'total_searched': len(results)
+        }
+        
+    except Exception as e:
+        log(f"\n❌ 크림 검색 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            'success': False,
+            'error': str(e),
+            'results': results
+        }
+
+
+def search_kream_sourcing(product_codes, callback=None):
+    """크림 소싱 검색 (기존 함수 유지)"""
+    global LOG_CALLBACK, stop_flag
+    LOG_CALLBACK = callback
+    stop_flag = False
+    
+    log("\n" + "=" * 60, 'info')
+    log("🛒 크림(KREAM) 소싱 검색 시작", 'info')
+    log("=" * 60, 'info')
+    
+    total = len(product_codes)
+    log(f"📊 총 {total}개 상품 검색 예정\n", 'info')
+    
+    results = {}
+    searched_count = 0
+    
+    try:
+        with sync_playwright() as p:
+            log("🌐 브라우저 시작...", 'info')
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+            )
+            context = browser.new_context(
+                viewport=None,
+                no_viewport=True,
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            )
+            
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                        context.add_cookies(cookies)
+                        log("  ✓ 쿠키 로드 완료", 'success')
+                except:
+                    pass
+            
+            page = context.new_page()
+            
+            for idx, product_code in enumerate(product_codes, 1):
+                if stop_flag:
+                    log("\n⏹️ 사용자가 검색을 중단했습니다.", 'warning')
+                    break
+                
+                if callback:
+                    callback(f"PROGRESS:{idx}/{total}", 'progress')
+                
+                log(f"\n[{idx}/{total}] 상품: {product_code}", 'info')
+                
+                try:
+                    search_results = search_kream_product(product_code, page, callback)
+                    
+                    if search_results:
+                        results[product_code] = search_results
+                        searched_count += 1
+                        log(f"  ✅ {len(search_results)}개 결과 발견", 'success')
+                    else:
+                        results[product_code] = []
+                        log(f"  ⚠️ 검색 결과 없음", 'warning')
+                    
+                    if idx < total:
+                        delay = random.uniform(2.0, 4.0)
+                        time.sleep(delay)
+                
+                except Exception as e:
+                    log(f"  ❌ 오류: {e}", 'error')
+                    results[product_code] = []
+            
+            browser.close()
+        
+        log("\n" + "=" * 60, 'success')
+        log(f"✅ 크림 검색 완료! 총 {searched_count}개 상품", 'success')
+        log("=" * 60, 'success')
+        
+        return {
+            'success': True,
+            'results': results,
+            'total_searched': searched_count
+        }
+        
+    except Exception as e:
+        log(f"\n❌ 크림 검색 오류: {e}", 'error')
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            'success': False,
+            'error': str(e),
+            'results': results,
+            'total_searched': searched_count
+        }
+
+
+def test_kream_search():
+    """테스트 함수"""
+    print("\n" + "=" * 60)
+    print("🧪 크림 검색 테스트")
+    print("=" * 60)
+    
+    test_codes = [
+        "DZ5485-410",  # 나이키 덩크
+        "GY5167",      # 아디다스
+    ]
+    
+    result = search_kream_products_batch(test_codes)
+    
+    print("\n📊 테스트 결과:")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("🛒 KREAM 검색 엔진")
+    print("=" * 60)
+    print("\n이 파일은 app.py를 통해 실행됩니다.")
+    print("\n직접 테스트하려면:")
+    print("  python kream_search.py test")
+    print("=" * 60)
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        test_kream_search()
+
+
+
+# ==========================================
+# 백그라운드 검색 함수 (app.py에서 호출)
+# 이 함수 1개만 kream_search.py 파일 맨 끝에 추가하세요
+# ==========================================
+
 def background_kream_search(task_id, product_codes, progress_queue):
-    """백그라운드 크림 검색 - URL 직접 이동 방식 (3단계)"""
+    """백그라운드 크림 검색 - 로그인 포함"""
     global stop_flag, browser, context, page
     
     try:
@@ -978,11 +1944,9 @@ def background_kream_search(task_id, product_codes, progress_queue):
             progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
             return
         
-        print(f"🎯 첫 번째 상품: {first_product}")
+        print(f"🎯 검색할 상품번호: {first_product}")
         
-        # ==========================================
         # 준비: 기존 브라우저 완전 종료
-        # ==========================================
         print("\n🎯 [준비] 기존 브라우저 확인 및 종료")
         progress_queue.put({
             'event': 'message',
@@ -1001,9 +1965,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
         context = None
         page = None
         
-        # ==========================================
         # 1단계: 새 브라우저 열기
-        # ==========================================
         print("\n🎯 [1단계] 새 브라우저 열기")
         progress_queue.put({
             'event': 'message',
@@ -1029,30 +1991,108 @@ def background_kream_search(task_id, product_codes, progress_queue):
             timezone_id='Asia/Seoul'
         )
         
-        page = context.new_page()
-        print("  ✅ 새 브라우저 열림 (오른쪽 위, Chrome)")
+        # 쿠키 로드 (이전 로그인 세션)
+        if os.path.exists(COOKIE_FILE):
+            try:
+                with open(COOKIE_FILE, 'r') as f:
+                    cookies = json.load(f)
+                    context.add_cookies(cookies)
+                print("  ✅ 쿠키 로드 완료 (이전 세션)")
+            except:
+                print("  ⚠️ 쿠키 로드 실패")
         
+        page = context.new_page()
+        print("  ✅ 새 브라우저 열림 (오른쪽 위)")
+        
+        # 메인 페이지
+        print("  📱 크림 메인 페이지로 이동...")
+        page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
+        time.sleep(2)
+        
+        print("  ✅ [1단계 완료] 메인 페이지 로드 성공!")
         progress_queue.put({'event': 'message', 'data': {'message': '[1단계 완료] ✅'}})
         
         # ==========================================
-        # 2단계: 크림 메인 페이지 접속
+        # ✨ 로그인 체크 & 대기 (새로 추가!)
         # ==========================================
-        print("\n🎯 [2단계] 크림 메인 페이지 접속")
+        print("\n🔐 [로그인 체크] 로그인 상태 확인")
         progress_queue.put({
             'event': 'message',
-            'data': {'message': '[2단계] 크림 접속 중...'}
+            'data': {'message': '[로그인] 상태 확인 중...'}
         })
         
-        page.goto('https://kream.co.kr/', wait_until='domcontentloaded', timeout=30000)
-        time.sleep(1.5)
+        try:
+            # 로그인 상태 확인 (My 페이지 링크 존재 여부)
+            page.wait_for_selector('a[href*="my"]', timeout=3000)
+            print("  ✅ 이미 로그인되어 있음!")
+            progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 로그인 완료'}})
+            
+        except:
+            # 로그인 필요
+            print("  ⚠️ 로그인이 필요합니다")
+            print("\n" + "="*60)
+            print("💡 수동 로그인 필요")
+            print("="*60)
+            print("1. 브라우저에서 크림 로그인 버튼 클릭")
+            print("2. 이메일/비밀번호 입력")
+            print("3. 로그인 완료 후 아무 키나 누르세요...")
+            print("="*60)
+            
+            progress_queue.put({
+                'event': 'message',
+                'data': {'message': '[로그인] ⚠️ 수동 로그인 필요 - 브라우저 확인'}
+            })
+            
+            # 사용자 입력 대기 (엔터 키)
+            input("\n👉 로그인 완료 후 Enter를 눌러주세요...")
+            
+            print("\n  ✅ 로그인 완료 확인!")
+            
+            # 쿠키 저장 (다음에 자동 로그인)
+            try:
+                cookies = context.cookies()
+                with open(COOKIE_FILE, 'w') as f:
+                    json.dump(cookies, f)
+                print("  ✅ 쿠키 저장 완료 (다음에 자동 로그인)")
+            except Exception as e:
+                print(f"  ⚠️ 쿠키 저장 실패: {e}")
+            
+            progress_queue.put({'event': 'message', 'data': {'message': '[로그인] ✅ 완료'}})
         
-        print("  ✅ 크림 메인 페이지 로드 완료")
+        print("  ✅ [로그인 체크 완료]")
+        
+        # 2단계: 검색 버튼 찾기
+        print("\n🎯 [2단계] 검색 버튼(돋보기) 찾기")
+        progress_queue.put({'event': 'message', 'data': {'message': '[2단계] 검색 버튼 찾기 중...'}})
+        
+        button_selectors = [
+            'button.btn_search.header-search-button',
+            'button.btn_search',
+            'button.header-search-button',
+        ]
+        
+        search_button = None
+        for selector in button_selectors:
+            try:
+                temp = page.locator(selector).first
+                if temp.count() > 0 and temp.is_visible():
+                    search_button = temp
+                    print(f"  ✅ 검색 버튼 발견! ({selector})")
+                    break
+            except:
+                continue
+        
+        if not search_button:
+            error_msg = "검색 버튼을 찾을 수 없습니다"
+            print(f"  ❌ {error_msg}")
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+            return
+        
+        print("  ✅ [2단계 완료]")
         progress_queue.put({'event': 'message', 'data': {'message': '[2단계 완료] ✅'}})
         
-        # ==========================================
-        # 3단계: 검색 URL로 직접 이동 (봇 감지 방지)
-        # ==========================================
-        print(f"\n🎯 [3단계] 크림 검색 실행: {first_product}")
+        # 3단계: 검색 URL로 직접 이동
+        print(f"\n🎯 [3단계] 검색 URL로 이동: {first_product}")
         progress_queue.put({
             'event': 'message',
             'data': {'message': f'[3단계] {first_product} 검색 중...'}
@@ -1062,83 +2102,218 @@ def background_kream_search(task_id, product_codes, progress_queue):
         search_url = f"https://kream.co.kr/search?keyword={first_product}"
         print(f"  📍 검색 URL: {search_url}")
         
-        # 자연스러운 대기 (사람처럼)
+        # 자연스러운 대기
         time.sleep(random.uniform(0.5, 1.0))
         
-        # 검색 페이지로 직접 이동
-        print(f"  🌐 검색 페이지 이동 중...")
+        # 검색 페이지로 이동
         page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
-        
-        # 페이지 로딩 대기
         time.sleep(2)
-        print(f"  ⏳ 검색 결과 로딩 중...")
         
-        # 현재 URL 확인
         current_url = page.url
         print(f"  📍 현재 URL: {current_url}")
         
-        # 검색 결과 확인
         if 'search' in current_url.lower():
             print(f"  ✅ 검색 페이지 이동 완료!")
-            
-            # 스크린샷
-            try:
-                page.screenshot(path='shots_kream/search_result.png', full_page=True)
-                print(f"  📸 스크린샷: shots_kream/search_result.png")
-            except:
-                pass
-        else:
-            print(f"  ⚠️ URL이 예상과 다름: {current_url}")
         
-        print(f"  ✅ [3단계 완료] 검색 실행 성공!")
+        print(f"  ✅ [3단계 완료]")
+        progress_queue.put({'event': 'message', 'data': {'message': '[3단계 완료] ✅'}})
+        
+        # 4단계: 첫 번째 상품 클릭 및 모델번호 확인
+        print(f"\n🎯 [4단계] 첫 번째 상품 클릭 및 모델번호 확인")
         progress_queue.put({
             'event': 'message',
-            'data': {'message': f'[3단계 완료] {first_product} 검색 완료 ✅'}
+            'data': {'message': '[4단계] 상품 선택 중...'}
         })
         
-        # ==========================================
-        # ⏹️ 멈춤 (검색 결과 확인)
-        # ==========================================
-        print("\n" + "="*60)
-        print("⏹️  3단계까지 완료! 검색 결과 페이지에서 멈춤")
-        print("="*60)
-        print("💡 브라우저 확인:")
-        print(f"   ✅ 검색어: {first_product}")
-        print(f"   ✅ URL: {current_url}")
-        print("   ✅ 검색 결과가 보이나요?")
-        print("\n💡 다음 단계:")
-        print("   → 첫 번째 검색 결과 찾기")
-        print("   → 상품 클릭")
-        print("   → 상세 정보 추출")
-        print("="*60 + "\n")
+        # 검색 결과 대기
+        try:
+            print("  ⏳ 검색 결과 대기 중...")
+            page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
+            print("  ✅ 검색 결과 발견!")
+        except Exception as e:
+            error_msg = f"검색 결과를 찾을 수 없습니다: {e}"
+            print(f"  ❌ {error_msg}")
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+            return
         
-        # 완료 메시지
-        progress_queue.put({
-            'event': 'complete',
-            'data': {
-                'message': f'✅ 3단계 완료 - "{first_product}" 검색됨!',
-                'product_code': first_product,
-                'url': current_url,
-                'total_processed': 0
-            }
-        })
+        # 첫 번째 상품 찾기 및 클릭
+        try:
+            print("  🔍 첫 번째 상품 찾기...")
+            
+            # 실제 HTML 구조에 맞는 선택자
+            first_product_link = page.locator('a.product_card[href*="/products/"]').first
+            
+            if first_product_link.count() == 0:
+                error_msg = "상품 카드를 찾을 수 없습니다"
+                print(f"  ❌ {error_msg}")
+                progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+                return
+            
+            print("  ✅ 첫 번째 상품 발견!")
+            
+            # 자연스럽게 hover 후 클릭
+            print("  🖱️  상품에 마우스 올리기...")
+            first_product_link.hover()
+            time.sleep(random.uniform(0.3, 0.7))
+            
+            print("  🖱️  상품 클릭...")
+            first_product_link.click()
+            
+            # 페이지 전환 대기
+            time.sleep(2)
+            
+            # 현재 URL 확인
+            product_url = page.url
+            print(f"  📍 상품 페이지 URL: {product_url}")
+            
+            if '/products/' in product_url:
+                print(f"  ✅ 상품 상세 페이지로 이동 완료!")
+            
+        except Exception as e:
+            error_msg = f"상품 클릭 실패: {e}"
+            print(f"  ❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
+            return
         
-        return
+        # 모델번호 확인
+        print(f"\n  🔍 모델번호 확인 중...")
+        print(f"  🎯 찾는 상품번호: {first_product}")
+        
+        try:
+            # JavaScript로 모델번호 추출
+            model_info = page.evaluate("""
+                () => {
+                    let model_number = '';
+                    
+                    // 1. p.text-lookup 태그에서 찾기
+                    const pTags = document.querySelectorAll('p.text-lookup');
+                    for (let p of pTags) {
+                        const text = p.textContent.trim();
+                        if (text.includes('모델번호')) {
+                            model_number = text;
+                            break;
+                        }
+                    }
+                    
+                    // 2. 못 찾으면 전체 요소 검색
+                    if (!model_number) {
+                        const allElements = document.querySelectorAll('*');
+                        for (let el of allElements) {
+                            const text = el.textContent;
+                            if (text && text.includes('모델번호') && text.length < 100) {
+                                model_number = text.trim();
+                                break;
+                            }
+                        }
+                    }
+                    
+                    return {
+                        full_text: model_number,
+                        clean_number: model_number.replace('모델번호', '').trim()
+                    };
+                }
+            """)
+            
+            model_text = model_info.get('full_text', '')
+            model_clean = model_info.get('clean_number', '')
+            
+            print(f"  📋 모델번호 텍스트: {model_text}")
+            print(f"  🔢 모델번호만: {model_clean}")
+            
+            # 상품번호 포함 여부 확인 (대소문자 무시)
+            if first_product.upper() in model_text.upper():
+                print(f"  ✅ 모델번호 일치! ({first_product})")
+                print(f"\n  {'='*50}")
+                print(f"  🎉 상품 찾기 성공!")
+                print(f"  📍 상품번호: {first_product}")
+                print(f"  📍 모델번호: {model_text}")
+                print(f"  📍 URL: {product_url}")
+                print(f"  {'='*50}\n")
+                
+                progress_queue.put({
+                    'event': 'message',
+                    'data': {'message': f'[4단계 완료] 모델번호 일치 ✅'}
+                })
+                
+                # 멈춤 (성공)
+                print("\n" + "="*60)
+                print("⏹️  4단계까지 완료! 모델번호 일치 확인")
+                print("="*60)
+                print("💡 브라우저 확인:")
+                print(f"   ✅ 검색어: {first_product}")
+                print(f"   ✅ 로그인 상태: 로그인됨")
+                print(f"   ✅ 첫 번째 상품 클릭됨")
+                print(f"   ✅ 모델번호: {model_text}")
+                print(f"   ✅ 일치 여부: 일치!")
+                print("\n💡 다음 단계:")
+                print("   → 상품 상세 정보 추출")
+                print("="*60 + "\n")
+                
+                progress_queue.put({
+                    'event': 'complete',
+                    'data': {
+                        'message': f'✅ 상품 찾기 성공 - {first_product}',
+                        'product_code': first_product,
+                        'model_number': model_clean,
+                        'url': product_url,
+                        'match': True
+                    }
+                })
+                
+            else:
+                print(f"  ❌ 모델번호 불일치!")
+                print(f"  🔍 찾는 상품: {first_product}")
+                print(f"  📋 페이지 모델: {model_text}")
+                
+                progress_queue.put({
+                    'event': 'message',
+                    'data': {'message': f'[4단계] 모델번호 불일치'}
+                })
+                
+                # 멈춤 (불일치)
+                print("\n" + "="*60)
+                print("⏹️  4단계까지 완료! 모델번호 불일치")
+                print("="*60)
+                print("💡 다음 단계:")
+                print("   → 뒤로가기")
+                print("   → 두 번째 상품 클릭")
+                print("="*60 + "\n")
+                
+                progress_queue.put({
+                    'event': 'complete',
+                    'data': {
+                        'message': f'⚠️ 모델번호 불일치 - {first_product}',
+                        'product_code': first_product,
+                        'model_number': model_clean,
+                        'url': product_url,
+                        'match': False
+                    }
+                })
+            
+        except Exception as e:
+            error_msg = f"모델번호 확인 실패: {e}"
+            print(f"  ❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            progress_queue.put({'event': 'error', 'data': {'error': error_msg}})
         
     except Exception as e:
-        print(f"\n❌ 오류: {e}")
+        error_msg = f"오류 발생: {str(e)}"
+        print(f"\n❌ {error_msg}")
         import traceback
         traceback.print_exc()
         
         progress_queue.put({
             'event': 'error',
-            'data': {'error': str(e)}
+            'data': {'error': error_msg}
         })
-
-
-
+    
+    finally:
+        print("\n🔚 검색 프로세스 종료")
 # ==========================================
-# 추가: close_browser_safe() 함수
+# close_browser_safe() 함수
 # ==========================================
 def close_browser_safe():
     """브라우저 안전하게 종료"""
