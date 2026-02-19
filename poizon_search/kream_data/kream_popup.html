@@ -66,6 +66,16 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102,126,234,0.3);
         }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            margin-left: 10px;
+            display: none;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
         .btn-danger {
             background: linear-gradient(135deg, #ff4757 0%, #ff6348 100%);
             color: white;
@@ -130,24 +140,6 @@
             transform: scale(1.05);
             box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
         }
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-searching {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        .status-done {
-            background: #d4edda;
-            color: #155724;
-        }
         .sort-btn {
             background: none;
             border: none;
@@ -168,6 +160,24 @@
         }
         .sort-btn.desc::after {
             content: ' ▼';
+        }
+        
+        /* 비교 열 기본 스타일 */
+        td.comparison {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        td.comparison.profit-high {
+            background-color: #e8f5e9;
+        }
+
+        tr:hover td.comparison {
+            background-color: #e9ecef;
+        }
+
+        tr:hover td.comparison.profit-high {
+            background-color: #d4edda;
         }
         
         /* 디버그 로그 패널 */
@@ -208,31 +218,6 @@
             margin-bottom: 5px;
             line-height: 1.5;
         }
-        /* 비교 열 기본 스타일 */
-        td.comparison {
-            background-color: #f8f9fa;  /* 기본 연한 그레이 */
-            font-weight: 600;
-        }
-
-        /* 10,000원 이상 유리할 때 연한 녹색 */
-        td.comparison.profit-high {
-            background-color: #e8f5e9;  /* 연한 녹색 */
-        }
-
-        /* 호버 시 */
-        tr:hover td.comparison {
-            background-color: #e9ecef;
-        }
-
-        tr:hover td.comparison.profit-high {
-            background-color: #d4edda;  /* 호버 시 조금 더 진한 녹색 */
-        }
-        
-        /* 디버그 로그 패널 */
-        .debug-panel {
-            margin-top: 20px;
-            /* ... */
-        }
         .debug-time {
             color: #888;
         }
@@ -252,6 +237,9 @@
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="startKreamSearch()" id="searchBtn">
                     🔍 크림 검색 시작
+                </button>
+                <button class="btn btn-success" onclick="downloadKreamExcel()" id="excelBtn">
+                    📊 엑셀 다운로드
                 </button>
                 <button class="btn btn-danger" onclick="closeKreamWindow()" id="closeBtn">
                     ❌ 창 닫기
@@ -315,6 +303,7 @@
         let collectedData = [];
         let currentSortColumn = null;
         let currentSortOrder = 'asc';
+        let kreamSearchResults = [];  // ✅ 엑셀 저장용 데이터
         
         // ==========================================
         // 디버그 로그 함수
@@ -441,12 +430,23 @@
                 return;
             }
             
+            // ✅ 엑셀 저장용 데이터 초기화 (모든 값을 문자열로 변환)
+            kreamSearchResults = data.map((item, index) => ({
+                순번: String(index + 1),
+                상품번호: String(item.상품번호 || '-'),
+                제품명: String(item.제품명 || '-'),
+                평균거래가: String(item.최근30일평균거래가 || '-'),
+                중국노출가: String(item.중국노출 || '-'),
+                중국판매량: String(item.중국시장최근30일판매량 || 0),
+                현업자판매량: String(item.현지판매자최근30일판매량 || 0),
+                크림평균가: '-',
+                크림판매량: '-',
+                비교: '-'
+            }));
+            
             tbody.innerHTML = data.map((item, index) => {
-                // 첫 3개만 디버그 로그
                 if (index < 3) {
                     addDebugLog(`   행 #${index+1}: ${item.상품번호}`, '#888');
-                    addDebugLog(`      → 중국판매량: ${item.중국시장최근30일판매량}`, '#888');
-                    addDebugLog(`      → 현업자판매량: ${item.현지판매자최근30일판매량}`, '#888');
                 }
                 
                 return `
@@ -458,7 +458,7 @@
                             '-'}
                     </td>
                     <td>
-                        <button class="kream-btn" disabled style="opacity: 0.5; cursor: not-allowed;" title="전체 검색 버튼을 사용하세요" id="btn-${index}">
+                        <button class="kream-btn" disabled style="opacity: 0.5; cursor: not-allowed;" title="전체 검색 버튼을 사용하세요">
                             🔍 검색
                         </button>
                     </td>
@@ -565,6 +565,10 @@
                 const btn = document.getElementById('searchBtn');
                 btn.disabled = false;
                 btn.textContent = '✅ 검색 완료';
+                
+                // ✅ 엑셀 다운로드 버튼 표시
+                document.getElementById('excelBtn').style.display = 'block';
+                addDebugLog(`📊 엑셀 다운로드 버튼 활성화`, '#0f0');
             });
             
             eventSource.addEventListener('error', function(e) {
@@ -588,7 +592,6 @@
                 return;
             }
             
-            // 크림 데이터 확인
             if (!result.kream_data) {
                 addDebugLog(`   ⚠️ kream_data 없음`, '#ff0');
                 return;
@@ -605,17 +608,20 @@
                 avgPriceEl.style.fontWeight = '600';
                 avgPriceEl.style.color = '#667eea';
                 
-                // 숫자만 추출 (비교용)
                 const priceStr = result.kream_data.avg_price.replace(/[₩,원\s]/g, '');
                 kreamPrice = parseInt(priceStr) || 0;
                 
-                addDebugLog(`   → 크림평균가: ${result.kream_data.avg_price} (${kreamPrice})`, '#0f0');
+                // ✅ 엑셀 데이터 업데이트 (문자열로 저장)
+                if (kreamSearchResults[index]) {
+                    kreamSearchResults[index].크림평균가 = String(result.kream_data.avg_price);
+                }
+                
+                addDebugLog(`   → 크림평균가: ${result.kream_data.avg_price}`, '#0f0');
             }
             
             // 2. 크림 판매량 업데이트
             const salesEl = document.getElementById(`kream-sales-${index}`);
             if (salesEl && result.kream_data.sales) {
-                // 판매량 문자열에서 숫자만 추출
                 let salesNum = 0;
                 if (typeof result.kream_data.sales === 'string') {
                     salesNum = parseInt(result.kream_data.sales.replace(/[^0-9]/g, '')) || 0;
@@ -626,9 +632,12 @@
                 salesEl.textContent = salesNum.toLocaleString() + '개';
                 salesEl.style.fontWeight = '600';
                 salesEl.style.color = '#667eea';
-                
-                // data 속성 업데이트 (정렬용)
                 salesEl.setAttribute('data-kream-sales', salesNum);
+                
+                // ✅ 엑셀 데이터 업데이트 (문자열로 저장)
+                if (kreamSearchResults[index]) {
+                    kreamSearchResults[index].크림판매량 = String(result.kream_data.sales);
+                }
                 
                 addDebugLog(`   → 크림판매량: ${salesNum.toLocaleString()}개`, '#0f0');
             }
@@ -646,37 +655,100 @@
                     const diff = cnPrice - kreamPrice;
                     const diffFormatted = Math.abs(diff).toLocaleString();
                     
-                    // 기본 클래스 설정
                     comparisonEl.className = 'comparison';
                     
+                    let comparisonText = '';
                     if (diff > 0) {
-                        comparisonEl.textContent = `+₩${diffFormatted}`;
+                        comparisonText = `+₩${diffFormatted}`;
+                        comparisonEl.textContent = comparisonText;
                         comparisonEl.style.color = '#4CAF50';
                         comparisonEl.title = '중국이 더 비쌈 (유리)';
                         
-                        // ✅ 10,000원 이상 차이 날 때만 녹색 배경
                         if (diff >= 10000) {
                             comparisonEl.className = 'comparison profit-high';
-                            addDebugLog(`   → 비교: +₩${diffFormatted} (10,000원 이상 차이!)`, '#0f0');
+                            addDebugLog(`   → 비교: ${comparisonText} (10,000원 이상!)`, '#0f0');
                         } else {
-                            addDebugLog(`   → 비교: +₩${diffFormatted}`, '#0ff');
+                            addDebugLog(`   → 비교: ${comparisonText}`, '#0ff');
                         }
                         
                     } else if (diff < 0) {
-                        comparisonEl.textContent = `-₩${diffFormatted}`;
+                        comparisonText = `-₩${diffFormatted}`;
+                        comparisonEl.textContent = comparisonText;
                         comparisonEl.style.color = '#f44336';
                         comparisonEl.title = '크림이 더 비쌈 (불리)';
-                        addDebugLog(`   → 비교: -₩${diffFormatted} (크림이 더 비쌈)`, '#ff0');
+                        addDebugLog(`   → 비교: ${comparisonText}`, '#ff0');
                     } else {
-                        comparisonEl.textContent = '₩0';
+                        comparisonText = '₩0';
+                        comparisonEl.textContent = comparisonText;
                         comparisonEl.style.color = '#666';
                         comparisonEl.title = '가격 동일';
-                        addDebugLog(`   → 비교: ₩0 (동일)`, '#0ff');
+                        addDebugLog(`   → 비교: ${comparisonText}`, '#0ff');
+                    }
+                    
+                    // ✅ 엑셀 데이터 업데이트 (문자열로 저장)
+                    if (kreamSearchResults[index]) {
+                        kreamSearchResults[index].비교 = String(comparisonText);
                     }
                 }
             }
             
             addDebugLog(`   ✅ 행 #${index + 1} 업데이트 완료`, '#0f0');
+        }
+
+        // ==========================================
+        // ✨ 엑셀 다운로드 함수
+        // ==========================================
+        async function downloadKreamExcel() {
+            try {
+                addDebugLog('📊 엑셀 파일 생성 중...', '#0ff');
+                
+                // 빈 데이터 제거
+                const validData = kreamSearchResults.filter(item => item != null);
+                
+                if (validData.length === 0) {
+                    alert('❌ 다운로드할 데이터가 없습니다');
+                    return;
+                }
+                
+                addDebugLog(`   → 총 ${validData.length}개 데이터`, '#0ff');
+                
+                // 서버에 POST 요청
+                const response = await fetch('/export_kream_to_excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        data: validData
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    addDebugLog(`✅ 엑셀 파일 생성 완료: ${result.filename}`, '#0f0');
+                    addDebugLog(`   → ${result.count}개 상품 저장됨`, '#0f0');
+                    
+                    // 새 창으로 다운로드 (브라우저 차단 방지)
+                    const downloadUrl = `/download_kream/${result.filename}`;
+                    window.location.href = downloadUrl;
+                    
+                    addDebugLog('📥 다운로드 시작!', '#0f0');
+                    
+                    // 1초 후 알림
+                    setTimeout(() => {
+                        alert(`✅ 엑셀 다운로드 완료!\n\n파일: ${result.filename}\n상품: ${result.count}개`);
+                    }, 500);
+                } else {
+                    alert('❌ 엑셀 생성 실패: ' + result.error);
+                    addDebugLog('❌ 엑셀 생성 실패: ' + result.error, '#f00');
+                }
+                
+            } catch (error) {
+                console.error('엑셀 다운로드 오류:', error);
+                alert('❌ 엑셀 다운로드 오류: ' + error);
+                addDebugLog('❌ 엑셀 다운로드 오류: ' + error, '#f00');
+            }
         }
 
         // ==========================================
@@ -747,13 +819,8 @@
                 
                 fetch('/stop_kream_search', { method: 'POST' })
                     .then(response => response.json())
-                    .then(data => addDebugLog(`✅ 중단 요청 완료: ${data.message}`, '#0f0'))
-                    .catch(error => addDebugLog(`⚠️ 중단 요청 실패: ${error.message}`, '#ff0'));
-                
-                fetch('/close_kream_browser', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => addDebugLog(`✅ 브라우저 종료: ${data.message}`, '#0f0'))
-                    .catch(error => addDebugLog(`⚠️ 브라우저 종료 실패: ${error.message}`, '#ff0'));
+                    .then(data => addDebugLog(`✅ 중단 요청 완료`, '#0f0'))
+                    .catch(error => addDebugLog(`⚠️ 중단 요청 실패`, '#ff0'));
                 
                 setTimeout(() => {
                     addDebugLog('👋 창을 닫습니다...', '#0f0');

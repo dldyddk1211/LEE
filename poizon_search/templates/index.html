@@ -1344,10 +1344,26 @@
       progressBar.style.width = percent + '%';
       progressBar.textContent = percent + '%';
     }
+// 전역 변수 추가
+let isWorking = false;  // 작업 중 플래그
 
-    function resetIdleTimer() {
-      if (idleTimer) clearTimeout(idleTimer);
+function resetIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+  
+  // ✅ 작업 중이면 타임아웃 설정 안 함
+  if (isWorking) {
+    console.log('🚀 작업 중이므로 타임아웃 무시');
+    return;
+  }
+    
       idleTimer = setTimeout(() => {
+        // ✅ 타임아웃 시점에도 작업 중이면 종료 안 함
+        if (isWorking) {
+          console.log('🚀 작업 중이므로 브라우저 종료 취소');
+          resetIdleTimer();  // 타이머 재설정
+          return;
+        }
+        
         addLog('⏰ 5분간 활동이 없어 브라우저를 종료합니다', 'info');
         fetch('/shutdown_browser').then(() => {
           isLoggedIn = false;
@@ -1362,6 +1378,42 @@
       }, 5 * 60 * 1000);
     }
 
+    // 작업 시작 시 호출
+    function startCollectionProcess(keyword, maxPages) {
+      isWorking = true;  // ✅ 작업 시작
+      // ... 기존 코드 ...
+    }
+
+    // 작업 완료/에러 시 호출
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'complete') {
+        isWorking = false;  // ✅ 작업 완료
+        resetIdleTimer();   // ✅ 타이머 재시작
+        // ... 기존 코드 ...
+      }
+      
+      if (data.type === 'error') {
+        isWorking = false;  // ✅ 작업 종료
+        resetIdleTimer();   // ✅ 타이머 재시작
+        // ... 기존 코드 ...
+      }
+    };
+
+    // 중단 시에도 호출
+    function stopCollection() {
+      isWorking = false;  // ✅ 작업 종료
+      resetIdleTimer();   // ✅ 타이머 재시작
+      // ... 기존 코드 ...
+    }
+
+    // 리스트 비교 시작
+    async function startComparison(products) {
+      isWorking = true;  // ✅ 작업 시작
+      // ... 기존 코드 ...
+    }
+   
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';

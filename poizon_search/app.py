@@ -1365,6 +1365,119 @@ def stop_kream_search():
     return jsonify({'success': True, 'message': '검색이 중단되었습니다'})
 
 
+# app.py에 추가
+
+@app.route('/export_kream_to_excel', methods=['POST'])
+def export_kream_to_excel():
+    """크림 검색 결과를 엑셀로 저장"""
+    try:
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment, PatternFill
+        from datetime import datetime
+        
+        data = request.json.get('data', [])
+        
+        if not data:
+            return jsonify({'success': False, 'error': '데이터가 없습니다'})
+        
+        # 워크북 생성
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "크림 검색 결과"
+        
+        # 헤더 스타일
+        header_fill = PatternFill(start_color="667eea", end_color="667eea", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=11)
+        header_align = Alignment(horizontal="center", vertical="center")
+        
+        # 헤더 작성
+        headers = ['순번', '상품번호', '제품명', '평균거래가', '중국노출가', 
+                   '중국판매량', '현업자판매량', '크림평균가', '크림판매량', '비교']
+        
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_align
+        
+        # 데이터 작성 (안전하게 문자열 처리)
+        for row_idx, item in enumerate(data, start=2):
+            try:
+                ws.cell(row=row_idx, column=1, value=str(item.get('순번', '')))
+                ws.cell(row=row_idx, column=2, value=str(item.get('상품번호', '')))
+                ws.cell(row=row_idx, column=3, value=str(item.get('제품명', '')))
+                ws.cell(row=row_idx, column=4, value=str(item.get('평균거래가', '')))
+                ws.cell(row=row_idx, column=5, value=str(item.get('중국노출가', '')))
+                ws.cell(row=row_idx, column=6, value=str(item.get('중국판매량', '')))
+                ws.cell(row=row_idx, column=7, value=str(item.get('현업자판매량', '')))
+                ws.cell(row=row_idx, column=8, value=str(item.get('크림평균가', '')))
+                ws.cell(row=row_idx, column=9, value=str(item.get('크림판매량', '')))
+                ws.cell(row=row_idx, column=10, value=str(item.get('비교', '')))
+            except Exception as e:
+                print(f"⚠️ 행 {row_idx} 처리 오류: {e}")
+                continue
+        
+        # 열 너비 자동 조정
+        column_widths = [8, 15, 40, 15, 15, 12, 15, 15, 12, 12]
+        for idx, width in enumerate(column_widths, start=1):
+            ws.column_dimensions[ws.cell(row=1, column=idx).column_letter].width = width
+        
+        # 파일 저장
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'kream_search_{timestamp}.xlsx'
+        
+        # 출력 디렉토리 생성
+        output_dir = os.path.join(os.path.dirname(__file__), 'kream_data', 'output_data')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        filepath = os.path.join(output_dir, filename)
+        wb.save(filepath)
+        wb.close()  # 워크북 닫기
+        
+        print(f"✅ 엑셀 파일 생성 완료: {filepath}")
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'count': len(data)
+        })
+        
+    except Exception as e:
+        print(f"❌ 엑셀 생성 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/download_kream/<filename>')
+def download_kream(filename):
+    """크림 엑셀 파일 다운로드"""
+    try:
+        # 파일 경로 보안 검증
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return jsonify({'error': '잘못된 파일명입니다'}), 400
+        
+        file_path = os.path.join(os.path.dirname(__file__), 'kream_data', 'output_data', filename)
+        
+        print(f"📥 다운로드 요청: {filename}")
+        
+        if os.path.exists(file_path):
+            return send_file(
+                file_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+        else:
+            return jsonify({'error': '파일을 찾을 수 없습니다'}), 404
+            
+    except Exception as e:
+        print(f"❌ 다운로드 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     print("=" * 50)
     print("🚀 POIZON 데이터 수집기 서버 시작")
