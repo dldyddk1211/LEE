@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스케줄러 & 작업 관리</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        /* 탭 메뉴 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        /* 컨트롤 바 */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .task-count {
+            font-size: 1em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        /* 작업 카드 리스트 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .task-card {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .task-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .task-time {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .task-mode {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .mode-keyword {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .mode-compare {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .task-keyword {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        
+        .task-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .stat-icon {
+            font-size: 18px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .btn-view {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102,126,234,0.3);
+        }
+        
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        /* 로딩 상태 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 모바일 반응형 */
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                min-width: 100%;
+            }
+            
+            .task-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .task-actions {
+                flex-direction: column;
+            }
+            
+            .btn-sm {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 스케줄러 & 작업 관리</h1>
+            <p>완료된 작업을 확인하고 데이터를 다시 불러올 수 있습니다</p>
+        </div>
+        
+        <!-- 탭 메뉴 -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('completed')">
+                ✅ 완료 기록
+            </button>
+            <button class="tab" onclick="switchTab('running')" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                🔄 진행 중 (준비중)
+            </button>
+            <button class="tab" onclick="switchTab('queue')" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                ⏰ 대기 중 (준비중)
+            </button>
+        </div>
+        
+        <!-- 컨트롤 바 -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 키워드로 검색..." onkeyup="filterTasks()">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="task-count">총 <strong id="taskCount">0</strong>개</span>
+                <button class="btn btn-primary btn-sm" onclick="refreshTasks()">
+                    🔄 새로고침
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="closeScheduler()">
+                    ❌ 닫기
+                </button>
+            </div>
+        </div>
+        
+        <!-- 작업 리스트 -->
+        <div id="taskList" class="task-list">
+            <!-- 로딩 중 -->
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 15px;">작업 목록을 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let allTasks = [];
+        let currentTab = 'completed';
+        
+        // ==========================================
+        // 페이지 로드 시 작업 목록 불러오기
+        // ==========================================
+        window.addEventListener('load', function() {
+            console.log('📅 스케줄러 페이지 로드');
+            refreshTasks();
+        });
+        
+        // ==========================================
+        // 탭 전환
+        // ==========================================
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // 탭 버튼 상태 업데이트
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 해당 탭 데이터 표시
+            renderTasks();
+        }
+        
+        // ==========================================
+        // 작업 목록 새로고침
+        // ==========================================
+        async function refreshTasks() {
+            try {
+                console.log('🔄 작업 목록 새로고침...');
+                
+                const response = await fetch('/api/scheduler/history');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allTasks = data.records || [];
+                    console.log(`✅ ${allTasks.length}개 작업 로드`);
+                    renderTasks();
+                } else {
+                    throw new Error(data.error || '알 수 없는 오류');
+                }
+                
+            } catch (error) {
+                console.error('❌ 작업 목록 로드 실패:', error);
+                showError('작업 목록을 불러올 수 없습니다: ' + error.message);
+            }
+        }
+        
+        // ==========================================
+        // 작업 목록 렌더링
+        // ==========================================
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            const taskCount = document.getElementById('taskCount');
+            
+            // 검색 필터 적용
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase();
+            const filteredTasks = allTasks.filter(task => {
+                if (!searchKeyword) return true;
+                return task.keyword && task.keyword.toLowerCase().includes(searchKeyword);
+            });
+            
+            taskCount.textContent = filteredTasks.length;
+            
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-title">작업 기록이 없습니다</div>
+                        <div class="empty-state-text">
+                            ${searchKeyword ? '검색 결과가 없습니다' : '키워드 검색을 실행하면 여기에 기록이 남습니다'}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 작업 카드 생성
+            taskList.innerHTML = filteredTasks.map(task => createTaskCard(task)).join('');
+        }
+        
+        // ==========================================
+        // 작업 카드 HTML 생성
+        // ==========================================
+        function createTaskCard(task) {
+            const date = new Date(task.timestamp);
+            const timeStr = date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            const modeText = task.mode === 'keyword' ? '키워드 검색' : '리스트 비교';
+            const modeClass = task.mode === 'keyword' ? 'mode-keyword' : 'mode-compare';
+            
+            const duration = formatDuration(task.duration_seconds || 0);
+            
+            return `
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-time">🕐 ${timeStr}</div>
+                        <div class="task-mode ${modeClass}">${modeText}</div>
+                    </div>
+                    
+                    <div class="task-keyword">
+                        🔍 ${task.keyword || '(키워드 없음)'}
+                    </div>
+                    
+                    <div class="task-stats">
+                        <div class="stat-item">
+                            <span class="stat-icon">📦</span>
+                            <div>
+                                <div class="stat-label">수집 완료</div>
+                                <div class="stat-value">${task.collected_count || 0}개</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-icon">🛒</span>
+                            <div>
+                                <div class="stat-label">크림 검색</div>
+                                <div class="stat-value">${task.kream_count || 0}개</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-icon">⏱️</span>
+                            <div>
+                                <div class="stat-label">소요 시간</div>
+                                <div class="stat-value">${duration}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <button class="btn btn-view btn-sm" onclick="viewTaskData('${task.id}')">
+                            📋 데이터 보기
+                        </button>
+                        <button class="btn btn-download btn-sm" onclick="downloadTaskExcel('${task.id}')">
+                            📊 엑셀 다운로드
+                        </button>
+                        <button class="btn btn-delete btn-sm" onclick="deleteTask('${task.id}')">
+                            🗑️ 삭제
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==========================================
+        // 시간 포맷팅
+        // ==========================================
+        function formatDuration(seconds) {
+            if (seconds < 60) return `${seconds}초`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes}분 ${secs}초`;
+        }
+        
+        // ==========================================
+        // 검색 필터
+        // ==========================================
+        function filterTasks() {
+            renderTasks();
+        }
+        
+        // ==========================================
+        // 데이터 보기 - 메인 창에 로드
+        // ==========================================
+        async function viewTaskData(taskId) {
+            try {
+                console.log('📋 작업 데이터 불러오기:', taskId);
+                
+                const response = await fetch(`/api/scheduler/task/${taskId}`);
+                const result = await response.json();
+                
+                if (result.success && result.task) {
+                    // opener를 통해 메인 창에 데이터 전달
+                    if (window.opener && window.opener.loadHistoryData) {
+                        window.opener.loadHistoryData(result.task.data, result.task.keyword);
+                        alert(`✅ "${result.task.keyword}" 데이터를 메인 화면에 불러왔습니다!`);
+                        window.close();
+                    } else {
+                        alert('⚠️ 메인 창을 찾을 수 없습니다. 창을 다시 열어주세요.');
+                    }
+                } else {
+                    throw new Error(result.error || '데이터를 찾을 수 없습니다');
+                }
+                
+            } catch (error) {
+                console.error('❌ 데이터 로드 실패:', error);
+                alert('데이터를 불러올 수 없습니다: ' + error.message);
+            }
+        }
+        
+        // ==========================================
+        // 엑셀 다운로드
+        // ==========================================
+        async function downloadTaskExcel(taskId) {
+            try {
+                console.log('📊 엑셀 다운로드:', taskId);
+                
+                const response = await fetch(`/api/scheduler/task/${taskId}`);
+                const result = await response.json();
+                
+                if (result.success && result.task) {
+                    // 엑셀 생성 요청
+                    const excelResponse = await fetch('/export_to_excel', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            data: result.task.data,
+                            keyword: result.task.keyword
+                        })
+                    });
+                    
+                    const excelResult = await excelResponse.json();
+                    
+                    if (excelResult.success) {
+                        // 다운로드
+                        window.location.href = `/download/${excelResult.filename}`;
+                        alert(`✅ 엑셀 다운로드 시작!\n\n파일: ${excelResult.filename}`);
+                    } else {
+                        throw new Error(excelResult.error || '엑셀 생성 실패');
+                    }
+                } else {
+                    throw new Error(result.error || '데이터를 찾을 수 없습니다');
+                }
+                
+            } catch (error) {
+                console.error('❌ 엑셀 다운로드 실패:', error);
+                alert('엑셀 다운로드 실패: ' + error.message);
+            }
+        }
+        
+        // ==========================================
+        // 작업 삭제
+        // ==========================================
+        async function deleteTask(taskId) {
+            if (!confirm('이 작업 기록을 삭제하시겠습니까?\n\n삭제된 데이터는 복구할 수 없습니다.')) {
+                return;
+            }
+            
+            try {
+                console.log('🗑️ 작업 삭제:', taskId);
+                
+                const response = await fetch(`/api/scheduler/delete/${taskId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ 작업 기록이 삭제되었습니다.');
+                    refreshTasks();
+                } else {
+                    throw new Error(result.error || '삭제 실패');
+                }
+                
+            } catch (error) {
+                console.error('❌ 삭제 실패:', error);
+                alert('삭제 실패: ' + error.message);
+            }
+        }
+        
+        // ==========================================
+        // 오류 표시
+        // ==========================================
+        function showError(message) {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <div class="empty-state-title">오류가 발생했습니다</div>
+                    <div class="empty-state-text">${message}</div>
+                </div>
+            `;
+        }
+        
+        // ==========================================
+        // 창 닫기
+        // ==========================================
+        function closeScheduler() {
+            if (confirm('스케줄러 창을 닫으시겠습니까?')) {
+                window.close();
+            }
+        }
+    </script>
+</body>
+</html>

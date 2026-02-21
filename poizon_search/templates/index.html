@@ -106,7 +106,7 @@
     }
     .mode-buttons{
       display:grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap:12px;
     }
     .mode-btn{
@@ -748,7 +748,7 @@
       .login-status{ padding:16px; }
       .login-status h3{ font-size:1.05em; }
       #loginCheckBtn{ padding:12px 16px; font-size:16px; }
-      .mode-buttons{ grid-template-columns: 1fr; }
+      .mode-buttons{ grid-template-columns: repeat(2, 1fr); }
       .input-grid{ grid-template-columns: 1fr; }
       .button-group{ grid-template-columns: 1fr; }
       button, .download-btn{ font-size:16px; }
@@ -956,9 +956,9 @@
     <p class="subtitle">먼저 POIZON에 접속한 후 데이터를 수집하세요</p>
 
     <div class="login-status" id="loginStatus" style="text-align:center;">
-      <h3>🔐 STEP 1: POIZON 접속 필수</h3>
-      <p id="loginMessage">먼저 POIZON에 접속해주세요. 브라우저가 열리고 자동으로 로그인됩니다.</p>
-      <button id="loginCheckBtn" onclick="performLogin()">🚀 POIZON 접속하기</button>
+      <h3>🔐 STEP 1: POIZON 자동 접속 중...</h3>
+      <p id="loginMessage">잠시만 기다려주세요. 브라우저가 자동으로 열리고 로그인됩니다.</p>
+      <button id="loginCheckBtn" onclick="performLogin()" disabled>🔄 접속 중...</button>
     </div>
 
     <!-- 수집 모드 선택 (항상 표시) -->
@@ -993,9 +993,14 @@
           <span class="mode-icon">📋</span>
           <span class="mode-text">리스트 비교</span>
         </button>
-        <button class="mode-btn" id="modeHistory" onclick="selectMode('history')"disabled>
-          <span class="mode-icon">📚</span>
-          <span class="mode-text">검색 기록</span>
+
+        <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
+          <span class="mode-icon">📅</span>
+          <span class="mode-text">스케줄러</span>
+        </button>
+        <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
+          <span class="mode-icon">⚙️</span>
+          <span class="mode-text">설정</span>
         </button>
         </div>
     </div>
@@ -1344,26 +1349,10 @@
       progressBar.style.width = percent + '%';
       progressBar.textContent = percent + '%';
     }
-// 전역 변수 추가
-let isWorking = false;  // 작업 중 플래그
 
-function resetIdleTimer() {
-  if (idleTimer) clearTimeout(idleTimer);
-  
-  // ✅ 작업 중이면 타임아웃 설정 안 함
-  if (isWorking) {
-    console.log('🚀 작업 중이므로 타임아웃 무시');
-    return;
-  }
-    
+    function resetIdleTimer() {
+      if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
-        // ✅ 타임아웃 시점에도 작업 중이면 종료 안 함
-        if (isWorking) {
-          console.log('🚀 작업 중이므로 브라우저 종료 취소');
-          resetIdleTimer();  // 타이머 재설정
-          return;
-        }
-        
         addLog('⏰ 5분간 활동이 없어 브라우저를 종료합니다', 'info');
         fetch('/shutdown_browser').then(() => {
           isLoggedIn = false;
@@ -1378,208 +1367,179 @@ function resetIdleTimer() {
       }, 5 * 60 * 1000);
     }
 
-    // 작업 시작 시 호출
-    function startCollectionProcess(keyword, maxPages) {
-      isWorking = true;  // ✅ 작업 시작
-      // ... 기존 코드 ...
-    }
-
-    // 작업 완료/에러 시 호출
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === 'complete') {
-        isWorking = false;  // ✅ 작업 완료
-        resetIdleTimer();   // ✅ 타이머 재시작
-        // ... 기존 코드 ...
-      }
-      
-      if (data.type === 'error') {
-        isWorking = false;  // ✅ 작업 종료
-        resetIdleTimer();   // ✅ 타이머 재시작
-        // ... 기존 코드 ...
-      }
-    };
-
-    // 중단 시에도 호출
-    function stopCollection() {
-      isWorking = false;  // ✅ 작업 종료
-      resetIdleTimer();   // ✅ 타이머 재시작
-      // ... 기존 코드 ...
-    }
-
-    // 리스트 비교 시작
-    async function startComparison(products) {
-      isWorking = true;  // ✅ 작업 시작
-      // ... 기존 코드 ...
-    }
-   
     function renderTable() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
 
-      const totalItems = collectedData.length;
-      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-      if (currentPage > totalPages) currentPage = totalPages;
-      if (currentPage < 1) currentPage = 1;
+        const totalItems = collectedData.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
 
-      const startIdx = (currentPage - 1) * pageSize;
-      const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
+        const startIdx = (currentPage - 1) * pageSize;
+        const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
 
-      if (selectedMode === 'compare') {
-        // ==================== 리스트 비교 모드 ====================
-        for (const data of pageItems) {
-          const row = tbody.insertRow();
+        if (selectedMode === 'compare') {
+          // ==================== 리스트 비교 모드 ====================
+          for (const data of pageItems) {
+            const row = tbody.insertRow();
 
-          // 순번
-          const rowIndex = collectedData.indexOf(data) + 1;
-          row.insertCell().textContent = rowIndex;
+            // 순번
+            const rowIndex = collectedData.indexOf(data) + 1;
+            row.insertCell().textContent = rowIndex;
 
-          // 이미지
-          const imgCell = row.insertCell();
-          if (data.이미지URL) {
-            const img = document.createElement('img');
-            img.src = data.이미지URL;
-            img.className = 'product-img';
-            img.onerror = function() {
-              this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
-            };
-            imgCell.appendChild(img);
-          } else {
-            imgCell.textContent = '-';
-          }
-
-          // 크림 버튼
-          const kreamCell = row.insertCell();
-          const kreamBtn = document.createElement('button');
-          kreamBtn.className = 'kream-btn';
-          kreamBtn.textContent = '🛒 크림';
-          kreamBtn.onclick = () => {
-            const productCode = data.상품번호 || data.엑셀_상품번호;
-            if (productCode && productCode !== '-') {
-              const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
-              window.open(kreamUrl, '_blank');
+            // 이미지
+            const imgCell = row.insertCell();
+            if (data.이미지URL) {
+              const img = document.createElement('img');
+              img.src = data.이미지URL;
+              img.className = 'product-img';
+              img.onerror = function() {
+                this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
+              };
+              imgCell.appendChild(img);
             } else {
-              alert('상품번호가 없습니다.');
+              imgCell.textContent = '-';
             }
-          };
-          kreamCell.appendChild(kreamBtn);
 
-          row.insertCell().textContent = data.엑셀_상품번호 || '-';
-          row.insertCell().textContent = data.상품번호 || '-';
-          
-          // 제품명
-          const nameCell = row.insertCell();
-          const fullName = data.제품명 || '-';
-          const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
-          nameCell.textContent = truncatedName;
-          nameCell.title = fullName;
-          nameCell.style.cursor = 'help';
-          
-          row.insertCell().textContent = data.엑셀_할인가 ? data.엑셀_할인가.toLocaleString() + '원' : '-';
-          row.insertCell().textContent = data.엑셀_재고 !== undefined ? data.엑셀_재고.toLocaleString() + '개' : '-';
-          row.insertCell().textContent = data.중국노출_숫자 ? data.중국노출_숫자.toLocaleString() + '원' : '-';
-          
-          // 가격차이
-          const diffCell = row.insertCell();
-          const priceDiff = data.가격차이 || 0;
-          diffCell.textContent = priceDiff.toLocaleString() + '원';
-          if (priceDiff > 0) {
-            diffCell.style.color = '#dc3545';
-          } else if (priceDiff < 0) {
-            diffCell.style.color = '#007bff';
-          }
-          
-          // 판매량 (평균거래가 제거!)
-          row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
-          row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
-        }
-      } else {
-        // ==================== 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순 ====================
-        for (const data of pageItems) {
-          const row = tbody.insertRow();
-
-          // 순번
-          const rowIndex = collectedData.indexOf(data) + 1;
-          row.insertCell().textContent = rowIndex;
-
-          // 이미지
-          const imgCell = row.insertCell();
-          if (data.이미지URL) {
-            const img = document.createElement('img');
-            img.src = data.이미지URL;
-            img.className = 'product-img';
-            img.onerror = function() {
-              this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
+            // 크림 버튼
+            const kreamCell = row.insertCell();
+            const kreamBtn = document.createElement('button');
+            kreamBtn.className = 'kream-btn';
+            kreamBtn.textContent = '🛒 크림';
+            kreamBtn.onclick = () => {
+              const productCode = data.상품번호 || data.엑셀_상품번호;
+              if (productCode && productCode !== '-') {
+                const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
+                window.open(kreamUrl, '_blank');
+              } else {
+                alert('상품번호가 없습니다.');
+              }
             };
-            imgCell.appendChild(img);
-          } else {
-            imgCell.textContent = '-';
-          }
+            kreamCell.appendChild(kreamBtn);
 
-          // 크림 버튼
-          const kreamCell = row.insertCell();
-          const kreamBtn = document.createElement('button');
-          kreamBtn.className = 'kream-btn';
-          kreamBtn.textContent = '🛒 크림';
-          kreamBtn.onclick = () => {
-            const productCode = data.상품번호;
-            if (productCode && productCode !== '-') {
-              const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
-              window.open(kreamUrl, '_blank');
-            } else {
-              alert('상품번호가 없습니다.');
+            row.insertCell().textContent = data.엑셀_상품번호 || '-';
+            row.insertCell().textContent = data.상품번호 || '-';
+            
+            // 제품명
+            const nameCell = row.insertCell();
+            const fullName = data.제품명 || '-';
+            const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
+            nameCell.textContent = truncatedName;
+            nameCell.title = fullName;
+            nameCell.style.cursor = 'help';
+            
+            row.insertCell().textContent = data.엑셀_할인가 ? data.엑셀_할인가.toLocaleString() + '원' : '-';
+            row.insertCell().textContent = data.엑셀_재고 !== undefined ? data.엑셀_재고.toLocaleString() + '개' : '-';
+            row.insertCell().textContent = data.중국노출_숫자 ? data.중국노출_숫자.toLocaleString() + '원' : '-';
+            
+            // 가격차이
+            const diffCell = row.insertCell();
+            const priceDiff = data.가격차이 || 0;
+            diffCell.textContent = priceDiff.toLocaleString() + '원';
+            if (priceDiff > 0) {
+              diffCell.style.color = '#dc3545';
+            } else if (priceDiff < 0) {
+              diffCell.style.color = '#007bff';
             }
-          };
-          kreamCell.appendChild(kreamBtn);
+            
+            // 판매량 (평균거래가 제거!)
+            row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
+            row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
+          }
+        } else {
+          // ==================== 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순 ====================
+          for (const data of pageItems) {
+            const row = tbody.insertRow();
 
-          // 상품번호
-          row.insertCell().textContent = data.상품번호 || '-';
-          
-          // 제품명
-          const nameCell = row.insertCell();
-          const fullName = data.제품명 || '-';
-          const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
-          nameCell.textContent = truncatedName;
-          nameCell.title = fullName;
-          nameCell.style.cursor = 'help';
-          
-          // 브랜드/카테고리 (숨김)
-          const brandCell = row.insertCell();
-          brandCell.textContent = data.브랜드카테고리 || '-';
-          brandCell.style.display = 'none';
-          
-          // 상태 (숨김)
-          const statusCell = row.insertCell();
-          statusCell.textContent = data.상태 || '-';
-          statusCell.style.display = 'none';
-          
-          // 평균거래가
-          row.insertCell().textContent = data.최근30일평균거래가 || '-';
-          
-          // 중국노출가
-          row.insertCell().textContent = data.중국노출 || '-';
-          
-          // 판매량
-          row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
-          
-          // 현지판매량
-          row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
+            // 순번
+            const rowIndex = collectedData.indexOf(data) + 1;
+            row.insertCell().textContent = rowIndex;
+
+            // 이미지
+            const imgCell = row.insertCell();
+            if (data.이미지URL) {
+              const img = document.createElement('img');
+              img.src = data.이미지URL;
+              img.className = 'product-img';
+              img.onerror = function() {
+                this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
+              };
+              imgCell.appendChild(img);
+            } else {
+              imgCell.textContent = '-';
+            }
+
+            // 크림 버튼
+            const kreamCell = row.insertCell();
+            const kreamBtn = document.createElement('button');
+            kreamBtn.className = 'kream-btn';
+            kreamBtn.textContent = '🛒 크림';
+            kreamBtn.onclick = () => {
+              const productCode = data.상품번호;
+              if (productCode && productCode !== '-') {
+                const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
+                window.open(kreamUrl, '_blank');
+              } else {
+                alert('상품번호가 없습니다.');
+              }
+            };
+            kreamCell.appendChild(kreamBtn);
+
+            // 상품번호
+            row.insertCell().textContent = data.상품번호 || '-';
+            
+            // 제품명
+            const nameCell = row.insertCell();
+            const fullName = data.제품명 || '-';
+            const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
+            nameCell.textContent = truncatedName;
+            nameCell.title = fullName;
+            nameCell.style.cursor = 'help';
+            
+            // 브랜드/카테고리 (숨김)
+            const brandCell = row.insertCell();
+            brandCell.textContent = data.브랜드카테고리 || '-';
+            brandCell.style.display = 'none';
+            
+            // 상태 (숨김)
+            const statusCell = row.insertCell();
+            statusCell.textContent = data.상태 || '-';
+            statusCell.style.display = 'none';
+            
+            // 평균거래가
+            row.insertCell().textContent = data.최근30일평균거래가 || '-';
+            
+            // 중국노출가
+            row.insertCell().textContent = data.중국노출 || '-';
+            
+            // 판매량
+            row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
+            
+            // 현지판매량
+            row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
+          }
+            // ✅ 테이블 렌더링 후 버튼 확인
+            console.log('🎨 [DEBUG] renderTable 완료!');
+            
+            // 혹시 여기서 버튼을 숨기는지 확인
+            const sourcingBtn = document.getElementById('sourcingBtn');
+            if (sourcingBtn && sourcingBtn.style.display === 'none') {
+              console.warn('⚠️ [DEBUG] renderTable에서 sourcingBtn이 숨겨져 있음!');
         }
+
+        document.getElementById('resultCount').textContent = totalItems;
+        document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
+        document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+        document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
+        document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
       }
 
-      document.getElementById('resultCount').textContent = totalItems;
-      document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
-      document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
-      document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
-      document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
+      function addDataRow(data) {
+        collectedData.push(data);
+        renderTable();
+      }
     }
-
-    function addDataRow(data) {
-      collectedData.push(data);
-      renderTable();
-    }
-
     function openPricePopup(data) {
       document.getElementById('popupCode').textContent = data.상품번호 || '-';
       document.getElementById('popupName').textContent = data.제품명 || '-';
@@ -1943,7 +1903,8 @@ function resetIdleTimer() {
     }
 
     function selectMode(mode) {
-      if (!isLoggedIn && mode !== 'history') {
+      // 로그인 체크 수정
+      if (!isLoggedIn && mode !== 'scheduler' && mode !== 'settings') {
         alert('먼저 POIZON 접속을 해주세요!');
         return;
       }
@@ -1951,6 +1912,18 @@ function resetIdleTimer() {
       // 기록 모드는 팝업 열기
       if (mode === 'history') {
         openHistoryPopup();
+        return;
+      }
+      
+      // 스케줄러 모드는 팝업 열기
+      if (mode === 'scheduler') {
+        openSchedulerPopup();
+        return;
+      }
+      
+      // 설정 모드는 팝업 열기
+      if (mode === 'settings') {
+        openSettingsPopup();
         return;
       }
       
@@ -1989,7 +1962,7 @@ function resetIdleTimer() {
       document.getElementById('sourcingBtn').style.display = 'none';
       
       // 진행 상황 리셋
-      document.getElementById('progress').textContent = '0%';
+      
       document.getElementById('progressBar').style.width = '0%';
       document.getElementById('progressBar').className = 'progress-bar';
       
@@ -2065,32 +2038,46 @@ function resetIdleTimer() {
         return;
       }
       
-      addLog(`🛒 크림 검색 시작: ${productCodes.length}개 상품`, 'info');
+      addLog(`🛒 크림검색 시작: ${productCodes.length}개 상품`, 'info');
       
-      // ========================================
-      // ✨ 크림 검색 팝업 열기 (새 방식)
-      // ========================================
-      const width = 1600;
-      const height = 1000;
-      const left = (screen.width - width) / 2;
-      const top = (screen.height - height) / 2;
-      
-      // sessionStorage에 데이터 저장
-      sessionStorage.setItem('kreamSearchData', JSON.stringify(collectedData));
-      
-      // 크림 검색 팝업 직접 열기
-      const popup = window.open(
-        '/kream_popup',              // ✅ 크림 팝업 경로
-        'kream_search_popup',        // ✅ 팝업 이름
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-      );
-      
-      if (!popup) {
-        alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.');
-      } else {
-        addLog('✅ 크림 검색 창이 열렸습니다!', 'success');
-        addLog('💡 팝업 창에서 "크림 검색 시작" 버튼을 클릭하세요', 'info');
-      }
+      // 서버에 검색 요청
+      fetch('/start_sourcing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_codes: productCodes })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          // ========================================
+          // ✨ 새 창(팝업) 열기
+          // ========================================
+          const width = 1400;
+          const height = 900;
+          const left = (screen.width - width) / 2;
+          const top = (screen.height - height) / 2;
+          
+          const popup = window.open(
+            result.popup_url,
+            'sourcing_results',
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,toolbar=yes`
+          );
+          
+          if (!popup) {
+            alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.\n\n[Chrome/Edge 설정]\n1. 주소창 오른쪽 아이콘 클릭\n2. "항상 팝업 허용" 선택');
+          } else {
+            addLog('✅ 크림검색 창이 열렸습니다!', 'success');
+            addLog('💡 팝업 창에서 실시간 결과를 확인하세요', 'info');
+          }
+        } else {
+          addLog('❌ 검색 시작 실패: ' + result.error, 'error');
+          alert('❌ 검색 시작 실패:\n\n' + result.error);
+        }
+      })
+      .catch(error => {
+        addLog('❌ 오류 발생: ' + error, 'error');
+        alert('❌ 오류가 발생했습니다:\n\n' + error.message);
+      });
     }
 
     
@@ -2164,70 +2151,7 @@ function resetIdleTimer() {
       document.getElementById('startCompareBtn').style.display = 'none';
     }
 
-    function performLogin() {
-      const loginCheckBtn = document.getElementById('loginCheckBtn');
-      const loginMessage = document.getElementById('loginMessage');
-      const loginStatus = document.getElementById('loginStatus');
-
-      loginCheckBtn.disabled = true;
-      loginCheckBtn.textContent = '접속 중...';
-      loginMessage.textContent = 'POIZON에 접속하고 있습니다... 브라우저가 열립니다.';
-
-      addLog('🔄 POIZON 접속 시작...', 'info');
-      addLog('🌐 브라우저가 열리고 자동 로그인을 시도합니다', 'info');
-
-      fetch('/check_login')
-        .then(r => r.json())
-        .then(data => {
-          if (data.logged_in) {
-            isLoggedIn = true;
-            loginStatus.classList.add('logged-in');
-            loginMessage.textContent = '✅ POIZON 접속 완료! 이제 수집 모드를 선택하세요.';
-            loginCheckBtn.textContent = '✅ 접속 완료';
-            loginCheckBtn.style.background = '#28a745';
-            addLog('✅ POIZON 로그인 성공!', 'success');
-            addLog('💡 수집 모드를 선택하고 키워드를 입력하세요', 'info');
-            
-            // 모드 버튼 활성화 (준비 중 버튼 제외)
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-              if (btn.dataset.comingSoon === 'true') {
-                btn.disabled = true;
-                btn.style.opacity = '0.4';
-                btn.style.cursor = 'not-allowed';
-              } else {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-              }
-            });
-            
-            // 키워드 입력란 활성화
-            document.getElementById('keyword').disabled = false;
-            
-            // 기본 모드 선택 (키워드 검색)
-            selectMode('keyword');
-            
-            document.getElementById('maxPages').disabled = false;
-            document.getElementById('startBtn').disabled = false;
-            resetIdleTimer();
-          } else {
-            isLoggedIn = false;
-            loginStatus.classList.remove('logged-in');
-            loginMessage.textContent = '❌ 접속 실패: ' + (data.message || '알 수 없는 오류');
-            loginCheckBtn.textContent = '🚀 다시 접속하기';
-            loginCheckBtn.disabled = false;
-            addLog('❌ 접속 실패: ' + (data.message || '알 수 없는 오류'), 'error');
-          }
-        })
-        .catch(err => {
-          loginMessage.textContent = '❌ 접속 오류: ' + err;
-          loginCheckBtn.textContent = '🚀 다시 접속하기';
-          loginCheckBtn.disabled = false;
-          addLog('❌ 접속 오류: ' + err, 'error');
-        });
-    }
-
-    function startCollection() {
+      function startCollection() {
       const keyword = document.getElementById('keyword').value.trim();
       const maxPages = parseInt(document.getElementById('maxPages').value, 10);
       
@@ -2257,7 +2181,34 @@ function resetIdleTimer() {
     }
 
     function startCollectionProcess(keyword, maxPages) {
-      resetAll();
+      // ✅ resetAll() 대신 필요한 것만 초기화
+      
+      // EventSource 정리
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+      
+      // 로그만 초기화
+      document.getElementById('logBox').innerHTML = '';
+      
+      // 진행 상황 초기화
+      updateProgress(0, 100);
+      
+      // 기존 데이터 초기화 (새로운 검색이므로)
+      collectedData = [];
+      currentPage = 1;
+      
+      // 수집 결과 테이블 초기화 (새로운 데이터를 받을 준비)
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('resultCount').textContent = '0';
+      
+      // 버튼 숨김 (수집 시작 전)
+      document.getElementById('downloadBtn').style.display = 'none';
+      document.getElementById('sourcingBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'none';
+      
+      // === 여기서부터는 기존 코드 그대로 ===
       
       // 모든 모드 버튼 비활성화
       setModeButtonsEnabled(false);
@@ -2265,7 +2216,6 @@ function resetIdleTimer() {
       document.getElementById('startBtn').disabled = true;
       document.getElementById('stopBtn').style.display = 'block';
       addLog('🔄 수집 준비 중...', 'info');
-      updateProgress(0, 100);
       
       // 통계 초기화
       document.getElementById('currentPage').textContent = '0 / 0';
@@ -2286,6 +2236,7 @@ function resetIdleTimer() {
 
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        
         if (data.type === 'log') {
           addLog(data.message, data.level || 'info');
           
@@ -2297,26 +2248,27 @@ function resetIdleTimer() {
             }
           }
           
-          // 현재 작업 업데이트
           updateCurrentTask(data.message);
         }
+        
         if (data.type === 'progress') {
           updateProgress(data.current, data.total);
           
-          // 페이지 정보 업데이트
           if (data.page && data.total_pages) {
             document.getElementById('currentPage').textContent = `${data.page} / ${data.total_pages}`;
           }
         }
+        
         if (data.type === 'data') {
           addDataRow(data.item);
           
-          // 수집된 상품 수 업데이트
           const count = document.querySelectorAll('#tableBody tr').length;
           document.getElementById('collectedCount').textContent = `${count}개`;
         }
 
         if (data.type === 'complete') {
+          console.log('🎉 [DEBUG] complete 이벤트 받음!');
+          
           addLog('✅ 모든 작업 완료!', 'success');
           addLog(`총 ${data.total_items}개 상품 수집 완료 (${data.pages}페이지)`, 'success');
           
@@ -2324,8 +2276,13 @@ function resetIdleTimer() {
           document.getElementById('currentTask').textContent = '완료';
           document.getElementById('collectedCount').textContent = `${data.total_items}개`;
           
-          // 데이터 저장 및 테이블 표시
+          // ✅ 데이터 저장 및 테이블 표시
+          console.log('🔍 [DEBUG] data.data 확인:', data.data);
+          console.log('🔍 [DEBUG] Array 여부:', Array.isArray(data.data));
+          
           if (data.data && Array.isArray(data.data)) {
+            console.log('✅ [DEBUG] 데이터 저장 시작:', data.data.length, '개');
+            
             collectedData = data.data;
             currentData = data.data;
             
@@ -2335,7 +2292,12 @@ function resetIdleTimer() {
             // 결과 개수 업데이트
             document.getElementById('resultCount').textContent = data.data.length;
             
-            console.log('📊 데이터 저장:', data.data.length, '개');
+            // 테이블 렌더링
+            renderTable();
+            
+            console.log('✅ [DEBUG] 데이터 저장 완료!');
+          } else {
+            console.warn('⚠️ [DEBUG] data.data가 없거나 배열이 아님!');
           }
           
           // 자동으로 판매량 내림차순 정렬
@@ -2343,79 +2305,50 @@ function resetIdleTimer() {
           sortBy('판매량');
           addLog('✅ 정렬 완료!', 'success');
           
+          // ✅ 다운로드 버튼 표시
           if (data.file_path) {
             const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.href = `/download/${encodeURIComponent(data.file_path)}`;
             downloadBtn.style.display = 'block';
+            console.log('✅ [DEBUG] 다운로드 버튼 표시!');
           }
           
-          // 크림검색 버튼 표시
-          document.getElementById('sourcingBtn').style.display = 'block';
+          // ✅✅✅ 크림검색 버튼 표시 (디버깅 강화!)
+          const sourcingBtn = document.getElementById('sourcingBtn');
+          console.log('🔍 [DEBUG] sourcingBtn 요소:', sourcingBtn);
+          
+          if (sourcingBtn) {
+            sourcingBtn.style.display = 'block';
+            console.log('✅ [DEBUG] 크림검색 버튼 표시 완료!');
+            console.log('✅ [DEBUG] sourcingBtn.style.display:', sourcingBtn.style.display);
+          } else {
+            console.error('❌ [DEBUG] sourcingBtn 요소를 찾을 수 없음!');
+          }
+          
+          // ✅ 리셋 버튼 표시
+          document.getElementById('resetBtn').style.display = 'block';
+          console.log('✅ [DEBUG] 리셋 버튼 표시!');
           
           // 모드 버튼 재활성화
           setModeButtonsEnabled(true);
+          console.log('✅ [DEBUG] 모드 버튼 활성화!');
           
           document.getElementById('stopBtn').style.display = 'none';
-          document.getElementById('resetBtn').style.display = 'block';
           document.getElementById('startBtn').disabled = false;
+          
           eventSource.close();
           eventSource = null;
+          
+          console.log('🎉 [DEBUG] complete 처리 완료!');
         }
 
-        if (data.type === 'error') {
-          addLog('❌ 오류: ' + data.message, 'error');
-          
-          // 통계 초기화
-          document.getElementById('currentTask').textContent = '오류';
-          
-          // 모드 버튼 재활성화
-          setModeButtonsEnabled(true);
-          
-          document.getElementById('stopBtn').style.display = 'none';
-          document.getElementById('resetBtn').style.display = 'block';
-          document.getElementById('startBtn').disabled = false;
-          eventSource.close();
-          eventSource = null;
-        }
-      };
 
-      eventSource.onerror = () => {
-        addLog('❌ 연결 오류 발생', 'error');
-        
-        // 모드 버튼 재활성화
-        setModeButtonsEnabled(true);
-        
-        document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('resetBtn').style.display = 'block';
-        document.getElementById('startBtn').disabled = false;
-        if (eventSource) {
-          eventSource.close();
-          eventSource = null;
-        }
+
       };
     }
 
-    window.onload = () => {
-      addLog('👋 환영합니다!', 'info');
-      addLog('📌 먼저 "POIZON 접속하기" 버튼을 클릭해주세요', 'info');
 
-      document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
-        pageSize = parseInt(e.target.value, 10) || 20;
-        currentPage = 1;
-        renderTable();
-      });
 
-      document.getElementById('prevPageBtn').addEventListener('click', () => {
-        currentPage -= 1;
-        renderTable();
-      });
-
-      document.getElementById('nextPageBtn').addEventListener('click', () => {
-        currentPage += 1;
-        renderTable();
-      });
-    };
-    
     // ==========================================
     // 📚 기록 팝업 기능
     // ==========================================
@@ -2426,11 +2359,29 @@ function resetIdleTimer() {
         addLog('📚 기록 팝업 열림', 'info');
       }
 
+      // 스케줄러 팝업 열기
+      function openSchedulerPopup() {
+        const width = 1200;
+        const height = 800;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        
+        window.open('/scheduler', 'schedulerPopup',`width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+);
+      }
+
+      // 설정 팝업 열기
+      function openSettingsPopup() {
+        alert('⚙️ 설정 기능은 곧 출시됩니다!\n\n구현 예정 기능:\n• 브라우저 자동 닫기 시간 설정\n• 검색 딜레이 조정\n• 알림 설정\n• 데이터 저장 경로 변경');
+        addLog('⚙️ 설정 팝업 (준비 중)', 'info');
+      }
+
       // 기록 팝업 닫기
       function closeHistoryPopup(event) {
         if (event && event.target !== event.currentTarget) return;
         document.getElementById('historyPopup').classList.remove('active');
       }
+
 
       let allHistoryRecords = [];
 
@@ -2610,6 +2561,193 @@ function resetIdleTimer() {
           alert('전체 삭제 실패: ' + err.message);
         }
       }
+      // ==========================================
+      // 🚨 긴급 추가: performLogin 함수
+      // ==========================================
+      function performLogin() {
+        const loginCheckBtn = document.getElementById('loginCheckBtn');
+        const loginMessage = document.getElementById('loginMessage');
+        const loginStatus = document.getElementById('loginStatus');
+
+        loginCheckBtn.disabled = true;
+        loginCheckBtn.textContent = '접속 중...';
+        loginMessage.textContent = 'POIZON에 접속하고 있습니다... 브라우저가 열립니다.';
+
+        addLog('🔄 POIZON 접속 시작...', 'info');
+        addLog('🌐 브라우저가 열리고 자동 로그인을 시도합니다', 'info');
+
+        fetch('/check_login')
+          .then(r => r.json())
+          .then(data => {
+            if (data.logged_in) {
+              isLoggedIn = true;
+              loginStatus.classList.add('logged-in');
+              loginMessage.textContent = '✅ POIZON 접속 완료! 이제 수집 모드를 선택하세요.';
+              loginCheckBtn.textContent = '✅ 접속 완료';
+              loginCheckBtn.style.background = '#28a745';
+              addLog('✅ POIZON 로그인 성공!', 'success');
+              addLog('💡 수집 모드를 선택하고 키워드를 입력하세요', 'info');
+              
+              // 모드 버튼 활성화 (준비 중 버튼 제외)
+              document.querySelectorAll('.mode-btn').forEach(btn => {
+                if (btn.dataset.comingSoon === 'true') {
+                  btn.disabled = true;
+                  btn.style.opacity = '0.4';
+                  btn.style.cursor = 'not-allowed';
+                } else {
+                  btn.disabled = false;
+                  btn.style.opacity = '1';
+                  btn.style.cursor = 'pointer';
+                }
+              });
+              
+              // 키워드 입력란 활성화
+              document.getElementById('keyword').disabled = false;
+              
+              // 기본 모드 선택 (키워드 검색)
+              selectMode('keyword');
+              
+              document.getElementById('maxPages').disabled = false;
+              document.getElementById('startBtn').disabled = false;
+              resetIdleTimer();
+            } else {
+              isLoggedIn = false;
+              loginStatus.classList.remove('logged-in');
+              loginMessage.textContent = '❌ 접속 실패: ' + (data.message || '알 수 없는 오류');
+              loginCheckBtn.textContent = '🚀 다시 접속하기';
+              loginCheckBtn.disabled = false;
+              addLog('❌ 접속 실패: ' + (data.message || '알 수 없는 오류'), 'error');
+            }
+          })
+          .catch(err => {
+            loginMessage.textContent = '❌ 접속 오류: ' + err;
+            loginCheckBtn.textContent = '🚀 다시 접속하기';
+            loginCheckBtn.disabled = false;
+            addLog('❌ 접속 오류: ' + err, 'error');
+          });
+      }
+
+      // 스케줄러에서 과거 데이터 불러오기
+   // ==========================================
+// ✅ loadHistoryData 함수 완전 수정본
+// ==========================================
+
+// 기존 함수를 찾아서 (Ctrl+F: "function loadHistoryData"):
+
+
+    function loadHistoryData(data, keyword) {
+      console.log('📋 [DEBUG] loadHistoryData 호출됨!');
+      console.log('📋 [DEBUG] 받은 데이터:', data);
+      console.log('📋 [DEBUG] 데이터 타입:', typeof data);
+      console.log('📋 [DEBUG] 배열 여부:', Array.isArray(data));
+      console.log('📋 [DEBUG] 데이터 길이:', data ? data.length : 'null');
+      console.log('📋 [DEBUG] 키워드:', keyword);
+      
+      // ✅ 데이터 검증 강화
+      if (!data) {
+        console.error('❌ [DEBUG] 데이터가 null/undefined');
+        alert('❌ 데이터가 없습니다');
+        return;
+      }
+      
+      if (!Array.isArray(data)) {
+        console.error('❌ [DEBUG] 데이터가 배열이 아님');
+        alert('❌ 데이터 형식이 올바르지 않습니다');
+        return;
+      }
+      
+      if (data.length === 0) {
+        console.warn('⚠️ [DEBUG] 데이터가 비어있음');
+        alert('⚠️ 저장된 데이터가 없습니다');
+        return;
+      }
+      
+      console.log('✅ [DEBUG] 데이터 검증 완료:', data.length, '개');
+      
+      // ✅ 데이터 저장
+      collectedData = data;
+      currentPage = 1;
+      console.log('✅ [DEBUG] collectedData 저장 완료');
+      
+      // ✅ 결과 개수 업데이트
+      document.getElementById('resultCount').textContent = data.length;
+      console.log('✅ [DEBUG] resultCount 업데이트:', data.length);
+      
+      // ✅ 결과 섹션 활성화
+      const resultSection = document.getElementById('resultSection');
+      resultSection.classList.add('active');
+      console.log('✅ [DEBUG] resultSection 활성화 완료');
+      
+      // ✅ 테이블 렌더링
+      console.log('📊 [DEBUG] renderTable() 호출 시작...');
+      renderTable();
+      console.log('📊 [DEBUG] renderTable() 완료!');
+      
+      // ✅ 버튼 표시
+      document.getElementById('downloadBtn').style.display = 'block';
+      document.getElementById('sourcingBtn').style.display = 'block';
+      document.getElementById('resetBtn').style.display = 'block';
+      console.log('✅ [DEBUG] 버튼 표시 완료');
+      
+      // ✅ 로그 추가
+      addLog(`📋 "${keyword}" 데이터 로드 완료: ${data.length}개`, 'success');
+      
+      // ✅ 화면 스크롤 (약간 지연)
+      setTimeout(() => {
+        resultSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+        console.log('✅ [DEBUG] 스크롤 완료');
+      }, 200);
+      
+      console.log('🎉 [DEBUG] loadHistoryData 전체 완료!');
+    }
+
+    // ==========================================
+    // ✅ 수정 완료!
+    // ==========================================
+
+
+  // ========================================
+  // ✅ window.onload - 자동 로그인
+  // ========================================
+
+    window.onload = () => {
+      addLog('👋 POIZON 데이터 수집기에 오신 것을 환영합니다!', 'info');
+      addLog('🔄 자동으로 POIZON에 접속합니다...', 'info');
+      
+      // 버튼 비활성화 및 메시지 변경
+      const loginCheckBtn = document.getElementById('loginCheckBtn');
+      const loginMessage = document.getElementById('loginMessage');
+      
+      loginCheckBtn.disabled = true;
+      loginCheckBtn.textContent = '🔄 접속 중...';
+      loginMessage.textContent = '잠시만 기다려주세요. 브라우저가 자동으로 열리고 로그인됩니다.';
+      
+      // 1초 후 자동 로그인
+      setTimeout(() => {
+        performLogin();
+      }, 1000);
+      
+      // 페이지 컨트롤 이벤트 리스너
+      document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        pageSize = parseInt(e.target.value, 10) || 20;
+        currentPage = 1;
+        renderTable();
+      });
+
+      document.getElementById('prevPageBtn').addEventListener('click', () => {
+        currentPage -= 1;
+        renderTable();
+      });
+
+      document.getElementById('nextPageBtn').addEventListener('click', () => {
+        currentPage += 1;
+        renderTable();
+      });
+    };
+
   </script>
 </body>
 </html>

@@ -10,6 +10,8 @@ from openpyxl.drawing.image import Image as XLImage
 from openpyxl.styles import Font, Alignment, PatternFill
 import requests
 from io import BytesIO
+from datetime import datetime
+
 
 # 중단 플래그
 stop_flag = False
@@ -630,12 +632,12 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
                 time_str = f"{seconds}초"
             
             log(f"⏱️ 총 검색 시간: {time_str}", 'success')
-            
             return {
                 'success': True,
                 'total_items': len(all_data),
                 'pages': page_num,
                 'file_path': os.path.basename(excel_path) if excel_path else None,
+                'data': all_data,  # ✅ 추가!
                 'stopped': stop_flag
             }
 
@@ -720,6 +722,7 @@ def perform_login():
 
 def run_poizon_from_gui(keyword, max_pages=20, callback=None, skip_login=False):
     """GUI에서 호출하는 함수"""
+    
     return run(
         keyword=keyword, 
         max_pages=max_pages, 
@@ -1352,6 +1355,8 @@ def send_result(callback, product_code, data):
             import traceback
             log(f"  ❌ [DEBUG] traceback: {traceback.format_exc()}", 'error')
             traceback.print_exc()  # ← 직접 print!
+
+
 
 if __name__ == "__main__":
     print("=" * 60)
