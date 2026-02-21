@@ -92,7 +92,6 @@
       color:#fff;
     }
 
-    /* 수집 모드 선택 */
     .mode-selector{
       margin-bottom:20px;
       padding:20px;
@@ -138,19 +137,6 @@
       border-color:#667eea;
       background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color:#fff;
-    }
-    /* 🔒 준비 중 버튼 - 절대 활성화 방지 */
-    .mode-btn.coming-soon-btn,
-    .mode-btn.coming-soon-btn:hover,
-    .mode-btn.coming-soon-btn.active {
-      opacity: 0.4 !important;
-      cursor: not-allowed !important;
-      pointer-events: auto !important;
-      transform: none !important;
-      box-shadow: none !important;
-      border-color: #ddd !important;
-      background: #f8f9fa !important;
-      color: #999 !important;
     }
     .mode-icon{
       font-size:24px;
@@ -227,10 +213,6 @@
     }
     .upload-btn{
       background:#17a2b8;
-      padding:14px 12px !important;
-      font-size:16px !important;
-      font-weight:600 !important;
-      min-height: 48px !important;
     }
     .upload-btn:hover{
       background:#138496;
@@ -238,64 +220,10 @@
     }
     .compare-start-btn{
       background:#28a745;
-      padding:14px 12px !important;
-      font-size:16px !important;
-      font-weight:600 !important;
-      min-height: 48px !important;
     }
     .compare-start-btn:hover{
       background:#218838;
       transform: translateY(-2px);
-    }
-    
-    .sourcing-btn{
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: #fff;
-      border: none;
-      padding: 6.4px 12.8px;
-      border-radius: 6px;
-      font-size: 11.2px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(245, 87, 108, 0.25);
-      min-width: 100px;
-      max-width: 140px;
-      width: auto;
-    }
-    .sourcing-btn:hover{
-      background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-      transform: scale(1.05);
-      box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
-    }
-    .sourcing-btn:disabled{
-      background: #ccc;
-      cursor: not-allowed;
-      box-shadow: none;
-      transform: none;
-    }
-    
-    .stop-btn{
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      color: #fff;
-      border: none;
-      padding: 6.4px 12.8px;
-      border-radius: 6px;
-      font-size: 11.2px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(238, 90, 36, 0.25);
-      min-width: 80px;
-      max-width: 100px;
-      width: auto;
-    }
-    .stop-btn:hover{
-      background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
-      transform: scale(1.05);
-      box-shadow: 0 3px 12px rgba(238, 90, 36, 0.35);
     }
     
     #startBtn{
@@ -314,10 +242,6 @@
     .stop-btn{
       background:#dc3545;
       display:none;
-      padding:14px 12px !important;
-      font-size:16px !important;
-      font-weight:600 !important;
-      min-height: 48px !important;
     }
     .stop-btn:hover{
       background:#c82333;
@@ -327,10 +251,6 @@
     .download-btn{
       background:#28a745;
       display:none;
-      padding:14px 12px !important;
-      font-size:16px !important;
-      font-weight:600 !important;
-      min-height: 48px !important;
     }
     .download-btn:hover{
       background:#218838;
@@ -340,10 +260,6 @@
     .reset-btn{
       background:#6c757d;
       display:none;
-      padding:14px 12px !important;
-      font-size:16px !important;
-      font-weight:600 !important;
-      min-height: 48px !important;
     }
     .reset-btn:hover{
       background:#5a6268;
@@ -416,40 +332,10 @@
       border:1px solid #e0e0e0;
       border-radius:12px;
       background:#fff;
-      -webkit-overflow-scrolling: touch;
     }
     
-    /* 업로드 리스트 테이블 컬럼 너비 */
     #uploadListSection .table-container{
       max-height: 400px;
-    }
-    #uploadListSection table{
-      table-layout: fixed;
-      width: 100%;
-    }
-    #uploadListSection th:nth-child(1) { /* 순번 */
-      width: 50px;
-    }
-    #uploadListSection th:nth-child(2) { /* 상품번호 */
-      width: 17%;
-    }
-    #uploadListSection th:nth-child(3), /* 정가 */
-    #uploadListSection th:nth-child(4), /* 할인가 */
-    #uploadListSection th:nth-child(5)  /* 재고 */
-    {
-      width: 13%;
-    }
-    #uploadListSection th:nth-child(6) { /* 제품명 */
-      width: calc(100% - 50px - 17% - 13% - 13% - 13%);
-    }
-    #uploadListSection td{
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    #uploadListSection td:nth-child(6){ /* 제품명은 말줄임 */
-      white-space: normal;
-      word-break: break-word;
     }
     
     table{
@@ -465,9 +351,8 @@
       vertical-align:middle;
       white-space: nowrap;
     }
-    /* 제품명 컬럼만 말줄임 허용 */
     td:nth-child(4) {
-      max-width: 250px;
+      max-width: 125px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -490,176 +375,116 @@
       background:#f8f9fa;
       padding:5px;
     }
-    
-    /* 크림 버튼 */
-    .buy-btn{
-      background:#ff6b6b;
-      color:#fff;
-      border:none;
-      padding:6.4px 12.8px;
-      border-radius:6px;
-      cursor:pointer;
-      font-size:11.2px;
-      font-weight:600;
-      transition: all 0.3s;
-      white-space: nowrap;
-      min-width: 60px;
-      max-width: 80px;
-      width: auto;
-    }
-    .buy-btn:hover{
-      background:#ff5252;
-      transform: scale(1.05);
-    }
-    
-    .kream-btn{
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color:#fff;
-      border:none;
-      padding:6.4px 12.8px;
-      border-radius:6px;
-      cursor:pointer;
-      font-size:11.2px;
-      font-weight:600;
-      transition: all 0.3s;
-      white-space: nowrap;
-      min-width: 60px;
-      max-width: 80px;
-      width: auto;
-    }
-    .kream-btn:hover{
-      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+
+    .search-execute-btn {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
     }
 
-    /* 팝업 */
-    .popup-overlay{
-      display:none;
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.7);
-      z-index:1000;
-      justify-content:center;
-      align-items:center;
+    .search-execute-btn:hover {
+      background: #3367d6;
     }
-    .popup-overlay.active{ display:flex; }
-    
-    .popup-content{
-      background:#fff;
-      border-radius:20px;
-      padding:30px;
-      max-width:600px;
-      width:90%;
-      max-height:80vh;
-      overflow-y:auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      position:relative;
+
+    .search-checkbox {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #4285f4;
     }
-    .popup-close{
-      position:absolute;
-      top:15px;
-      right:15px;
-      background:#f0f0f0;
-      border:none;
-      width:35px;
-      height:35px;
-      border-radius:50%;
-      cursor:pointer;
-      font-size:20px;
-      line-height:1;
-      transition: all 0.3s;
+
+    /* ✅ 반응형 검색 옵션 */
+    .search-options-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px 15px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      min-width: 380px;
+      width: fit-content;
     }
-    .popup-close:hover{
-      background:#e0e0e0;
-      transform:rotate(90deg);
+
+    .search-divider {
+      width: 1px;
+      height: 24px;
+      background: #dee2e6;
+      flex-shrink: 0;
     }
-    
-    .popup-product-info{
-      margin-bottom:30px;
-      padding-bottom:20px;
-      border-bottom:2px solid #e0e0e0;
+
+    .search-checkboxes {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      white-space: nowrap;
     }
-    .popup-product-header{
-      display:flex;
-      gap:20px;
-      margin-bottom:15px;
+
+    .search-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .popup-product-img{
-      width:120px;
-      height:120px;
-      object-fit:contain;
-      border-radius:10px;
-      background:#f8f9fa;
-      padding:10px;
+
+    .search-label-disabled {
+      opacity: 0.5;
     }
-    .popup-product-details{ flex:1; }
-    .popup-product-code{
-      font-size:24px;
-      font-weight:700;
-      color:#333;
-      margin-bottom:10px;
+
+    .search-label-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
     }
-    .popup-product-name{
-      font-size:16px;
-      color:#666;
-      margin-bottom:5px;
+
+    .search-label-disabled .search-label-text {
+      color: #999;
     }
-    .popup-product-price{
-      font-size:18px;
-      font-weight:600;
-      color:#667eea;
+
+    .search-label-badge {
+      font-size: 11px;
+      color: #999;
+      margin-left: 2px;
     }
-    
-    .price-compare-title{
-      font-size:20px;
-      font-weight:700;
-      color:#333;
-      margin-bottom:20px;
-      display:flex;
-      align-items:center;
-      gap:10px;
+
+    /* 작은 화면 (768px 이하) */
+    @media (max-width: 768px) {
+      .search-options-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        min-width: 100%;
+        width: 100%;
+      }
+
+      .search-divider {
+        display: none;
+      }
+
+      .search-checkboxes {
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .search-execute-btn {
+        width: 100%;
+      }
     }
-    
-    .shopping-links{
-      display:flex;
-      flex-direction:column;
-      gap:15px;
-    }
-    .shopping-link{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:15px 20px;
-      background:#f8f9fa;
-      border-radius:12px;
-      text-decoration:none;
-      transition: all 0.3s;
-      border:2px solid transparent;
-    }
-    .shopping-link:hover{
-      background:#fff;
-      border-color:#667eea;
-      transform:translateX(5px);
-      box-shadow: 0 4px 12px rgba(102,126,234,0.15);
-    }
-    .shopping-link-left{
-      display:flex;
-      align-items:center;
-      gap:15px;
-    }
-    .shopping-icon{ font-size:28px; }
-    .shopping-name{
-      font-size:18px;
-      font-weight:600;
-      color:#333;
-    }
-    .shopping-arrow{
-      font-size:24px;
-      color:#999;
+
+    /* 매우 작은 화면 (480px 이하) */
+    @media (max-width: 480px) {
+      .search-checkboxes {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
     }
 
     .progress-bar{
@@ -683,34 +508,6 @@
       font-size: 13px;
     }
 
-    /* 통계 카드 */
-    .stat-card {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: all 0.3s;
-    }
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .stat-label {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 8px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-      font-family: 'Courier New', monospace;
-    }
-
     .log{
       background:#fff;
       border:1px solid #e0e0e0;
@@ -722,7 +519,6 @@
       font-size:13px;
       line-height:1.6;
       margin-top:12px;
-      -webkit-overflow-scrolling: touch;
     }
     .log-line{ margin:3px 0; color:#333; }
     .log-line.success{ color:#28a745; }
@@ -731,222 +527,6 @@
 
     #resultSection{ display:none; }
     #resultSection.active{ display:block; }
-
-    @media (max-width: 1024px){
-      .container{ padding:24px; border-radius:16px; }
-      .button-group{ grid-template-columns: repeat(2, 1fr); }
-      .product-img{ width:64px; height:64px; }
-      .log{ height:240px; }
-      table{ min-width: 1000px; }
-    }
-
-    @media (max-width: 640px){
-      body{ padding:12px; }
-      .container{ padding:16px; border-radius:14px; }
-      h1{ font-size:1.5em; }
-      .subtitle{ font-size: 13px; margin-bottom: 18px; }
-      .login-status{ padding:16px; }
-      .login-status h3{ font-size:1.05em; }
-      #loginCheckBtn{ padding:12px 16px; font-size:16px; }
-      .mode-buttons{ grid-template-columns: repeat(2, 1fr); }
-      .input-grid{ grid-template-columns: 1fr; }
-      .button-group{ grid-template-columns: 1fr; }
-      button, .download-btn{ font-size:16px; }
-      .section{ padding:14px; }
-      .log{ height:220px; font-size:12px; }
-      .progress-bar{ height:26px; }
-      .page-info{ min-width:70px; }
-      th, td{ padding:10.8px 9px; }
-      table{ min-width: 980px; }
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      * { transition: none !important; }
-    }
-    
-    /* 기록 팝업 전용 스타일 */
-       /* 기록 팝업 전용 스타일 */
-    .history-popup-content {
-      background: #fff;
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 1200px;  /* 기록은 더 넓게 */
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      position: relative;
-    }
-    
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
-      padding-bottom: 20px;
-      border-bottom: 3px solid #667eea;
-    }
-    
-    .history-header h2 {
-      font-size: 1.8em;
-      color: #333;
-      margin: 0;
-    }
-    
-    .history-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    
-    .history-stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    
-    .history-stat-value {
-      font-size: 2em;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .history-stat-label {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-    
-    .history-controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .history-btn {
-      padding: 10px 18px;
-      border: 2px solid #667eea;
-      background: white;
-      color: #667eea;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s;
-    }
-    
-    .history-btn:hover {
-      background: #667eea;
-      color: white;
-    }
-    
-    .history-btn.danger {
-      border-color: #dc3545;
-      color: #dc3545;
-    }
-    
-    .history-btn.danger:hover {
-      background: #dc3545;
-      color: white;
-    }
-    
-    .history-list {
-      display: grid;
-      gap: 12px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    
-    .history-item {
-      background: #f8f9fa;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 15px;
-      transition: all 0.3s;
-    }
-    
-    .history-item:hover {
-      border-color: #667eea;
-      transform: translateX(5px);
-    }
-    
-    .history-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    
-    .history-item-title {
-      font-size: 1.1em;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    .history-item-date {
-      font-size: 13px;
-      color: #666;
-    }
-    
-    .history-item-info {
-      display: flex;
-      gap: 15px;
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-    
-    .history-item-actions {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .history-action-btn {
-      padding: 6px 12px;
-      border: 1px solid #ddd;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    
-    .history-action-btn:hover {
-      background: #f0f0f0;
-    }
-    
-    .history-action-btn.primary {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-    }
-    
-    .history-action-btn.primary:hover {
-      background: #5568d3;
-    }
-    
-    .history-action-btn.delete {
-      color: #dc3545;
-      border-color: #dc3545;
-    }
-    
-    .history-action-btn.delete:hover {
-      background: #dc3545;
-      color: white;
-    }
-    
-    .history-empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-    }
-    
-    .history-empty h3 {
-      font-size: 1.3em;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 
@@ -955,48 +535,44 @@
     <h1>🛍️ POIZON 데이터 수집기</h1>
     <p class="subtitle">먼저 POIZON에 접속한 후 데이터를 수집하세요</p>
 
-    <div class="login-status" id="loginStatus" style="text-align:center;">
+    <div class="login-status" id="loginStatus">
       <h3>🔐 STEP 1: POIZON 자동 접속 중...</h3>
       <p id="loginMessage">잠시만 기다려주세요. 브라우저가 자동으로 열리고 로그인됩니다.</p>
       <button id="loginCheckBtn" onclick="performLogin()" disabled>🔄 접속 중...</button>
     </div>
 
-    <!-- 수집 모드 선택 (항상 표시) -->
     <div class="mode-selector">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
       <div class="mode-buttons">
         <button class="mode-btn" id="modeKream" onclick="selectMode('kream')" disabled>
-            <span class="mode-icon">🛒</span>
-            <span class="mode-text">크림 검색</span>
-          </button>
-          
-          <button class="mode-btn" id="modePoizon" onclick="selectMode('poizon')" disabled>
-            <span class="mode-icon">🟣</span>
-            <span class="mode-text">포이즌 검색</span>
-          </button>
-          
-          <button class="mode-btn" id="modeMusinsa" onclick="selectMode('musinsa')" disabled>
-            <span class="mode-icon">🟤</span>
-            <span class="mode-text">무신사 검색</span>
-          </button>
-          
-          <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
-            <span class="mode-icon">📋</span>
-            <span class="mode-text">리스트 비교</span>
-          </button>
+          <span class="mode-icon">🛒</span>
+          <span class="mode-text">크림 검색</span>
+        </button>
+        
+        <button class="mode-btn" id="modePoizon" onclick="selectMode('poizon')" disabled>
+          <span class="mode-icon">🟣</span>
+          <span class="mode-text">포이즌 검색</span>
+        </button>
+        
+        <button class="mode-btn" id="modeMusinsa" onclick="selectMode('musinsa')" disabled>
+          <span class="mode-icon">🟤</span>
+          <span class="mode-text">무신사 검색</span>
+        </button>
+        
+        <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
+          <span class="mode-icon">📋</span>
+          <span class="mode-text">리스트 비교</span>
+        </button>
 
-          <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
-            <span class="mode-icon">📅</span>
-            <span class="mode-text">스케줄러</span>
-          </button>
-          
-          <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
-            <span class="mode-icon">⚙️</span>
-            <span class="mode-text">설정</span>
-          </button>
-
-
-
+        <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
+          <span class="mode-icon">📅</span>
+          <span class="mode-text">스케줄러</span>
+        </button>
+        
+        <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
+          <span class="mode-icon">⚙️</span>
+          <span class="mode-text">설정</span>
+        </button>
       </div>
     </div>
 
@@ -1028,12 +604,11 @@
 
     <div class="section" id="uploadListSection" style="display:none;">
       <h3>📋 업로드 리스트 (<span id="uploadCount">0</span>개)</h3>
-
-      <div class="table-container" style="max-height: 400px;">
+      <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th style="width: 50px;">#</th>
+              <th>#</th>
               <th>상품번호</th>
               <th>제품명</th>
               <th>정가</th>
@@ -1044,10 +619,6 @@
           <tbody id="uploadTableBody"></tbody>
         </table>
       </div>
-
-      <div class="hint" style="margin-top:10px;">
-        엑셀에서 업로드된 상품 목록입니다. "검색 시작" 버튼을 클릭하여 포이즌 가격 비교를 시작하세요.
-      </div>
     </div>
 
     <div class="section" id="resultSection">
@@ -1056,21 +627,35 @@
           📋 수집 결과 (<span id="resultCount">0</span>개) 
           <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
         </h3>
-        <div style="display: flex; gap: 8px;">
-          <button id="sourcingBtn" class="sourcing-btn" onclick="startSourcing()" style="display:none;">
-            🔍 크림검색
-          </button>
-          <button id="stopSourcingBtn" class="stop-btn" onclick="stopSourcing()" style="display:none;">
-            ⏹️ 멈춤
-          </button>
+
+        <div id="resultSearchOptions" style="display: none;">
+          <div class="search-options-container">
+            
+            <button id="resultKreamSearchBtn" class="search-execute-btn">
+              🔍 검색
+            </button>
+            
+            <div class="search-divider"></div>
+            
+            <div class="search-checkboxes">
+              <label class="search-label">
+                <input type="checkbox" id="resultSearchKream" checked class="search-checkbox">
+                <span class="search-label-text">🛒 크림</span>
+              </label>
+              
+              <label class="search-label search-label-disabled">
+                <input type="checkbox" id="resultSearchMusinsa" disabled class="search-checkbox">
+                <span class="search-label-text">🟤 무신사</span>
+                <span class="search-label-badge">(준비중)</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="table-container">
         <table>
-          <thead id="tableHeader">
-            <!-- 동적으로 생성됨 -->
-          </thead>
+          <thead id="tableHeader"></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
@@ -1085,107 +670,14 @@
         <span id="pageInfo" class="page-info">1 / 1</span>
         <button id="nextPageBtn" class="page-btn">다음 →</button>
       </div>
-
-      <div class="hint" style="margin-top:10px;">
-        작은 화면에서는 테이블이 좌우로 스크롤됩니다.
-      </div>
     </div>
 
     <div class="section" id="statusSection">
       <h3>📊 진행 상황</h3>
-      
-      <!-- 진행률 바 -->
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar">0%</div>
       </div>
-      
-      <!-- 상세 통계 (숨김) -->
-      <div style="display:none;">
-        <div class="stat-card">
-          <div class="stat-label">현재 페이지</div>
-          <div class="stat-value" id="currentPage">0 / 0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">수집된 상품</div>
-          <div class="stat-value" id="collectedCount">0개</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">현재 작업</div>
-          <div class="stat-value" id="currentTask">대기 중</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">경과 시간</div>
-          <div class="stat-value" id="elapsedTime">00:00</div>
-        </div>
-      </div>
-      
-      <!-- 로그 -->
       <div class="log" id="logBox"></div>
-    </div>
-  </div>
-
-  <!-- 가격 비교 팝업 -->
-  <div class="popup-overlay" id="pricePopup" onclick="closePopup(event)">
-    <div class="popup-content" onclick="event.stopPropagation()">
-      <button class="popup-close" onclick="closePopup()">×</button>
-      
-      <div class="popup-product-info">
-        <div class="popup-product-header">
-          <img id="popupImg" class="popup-product-img" src="" alt="상품 이미지">
-          <div class="popup-product-details">
-            <div class="popup-product-code" id="popupCode"></div>
-            <div class="popup-product-name" id="popupName"></div>
-            <div class="popup-product-spu" id="popupSPU" style="font-size:13px;color:#999;margin-top:5px;"></div>
-            <div class="popup-product-price" id="popupPrice" style="margin-top:10px;"></div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="price-compare-title">💰 가격 비교</div>
-      
-      <div class="shopping-links" id="shoppingLinks"></div>
-    </div>
-  </div>
-
-  <!-- 기록 팝업 -->
-  <div class="popup-overlay" id="historyPopup" onclick="closeHistoryPopup(event)">
-    <div class="history-popup-content" onclick="event.stopPropagation()">
-      <button class="popup-close" onclick="closeHistoryPopup()">×</button>
-      
-      <div class="history-header">
-        <h2>📚 검색 기록</h2>
-      </div>
-      
-      <!-- 통계 -->
-      <div class="history-stats">
-        <div class="history-stat-card">
-          <div class="history-stat-value" id="historyTotalCount">0</div>
-          <div class="history-stat-label">총 기록 수</div>
-        </div>
-        <div class="history-stat-card">
-          <div class="history-stat-value" id="historyKeywordCount">0</div>
-          <div class="history-stat-label">키워드 검색</div>
-        </div>
-        <div class="history-stat-card">
-          <div class="history-stat-value" id="historyCompareCount">0</div>
-          <div class="history-stat-label">리스트 비교</div>
-        </div>
-      </div>
-      
-      <!-- 컨트롤 -->
-      <div class="history-controls">
-        <button class="history-btn" onclick="refreshHistoryList()">🔄 새로고침</button>
-        <button class="history-btn" onclick="downloadAllHistory()">📦 전체 다운로드</button>
-        <button class="history-btn danger" onclick="clearAllHistory()">🗑️ 전체 삭제</button>
-      </div>
-      
-      <!-- 기록 리스트 -->
-      <div class="history-list" id="historyListContent">
-        <div class="history-empty">
-          <h3>📭 저장된 기록이 없습니다</h3>
-          <p>검색 완료 후 자동으로 저장됩니다</p>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1197,89 +689,69 @@
     let pageSize = 20;
     let currentPage = 1;
     let selectedMode = 'poizon';
+    let sortColumn = null;
+    let sortDirection = 'desc';
+    let uploadedProducts = [];
 
-    // 모드별 테이블 헤더 설정
     function updateTableHeader(mode) {
       const tableHeader = document.getElementById('tableHeader');
       let headerHTML = '';
 
       if (mode === 'compare') {
-        // 리스트 비교 모드 (간결하게!)
         headerHTML = `
           <tr>
-            <th style="width: 50px;">#</th>
+            <th>#</th>
             <th>이미지</th>
-            <th>크림</th>
             <th>엑셀_상품번호</th>
             <th>포이즌_상품번호</th>
             <th>제품명</th>
             <th>엑셀_할인가</th>
             <th>엑셀_재고</th>
             <th>포이즌_중국노출가</th>
-            <th style="cursor:pointer;" onclick="sortBy('가격차이')">
-              가격차이 <span id="sort가격차이">⇅</span>
-            </th>
-            <th style="cursor:pointer;" onclick="sortBy('판매량')">
-              중국시장판매량 <span id="sort판매량">⇅</span>
-            </th>
-            <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
-              현지판매자량 <span id="sort현지판매량">⇅</span>
-            </th>
+            <th onclick="sortBy('가격차이')">가격차이</th>
+            <th onclick="sortBy('판매량')">중국시장판매량</th>
+            <th onclick="sortBy('현지판매량')">현지판매자량</th>
+          </tr>
+        `;
+      } else if (mode === 'poizon') {
+        headerHTML = `
+          <tr>
+            <th>#</th>
+            <th>이미지</th>
+            <th>상품번호</th>
+            <th>제품명</th>
+            <th>평균거래가</th>
+            <th>중국노출가</th>
+            <th onclick="sortBy('중국판매량')">중국판매량</th>
+            <th onclick="sortBy('현업자판매량')">현업자판매량</th>
+            <th>크림평균가</th>
+            <th onclick="sortBy('크림판매량')">크림판매량</th>
           </tr>
         `;
       } else {
-        // 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순
         headerHTML = `
           <tr>
-            <th style="width: 50px;">#</th>
+            <th>#</th>
             <th>이미지</th>
-            <th>크림</th>
             <th>상품번호</th>
             <th>제품명</th>
-            <th style="display:none;">브랜드/카테고리</th>
-            <th style="display:none;">상태</th>
             <th>평균거래가</th>
             <th>중국노출가</th>
-            <th style="cursor:pointer;" onclick="sortBy('판매량')">
-              중국시장판매량 <span id="sort판매량">⇅</span>
-            </th>
-            <th style="cursor:pointer;" onclick="sortBy('현지판매량')">
-              현지판매자량 <span id="sort현지판매량">⇅</span>
-            </th>
+            <th>판매량</th>
           </tr>
         `;
       }
-
       tableHeader.innerHTML = headerHTML;
     }
 
-    // 초기 헤더 설정
     updateTableHeader(selectedMode);
 
-    // 모드 버튼 활성화/비활성화
     function setModeButtonsEnabled(enabled) {
-      const modeButtons = document.querySelectorAll('.mode-btn');
-      modeButtons.forEach(btn => {
-        // 🔒 준비 중 버튼은 항상 비활성화 유지
-        if (btn.dataset.comingSoon === 'true') {
-          btn.disabled = true;
-          btn.style.opacity = '0.4';
-          btn.style.cursor = 'not-allowed';
-          return;
-        }
+      document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.disabled = !enabled;
-        if (!enabled) {
-          btn.style.opacity = '0.5';
-          btn.style.cursor = 'not-allowed';
-        } else {
-          btn.style.opacity = '1';
-          btn.style.cursor = 'pointer';
-        }
+        btn.style.opacity = enabled ? '1' : '0.5';
       });
     }
-    let sortColumn = null;
-    let sortDirection = 'desc';
-    let uploadedProducts = []; // 업로드된 상품 리스트 // 'asc' or 'desc' // 기본값: 키워드 검색
 
     function addLog(message, type = 'info') {
       const logBox = document.getElementById('logBox');
@@ -1291,55 +763,8 @@
       resetIdleTimer();
     }
 
-    // 경과 시간 타이머
-    let startTime = null;
-    let elapsedTimer = null;
-    
-    function startElapsedTimer() {
-      startTime = Date.now();
-      if (elapsedTimer) clearInterval(elapsedTimer);
-      
-      elapsedTimer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        document.getElementById('elapsedTime').textContent = timeStr;
-      }, 1000);
-    }
-    
-    function stopElapsedTimer() {
-      if (elapsedTimer) {
-        clearInterval(elapsedTimer);
-        elapsedTimer = null;
-      }
-    }
-    
-    // 현재 작업 업데이트
-    function updateCurrentTask(message) {
-      const taskEl = document.getElementById('currentTask');
-      
-      if (message.includes('페이지') && message.includes('검색')) {
-        taskEl.textContent = '페이지 검색 중';
-      } else if (message.includes('상품 정보 수집')) {
-        taskEl.textContent = '상품 정보 수집';
-      } else if (message.includes('다음 페이지')) {
-        taskEl.textContent = '페이지 이동 중';
-      } else if (message.includes('로그인')) {
-        taskEl.textContent = '로그인 중';
-      } else if (message.includes('접속')) {
-        taskEl.textContent = 'POIZON 접속';
-      } else if (message.includes('저장')) {
-        taskEl.textContent = '데이터 저장 중';
-      } else if (message.includes('완료')) {
-        taskEl.textContent = '완료';
-        stopElapsedTimer();
-      }
-    }
-
     function updateProgress(current, total) {
-      const safeTotal = Math.max(1, total || 1);
-      const percent = Math.round((current / safeTotal) * 100);
+      const percent = Math.round((current / Math.max(1, total)) * 100);
       const progressBar = document.getElementById('progressBar');
       progressBar.style.width = percent + '%';
       progressBar.textContent = percent + '%';
@@ -1348,1390 +773,336 @@
     function resetIdleTimer() {
       if (idleTimer) clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
-        addLog('⏰ 5분간 활동이 없어 브라우저를 종료합니다', 'info');
-        fetch('/shutdown_browser').then(() => {
-          isLoggedIn = false;
-          document.getElementById('loginStatus').classList.remove('logged-in');
-          document.getElementById('loginMessage').textContent = '브라우저가 종료되었습니다. 다시 접속해주세요.';
-          document.getElementById('loginCheckBtn').textContent = '🚀 POIZON 접속하기';
-          document.getElementById('loginCheckBtn').disabled = false;
-          document.getElementById('keyword').disabled = true;
-          document.getElementById('maxPages').disabled = true;
-          document.getElementById('startBtn').disabled = true;
-        });
+        fetch('/shutdown_browser');
+        isLoggedIn = false;
       }, 5 * 60 * 1000);
     }
 
     function renderTable() {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
 
-        const totalItems = collectedData.length;
-        const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
+      const totalItems = collectedData.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
 
-        const startIdx = (currentPage - 1) * pageSize;
-        const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
+      const startIdx = (currentPage - 1) * pageSize;
+      const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
 
-        if (selectedMode === 'compare') {
-          // ==================== 리스트 비교 모드 ====================
-          for (const data of pageItems) {
-            const row = tbody.insertRow();
+      pageItems.forEach((data, idx) => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = startIdx + idx + 1;
 
-            // 순번
-            const rowIndex = collectedData.indexOf(data) + 1;
-            row.insertCell().textContent = rowIndex;
-
-            // 이미지
-            const imgCell = row.insertCell();
-            if (data.이미지URL) {
-              const img = document.createElement('img');
-              img.src = data.이미지URL;
-              img.className = 'product-img';
-              img.onerror = function() {
-                this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
-              };
-              imgCell.appendChild(img);
-            } else {
-              imgCell.textContent = '-';
-            }
-
-            // 크림 버튼
-            const kreamCell = row.insertCell();
-            const kreamBtn = document.createElement('button');
-            kreamBtn.className = 'kream-btn';
-            kreamBtn.textContent = '🛒 크림';
-            kreamBtn.onclick = () => {
-              const productCode = data.상품번호 || data.엑셀_상품번호;
-              if (productCode && productCode !== '-') {
-                const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
-                window.open(kreamUrl, '_blank');
-              } else {
-                alert('상품번호가 없습니다.');
-              }
-            };
-            kreamCell.appendChild(kreamBtn);
-
-            row.insertCell().textContent = data.엑셀_상품번호 || '-';
-            row.insertCell().textContent = data.상품번호 || '-';
-            
-            // 제품명
-            const nameCell = row.insertCell();
-            const fullName = data.제품명 || '-';
-            const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
-            nameCell.textContent = truncatedName;
-            nameCell.title = fullName;
-            nameCell.style.cursor = 'help';
-            
-            row.insertCell().textContent = data.엑셀_할인가 ? data.엑셀_할인가.toLocaleString() + '원' : '-';
-            row.insertCell().textContent = data.엑셀_재고 !== undefined ? data.엑셀_재고.toLocaleString() + '개' : '-';
-            row.insertCell().textContent = data.중국노출_숫자 ? data.중국노출_숫자.toLocaleString() + '원' : '-';
-            
-            // 가격차이
-            const diffCell = row.insertCell();
-            const priceDiff = data.가격차이 || 0;
-            diffCell.textContent = priceDiff.toLocaleString() + '원';
-            if (priceDiff > 0) {
-              diffCell.style.color = '#dc3545';
-            } else if (priceDiff < 0) {
-              diffCell.style.color = '#007bff';
-            }
-            
-            // 판매량 (평균거래가 제거!)
-            row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
-            row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
-          }
-        } else {
-          // ==================== 키워드 검색 / 거래금액 높은순 / 거래증가 빠른순 ====================
-          for (const data of pageItems) {
-            const row = tbody.insertRow();
-
-            // 순번
-            const rowIndex = collectedData.indexOf(data) + 1;
-            row.insertCell().textContent = rowIndex;
-
-            // 이미지
-            const imgCell = row.insertCell();
-            if (data.이미지URL) {
-              const img = document.createElement('img');
-              img.src = data.이미지URL;
-              img.className = 'product-img';
-              img.onerror = function() {
-                this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect fill="%23f0f0f0" width="80" height="80"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo IMG%3C/text%3E%3C/svg%3E';
-              };
-              imgCell.appendChild(img);
-            } else {
-              imgCell.textContent = '-';
-            }
-
-            // 크림 버튼
-            const kreamCell = row.insertCell();
-            const kreamBtn = document.createElement('button');
-            kreamBtn.className = 'kream-btn';
-            kreamBtn.textContent = '🛒 크림';
-            kreamBtn.onclick = () => {
-              const productCode = data.상품번호;
-              if (productCode && productCode !== '-') {
-                const kreamUrl = `https://kream.co.kr/search?keyword=${encodeURIComponent(productCode)}&tab=products`;
-                window.open(kreamUrl, '_blank');
-              } else {
-                alert('상품번호가 없습니다.');
-              }
-            };
-            kreamCell.appendChild(kreamBtn);
-
-            // 상품번호
-            row.insertCell().textContent = data.상품번호 || '-';
-            
-            // 제품명
-            const nameCell = row.insertCell();
-            const fullName = data.제품명 || '-';
-            const truncatedName = fullName.length > 30 ? fullName.substring(0, 30) + '...' : fullName;
-            nameCell.textContent = truncatedName;
-            nameCell.title = fullName;
-            nameCell.style.cursor = 'help';
-            
-            // 브랜드/카테고리 (숨김)
-            const brandCell = row.insertCell();
-            brandCell.textContent = data.브랜드카테고리 || '-';
-            brandCell.style.display = 'none';
-            
-            // 상태 (숨김)
-            const statusCell = row.insertCell();
-            statusCell.textContent = data.상태 || '-';
-            statusCell.style.display = 'none';
-            
-            // 평균거래가
-            row.insertCell().textContent = data.최근30일평균거래가 || '-';
-            
-            // 중국노출가
-            row.insertCell().textContent = data.중국노출 || '-';
-            
-            // 판매량
-            row.insertCell().textContent = data.중국시장최근30일판매량 ? data.중국시장최근30일판매량.toLocaleString() + '개' : '0개';
-            
-            // 현지판매량
-            row.insertCell().textContent = data.현지판매자최근30일판매량 ? data.현지판매자최근30일판매량.toLocaleString() + '개' : '0개';
-          }
-            // ✅ 테이블 렌더링 후 버튼 확인
-            console.log('🎨 [DEBUG] renderTable 완료!');
-            
-            // 혹시 여기서 버튼을 숨기는지 확인
-            const sourcingBtn = document.getElementById('sourcingBtn');
-            if (sourcingBtn && sourcingBtn.style.display === 'none') {
-              console.warn('⚠️ [DEBUG] renderTable에서 sourcingBtn이 숨겨져 있음!');
+        const imgCell = row.insertCell();
+        if (data.이미지URL) {
+          const img = document.createElement('img');
+          img.src = data.이미지URL;
+          img.className = 'product-img';
+          imgCell.appendChild(img);
         }
 
-        document.getElementById('resultCount').textContent = totalItems;
-        document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
-        document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
-        document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
-        document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
-      }
-
-      function addDataRow(data) {
-        collectedData.push(data);
-        renderTable();
-      }
-    }
-    function openPricePopup(data) {
-      document.getElementById('popupCode').textContent = data.상품번호 || '-';
-      document.getElementById('popupName').textContent = data.제품명 || '-';
-      
-      // SPU_ID - 있을 때만 표시
-      const spuElement = document.getElementById('popupSPU');
-      if (data.SPU_ID && data.SPU_ID.trim()) {
-        spuElement.textContent = 'SPU ID: ' + data.SPU_ID;
-        spuElement.style.display = 'block';
-      } else {
-        spuElement.textContent = '';
-        spuElement.style.display = 'none';
-      }
-      
-      document.getElementById('popupPrice').textContent = '중국 노출가: ' + (data.중국노출 || '-');
-      
-      const popupImg = document.getElementById('popupImg');
-      if (data.이미지URL) {
-        popupImg.src = data.이미지URL;
-      } else {
-        popupImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120"%3E%3Crect fill="%23f0f0f0" width="120" height="120"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3ENo IMG%3C/text%3E%3C/svg%3E';
-      }
-      
-      // 검색어: 상품번호 우선, 없으면 제품명
-      const productCode = data.상품번호 || '';
-      const productName = data.제품명 || '';
-      const searchQuery = productCode || productName;
-      
-      const shoppingLinks = [
-        { icon: '🟢', name: '네이버쇼핑', url: `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(searchQuery)}` },
-        { icon: '🟣', name: '무신사', url: `https://www.musinsa.com/search/musinsa/goods?q=${encodeURIComponent(searchQuery)}` },
-        { icon: '🔵', name: 'ABC마트', url: `https://www.abcmart.co.kr/search?search_text=${encodeURIComponent(searchQuery)}` }
-      ];
-      
-      const linksContainer = document.getElementById('shoppingLinks');
-      linksContainer.innerHTML = '';
-      
-      shoppingLinks.forEach(shop => {
-        const link = document.createElement('a');
-        link.className = 'shopping-link';
-        link.href = shop.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.innerHTML = `
-          <div class="shopping-link-left">
-            <span class="shopping-icon">${shop.icon}</span>
-            <span class="shopping-name">${shop.name}</span>
-          </div>
-          <span class="shopping-arrow">→</span>
-        `;
-        linksContainer.appendChild(link);
+        if (selectedMode === 'poizon') {
+          row.insertCell().textContent = data.상품번호 || '-';
+          row.insertCell().textContent = data.제품명 || '-';
+          row.insertCell().textContent = data.최근30일평균거래가 || '-';
+          row.insertCell().textContent = data.중국노출 || '-';
+          row.insertCell().textContent = (data.중국시장최근30일판매량 || 0).toLocaleString() + '개';
+          row.insertCell().textContent = (data.현지판매자최근30일판매량 || 0).toLocaleString() + '개';
+          row.insertCell().textContent = data.크림평균가 || '-';
+          row.insertCell().textContent = data.크림판매량 ? data.크림판매량.toLocaleString() + '개' : '-';
+        }
       });
-      
-      document.getElementById('pricePopup').classList.add('active');
-    }
 
-    function closePopup(event) {
-      if (!event || event.target.id === 'pricePopup') {
-        document.getElementById('pricePopup').classList.remove('active');
-      }
-    }
-
-    async function handleExcelUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      addLog(`📤 엑셀 파일 업로드 중: ${file.name}`, 'info');
-      
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      try {
-        const response = await fetch('/upload_excel', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          addLog(`✅ 엑셀 파일 업로드 완료: ${result.count}개 상품`, 'success');
-          
-          // 업로드된 상품 저장
-          uploadedProducts = result.products;
-          
-          // 업로드 리스트 먼저 표시
-          showUploadedList(result.products);
-          
-          addLog(`📋 업로드된 상품 목록을 확인하고 "검색 시작" 버튼을 클릭하세요`, 'info');
-          
-          // "검색 시작" 버튼 표시
-          document.getElementById('startCompareBtn').style.display = 'block';
-          
-        } else {
-          addLog(`❌ 업로드 실패: ${result.error}`, 'error');
-        }
-      } catch (error) {
-        addLog(`❌ 업로드 오류: ${error}`, 'error');
-      }
-      
-      // 파일 선택 초기화
-      event.target.value = '';
-    }
-
-    function showUploadedList(products) {
-      addLog(`\n📋 === 업로드 리스트 (${products.length}개) ===`, 'info');
-      
-      // 업로드 리스트 테이블에 표시
-      const uploadTableBody = document.getElementById('uploadTableBody');
-      uploadTableBody.innerHTML = '';
-      
-      products.forEach((product, index) => {
-        const row = uploadTableBody.insertRow();
-        row.insertCell().textContent = index + 1;  // 순번
-        row.insertCell().textContent = product.code || '-';
-        row.insertCell().textContent = product.name || '-';
-        row.insertCell().textContent = product.original_price ? product.original_price.toLocaleString() + '원' : '-';
-        row.insertCell().textContent = product.sale_price ? product.sale_price.toLocaleString() + '원' : '-';
-        row.insertCell().textContent = product.stock !== undefined ? product.stock.toLocaleString() + '개' : '-';
-        
-        addLog(`  ${index + 1}. ${product.code} - ${product.name} (할인가: ${product.sale_price.toLocaleString()}원, 재고: ${product.stock || 0}개)`, 'info');
-      });
-      
-      // 업로드 리스트 섹션 표시
-      document.getElementById('uploadCount').textContent = products.length;
-      document.getElementById('uploadListSection').style.display = 'block';
-      
-      // 수집 결과는 숨김 (검색 전)
-      document.getElementById('resultSection').classList.remove('active');
-      collectedData = [];
-      renderTable();
-      
-      addLog(`📋 === 업로드 리스트 끝 ===\n`, 'info');
-    }
-
-    async function startComparison(products) {
-      // 🔍 리스트 비교 모드로 설정! (디버깅!)
-      console.log('🔍 [DEBUG] startComparison 시작!');
-      selectedMode = 'compare';
-      console.log('🔍 [DEBUG] selectedMode 설정:', selectedMode);
-      updateTableHeader(selectedMode);
-      console.log('🔍 [DEBUG] updateTableHeader 완료!');
-      
-      // 서버 작업 상태 체크
-      try {
-        const statusRes = await fetch('/check_status');
-        const status = await statusRes.json();
-        
-        if (status.working) {
-          const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
-          alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n경과 시간: ${status.elapsed_minutes}분\n\n약 ${status.remaining_minutes}분 후 사용 가능합니다.`);
-          return;
-        }
-      } catch (err) {
-        console.error('상태 체크 실패:', err);
-      }
-      
-      collectedData = [];
-      currentPage = 1;
-      
-      // 업로드 리스트 숨김
-      document.getElementById('uploadListSection').style.display = 'none';
-      
-      // 수집 결과 섹션 표시
-      document.getElementById('resultSection').classList.add('active');
-      
-      // 모든 모드 버튼 비활성화
-      setModeButtonsEnabled(false);
-      
-      document.getElementById('uploadLabel').style.display = 'none';
-      document.getElementById('startCompareBtn').style.display = 'none';
-      document.getElementById('stopBtn').style.display = 'block';
-      
-      addLog(`🔍 ${products.length}개 상품 포이즌 가격 조회 중...`, 'info');
-      
-      try {
-        // POST로 products 전송
-        const response = await fetch('/compare_prices', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ products: products })
-        });
-        
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const jsonStr = line.slice(6);
-              if (jsonStr.trim()) {
-                try {
-                  const data = JSON.parse(jsonStr);
-                  
-                  if (data.type === 'log') addLog(data.message, data.level || 'info');
-                  if (data.type === 'progress') updateProgress(data.current, data.total);
-                  
-                  // 🔍 product_result 처리 (디버깅!)
-                  if (data.type === 'product_result') {
-                    console.log('🔍 [DEBUG] product_result 받음!', data);
-                    console.log('🔍 [DEBUG] product_code:', data.product_code);
-                    console.log('🔍 [DEBUG] products:', data.products);
-                    
-                    if (data.products && Array.isArray(data.products)) {
-                      console.log('🔍 [DEBUG] products 배열 OK, 개수:', data.products.length);
-                      
-                      data.products.forEach((product, idx) => {
-                        console.log(`🔍 [DEBUG] product[${idx}]:`, product);
-                        console.log(`🔍 [DEBUG] product[${idx}] 제품명:`, product.제품명);
-                        
-                        collectedData.push(product);
-                        console.log(`🔍 [DEBUG] collectedData에 추가! 현재 개수:`, collectedData.length);
-                      });
-                      
-                      // 결과 섹션 표시
-                      document.getElementById('resultSection').classList.add('active');
-                      document.getElementById('resultCount').textContent = collectedData.length;
-                      
-                      // 테이블 렌더링
-                      console.log('🔍 [DEBUG] renderTable 호출!');
-                      renderTable();
-                      console.log('🔍 [DEBUG] renderTable 완료!');
-                    } else {
-                      console.warn('⚠️ [DEBUG] products가 배열이 아님!', data);
-                    }
-                  }
-                  
-                  if (data.type === 'data') {
-                    // 기존 업로드 리스트에서 해당 상품 찾아서 업데이트
-                    const index = collectedData.findIndex(item => 
-                      item.엑셀_상품번호 === data.item.엑셀_상품번호
-                    );
-                    
-                    if (index !== -1) {
-                      // 기존 항목 업데이트 (실시간으로 포이즌 정보 채워짐)
-                      collectedData[index] = { ...collectedData[index], ...data.item };
-                    } else {
-                      // 새 항목 추가
-                      collectedData.push(data.item);
-                    }
-                    
-                    renderTable();
-                  }
-                  
-                  if (data.type === 'complete') {
-                    addLog('✅ 가격 비교 완료!', 'success');
-                    addLog(`총 ${data.total_items}개 상품 비교 완료`, 'success');
-                    
-                    sortBy('판매량');
-                    
-                    if (data.file_path) {
-                      const downloadBtn = document.getElementById('downloadBtn');
-                      downloadBtn.href = `/download/${encodeURIComponent(data.file_path)}`;
-                      downloadBtn.style.display = 'block';
-                    }
-                    
-                    // 크림검색 버튼 표시
-                    document.getElementById('sourcingBtn').style.display = 'block';
-                    
-                    // 모드 버튼 재활성화
-                    setModeButtonsEnabled(true);
-                    
-                    document.getElementById('stopBtn').style.display = 'none';
-                    document.getElementById('resetBtn').style.display = 'block';
-                    document.getElementById('uploadLabel').style.display = 'block';
-                    return;
-                  }
-                  
-                  if (data.type === 'error') {
-                    addLog('❌ 오류: ' + data.message, 'error');
-                    
-                    // 모드 버튼 재활성화
-                    setModeButtonsEnabled(true);
-                    
-                    document.getElementById('stopBtn').style.display = 'none';
-                    document.getElementById('resetBtn').style.display = 'block';
-                    document.getElementById('uploadLabel').style.display = 'block';
-                    return;
-                  }
-                } catch (e) {
-                  // JSON 파싱 오류 무시
-                }
-              }
-            }
-          }
-        }
-      } catch (error) {
-        addLog('❌ 연결 오류: ' + error, 'error');
-        
-        // 모드 버튼 재활성화
-        setModeButtonsEnabled(true);
-        
-        document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('resetBtn').style.display = 'block';
-        document.getElementById('uploadLabel').style.display = 'block';
-      }
-    }
-
-    function startComparisonFromUpload() {
-      if (uploadedProducts.length === 0) {
-        alert('업로드된 상품이 없습니다!');
-        return;
-      }
-      
-      addLog(`\n🚀 포이즌 검색 시작 (${uploadedProducts.length}개)`, 'info');
-      startComparison(uploadedProducts);
+      document.getElementById('resultCount').textContent = totalItems;
+      document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
+      document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
+      document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
     }
 
     function sortBy(column) {
-      // 같은 컬럼 클릭 시 방향 전환
-      if (sortColumn === column) {
-        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        sortColumn = column;
-        sortDirection = 'desc'; // 새 컬럼은 내림차순부터
-      }
+      sortDirection = sortColumn === column ? (sortDirection === 'asc' ? 'desc' : 'asc') : 'desc';
+      sortColumn = column;
       
-      // 정렬 아이콘 업데이트 (모든 아이콘 초기화)
-      const sortIcons = ['sort판매량', 'sort현지판매량', 'sort가격차이'];
-      sortIcons.forEach(iconId => {
-        const element = document.getElementById(iconId);
-        if (element) {
-          element.textContent = '⇅';
-        }
-      });
-      
-      // 선택된 컬럼 아이콘 업데이트
-      const selectedIcon = document.getElementById('sort' + column);
-      if (selectedIcon) {
-        selectedIcon.textContent = sortDirection === 'asc' ? '↑' : '↓';
-      }
-      
-      // 데이터 정렬
       collectedData.sort((a, b) => {
-        let valA, valB;
-        
-        if (column === '판매량') {
+        let valA = 0, valB = 0;
+        if (column === '중국판매량') {
           valA = a.중국시장최근30일판매량 || 0;
           valB = b.중국시장최근30일판매량 || 0;
-        } else if (column === '현지판매량') {
+        } else if (column === '현업자판매량') {
           valA = a.현지판매자최근30일판매량 || 0;
           valB = b.현지판매자최근30일판매량 || 0;
-        } else if (column === '가격차이') {
-          valA = a.가격차이 || 0;
-          valB = b.가격차이 || 0;
+        } else if (column === '크림판매량') {
+          valA = a.크림판매량 || 0;
+          valB = b.크림판매량 || 0;
         }
-        
         return sortDirection === 'asc' ? valA - valB : valB - valA;
       });
       
-      currentPage = 1;
       renderTable();
     }
 
     function selectMode(mode) {
-      // 로그인 체크 수정
       if (!isLoggedIn && mode !== 'scheduler' && mode !== 'settings') {
         alert('먼저 POIZON 접속을 해주세요!');
         return;
       }
       
-      // 기록 모드는 팝업 열기
-      if (mode === 'history') {
-        openHistoryPopup();
-        return;
-      }
-      
-      // 스케줄러 모드는 팝업 열기
       if (mode === 'scheduler') {
-        openSchedulerPopup();
+        window.open('/scheduler', 'schedulerPopup', 'width=1200,height=800');
         return;
       }
       
-      // 설정 모드는 팝업 열기
       if (mode === 'settings') {
-        openSettingsPopup();
+        alert('⚙️ 설정 기능은 곧 출시됩니다!');
         return;
       }
       
-      // 작업 중이면 모드 변경 차단
-      fetch('/check_status')
-        .then(res => res.json())
-        .then(status => {
-          if (status.working) {
-            const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
-            alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n\n작업이 완료될 때까지 모드를 변경할 수 없습니다.`);
-            return;
-          }
-          
-          // 모드 변경 실행
-          selectModeProcess(mode);
-        })
-        .catch(err => {
-          console.error('상태 체크 실패:', err);
-          selectModeProcess(mode);
-        });
-    }
-    
-    function selectModeProcess(mode) {
       selectedMode = mode;
-
-      // 🔄 모드 변경 시 모든 상태 리셋!
       collectedData = [];
-      currentData = [];
-      currentPage = 1;
-      
-      // 수집 결과 섹션 리셋
-      document.getElementById('resultSection').classList.remove('active');
-      document.getElementById('tableBody').innerHTML = '';
-      document.getElementById('resultCount').textContent = '0';
-      document.getElementById('downloadBtn').style.display = 'none';
-      document.getElementById('sourcingBtn').style.display = 'none';
-      
-      // 진행 상황 리셋
-      
-      document.getElementById('progressBar').style.width = '0%';
-      document.getElementById('progressBar').className = 'progress-bar';
-      
-      // 업로드 리스트 리셋 (리스트 비교에서 다른 모드로 변경 시)
-      if (mode !== 'compare') {
-        document.getElementById('uploadListSection').style.display = 'none';
-        document.getElementById('uploadTableBody').innerHTML = '';
-        document.getElementById('uploadCount').textContent = '0';
-        uploadedProducts = [];
-        document.getElementById('startCompareBtn').style.display = 'none';
-      }
-      
-      addLog('🔄 모드 변경 - 이전 결과 초기화', 'info');
-      
-      // 테이블 헤더 업데이트
       updateTableHeader(mode);
       
-      // 모든 버튼 비활성화
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
       
-      // 선택된 버튼 활성화
-      const modeId = 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
-      document.getElementById(modeId).classList.add('active');
-      
-      // 키워드 입력란 제어
       const keywordInput = document.getElementById('keyword');
-      if (mode === 'keyword') {
-        keywordInput.disabled = false;
-        keywordInput.parentElement.style.display = 'block';
-        document.getElementById('startBtn').style.display = 'block';
-        document.getElementById('uploadLabel').style.display = 'none';
-      } else if (mode === 'compare') {
-        // 리스트 비교 모드
+      if (mode === 'compare') {
         keywordInput.disabled = true;
-        keywordInput.value = '';
         keywordInput.parentElement.style.display = 'none';
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
       } else {
-        // 거래금액, 거래증가 모드 - 키워드 입력 가능
-        keywordInput.disabled = false;  // ✅ 활성화
-        keywordInput.parentElement.style.display = 'block';  // ✅ 표시
+        keywordInput.disabled = false;
+        keywordInput.parentElement.style.display = 'block';
         document.getElementById('startBtn').style.display = 'block';
         document.getElementById('uploadLabel').style.display = 'none';
       }
       
-        const modeNames = {
-          'kream': '🛒 크림 검색',
-          'poizon': '🟣 포이즌 검색',
-          'musinsa': '🟤 무신사 검색',
-          'compare': '📋 리스트 비교',
-          'scheduler': '📅 스케줄러',
-          'settings': '⚙️ 설정'
-        };
-
-        const modeText = modeNames[mode] || mode;
-        addLog(`📊 수집 모드 선택: ${modeText}`, 'info');
+      addLog(`📊 수집 모드 선택: ${mode}`, 'info');
     }
 
-    // ==========================================
-    // ✨ 크림검색 - 팝업 버전 (NEW!)
-    // ==========================================
-    function startSourcing() {
-      // 수집된 상품이 있는지 확인
-      if (collectedData.length === 0) {
-        alert('❌ 수집된 데이터가 없습니다.\n먼저 키워드 검색을 실행하세요.');
-        return;
-      }
-      
-      // 상품번호만 추출
-      const productCodes = collectedData
-        .map(item => item.상품번호)
-        .filter(code => code && code !== '-' && code !== '상품 없음');
-      
-      if (productCodes.length === 0) {
-        alert('❌ 검색 가능한 상품번호가 없습니다.');
-        return;
-      }
-      
-      addLog(`🛒 크림검색 시작: ${productCodes.length}개 상품`, 'info');
-      
-      // 서버에 검색 요청
-      fetch('/start_sourcing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_codes: productCodes })
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          // ========================================
-          // ✨ 새 창(팝업) 열기
-          // ========================================
-          const width = 1400;
-          const height = 900;
-          const left = (screen.width - width) / 2;
-          const top = (screen.height - height) / 2;
-          
-          const popup = window.open(
-            result.popup_url,
-            'sourcing_results',
-            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes,toolbar=yes`
-          );
-          
-          if (!popup) {
-            alert('⚠️ 팝업이 차단되었습니다.\n\n브라우저 설정에서 팝업 차단을 해제해주세요.\n\n[Chrome/Edge 설정]\n1. 주소창 오른쪽 아이콘 클릭\n2. "항상 팝업 허용" 선택');
-          } else {
-            addLog('✅ 크림검색 창이 열렸습니다!', 'success');
-            addLog('💡 팝업 창에서 실시간 결과를 확인하세요', 'info');
-          }
-        } else {
-          addLog('❌ 검색 시작 실패: ' + result.error, 'error');
-          alert('❌ 검색 시작 실패:\n\n' + result.error);
-        }
-      })
-      .catch(error => {
-        addLog('❌ 오류 발생: ' + error, 'error');
-        alert('❌ 오류가 발생했습니다:\n\n' + error.message);
-      });
-    }
-
-    
-    function stopSourcing() {
-      if (!confirm('⚠️ 크림검색을 중단하시겠습니까?')) {
-        return;
-      }
-      
-      addLog('⏹️ 사용자가 검색 중단 요청', 'warning');
-      
-      // 백엔드에 중단 요청
-      fetch('/stop_sourcing', { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-          addLog('✅ 검색이 중단되었습니다', 'success');
-          
-          // 버튼 상태 복원
-          document.getElementById('sourcingBtn').disabled = false; document.getElementById('stopSourcingBtn').style.display = 'none';
-          document.getElementById('sourcingBtn').textContent = '🔍 크림검색';
-          document.getElementById('stopSourcingBtn').style.display = 'none';
-        })
-        .catch(err => {
-          addLog('❌ 중단 요청 실패: ' + err, 'error');
-        });
-    }
-    
-    function resetAll() {
-      // 서버에 중단 요청 (백그라운드 작업 강제 종료)
-      fetch('/stop', { method: 'POST' })
-        .then(() => addLog('⏹️ 백그라운드 작업 중단 (리셋)', 'warning'))
-        .catch(err => console.error('중단 요청 실패:', err));
-      
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
-      
-      document.getElementById('logBox').innerHTML = '';
-      document.getElementById('tableBody').innerHTML = '';
-      document.getElementById('uploadTableBody').innerHTML = '';
-      document.getElementById('downloadBtn').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'none';
-      document.getElementById('stopBtn').style.display = 'none';
-      document.getElementById('sourcingBtn').style.display = 'none';  // 크림검색 버튼 숨김
-      document.getElementById('uploadListSection').style.display = 'none';
-      document.getElementById('resultSection').classList.remove('active');
-      collectedData = [];
-      currentPage = 1;
-      pageSize = parseInt(document.getElementById('pageSizeSelect').value, 10) || 20;
-      renderTable();
-      updateProgress(0, 100);
-      
-      if (isLoggedIn) document.getElementById('startBtn').disabled = false;
-    }
-
-    function stopCollection() {
-      // 서버에 중단 요청
-      fetch('/stop', { method: 'POST' })
-        .then(() => addLog('⏹️ 백그라운드 작업 중단 요청 전송', 'warning'))
-        .catch(err => console.error('중단 요청 실패:', err));
-      
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
-      addLog('⏹️ 사용자가 수집을 중단했습니다.', 'error');
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('stopBtn').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'block';
-      document.getElementById('uploadLabel').style.display = selectedMode === 'compare' ? 'block' : 'none';
-      document.getElementById('startCompareBtn').style.display = 'none';
-    }
-
-      function startCollection() {
+    function startCollection() {
       const keyword = document.getElementById('keyword').value.trim();
       const maxPages = parseInt(document.getElementById('maxPages').value, 10);
       
-      if (selectedMode === 'keyword' && !keyword) {
-        return alert('키워드를 입력해주세요!');
-      }
-      
       if (!isLoggedIn) return alert('먼저 POIZON 접속을 해주세요!');
-
-      // 서버 작업 상태 체크
-      fetch('/check_status')
-        .then(res => res.json())
-        .then(status => {
-          if (status.working) {
-            const workTypeKr = status.work_type === 'scraping' ? '수집' : '비교';
-            alert(`⚠️ 서버 작업 중입니다.\n\n작업 유형: ${workTypeKr}\n진행 상황: ${status.progress}\n경과 시간: ${status.elapsed_minutes}분\n\n약 ${status.remaining_minutes}분 후 사용 가능합니다.`);
-            return;
-          }
-          
-          // 작업 시작
-          startCollectionProcess(keyword, maxPages);
-        })
-        .catch(err => {
-          console.error('상태 체크 실패:', err);
-          startCollectionProcess(keyword, maxPages);
-        });
-    }
-
-    function startCollectionProcess(keyword, maxPages) {
-      // ✅ resetAll() 대신 필요한 것만 초기화
       
-      // EventSource 정리
-      if (eventSource) {
-        eventSource.close();
-        eventSource = null;
-      }
+      if (eventSource) eventSource.close();
       
-      // 로그만 초기화
-      document.getElementById('logBox').innerHTML = '';
-      
-      // 진행 상황 초기화
-      updateProgress(0, 100);
-      
-      // 기존 데이터 초기화 (새로운 검색이므로)
       collectedData = [];
-      currentPage = 1;
-      
-      // 수집 결과 테이블 초기화 (새로운 데이터를 받을 준비)
-      document.getElementById('tableBody').innerHTML = '';
-      document.getElementById('resultCount').textContent = '0';
-      
-      // 버튼 숨김 (수집 시작 전)
-      document.getElementById('downloadBtn').style.display = 'none';
-      document.getElementById('sourcingBtn').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'none';
-      
-      // === 여기서부터는 기존 코드 그대로 ===
-      
-      // 모든 모드 버튼 비활성화
       setModeButtonsEnabled(false);
-      
       document.getElementById('startBtn').disabled = true;
       document.getElementById('stopBtn').style.display = 'block';
-      addLog('🔄 수집 준비 중...', 'info');
       
-      // 통계 초기화
-      document.getElementById('currentPage').textContent = '0 / 0';
-      document.getElementById('collectedCount').textContent = '0개';
-      document.getElementById('currentTask').textContent = '준비 중';
-      document.getElementById('elapsedTime').textContent = '00:00';
-      
-      // 경과 시간 타이머 시작
-      startElapsedTimer();
-
-      // 모드에 따라 URL 생성
       let url = `/start?mode=${selectedMode}&max_pages=${maxPages}&skip_login=true`;
-      if (selectedMode === 'keyword') {
-        url += `&keyword=${encodeURIComponent(keyword)}`;
-      }
+      if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
 
       eventSource = new EventSource(url);
 
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
-        if (data.type === 'log') {
-          addLog(data.message, data.level || 'info');
-          
-          // 검색 시간 추출 및 표시
-          if (data.message.includes('⏱️ 총 검색 시간:')) {
-            const timeMatch = data.message.match(/⏱️ 총 검색 시간: (.+)/);
-            if (timeMatch) {
-              document.getElementById('searchTime').textContent = `| ⏱️ ${timeMatch[1]}`;
-            }
-          }
-          
-          updateCurrentTask(data.message);
-        }
-        
-        if (data.type === 'progress') {
-          updateProgress(data.current, data.total);
-          
-          if (data.page && data.total_pages) {
-            document.getElementById('currentPage').textContent = `${data.page} / ${data.total_pages}`;
-          }
-        }
-        
+        if (data.type === 'log') addLog(data.message, data.level || 'info');
+        if (data.type === 'progress') updateProgress(data.current, data.total);
         if (data.type === 'data') {
-          addDataRow(data.item);
-          
-          const count = document.querySelectorAll('#tableBody tr').length;
-          document.getElementById('collectedCount').textContent = `${count}개`;
+          collectedData.push(data.item);
+          renderTable();
         }
 
         if (data.type === 'complete') {
-          console.log('🎉 [DEBUG] complete 이벤트 받음!');
-          
-          addLog('✅ 모든 작업 완료!', 'success');
-          addLog(`총 ${data.total_items}개 상품 수집 완료 (${data.pages}페이지)`, 'success');
-          
-          // 최종 통계 업데이트
-          document.getElementById('currentTask').textContent = '완료';
-          document.getElementById('collectedCount').textContent = `${data.total_items}개`;
-          
-          // ✅ 데이터 저장 및 테이블 표시
-          console.log('🔍 [DEBUG] data.data 확인:', data.data);
-          console.log('🔍 [DEBUG] Array 여부:', Array.isArray(data.data));
+          addLog('✅ 수집 완료!', 'success');
           
           if (data.data && Array.isArray(data.data)) {
-            console.log('✅ [DEBUG] 데이터 저장 시작:', data.data.length, '개');
-            
             collectedData = data.data;
-            currentData = data.data;
-            
-            // 결과 섹션 표시
-            document.getElementById('resultSection').classList.add('active');
-            
-            // 결과 개수 업데이트
-            document.getElementById('resultCount').textContent = data.data.length;
-            
-            // 테이블 렌더링
             renderTable();
-            
-            console.log('✅ [DEBUG] 데이터 저장 완료!');
-          } else {
-            console.warn('⚠️ [DEBUG] data.data가 없거나 배열이 아님!');
           }
           
-          // 자동으로 판매량 내림차순 정렬
-          addLog('📊 판매량 기준 내림차순 정렬 중...', 'info');
-          sortBy('판매량');
-          addLog('✅ 정렬 완료!', 'success');
-          
-          // ✅ 다운로드 버튼 표시
           if (data.file_path) {
-            const downloadBtn = document.getElementById('downloadBtn');
-            downloadBtn.href = `/download/${encodeURIComponent(data.file_path)}`;
-            downloadBtn.style.display = 'block';
-            console.log('✅ [DEBUG] 다운로드 버튼 표시!');
+            document.getElementById('downloadBtn').href = `/download/${encodeURIComponent(data.file_path)}`;
+            document.getElementById('downloadBtn').style.display = 'block';
           }
           
-          // ✅✅✅ 크림검색 버튼 표시 (디버깅 강화!)
-          const sourcingBtn = document.getElementById('sourcingBtn');
-          console.log('🔍 [DEBUG] sourcingBtn 요소:', sourcingBtn);
-          
-          if (sourcingBtn) {
-            sourcingBtn.style.display = 'block';
-            console.log('✅ [DEBUG] 크림검색 버튼 표시 완료!');
-            console.log('✅ [DEBUG] sourcingBtn.style.display:', sourcingBtn.style.display);
-          } else {
-            console.error('❌ [DEBUG] sourcingBtn 요소를 찾을 수 없음!');
-          }
-          
-          // ✅ 리셋 버튼 표시
+          document.getElementById('resultSearchOptions').style.display = 'block';
           document.getElementById('resetBtn').style.display = 'block';
-          console.log('✅ [DEBUG] 리셋 버튼 표시!');
-          
-          // 모드 버튼 재활성화
           setModeButtonsEnabled(true);
-          console.log('✅ [DEBUG] 모드 버튼 활성화!');
-          
           document.getElementById('stopBtn').style.display = 'none';
           document.getElementById('startBtn').disabled = false;
           
           eventSource.close();
           eventSource = null;
-          
-          console.log('🎉 [DEBUG] complete 처리 완료!');
         }
-
-
-
       };
     }
 
-
-
-    // ==========================================
-    // 📚 기록 팝업 기능
-    // ==========================================
-      // 기록 팝업 열기
-      function openHistoryPopup() {
-        document.getElementById('historyPopup').classList.add('active');
-        refreshHistoryList();
-        addLog('📚 기록 팝업 열림', 'info');
-      }
-
-      // 스케줄러 팝업 열기
-      function openSchedulerPopup() {
-        const width = 1200;
-        const height = 800;
-        const left = (screen.width - width) / 2;
-        const top = (screen.height - height) / 2;
-        
-        window.open('/scheduler', 'schedulerPopup',`width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-);
-      }
-
-      // 설정 팝업 열기
-      function openSettingsPopup() {
-        alert('⚙️ 설정 기능은 곧 출시됩니다!\n\n구현 예정 기능:\n• 브라우저 자동 닫기 시간 설정\n• 검색 딜레이 조정\n• 알림 설정\n• 데이터 저장 경로 변경');
-        addLog('⚙️ 설정 팝업 (준비 중)', 'info');
-      }
-
-      // 기록 팝업 닫기
-      function closeHistoryPopup(event) {
-        if (event && event.target !== event.currentTarget) return;
-        document.getElementById('historyPopup').classList.remove('active');
-      }
-
-
-      let allHistoryRecords = [];
-
-      // 기록 목록 새로고침
-      async function refreshHistoryList() {
-        try {
-          const res = await fetch('/api/history/list');
-          const data = await res.json();
-          
-          if (!data.success) throw new Error(data.error);
-          
-          allHistoryRecords = data.records;
-          renderHistoryList();
-          
-          console.log('✅ 기록 로드:', allHistoryRecords.length, '개');
-          
-        } catch (err) {
-          console.error('기록 로드 실패:', err);
-          alert('기록을 불러올 수 없습니다: ' + err.message);
-        }
-      }
-
-      // 기록 목록 렌더링
-      function renderHistoryList() {
-        const total = allHistoryRecords.length;
-        const keywordCount = allHistoryRecords.filter(r => r.type === 'keyword').length;
-        const compareCount = allHistoryRecords.filter(r => r.type === 'compare').length;
-        
-        // 통계 업데이트
-        document.getElementById('historyTotalCount').textContent = total;
-        document.getElementById('historyKeywordCount').textContent = keywordCount;
-        document.getElementById('historyCompareCount').textContent = compareCount;
-        
-        const listEl = document.getElementById('historyListContent');
-        
-        if (total === 0) {
-          listEl.innerHTML = `
-            <div class="history-empty">
-              <h3>📭 저장된 기록이 없습니다</h3>
-              <p>검색 완료 후 자동으로 저장됩니다</p>
-            </div>
-          `;
-          return;
-        }
-        
-        listEl.innerHTML = allHistoryRecords.map(r => {
-          const title = getHistoryTitle(r);
-          const date = new Date(r.timestamp).toLocaleString('ko-KR');
-          
-          return `
-            <div class="history-item">
-              <div class="history-item-header">
-                <div class="history-item-title">${title}</div>
-                <div class="history-item-date">${date}</div>
-              </div>
-              <div class="history-item-info">
-                <span>📊 ${r.summary.total_count}개</span>
-                <span>💰 평균 ${r.summary.avg_price.toLocaleString()}원</span>
-                <span>💾 ${r.size_mb}MB</span>
-              </div>
-              <div class="history-item-actions">
-                <button class="history-action-btn primary" onclick="loadHistoryRecord('${r.filename}')">
-                  📤 불러오기
-                </button>
-                <button class="history-action-btn" onclick="downloadHistoryFile('${r.filename}')">
-                  💾 다운로드
-                </button>
-                <button class="history-action-btn delete" onclick="deleteHistoryRecord('${r.filename}')">
-                  🗑️ 삭제
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // 기록 제목 생성
-      function getHistoryTitle(r) {
-        const p = r.params;
-        if (r.type === 'keyword') return `🔍 ${p.keyword || '키워드'} (${p.maxPages}p)`;
-        if (r.type === 'compare') return `📋 리스트 비교 (${r.summary.total_count}개)`;
-        if (r.type === 'price') return `💰 거래금액 높은 순 (${p.maxPages}p)`;
-        if (r.type === 'growth') return `📈 거래증가 빠른 순 (${p.maxPages}p)`;
-        return '검색 기록';
-      }
-
-      // 기록 불러오기
-      async function loadHistoryRecord(filename) {
-        try {
-          const res = await fetch(`/api/history/load/${filename}`);
-          const data = await res.json();
-          
-          if (!data.success) throw new Error(data.error);
-          
-          // 데이터 저장
-          collectedData = data.data.results;
-          currentData = data.data.results;
-          
-          // 결과 섹션 표시
-          document.getElementById('resultSection').classList.add('active');
-          document.getElementById('resultCount').textContent = collectedData.length;
-          
-          // 테이블 렌더링
-          renderTable();
-          
-          // 팝업 닫기
-          closeHistoryPopup();
-          
-          addLog(`✅ 기록 불러오기 완료: ${collectedData.length}개`, 'success');
-          
-        } catch (err) {
-          console.error('불러오기 실패:', err);
-          alert('불러오기 실패: ' + err.message);
-        }
-      }
-
-      // 파일 다운로드
-      function downloadHistoryFile(filename) {
-        window.open(`/api/history/download/${filename}`, '_blank');
-      }
-
-      // 전체 다운로드
-      function downloadAllHistory() {
-        if (allHistoryRecords.length === 0) {
-          alert('다운로드할 기록이 없습니다');
-          return;
-        }
-        window.open('/api/history/download-all', '_blank');
-      }
-
-      // 개별 삭제
-      async function deleteHistoryRecord(filename) {
-        if (!confirm(`"${filename}"을(를) 삭제하시겠습니까?`)) return;
-        
-        try {
-          const res = await fetch(`/api/history/delete/${filename}`, {method: 'DELETE'});
-          const data = await res.json();
-          
-          if (!data.success) throw new Error(data.error);
-          
-          alert('✅ 삭제 완료');
-          await refreshHistoryList();
-          
-        } catch (err) {
-          console.error('삭제 실패:', err);
-          alert('삭제 실패: ' + err.message);
-        }
-      }
-
-      // 전체 삭제
-      async function clearAllHistory() {
-        if (allHistoryRecords.length === 0) {
-          alert('삭제할 기록이 없습니다');
-          return;
-        }
-        
-        if (!confirm(`⚠️ 전체 ${allHistoryRecords.length}개 기록을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다!`)) return;
-        
-        try {
-          const ids = allHistoryRecords.map(r => r.id);
-          
-          const res = await fetch('/api/history/delete-selected', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({record_ids: ids})
-          });
-          
-          const data = await res.json();
-          
-          if (!data.success) throw new Error(data.error);
-          
-          alert(`✅ ${data.deleted}개 기록 삭제 완료`);
-          await refreshHistoryList();
-          
-        } catch (err) {
-          console.error('전체 삭제 실패:', err);
-          alert('전체 삭제 실패: ' + err.message);
-        }
-      }
-      // ==========================================
-      // 🚨 긴급 추가: performLogin 함수
-      // ==========================================
-      function performLogin() {
-        const loginCheckBtn = document.getElementById('loginCheckBtn');
-        const loginMessage = document.getElementById('loginMessage');
-        const loginStatus = document.getElementById('loginStatus');
-
-        loginCheckBtn.disabled = true;
-        loginCheckBtn.textContent = '접속 중...';
-        loginMessage.textContent = 'POIZON에 접속하고 있습니다... 브라우저가 열립니다.';
-
-        addLog('🔄 POIZON 접속 시작...', 'info');
-        addLog('🌐 브라우저가 열리고 자동 로그인을 시도합니다', 'info');
-
-        fetch('/check_login')
-          .then(r => r.json())
-          .then(data => {
-            if (data.logged_in) {
-              isLoggedIn = true;
-              loginStatus.classList.add('logged-in');
-              loginMessage.textContent = '✅ POIZON 접속 완료! 이제 수집 모드를 선택하세요.';
-              loginCheckBtn.textContent = '✅ 접속 완료';
-              loginCheckBtn.style.background = '#28a745';
-              addLog('✅ POIZON 로그인 성공!', 'success');
-              addLog('💡 수집 모드를 선택하고 키워드를 입력하세요', 'info');
-              
-              // 모드 버튼 활성화 (준비 중 버튼 제외)
-              document.querySelectorAll('.mode-btn').forEach(btn => {
-                if (btn.dataset.comingSoon === 'true') {
-                  btn.disabled = true;
-                  btn.style.opacity = '0.4';
-                  btn.style.cursor = 'not-allowed';
-                } else {
-                  btn.disabled = false;
-                  btn.style.opacity = '1';
-                  btn.style.cursor = 'pointer';
-                }
-              });
-              
-              // 키워드 입력란 활성화
-              document.getElementById('keyword').disabled = false;
-              
-              // 기본 모드 선택 (키워드 검색)
-              selectMode('poizon');
-              
-              document.getElementById('maxPages').disabled = false;
-              document.getElementById('startBtn').disabled = false;
-              resetIdleTimer();
-            } else {
-              isLoggedIn = false;
-              loginStatus.classList.remove('logged-in');
-              loginMessage.textContent = '❌ 접속 실패: ' + (data.message || '알 수 없는 오류');
-              loginCheckBtn.textContent = '🚀 다시 접속하기';
-              loginCheckBtn.disabled = false;
-              addLog('❌ 접속 실패: ' + (data.message || '알 수 없는 오류'), 'error');
-            }
-          })
-          .catch(err => {
-            loginMessage.textContent = '❌ 접속 오류: ' + err;
-            loginCheckBtn.textContent = '🚀 다시 접속하기';
-            loginCheckBtn.disabled = false;
-            addLog('❌ 접속 오류: ' + err, 'error');
-          });
-      }
-
-      // 스케줄러에서 과거 데이터 불러오기
-   // ==========================================
-// ✅ loadHistoryData 함수 완전 수정본
-// ==========================================
-
-// 기존 함수를 찾아서 (Ctrl+F: "function loadHistoryData"):
-
-
-    function loadHistoryData(data, keyword) {
-      console.log('📋 [DEBUG] loadHistoryData 호출됨!');
-      console.log('📋 [DEBUG] 받은 데이터:', data);
-      console.log('📋 [DEBUG] 데이터 타입:', typeof data);
-      console.log('📋 [DEBUG] 배열 여부:', Array.isArray(data));
-      console.log('📋 [DEBUG] 데이터 길이:', data ? data.length : 'null');
-      console.log('📋 [DEBUG] 키워드:', keyword);
-      
-      // ✅ 데이터 검증 강화
-      if (!data) {
-        console.error('❌ [DEBUG] 데이터가 null/undefined');
-        alert('❌ 데이터가 없습니다');
-        return;
-      }
-      
-      if (!Array.isArray(data)) {
-        console.error('❌ [DEBUG] 데이터가 배열이 아님');
-        alert('❌ 데이터 형식이 올바르지 않습니다');
-        return;
-      }
-      
-      if (data.length === 0) {
-        console.warn('⚠️ [DEBUG] 데이터가 비어있음');
-        alert('⚠️ 저장된 데이터가 없습니다');
-        return;
-      }
-      
-      console.log('✅ [DEBUG] 데이터 검증 완료:', data.length, '개');
-      
-      // ✅ 데이터 저장
-      collectedData = data;
-      currentPage = 1;
-      console.log('✅ [DEBUG] collectedData 저장 완료');
-      
-      // ✅ 결과 개수 업데이트
-      document.getElementById('resultCount').textContent = data.length;
-      console.log('✅ [DEBUG] resultCount 업데이트:', data.length);
-      
-      // ✅ 결과 섹션 활성화
-      const resultSection = document.getElementById('resultSection');
-      resultSection.classList.add('active');
-      console.log('✅ [DEBUG] resultSection 활성화 완료');
-      
-      // ✅ 테이블 렌더링
-      console.log('📊 [DEBUG] renderTable() 호출 시작...');
-      renderTable();
-      console.log('📊 [DEBUG] renderTable() 완료!');
-      
-      // ✅ 버튼 표시
-      document.getElementById('downloadBtn').style.display = 'block';
-      document.getElementById('sourcingBtn').style.display = 'block';
+    function stopCollection() {
+      fetch('/stop', { method: 'POST' });
+      if (eventSource) eventSource.close();
+      addLog('⏹️ 수집 중단', 'error');
+      document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
-      console.log('✅ [DEBUG] 버튼 표시 완료');
-      
-      // ✅ 로그 추가
-      addLog(`📋 "${keyword}" 데이터 로드 완료: ${data.length}개`, 'success');
-      
-      // ✅ 화면 스크롤 (약간 지연)
-      setTimeout(() => {
-        resultSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-        console.log('✅ [DEBUG] 스크롤 완료');
-      }, 200);
-      
-      console.log('🎉 [DEBUG] loadHistoryData 전체 완료!');
     }
 
-    // ==========================================
-    // ✅ 수정 완료!
-    // ==========================================
-
-
-  // ========================================
-  // ✅ window.onload - 자동 로그인
-  // ========================================
-
-    window.onload = () => {
-      addLog('👋 POIZON 데이터 수집기에 오신 것을 환영합니다!', 'info');
-      addLog('🔄 자동으로 POIZON에 접속합니다...', 'info');
+    function resetAll() {
+      fetch('/stop', { method: 'POST' });
+      if (eventSource) eventSource.close();
       
-      // 버튼 비활성화 및 메시지 변경
+      document.getElementById('logBox').innerHTML = '';
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('resultSearchOptions').style.display = 'none';
+      collectedData = [];
+      renderTable();
+      updateProgress(0, 100);
+    }
+
+    function performLogin() {
       const loginCheckBtn = document.getElementById('loginCheckBtn');
       const loginMessage = document.getElementById('loginMessage');
-      
+      const loginStatus = document.getElementById('loginStatus');
+
       loginCheckBtn.disabled = true;
-      loginCheckBtn.textContent = '🔄 접속 중...';
-      loginMessage.textContent = '잠시만 기다려주세요. 브라우저가 자동으로 열리고 로그인됩니다.';
+      loginCheckBtn.textContent = '접속 중...';
+
+      addLog('🔄 POIZON 접속 시작...', 'info');
+
+      fetch('/check_login')
+        .then(r => r.json())
+        .then(data => {
+          if (data.logged_in) {
+            isLoggedIn = true;
+            loginStatus.classList.add('logged-in');
+            loginMessage.textContent = '✅ POIZON 접속 완료!';
+            loginCheckBtn.textContent = '✅ 접속 완료';
+            loginCheckBtn.style.background = '#28a745';
+            addLog('✅ 로그인 성공!', 'success');
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+            });
+            
+            document.getElementById('keyword').disabled = false;
+            selectMode('poizon');
+            document.getElementById('maxPages').disabled = false;
+            document.getElementById('startBtn').disabled = false;
+            resetIdleTimer();
+          } else {
+            loginMessage.textContent = '❌ 접속 실패';
+            loginCheckBtn.textContent = '🚀 다시 접속하기';
+            loginCheckBtn.disabled = false;
+          }
+        });
+    }
+
+    window.onload = () => {
+      addLog('👋 POIZON 데이터 수집기 시작!', 'info');
       
-      // 1초 후 자동 로그인
-      setTimeout(() => {
-        performLogin();
-      }, 1000);
+      setTimeout(() => performLogin(), 1000);
       
-      // 페이지 컨트롤 이벤트 리스너
+      // ✅ 검색 버튼 이벤트
+      const resultBtn = document.getElementById('resultKreamSearchBtn');
+      if (resultBtn) {
+        resultBtn.addEventListener('click', async () => {
+          if (collectedData.length === 0) {
+            alert('❌ 수집된 데이터가 없습니다.');
+            return;
+          }
+          
+          const productCodes = collectedData
+            .map(item => item.상품번호)
+            .filter(code => code && code !== '-');
+          
+          if (productCodes.length === 0) {
+            alert('❌ 검색 가능한 상품번호가 없습니다.');
+            return;
+          }
+          
+          const searchKream = document.getElementById('resultSearchKream').checked;
+          if (!searchKream) {
+            alert('⚠️ 크림 검색을 선택해주세요!');
+            return;
+          }
+          
+          resultBtn.disabled = true;
+          resultBtn.textContent = '🔄 검색 중...';
+          
+          addLog(`🔍 크림 검색 시작: ${productCodes.length}개`, 'info');
+          
+          try {
+            const response = await fetch('/start_kream_search', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ product_codes: productCodes })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+              throw new Error(result.error);
+            }
+            
+            const taskId = result.task_id;
+            addLog(`✅ 작업 ID: ${taskId}`, 'info');
+            
+            const kreamEventSource = new EventSource(`/kream_search_progress/${taskId}`);
+            
+            let updatedCount = 0;
+            
+            kreamEventSource.addEventListener('message', (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                
+                if (data.message) {
+                  addLog(data.message, data.level || 'info');
+                }
+                
+                if (data.progress !== undefined) {
+                  updateProgress(data.current || 0, data.total || productCodes.length);
+                }
+                
+                if (data.product_code && data.result) {
+                  const productCode = data.product_code;
+                  const kreamData = data.result;
+                  
+                  const index = collectedData.findIndex(item => item.상품번호 === productCode);
+                  
+                  if (index !== -1 && kreamData.success) {
+                    collectedData[index].크림평균가 = kreamData.average_price || '-';
+                    collectedData[index].크림판매량 = kreamData.sales_count || 0;
+                    
+                    updatedCount++;
+                    renderTable();
+                    
+                    addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
+                  }
+                }
+              } catch (e) {
+                console.error('파싱 오류:', e);
+              }
+            });
+            
+            kreamEventSource.addEventListener('complete', () => {
+              addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
+              kreamEventSource.close();
+              resultBtn.disabled = false;
+              resultBtn.textContent = '🔍 검색';
+              updateProgress(0, 100);
+            });
+            
+            kreamEventSource.addEventListener('error', () => {
+              addLog('❌ 연결 오류', 'error');
+              kreamEventSource.close();
+              resultBtn.disabled = false;
+              resultBtn.textContent = '🔍 검색';
+            });
+            
+          } catch (error) {
+            addLog('❌ 오류: ' + error, 'error');
+            resultBtn.disabled = false;
+            resultBtn.textContent = '🔍 검색';
+          }
+        });
+      }
+      
       document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
         pageSize = parseInt(e.target.value, 10) || 20;
         currentPage = 1;
@@ -2748,7 +1119,6 @@
         renderTable();
       });
     };
-
   </script>
 </body>
 </html>

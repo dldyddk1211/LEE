@@ -1,0 +1,25 @@
+[33m04a5935[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 수집모드변경 크림 포이즌 무신사
+[33m4b81481[m 스케줄러 과거 자료 1차 확인
+[33mc90d405[m 크림결과 엑셀
+[33mf7bf8fb[m 크림 비교 완료
+[33me25f578[m 크림 비교 1번 완료
+[33m0dde1cc[m 크림 상품 1번 검색 성공
+[33m002e73f[m 크림 리스트 1번 검색 매크로확인
+[33m40bb5db[m 크림팝업 결과테이블 항목 정리
+[33m3071e35[m 창닫기 후 새로 검색 오류 해결
+[33mb1dea2a[m 크림 팝업 찾기 클릭까지
+[33mfe85fdf[m 크림서치 파일 구조 및 팝업
+[33m8e98d78[m 크림 검색 팝업시작
+[33mf29b3f6[m 맥 환경 검색창 문제 해결
+[33m1fc75a3[m 모든 변경시 리셋 기능 복구
+[33m259cce7[m test
+[33m6e8cd47[m 리스트 비교 완벽 복구
+[33m460e55d[m 리스트비교 복구 90%완료
+[33mf22ed8d[m 리스트 비교 에러 복구
+[33m9cca40f[m 리스트 비교 복구
+[33mc13fbed[m git hub setting
+[33mf98aeee[m test
+[33me5568ff[m Rename project from 'poizon_search' to 'pozion'
+[33m9905809[m Fix formatting in README header
+[33m866658a[m created test md
+[33m6ce32aa[m Initial commit

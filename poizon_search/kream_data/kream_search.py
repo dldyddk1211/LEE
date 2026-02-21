@@ -529,119 +529,252 @@ def close_browser():
 # 기존 함수들 (그대로 유지)
 # ==========================================
 
+
 def search_kream_product_detail(product_code):
-    """크림에서 상품 검색하고 모델번호 추출 (기존 함수 유지)"""
+    """크림에서 상품 검색 - background_kream_search 로직 적용"""
     try:
         log(f"\n🔍 크림 검색: {product_code}", 'info')
         
         page = get_browser()
         
-        search_url = f"{KREAM_SEARCH_URL}?keyword={product_code}&tab=products&footer=home"
+        # 랜덤 딜레이
+        delay = random.uniform(1.0, 2.0)
+        time.sleep(delay)
+        log(f"  💤 {delay:.1f}초 대기", 'info')
+        
+        # 검색 URL
+        search_url = f"https://kream.co.kr/search?keyword={product_code}"
         log(f"  → URL: {search_url}")
         
-        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
-        wait_stable(page, 2000)
+        # 페이지 이동
+        page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
+        time.sleep(2)
         
+        log(f"  ✅ 검색 페이지 이동 완료", 'success')
+        
+        # 검색 결과 확인
         try:
-            first_product = page.wait_for_selector('.search_result_item, .product_card, .item_inner', timeout=10000)
-            log(f"  ✓ 검색 결과 발견")
-            first_product.click()
-            wait_stable(page, 2000)
-            
+            log("  → 검색 결과 대기 중...", 'info')
+            page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
+            log("  ✅ 검색 결과 발견!", 'success')
         except Exception as e:
-            log(f"  ⚠️ 검색 결과 없음: {e}", 'warning')
-            safe_screenshot(page, f"search_no_result_{product_code}")
+            log(f"  ❌ 검색 결과 없음: {e}", 'error')
+            safe_screenshot(page, f"no_result_{product_code}")
             return {'success': False, 'error': '검색 결과 없음'}
         
+        # 첫 번째 상품 클릭
         try:
+            log("  → 첫 번째 상품 클릭...", 'info')
+            first_product = page.locator('a.product_card[href*="/products/"]').first
+            
+            if first_product.count() == 0:
+                log(f"  ❌ 상품 카드 없음", 'error')
+                return {'success': False, 'error': '상품 카드 없음'}
+            
+            first_product.hover()
+            time.sleep(random.uniform(0.3, 0.7))
+            first_product.click()
+            time.sleep(2)
+            
             current_url = page.url
             product_id = current_url.split('/products/')[-1].split('?')[0] if '/products/' in current_url else None
             
-            log(f"  → 상품 페이지: {current_url}")
+            log(f"  ✅ 상품 페이지 이동: {current_url}", 'success')
             if product_id:
-                log(f"  → Product ID: {product_id}")
+                log(f"  → Product ID: {product_id}", 'info')
             
-            # 모델번호 추출
-            model_number = page.evaluate("""
+        except Exception as e:
+            log(f"  ❌ 상품 클릭 실패: {e}", 'error')
+            safe_screenshot(page, f"click_fail_{product_code}")
+            return {'success': False, 'error': '상품 클릭 실패'}
+        
+        # 모델번호 확인
+        try:
+            log(f"  → 모델번호 확인 중...", 'info')
+            
+            model_info = page.evaluate("""
                 () => {
-                    const elements = document.querySelectorAll('*');
-                    for (let el of elements) {
-                        const text = el.textContent;
-                        if (text && text.includes('모델번호')) {
-                            const parent = el.parentElement;
-                            const siblings = Array.from(parent.children);
-                            const index = siblings.indexOf(el);
+                    let model_numbers = [];
+                    let full_text = '';
+                    
+                    const pTags = document.querySelectorAll('p.text-lookup');
+                    
+                    for (let p of pTags) {
+                        const text = p.textContent.trim();
+                        if (text.includes('모델번호')) {
+                            full_text = text;
+                            const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                            const matches = text.match(pattern);
                             
-                            if (index < siblings.length - 1) {
-                                return siblings[index + 1].textContent.trim();
+                            if (matches) {
+                                model_numbers = [...new Set(matches)];
                             }
-                            
-                            const match = text.match(/모델번호[:\\s]+([A-Z0-9-]+)/i);
-                            if (match) return match[1];
+                            break;
                         }
                     }
                     
-                    const dts = document.querySelectorAll('dt');
-                    for (let dt of dts) {
-                        if (dt.textContent.includes('모델번호')) {
-                            const dd = dt.nextElementSibling;
-                            if (dd && dd.tagName === 'DD') {
-                                return dd.textContent.trim();
+                    if (model_numbers.length === 0) {
+                        const allElements = document.querySelectorAll('*');
+                        
+                        for (let el of allElements) {
+                            const text = el.textContent;
+                            if (text && text.includes('모델번호') && text.length < 200) {
+                                full_text = text.trim();
+                                const pattern = /[A-Z0-9]{2,10}-[0-9]{3}|[A-Z0-9]{6,}/g;
+                                const matches = text.match(pattern);
+                                
+                                if (matches) {
+                                    model_numbers = [...new Set(matches)];
+                                    break;
+                                }
                             }
                         }
                     }
-                    return null;
+                    
+                    return {
+                        found: model_numbers.length > 0,
+                        model_numbers: model_numbers,
+                        full_text: full_text
+                    };
                 }
             """)
             
-            if model_number:
-                log(f"  ✅ 모델번호 발견: {model_number}", 'success')
-                
-                if model_number.upper() == product_code.upper():
-                    log(f"  ✅ 모델번호 일치!", 'success')
-                    safe_screenshot(page, f"match_{product_code}")
-                    
-                    return {
-                        'success': True,
-                        'model_number': model_number,
-                        'product_id': product_id,
-                        'url': current_url
-                    }
-                else:
-                    log(f"  ⚠️ 모델번호 불일치: {model_number} != {product_code}", 'warning')
-                    safe_screenshot(page, f"mismatch_{product_code}")
-                    
-                    return {
-                        'success': False,
-                        'model_number': model_number,
-                        'product_id': product_id,
-                        'url': current_url,
-                        'error': f'모델번호 불일치 ({model_number})'
-                    }
-            else:
-                log(f"  ❌ 모델번호를 찾을 수 없습니다", 'error')
-                safe_screenshot(page, f"no_model_{product_code}")
+            model_found = model_info.get('found', False)
+            model_numbers = model_info.get('model_numbers', [])
+            model_text = model_info.get('full_text', '')
+            
+            is_match = False
+            matched_model = None
+            
+            if model_found and model_numbers:
+                for model in model_numbers:
+                    if product_code.upper() == model.upper():
+                        is_match = True
+                        matched_model = model
+                        log(f"  ✅ 모델번호 일치: {model}", 'success')
+                        break
+            
+            if not is_match and model_text:
+                if product_code.upper() in model_text.upper():
+                    is_match = True
+                    matched_model = product_code
+                    log(f"  ✅ 모델번호 포함 일치!", 'success')
+            
+            if not is_match:
+                log(f"  ❌ 모델번호 불일치", 'warning')
+                log(f"     찾는 번호: {product_code}", 'warning')
+                log(f"     페이지 번호: {', '.join(model_numbers) if model_numbers else '없음'}", 'warning')
+                safe_screenshot(page, f"mismatch_{product_code}")
                 
                 return {
                     'success': False,
+                    'model_number': ', '.join(model_numbers) if model_numbers else None,
                     'product_id': product_id,
                     'url': current_url,
-                    'error': '모델번호 없음'
+                    'error': '모델번호 불일치'
                 }
-                
-        except Exception as e:
-            log(f"  ❌ 상품 정보 추출 실패: {e}", 'error')
-            safe_screenshot(page, f"extract_error_{product_code}")
-            import traceback
-            traceback.print_exc()
             
-            return {'success': False, 'error': str(e)}
+        except Exception as e:
+            log(f"  ❌ 모델번호 확인 실패: {e}", 'error')
+            safe_screenshot(page, f"model_error_{product_code}")
+            return {'success': False, 'error': '모델번호 확인 실패'}
+        
+        # 거래 정보 추출
+        try:
+            log(f"  → 거래 정보 추출 중...", 'info')
+            
+            trade_info = page.evaluate("""
+                () => {
+                    let prices = [];
+                    let trade_dates = [];
+                    
+                    const allElements = document.querySelectorAll('*');
+                    
+                    for (let el of allElements) {
+                        const text = el.textContent.trim();
+                        const priceMatch = text.match(/^([0-9,]+)원$/);
+                        
+                        if (priceMatch && prices.length < 5) {
+                            const priceText = priceMatch[1].replace(/,/g, '');
+                            const price = parseInt(priceText);
+                            
+                            if (price >= 10000 && price <= 1000000000) {
+                                prices.push(price);
+                            }
+                        }
+                    }
+                    
+                    for (let el of allElements) {
+                        const text = el.textContent.trim();
+                        
+                        if (text.match(/^\\d{2}\\/\\d{2}\\/\\d{2}$|^\\d+일 전$|^방금 전$|^오늘$|^어제$/)) {
+                            if (trade_dates.length === 0) {
+                                trade_dates.push(text);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    let avg_price = 0;
+                    if (prices.length > 0) {
+                        const sum = prices.reduce((a, b) => a + b, 0);
+                        avg_price = Math.round(sum / prices.length);
+                    }
+                    
+                    return {
+                        prices: prices.slice(0, 5),
+                        count: Math.min(prices.length, 5),
+                        avg_price: avg_price,
+                        first_trade_date: trade_dates.length > 0 ? trade_dates[0] : ''
+                    };
+                }
+            """)
+            
+            prices = trade_info.get('prices', [])
+            count = trade_info.get('count', 0)
+            avg_price = trade_info.get('avg_price', 0)
+            first_trade_date = trade_info.get('first_trade_date', 'N/A')
+            
+            average_price = f"{avg_price:,}원" if avg_price > 0 else "N/A"
+            sales_count = first_trade_date if first_trade_date else "N/A"
+            
+            if count > 0:
+                log(f"  ✅ 거래 정보 추출 완료!", 'success')
+                log(f"     💰 평균가: {average_price}", 'success')
+                log(f"     📦 최근 거래: {sales_count}", 'success')
+                safe_screenshot(page, f"success_{product_code}")
+                
+                return {
+                    'success': True,
+                    'model_number': matched_model,
+                    'product_id': product_id,
+                    'url': current_url,
+                    'average_price': average_price,
+                    'sales_count': sales_count
+                }
+            else:
+                log(f"  ⚠️ 거래 정보 없음", 'warning')
+                safe_screenshot(page, f"no_trade_{product_code}")
+                
+                return {
+                    'success': False,
+                    'model_number': matched_model,
+                    'product_id': product_id,
+                    'url': current_url,
+                    'error': '거래 정보 없음'
+                }
+            
+        except Exception as e:
+            log(f"  ❌ 거래 정보 추출 실패: {e}", 'error')
+            safe_screenshot(page, f"trade_error_{product_code}")
+            return {'success': False, 'error': '거래 정보 추출 실패'}
         
     except Exception as e:
         log(f"❌ 검색 오류: {e}", 'error')
         import traceback
         traceback.print_exc()
         return {'success': False, 'error': str(e)}
+
 
 
 def search_kream_product(product_code, page, callback=None):
@@ -1036,17 +1169,36 @@ def safe_screenshot(page, name: str):
 
 
 def get_browser():
-    """브라우저 인스턴스 가져오기 (싱글톤)"""
+    """브라우저 인스턴스 가져오기 (싱글톤) - 봇 차단 우회"""
     global _playwright, _browser, _context, _page
     
     if _browser is None or _page is None:
         if _playwright is None:
             _playwright = sync_playwright().start()
         
-        _browser = _playwright.chromium.launch(headless=HEADLESS)
+        # ✅ 봇 감지 방지 설정!
+        _browser = _playwright.chromium.launch(
+            headless=HEADLESS,
+            channel='chrome',  # 실제 Chrome 사용
+            args=[
+                '--disable-blink-features=AutomationControlled',  # 자동화 감지 방지
+                '--disable-dev-shm-usage',
+                '--no-sandbox'
+            ]
+        )
+        
+        # ✅ User-Agent 및 헤더 설정
         _context = _browser.new_context(
             viewport={'width': 1920, 'height': 1080},
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            extra_http_headers={
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Referer': 'https://kream.co.kr/',
+                'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"'
+            }
         )
         
         # 쿠키 로드
@@ -1060,9 +1212,21 @@ def get_browser():
                 pass
         
         _page = _context.new_page()
+        
+        # ✅ JavaScript 탐지 우회
+        _page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5]
+            });
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['ko-KR', 'ko', 'en-US', 'en']
+            });
+        """)
     
     return _page
-
 
 def save_cookies():
     """쿠키 저장"""
@@ -1491,212 +1655,6 @@ def close_browser():
 # ==========================================
 # 기존 함수들 (그대로 유지)
 # ==========================================
-
-def search_kream_product_detail(product_code):
-    """크림에서 상품 검색하고 모델번호 추출 (기존 함수 유지)"""
-    try:
-        log(f"\n🔍 크림 검색: {product_code}", 'info')
-        
-        page = get_browser()
-        
-        search_url = f"{KREAM_SEARCH_URL}?keyword={product_code}&tab=products&footer=home"
-        log(f"  → URL: {search_url}")
-        
-        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
-        wait_stable(page, 2000)
-        
-        try:
-            first_product = page.wait_for_selector('.search_result_item, .product_card, .item_inner', timeout=10000)
-            log(f"  ✓ 검색 결과 발견")
-            first_product.click()
-            wait_stable(page, 2000)
-            
-        except Exception as e:
-            log(f"  ⚠️ 검색 결과 없음: {e}", 'warning')
-            safe_screenshot(page, f"search_no_result_{product_code}")
-            return {'success': False, 'error': '검색 결과 없음'}
-        
-        try:
-            current_url = page.url
-            product_id = current_url.split('/products/')[-1].split('?')[0] if '/products/' in current_url else None
-            
-            log(f"  → 상품 페이지: {current_url}")
-            if product_id:
-                log(f"  → Product ID: {product_id}")
-            
-            # 모델번호 추출
-            model_number = page.evaluate("""
-                () => {
-                    const elements = document.querySelectorAll('*');
-                    for (let el of elements) {
-                        const text = el.textContent;
-                        if (text && text.includes('모델번호')) {
-                            const parent = el.parentElement;
-                            const siblings = Array.from(parent.children);
-                            const index = siblings.indexOf(el);
-                            
-                            if (index < siblings.length - 1) {
-                                return siblings[index + 1].textContent.trim();
-                            }
-                            
-                            const match = text.match(/모델번호[:\\s]+([A-Z0-9-]+)/i);
-                            if (match) return match[1];
-                        }
-                    }
-                    
-                    const dts = document.querySelectorAll('dt');
-                    for (let dt of dts) {
-                        if (dt.textContent.includes('모델번호')) {
-                            const dd = dt.nextElementSibling;
-                            if (dd && dd.tagName === 'DD') {
-                                return dd.textContent.trim();
-                            }
-                        }
-                    }
-                    return null;
-                }
-            """)
-            
-            if model_number:
-                log(f"  ✅ 모델번호 발견: {model_number}", 'success')
-                
-                if model_number.upper() == product_code.upper():
-                    log(f"  ✅ 모델번호 일치!", 'success')
-                    safe_screenshot(page, f"match_{product_code}")
-                    
-                    return {
-                        'success': True,
-                        'model_number': model_number,
-                        'product_id': product_id,
-                        'url': current_url
-                    }
-                else:
-                    log(f"  ⚠️ 모델번호 불일치: {model_number} != {product_code}", 'warning')
-                    safe_screenshot(page, f"mismatch_{product_code}")
-                    
-                    return {
-                        'success': False,
-                        'model_number': model_number,
-                        'product_id': product_id,
-                        'url': current_url,
-                        'error': f'모델번호 불일치 ({model_number})'
-                    }
-            else:
-                log(f"  ❌ 모델번호를 찾을 수 없습니다", 'error')
-                safe_screenshot(page, f"no_model_{product_code}")
-                
-                return {
-                    'success': False,
-                    'product_id': product_id,
-                    'url': current_url,
-                    'error': '모델번호 없음'
-                }
-                
-        except Exception as e:
-            log(f"  ❌ 상품 정보 추출 실패: {e}", 'error')
-            safe_screenshot(page, f"extract_error_{product_code}")
-            import traceback
-            traceback.print_exc()
-            
-            return {'success': False, 'error': str(e)}
-        
-    except Exception as e:
-        log(f"❌ 검색 오류: {e}", 'error')
-        import traceback
-        traceback.print_exc()
-        return {'success': False, 'error': str(e)}
-
-
-def search_kream_product(product_code, page, callback=None):
-    """크림에서 상품 검색 (기존 함수 유지)"""
-    global LOG_CALLBACK
-    LOG_CALLBACK = callback
-    
-    try:
-        log(f"\n🔍 크림 검색: {product_code}", 'info')
-        
-        search_url = f"{KREAM_SEARCH_URL}?keyword={product_code}"
-        log(f"  → URL: {search_url}")
-        
-        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
-        wait_stable(page, 2000)
-        
-        try:
-            page.wait_for_selector(".product_card, .item_inner, .product-item", timeout=10000)
-            log(f"  ✓ 검색 결과 로드됨")
-        except:
-            log(f"  ⚠️ 검색 결과 없음", 'warning')
-            return []
-        
-        results = page.evaluate("""
-            () => {
-                const products = [];
-                const cards = document.querySelectorAll('.product_card, .item_inner, .product-item');
-                
-                cards.forEach((card, index) => {
-                    if (index >= 10) return;
-                    
-                    try {
-                        const nameEl = card.querySelector('.product_name, .name, h3, .title');
-                        const name = nameEl ? nameEl.textContent.trim() : '';
-                        
-                        const priceEl = card.querySelector('.price, .amount, .product_price');
-                        let price = '';
-                        if (priceEl) {
-                            price = priceEl.textContent.trim();
-                        }
-                        
-                        const imgEl = card.querySelector('img');
-                        const image_url = imgEl ? (imgEl.src || imgEl.dataset.src || '') : '';
-                        
-                        const linkEl = card.querySelector('a');
-                        let link = '';
-                        if (linkEl) {
-                            link = linkEl.href || '';
-                            if (link && !link.startsWith('http')) {
-                                link = 'https://kream.co.kr' + link;
-                            }
-                        }
-                        
-                        const sizeEl = card.querySelector('.size, .product_size');
-                        const size = sizeEl ? sizeEl.textContent.trim() : '';
-                        
-                        const brandEl = card.querySelector('.brand, .product_brand');
-                        const brand = brandEl ? brandEl.textContent.trim() : '';
-                        
-                        if (name) {
-                            products.push({
-                                name: name,
-                                price: price,
-                                image_url: image_url,
-                                link: link,
-                                size: size,
-                                brand: brand,
-                                source: 'KREAM'
-                            });
-                        }
-                    } catch (e) {
-                        console.error('상품 파싱 오류:', e);
-                    }
-                });
-                
-                return products;
-            }
-        """)
-        
-        log(f"  ✅ {len(results)}개 상품 발견", 'success')
-        
-        for idx, product in enumerate(results, 1):
-            log(f"    {idx}. {product.get('name', 'N/A')[:50]} - {product.get('price', 'N/A')}")
-        
-        return results
-        
-    except Exception as e:
-        log(f"  ❌ 크림 검색 오류: {e}", 'error')
-        import traceback
-        traceback.print_exc()
-        return []
-
 
 def search_kream_products_batch(product_codes, callback=None):
     """여러 상품을 크림에서 일괄 검색 (기존 함수 유지)"""

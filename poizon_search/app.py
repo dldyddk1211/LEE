@@ -14,6 +14,7 @@ import threading
 import queue
 import openpyxl
 import uuid
+import time
 from datetime import datetime
 
 # 전역 변수
@@ -374,29 +375,37 @@ def check_status():
         'remaining_minutes': remaining_minutes
     })
 
-    @app.route('/start')
-    def start():
-        keyword = request.args.get('keyword', '나이키')
-        max_pages = int(request.args.get('max_pages', 20))
-        skip_login = request.args.get('skip_login', 'false').lower() == 'true'
-        mode = request.args.get('mode', 'poizon')  # ✅ 기본값
-        
-        # ✅ 포이즌만 실행
-        if mode == 'poizon':
-            thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
-            thread.daemon = True
-            thread.start()
-        elif mode == 'kream':
-            log_queue.put({'type': 'error', 'message': '크림 검색 기능은 준비 중입니다'})
-        elif mode == 'musinsa':
-            log_queue.put({'type': 'error', 'message': '무신사 검색 기능은 준비 중입니다'})
+@app.route('/start')
+def start():
+    keyword = request.args.get('keyword', '나이키')
+    max_pages = int(request.args.get('max_pages', 20))
+    skip_login = request.args.get('skip_login', 'false').lower() == 'true'
+    mode = request.args.get('mode', 'poizon')
     
+    # mode 처리
+    if mode == 'keyword':
+        mode = 'poizon'
+    
+    # 큐 비우기
     while not log_queue.empty():
         log_queue.get()
     
-    thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
-    thread.daemon = True
-    thread.start()
+    # 모드별 처리
+    if mode == 'poizon':
+        thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
+        thread.daemon = True
+        thread.start()
+        
+    elif mode == 'kream':
+        log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
+        
+    elif mode == 'musinsa':
+        log_queue.put({'type': 'error', 'message': '🟤 무신사 검색 기능은 준비 중입니다'})
+    
+    else:
+        thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
+        thread.daemon = True
+        thread.start()
     
     def generate():
         while True:
@@ -410,6 +419,7 @@ def check_status():
                 yield f"data: {json.dumps({'type': 'ping'})}\n\n"
     
     return Response(generate(), mimetype='text/event-stream')
+
 
 @app.route('/upload_excel', methods=['POST'])
 def upload_excel():
@@ -579,75 +589,100 @@ def search_kream_product():
 
 @app.route('/start_kream_search', methods=['POST'])
 def start_kream_search():
+    """크림 검색 시작 - 인라인 방식"""
     try:
+        if kream_search is None:
+            return jsonify({
+                'success': False, 
+                'error': 'kream_search 모듈이 로드되지 않았습니다.'
+            }), 500
+        
         data = request.json
         product_codes = data.get('product_codes', [])
         
         if not product_codes:
-            return jsonify({'success': False, 'error': '검색할 상품이 없습니다'})
+            return jsonify({'success': False, 'error': '상품 코드가 없습니다'})
         
-        if kream_search is None:
-            return jsonify({'success': False, 'error': 'kream_search 모듈을 찾을 수 없습니다'})
-        
+        # Task ID 생성
         task_id = str(uuid.uuid4())
-        progress_queue = queue.Queue()
         
-        kream_search_tasks[task_id] = {
-            'status': 'running',
-            'queue': progress_queue,
+        # 글로벌 딕셔너리에 작업 등록
+        if not hasattr(app, 'kream_tasks'):
+            app.kream_tasks = {}
+        
+        app.kream_tasks[task_id] = {
             'product_codes': product_codes,
-            'total': len(product_codes),
-            'current': 0
+            'status': 'pending'
         }
-        
-        thread = threading.Thread(
-            target=kream_search.background_kream_search,
-            args=(task_id, product_codes, progress_queue)
-        )
-        thread.daemon = True
-        thread.start()
         
         return jsonify({
             'success': True,
             'task_id': task_id,
             'total_products': len(product_codes)
         })
+        
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+
+
+
+# /stop_kream_search 함수 바로 아래에 추가:
 
 @app.route('/kream_search_progress/<task_id>')
 def kream_search_progress(task_id):
+    """크림 검색 진행 상황 SSE"""
     def generate():
-        if task_id not in kream_search_tasks:
-            yield f"event: error\ndata: {json.dumps({'error': 'Task not found'})}\n\n"
-            return
-        
-        task = kream_search_tasks[task_id]
-        progress_queue = task['queue']
-        
         try:
-            while True:
+            # Task 확인
+            if not hasattr(app, 'kream_tasks') or task_id not in app.kream_tasks:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Task not found'})}\n\n"
+                return
+            
+            task = app.kream_tasks[task_id]
+            product_codes = task['product_codes']
+            total = len(product_codes)
+            
+            # 시작 로그
+            yield f"data: {json.dumps({'type': 'log', 'message': f'크림 검색 시작: {total}개', 'level': 'info'})}\n\n"
+            
+            # 상품별 검색
+            for idx, product_code in enumerate(product_codes, 1):
                 try:
-                    message = progress_queue.get(timeout=30)
-                except queue.Empty:
-                    yield f": keep-alive\n\n"
-                    continue
-                
-                event = message.get('event', 'message')
-                data = message.get('data', {})
-                
-                yield f"event: {event}\ndata: {json.dumps(data)}\n\n"
-                
-                if event in ('complete', 'error'):
-                    break
-        except GeneratorExit:
-            pass
+                    # 진행률
+                    yield f"data: {json.dumps({'type': 'progress', 'current': idx, 'total': total})}\n\n"
+                    
+                    # 로그
+                    yield f"data: {json.dumps({'type': 'log', 'message': f'[{idx}/{total}] {product_code} 검색 중...', 'level': 'info'})}\n\n"
+                    
+                    # ✅ 실제 크림 검색 실행
+                    result = kream_search.search_kream_product_detail(product_code)
+                    
+                    # 결과 전송
+                    yield f"data: {json.dumps({'product_code': product_code, 'result': result})}\n\n"
+                    
+                    # 딜레이
+                    time.sleep(0.5)
+                    
+                except Exception as e:
+                    yield f"data: {json.dumps({'type': 'log', 'message': f'❌ {product_code} 검색 실패: {str(e)}', 'level': 'error'})}\n\n"
+            
+            # 완료
+            yield f"event: complete\ndata: {json.dumps({'total': total, 'message': f'크림 검색 완료: {total}개'})}\n\n"
+            
+            # Task 삭제
+            if task_id in app.kream_tasks:
+                del app.kream_tasks[task_id]
+            
+        except Exception as e:
+            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
     
     return Response(
         stream_with_context(generate()),
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
+
 
 @app.route('/export_kream_to_excel', methods=['POST'])
 def export_kream_to_excel():
