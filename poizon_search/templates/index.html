@@ -965,44 +965,39 @@
     <div class="mode-selector">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
       <div class="mode-buttons">
-        <button class="mode-btn" id="modeKeyword" onclick="selectMode('keyword')" disabled>
-          <span class="mode-icon">🔍</span>
-          <span class="mode-text">키워드 검색</span>
-        </button>
-        <button class="mode-btn coming-soon-btn" 
-                id="modePrice" 
-                data-coming-soon="true"
-                onclick="event.preventDefault(); alert('💰 거래금액 높은 순 기능은 준비 중입니다');" 
-                disabled 
-                style="opacity:0.4; cursor:not-allowed; pointer-events:auto;">
-          <span class="mode-icon">💰</span>
-          <span class="mode-text">거래금액 높은 순</span>
-          <span style="font-size:10px; color:#999; display:block; margin-top:2px;">🔒 준비 중</span>
-        </button>
-        <button class="mode-btn coming-soon-btn" 
-                id="modeGrowth" 
-                data-coming-soon="true"
-                onclick="event.preventDefault(); alert('📈 거래증가 빠른 순 기능은 준비 중입니다');" 
-                disabled 
-                style="opacity:0.4; cursor:not-allowed; pointer-events:auto;">
-          <span class="mode-icon">📈</span>
-          <span class="mode-text">거래증가 빠른 순</span>
-          <span style="font-size:10px; color:#999; display:block; margin-top:2px;">🔒 준비 중</span>
-        </button>
-        <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
-          <span class="mode-icon">📋</span>
-          <span class="mode-text">리스트 비교</span>
-        </button>
+        <button class="mode-btn" id="modeKream" onclick="selectMode('kream')" disabled>
+            <span class="mode-icon">🛒</span>
+            <span class="mode-text">크림 검색</span>
+          </button>
+          
+          <button class="mode-btn" id="modePoizon" onclick="selectMode('poizon')" disabled>
+            <span class="mode-icon">🟣</span>
+            <span class="mode-text">포이즌 검색</span>
+          </button>
+          
+          <button class="mode-btn" id="modeMusinsa" onclick="selectMode('musinsa')" disabled>
+            <span class="mode-icon">🟤</span>
+            <span class="mode-text">무신사 검색</span>
+          </button>
+          
+          <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
+            <span class="mode-icon">📋</span>
+            <span class="mode-text">리스트 비교</span>
+          </button>
 
-        <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
-          <span class="mode-icon">📅</span>
-          <span class="mode-text">스케줄러</span>
-        </button>
-        <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
-          <span class="mode-icon">⚙️</span>
-          <span class="mode-text">설정</span>
-        </button>
-        </div>
+          <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
+            <span class="mode-icon">📅</span>
+            <span class="mode-text">스케줄러</span>
+          </button>
+          
+          <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
+            <span class="mode-icon">⚙️</span>
+            <span class="mode-text">설정</span>
+          </button>
+
+
+
+      </div>
     </div>
 
     <div class="input-grid">
@@ -1201,7 +1196,7 @@
     let idleTimer = null;
     let pageSize = 20;
     let currentPage = 1;
-    let selectedMode = 'keyword';
+    let selectedMode = 'poizon';
 
     // 모드별 테이블 헤더 설정
     function updateTableHeader(mode) {
@@ -2011,11 +2006,17 @@
         document.getElementById('uploadLabel').style.display = 'none';
       }
       
-      const modeText = mode === 'keyword' ? '키워드 검색' : 
-                       mode === 'price' ? '거래금액 높은 순' : 
-                       mode === 'growth' ? '거래증가 빠른 순' : 
-                       '리스트 비교';
-      addLog(`📊 수집 모드 선택: ${modeText}`, 'info');
+        const modeNames = {
+          'kream': '🛒 크림 검색',
+          'poizon': '🟣 포이즌 검색',
+          'musinsa': '🟤 무신사 검색',
+          'compare': '📋 리스트 비교',
+          'scheduler': '📅 스케줄러',
+          'settings': '⚙️ 설정'
+        };
+
+        const modeText = modeNames[mode] || mode;
+        addLog(`📊 수집 모드 선택: ${modeText}`, 'info');
     }
 
     // ==========================================
@@ -2605,7 +2606,7 @@
               document.getElementById('keyword').disabled = false;
               
               // 기본 모드 선택 (키워드 검색)
-              selectMode('keyword');
+              selectMode('poizon');
               
               document.getElementById('maxPages').disabled = false;
               document.getElementById('startBtn').disabled = false;

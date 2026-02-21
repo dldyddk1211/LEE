@@ -374,11 +374,22 @@ def check_status():
         'remaining_minutes': remaining_minutes
     })
 
-@app.route('/start')
-def start():
-    keyword = request.args.get('keyword', '나이키')
-    max_pages = int(request.args.get('max_pages', 20))
-    skip_login = request.args.get('skip_login', 'false').lower() == 'true'
+    @app.route('/start')
+    def start():
+        keyword = request.args.get('keyword', '나이키')
+        max_pages = int(request.args.get('max_pages', 20))
+        skip_login = request.args.get('skip_login', 'false').lower() == 'true'
+        mode = request.args.get('mode', 'poizon')  # ✅ 기본값
+        
+        # ✅ 포이즌만 실행
+        if mode == 'poizon':
+            thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
+            thread.daemon = True
+            thread.start()
+        elif mode == 'kream':
+            log_queue.put({'type': 'error', 'message': '크림 검색 기능은 준비 중입니다'})
+        elif mode == 'musinsa':
+            log_queue.put({'type': 'error', 'message': '무신사 검색 기능은 준비 중입니다'})
     
     while not log_queue.empty():
         log_queue.get()
