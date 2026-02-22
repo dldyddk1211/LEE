@@ -512,6 +512,18 @@ def download(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/shutdown_kream_browser')
+def shutdown_kream_browser():
+    """크림 브라우저 종료"""
+    try:
+        if kream_search:
+            kream_search.close_kream_browser()
+            return jsonify({'success': True, 'message': '크림 브라우저 종료 완료'})
+        else:
+            return jsonify({'success': False, 'error': 'kream_search 모듈 없음'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/shutdown_browser')
 def shutdown_browser():
     try:

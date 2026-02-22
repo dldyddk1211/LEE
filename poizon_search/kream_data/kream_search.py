@@ -50,6 +50,50 @@ _page = None
 
 ############################
 
+def close_kream_browser():
+    """크림 검색 브라우저 완전 종료"""
+    global _playwright, _browser, _context, _page
+    
+    print("🔄 크림 브라우저 종료 시작...")
+    
+    # 페이지 종료
+    if _page:
+        try:
+            _page.close()
+            print("  ✓ 페이지 종료")
+        except Exception as e:
+            print(f"  ⚠️ 페이지 종료 오류: {e}")
+        _page = None
+    
+    # 컨텍스트 종료
+    if _context:
+        try:
+            _context.close()
+            print("  ✓ 컨텍스트 종료")
+        except Exception as e:
+            print(f"  ⚠️ 컨텍스트 종료 오류: {e}")
+        _context = None
+    
+    # 브라우저 종료
+    if _browser:
+        try:
+            _browser.close()
+            print("  ✓ 브라우저 종료")
+        except Exception as e:
+            print(f"  ⚠️ 브라우저 종료 오류: {e}")
+        _browser = None
+    
+    # Playwright 종료
+    if _playwright:
+        try:
+            _playwright.stop()
+            print("  ✓ Playwright 종료")
+        except Exception as e:
+            print(f"  ⚠️ Playwright 종료 오류: {e}")
+        _playwright = None
+    
+    print("✅ 크림 브라우저 완전 종료 완료")
+    time.sleep(0.2)  # 안전 대기
 
 def wait_stable(page, ms=600):
     """페이지 안정화 대기"""
@@ -62,6 +106,7 @@ def wait_stable(page, ms=600):
 
 def safe_screenshot(page, name: str):
     """스크린샷 저장"""
+    return
     shots_dir = "shots_kream"
     os.makedirs(shots_dir, exist_ok=True)
     path = os.path.join(shots_dir, f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{name}.png")
@@ -531,11 +576,69 @@ def close_browser():
 
 
 def search_kream_product_detail(product_code):
-    """크림에서 상품 검색 - background_kream_search 로직 적용"""
+    """크림에서 상품 검색 - 완전 독립 실행 버전"""
+    
+    # ✅ 전역 변수 사용 안함! 로컬 변수만 사용!
+    local_playwright = None
+    local_browser = None
+    local_context = None
+    local_page = None
+    
     try:
         log(f"\n🔍 크림 검색: {product_code}", 'info')
         
-        page = get_browser()
+        # ✅ 완전히 새로운 Playwright 인스턴스 생성
+        from playwright.sync_api import sync_playwright
+        
+        local_playwright = sync_playwright().start()
+        
+        local_browser = local_playwright.chromium.launch(
+            headless=False,  # HEADLESS 설정값 사용
+            channel='chrome',
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--disable-dev-shm-usage',
+                '--no-sandbox'
+            ]
+        )
+        
+        local_context = local_browser.new_context(
+            viewport={'width': 1920, 'height': 1080},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            extra_http_headers={
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Referer': 'https://kream.co.kr/',
+                'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"'
+            }
+        )
+        
+        # 쿠키 로드
+        if os.path.exists(COOKIE_FILE):
+            try:
+                with open(COOKIE_FILE, 'r', encoding='utf-8') as f:
+                    cookies = json.load(f)
+                    local_context.add_cookies(cookies)
+                    log("  ✓ 쿠키 로드 완료", 'success')
+            except Exception as e:
+                log(f"  ⚠️ 쿠키 로드 실패: {e}", 'warning')
+        
+        local_page = local_context.new_page()
+        
+        # 봇 탐지 우회
+        local_page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+            });
+            Object.defineProperty(navigator, 'plugins', {
+                get: () => [1, 2, 3, 4, 5]
+            });
+            Object.defineProperty(navigator, 'languages', {
+                get: () => ['ko-KR', 'ko', 'en-US', 'en']
+            });
+        """)
         
         # 랜덤 딜레이
         delay = random.uniform(1.0, 2.0)
@@ -547,7 +650,7 @@ def search_kream_product_detail(product_code):
         log(f"  → URL: {search_url}")
         
         # 페이지 이동
-        page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
+        local_page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
         time.sleep(2)
         
         log(f"  ✅ 검색 페이지 이동 완료", 'success')
@@ -555,17 +658,16 @@ def search_kream_product_detail(product_code):
         # 검색 결과 확인
         try:
             log("  → 검색 결과 대기 중...", 'info')
-            page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
+            local_page.wait_for_selector('.product_card, a[href*="/products/"]', timeout=10000)
             log("  ✅ 검색 결과 발견!", 'success')
         except Exception as e:
             log(f"  ❌ 검색 결과 없음: {e}", 'error')
-            safe_screenshot(page, f"no_result_{product_code}")
             return {'success': False, 'error': '검색 결과 없음'}
         
         # 첫 번째 상품 클릭
         try:
             log("  → 첫 번째 상품 클릭...", 'info')
-            first_product = page.locator('a.product_card[href*="/products/"]').first
+            first_product = local_page.locator('a.product_card[href*="/products/"]').first
             
             if first_product.count() == 0:
                 log(f"  ❌ 상품 카드 없음", 'error')
@@ -576,7 +678,7 @@ def search_kream_product_detail(product_code):
             first_product.click()
             time.sleep(2)
             
-            current_url = page.url
+            current_url = local_page.url
             product_id = current_url.split('/products/')[-1].split('?')[0] if '/products/' in current_url else None
             
             log(f"  ✅ 상품 페이지 이동: {current_url}", 'success')
@@ -585,14 +687,13 @@ def search_kream_product_detail(product_code):
             
         except Exception as e:
             log(f"  ❌ 상품 클릭 실패: {e}", 'error')
-            safe_screenshot(page, f"click_fail_{product_code}")
             return {'success': False, 'error': '상품 클릭 실패'}
         
         # 모델번호 확인
         try:
             log(f"  → 모델번호 확인 중...", 'info')
             
-            model_info = page.evaluate("""
+            model_info = local_page.evaluate("""
                 () => {
                     let model_numbers = [];
                     let full_text = '';
@@ -664,7 +765,6 @@ def search_kream_product_detail(product_code):
                 log(f"  ❌ 모델번호 불일치", 'warning')
                 log(f"     찾는 번호: {product_code}", 'warning')
                 log(f"     페이지 번호: {', '.join(model_numbers) if model_numbers else '없음'}", 'warning')
-                safe_screenshot(page, f"mismatch_{product_code}")
                 
                 return {
                     'success': False,
@@ -676,14 +776,13 @@ def search_kream_product_detail(product_code):
             
         except Exception as e:
             log(f"  ❌ 모델번호 확인 실패: {e}", 'error')
-            safe_screenshot(page, f"model_error_{product_code}")
             return {'success': False, 'error': '모델번호 확인 실패'}
         
         # 거래 정보 추출
         try:
             log(f"  → 거래 정보 추출 중...", 'info')
             
-            trade_info = page.evaluate("""
+            trade_info = local_page.evaluate("""
                 () => {
                     let prices = [];
                     let trade_dates = [];
@@ -742,9 +841,8 @@ def search_kream_product_detail(product_code):
                 log(f"  ✅ 거래 정보 추출 완료!", 'success')
                 log(f"     💰 평균가: {average_price}", 'success')
                 log(f"     📦 최근 거래: {sales_count}", 'success')
-                safe_screenshot(page, f"success_{product_code}")
                 
-                return {
+                result = {
                     'success': True,
                     'model_number': matched_model,
                     'product_id': product_id,
@@ -752,9 +850,10 @@ def search_kream_product_detail(product_code):
                     'average_price': average_price,
                     'sales_count': sales_count
                 }
+                
+                return result
             else:
                 log(f"  ⚠️ 거래 정보 없음", 'warning')
-                safe_screenshot(page, f"no_trade_{product_code}")
                 
                 return {
                     'success': False,
@@ -766,7 +865,6 @@ def search_kream_product_detail(product_code):
             
         except Exception as e:
             log(f"  ❌ 거래 정보 추출 실패: {e}", 'error')
-            safe_screenshot(page, f"trade_error_{product_code}")
             return {'success': False, 'error': '거래 정보 추출 실패'}
         
     except Exception as e:
@@ -774,6 +872,39 @@ def search_kream_product_detail(product_code):
         import traceback
         traceback.print_exc()
         return {'success': False, 'error': str(e)}
+    
+    finally:
+        # ✅✅✅ 반드시 정리! (역순으로!) ✅✅✅
+        try:
+            if local_page:
+                local_page.close()
+                local_page = None
+        except Exception as e:
+            print(f"⚠️ Page 정리 오류: {e}")
+        
+        try:
+            if local_context:
+                local_context.close()
+                local_context = None
+        except Exception as e:
+            print(f"⚠️ Context 정리 오류: {e}")
+        
+        try:
+            if local_browser:
+                local_browser.close()
+                local_browser = None
+        except Exception as e:
+            print(f"⚠️ Browser 정리 오류: {e}")
+        
+        try:
+            if local_playwright:
+                local_playwright.stop()
+                local_playwright = None
+        except Exception as e:
+            print(f"⚠️ Playwright 정리 오류: {e}")
+        
+        # 안전 딜레이
+        time.sleep(0.1)
 
 
 
