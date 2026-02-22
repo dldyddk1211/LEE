@@ -1232,7 +1232,6 @@
         });
     }
 
-
     window.onload = () => {
       addLog('👋 POIZON 데이터 수집기 시작!', 'info');
       setTimeout(() => performLogin(), 1000);
@@ -1289,6 +1288,7 @@
             
             let updatedCount = 0;
             
+            // ===== 메시지 이벤트 =====
             kreamEventSource.addEventListener('message', (event) => {
               try {
                 if (kreamSearchStopped) {
@@ -1351,7 +1351,8 @@
               }
             });
             
-            kreamEventSource.addEventListener('complete', () => {
+            // ===== 완료 이벤트 =====
+            kreamEventSource.addEventListener('complete', async () => {
               addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
               kreamEventSource.close();
               kreamSearchEventSource = null;
@@ -1362,8 +1363,38 @@
               document.getElementById('resetBtn').style.display = 'block';
               
               updateProgress(0, 100);
+              
+              // ✅ 크림 검색 결과를 스케줄러에 저장
+              try {
+                addLog('💾 크림 검색 결과 저장 중...', 'info');
+                
+                const saveResponse = await fetch('/api/scheduler/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    keyword: `크림검색_${productCodes.length}개`,
+                    mode: 'kream',
+                    collected_count: updatedCount,
+                    kream_count: updatedCount,
+                    duration_seconds: 0,
+                    data: collectedData.filter(item => item.크림평균가 && item.크림평균가 !== '-')
+                  })
+                });
+                
+                const saveResult = await saveResponse.json();
+                
+                if (saveResult.success) {
+                  addLog(`✅ 스케줄러 저장 완료: ${saveResult.task_id}`, 'success');
+                } else {
+                  addLog(`⚠️ 스케줄러 저장 실패: ${saveResult.error}`, 'warning');
+                }
+              } catch (error) {
+                console.error('스케줄러 저장 오류:', error);
+                addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
+              }
             });
             
+            // ===== 에러 이벤트 =====
             kreamEventSource.addEventListener('error', () => {
               addLog('❌ 연결 오류', 'error');
               kreamEventSource.close();
@@ -1385,6 +1416,7 @@
         });
       }
       
+        
       document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
         pageSize = parseInt(e.target.value, 10) || 20;
         currentPage = 1;
@@ -1401,7 +1433,10 @@
         renderTable();
       });
     };
-  // ==========================================
+
+
+
+    // ==========================================
   // 스케줄러에서 데이터 불러오기
   // ==========================================
 
