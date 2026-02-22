@@ -902,7 +902,7 @@
       }
       
       if (mode === 'scheduler') {
-        window.open('/scheduler', 'schedulerPopup', 'width=1200,height=800');
+        window.open('/api/scheduler/page', 'schedulerPopup', 'width=1200,height=800');  // ✅ 올바른 경로
         return;
       }
       
@@ -1401,6 +1401,49 @@
         renderTable();
       });
     };
+  // ==========================================
+  // 스케줄러에서 데이터 불러오기
+  // ==========================================
+
+  window.loadHistoryData = function(data, keyword) {
+    console.log('📋 스케줄러에서 데이터 로드:', keyword, data.length + '개');
+    
+    // 데이터 설정
+    collectedData = data;
+    
+    // 모드 감지 (keyword에 '리스트비교'가 포함되어 있으면 compare 모드)
+    if (keyword && keyword.includes('리스트비교')) {
+      selectedMode = 'compare';
+    } else {
+      selectedMode = 'poizon';
+    }
+    
+    // 테이블 헤더 업데이트
+    updateTableHeader(selectedMode);
+    
+    // 테이블 렌더링
+    currentPage = 1;
+    renderTable();
+    
+    // 결과 섹션 표시
+    document.getElementById('resultSection').classList.add('active');
+    
+    // 로그 추가
+    addLog(`✅ 스케줄러에서 "${keyword}" 데이터 ${data.length}개 로드 완료`, 'success');
+    
+    // 모드 버튼 활성화
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    const modeBtn = selectedMode === 'compare' ? 'modeCompare' : 'modePoizon';
+    document.getElementById(modeBtn).classList.add('active');
+    
+    // 검색 옵션 표시 (poizon 모드인 경우)
+    if (selectedMode === 'poizon') {
+      document.getElementById('resultSearchOptions').style.display = 'block';
+    }
+    
+    console.log('✅ 데이터 로드 완료!');
+  };
+
   </script>
 </body>
 </html>

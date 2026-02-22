@@ -17,6 +17,7 @@ import uuid
 import time
 from datetime import datetime
 
+
 # 전역 변수
 kream_search_tasks = {}
 kream_search = None
@@ -25,6 +26,8 @@ kream_search = None
 try:
     from kream_data import kream_search
     print("✅ kream_search 모듈 로드 성공")
+
+
 except ImportError:
     try:
         import kream_data.kream_search as kream_search
@@ -42,6 +45,18 @@ except ImportError:
                 kream_search = None
 
 app = Flask(__name__)
+
+# ✅ 스케줄러 Blueprint 등록
+try:
+    from scheduler_data.scheduler_api import scheduler_bp, save_task_to_history
+    app.register_blueprint(scheduler_bp)
+    print("✅ 스케줄러 등록 성공")
+except Exception as e:
+    print(f"⚠️ 스케줄러 로드 실패: {e}")
+    # 대비용 더미 함수
+    def save_task_to_history(task_data):
+        print("⚠️ 스케줄러 없이 실행 중")
+        return None
 
 # 캐시 비활성화
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
@@ -144,8 +159,8 @@ def run_scraper(keyword, max_pages, skip_login=False):
     global result_data, stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
     
     is_working = True
-    import time
-    work_start_time = time.time()
+    import time as time_module
+    work_start_time = time_module.time()
     work_type = 'scraping'
     estimated_items = max_pages
     current_items = 0
@@ -162,6 +177,32 @@ def run_scraper(keyword, max_pages, skip_login=False):
         )
         
         if result.get('success'):
+            # ✅ 스케줄러에 저장!
+            try:
+                end_time = time_module.time()
+                duration_seconds = int(end_time - work_start_time)
+                
+                task_data = {
+                    'keyword': keyword,
+                    'mode': 'keyword',
+                    'collected_count': result.get('total_items', 0),
+                    'kream_count': 0,
+                    'duration_seconds': duration_seconds,
+                    'data': result.get('data', [])
+                }
+                
+                task_id = save_task_to_history(task_data)
+                if task_id:
+                    print(f"💾 스케줄러 저장 완료: {task_id}")
+                else:
+                    print(f"⚠️ 스케줄러 저장 실패")
+                
+            except Exception as e:
+                print(f"⚠️ 스케줄러 저장 오류: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            # 기존 complete 메시지
             log_queue.put({
                 'type': 'complete',
                 'total_items': result.get('total_items', 0),
@@ -189,11 +230,12 @@ def run_scraper(keyword, max_pages, skip_login=False):
         current_items = 0
 
 def run_comparison(products):
+    """리스트 비교 작업"""
     global result_data, stop_flag, current_browser, is_working, work_start_time, work_type, estimated_items, current_items
     
     is_working = True
-    import time
-    work_start_time = time.time()  # 시작 시간 저장
+    import time as time_module
+    work_start_time = time_module.time()
     work_type = 'comparison'
     estimated_items = len(products)
     current_items = 0
@@ -205,9 +247,9 @@ def run_comparison(products):
         result = run_excel_comparison(products, callback=log_callback)
         
         if result.get('success'):
-            # ✅ 작업 완료 - 스케줄러에 저장!
+            # ✅ 스케줄러에 저장!
             try:
-                end_time = time.time()
+                end_time = time_module.time()
                 duration_seconds = int(end_time - work_start_time)
                 
                 task_data = {
@@ -216,16 +258,21 @@ def run_comparison(products):
                     'collected_count': result.get('total_items', 0),
                     'kream_count': 0,
                     'duration_seconds': duration_seconds,
-                    'data': result.get('data', [])
+                    'data': result.get('results', [])  # results 필드 사용
                 }
                 
-                task_id = save_task_history(task_data)
-                print(f"💾 스케줄러 저장 완료: {task_id}")
+                task_id = save_task_to_history(task_data)
+                if task_id:
+                    print(f"💾 스케줄러 저장 완료: {task_id}")
+                else:
+                    print(f"⚠️ 스케줄러 저장 실패")
                 
             except Exception as e:
-                print(f"⚠️ 스케줄러 저장 실패: {e}")
+                print(f"⚠️ 스케줄러 저장 오류: {e}")
+                import traceback
+                traceback.print_exc()
             
-            # 기존 코드
+            # 기존 complete 메시지
             log_queue.put({
                 'type': 'complete',
                 'total_items': result.get('total_items', 0),
@@ -250,61 +297,6 @@ def run_comparison(products):
         work_type = None
         estimated_items = 0
         current_items = 0
-
-# ==========================================
-# 작업 기록 관리
-# ==========================================
-
-def save_task_history(task_data):
-    """작업 기록 저장 - 방어 코드 강화"""
-    history_file = 'task_history.json'
-    
-    try:
-        # ✅ task_data 유효성 검사
-        if not isinstance(task_data, dict):
-            print(f"⚠️ task_data가 dict가 아님: {type(task_data)}")
-            return None
-        
-        # 기존 기록 로드
-        if os.path.exists(history_file):
-            try:
-                with open(history_file, 'r', encoding='utf-8') as f:
-                    history = json.load(f)
-            except json.JSONDecodeError as e:
-                print(f"⚠️ task_history.json 파싱 오류: {e}")
-                history = []
-        else:
-            history = []
-        
-        # ✅ 안전한 데이터 추출
-        record = {
-            'id': f"task_{int(datetime.now().timestamp())}",
-            'timestamp': datetime.now().isoformat(),
-            'keyword': str(task_data.get('keyword', '알 수 없음')),
-            'mode': str(task_data.get('mode', 'keyword')),
-            'collected_count': int(task_data.get('collected_count', 0)),
-            'kream_count': int(task_data.get('kream_count', 0)),
-            'duration_seconds': int(task_data.get('duration_seconds', 0)),
-            'data': task_data.get('data', []) if isinstance(task_data.get('data'), list) else [],
-            'status': 'completed'
-        }
-        
-        # 리스트에 추가
-        history.insert(0, record)
-        history = history[:50]  # 최근 50개만 유지
-        
-        # 파일 저장
-        with open(history_file, 'w', encoding='utf-8') as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-        
-        print(f"✅ 작업 기록 저장 성공: {record['id']}")
-        return record['id']
-        
-    except Exception as e:
-        print(f"❌ save_task_history 오류: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
 
 # ==========================================
 # 라우트
@@ -798,60 +790,9 @@ def start_sourcing():
     return jsonify({
         'success': True,
         'session_id': session_id,
-        'popup_url': f'/kream_popup?session_id={session_id}'  # ✅ 기존 크림 팝업!
+        'popup_url': f'/kream_popup?session_id={session_id}'
     })
 
-
-# ==========================================
-# 스케줄러
-# ==========================================
-
-@app.route('/scheduler')
-def scheduler_page():
-    return render_template('scheduler.html')
-
-@app.route('/api/scheduler/history')
-def get_task_history():
-    try:
-        if os.path.exists('task_history.json'):
-            with open('task_history.json', 'r', encoding='utf-8') as f:
-                history = json.load(f)
-        else:
-            history = []
-        
-        return jsonify({'success': True, 'records': history})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route('/api/scheduler/task/<task_id>')
-def get_task_data(task_id):
-    try:
-        with open('task_history.json', 'r', encoding='utf-8') as f:
-            history = json.load(f)
-        
-        task = next((t for t in history if t['id'] == task_id), None)
-        
-        if task:
-            return jsonify({'success': True, 'task': task})
-        else:
-            return jsonify({'success': False, 'error': '작업을 찾을 수 없습니다'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route('/api/scheduler/delete/<task_id>', methods=['POST'])
-def delete_task(task_id):
-    try:
-        with open('task_history.json', 'r', encoding='utf-8') as f:
-            history = json.load(f)
-        
-        history = [t for t in history if t['id'] != task_id]
-        
-        with open('task_history.json', 'w', encoding='utf-8') as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-        
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
 
 # ==========================================
 # 서버 시작
