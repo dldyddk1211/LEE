@@ -632,53 +632,64 @@ def start_kream_search():
 
 
 # /stop_kream_search 함수 바로 아래에 추가:
-
 @app.route('/kream_search_progress/<task_id>')
 def kream_search_progress(task_id):
     """크림 검색 진행 상황 SSE"""
+    
+    if not hasattr(app, 'kream_tasks') or task_id not in app.kream_tasks:
+        def error_gen():
+            yield f"event: error\ndata: {json.dumps({'error': 'Task not found'})}\n\n"
+        return Response(error_gen(), mimetype='text/event-stream')
+    
+    task = app.kream_tasks[task_id]
+    product_codes = task['product_codes']
+    
+    # ✅ 진행 상황 큐 생성
+    progress_queue = queue.Queue()
+    
+    # ✅ 백그라운드 스레드 시작
+    def run_background():
+        try:
+            kream_search.background_kream_search(task_id, product_codes, progress_queue)
+        except Exception as e:
+            print(f"❌ 백그라운드 검색 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            progress_queue.put({'event': 'error', 'data': {'error': str(e)}})
+    
+    thread = threading.Thread(target=run_background)
+    thread.daemon = True
+    thread.start()
+    
+    # ✅ SSE 스트림
     def generate():
         try:
-            # Task 확인
-            if not hasattr(app, 'kream_tasks') or task_id not in app.kream_tasks:
-                yield f"data: {json.dumps({'type': 'error', 'message': 'Task not found'})}\n\n"
-                return
-            
-            task = app.kream_tasks[task_id]
-            product_codes = task['product_codes']
-            total = len(product_codes)
-            
-            # 시작 로그
-            yield f"data: {json.dumps({'type': 'log', 'message': f'크림 검색 시작: {total}개', 'level': 'info'})}\n\n"
-            
-            # 상품별 검색
-            for idx, product_code in enumerate(product_codes, 1):
+            while True:
                 try:
-                    # 진행률
-                    yield f"data: {json.dumps({'type': 'progress', 'current': idx, 'total': total})}\n\n"
+                    # 큐에서 메시지 가져오기 (30초 타임아웃)
+                    msg = progress_queue.get(timeout=30)
                     
-                    # 로그
-                    yield f"data: {json.dumps({'type': 'log', 'message': f'[{idx}/{total}] {product_code} 검색 중...', 'level': 'info'})}\n\n"
+                    event_type = msg.get('event', 'message')
+                    event_data = msg.get('data', {})
                     
-                    # ✅ 실제 크림 검색 실행
-                    result = kream_search.search_kream_product_detail(product_code)
+                    # SSE 형식으로 전송
+                    yield f"event: {event_type}\ndata: {json.dumps(event_data, ensure_ascii=False)}\n\n"
                     
-                    # 결과 전송
-                    yield f"data: {json.dumps({'product_code': product_code, 'result': result})}\n\n"
+                    # 완료 또는 에러 시 종료
+                    if event_type in ['complete', 'error']:
+                        # Task 삭제
+                        if task_id in app.kream_tasks:
+                            del app.kream_tasks[task_id]
+                        break
                     
-                    # 딜레이
-                    time.sleep(0.5)
+                except queue.Empty:
+                    # 타임아웃 시 핑 전송
+                    yield f"event: ping\ndata: {json.dumps({'status': 'alive'})}\n\n"
                     
-                except Exception as e:
-                    yield f"data: {json.dumps({'type': 'log', 'message': f'❌ {product_code} 검색 실패: {str(e)}', 'level': 'error'})}\n\n"
-            
-            # 완료
-            yield f"event: complete\ndata: {json.dumps({'total': total, 'message': f'크림 검색 완료: {total}개'})}\n\n"
-            
-            # Task 삭제
-            if task_id in app.kream_tasks:
-                del app.kream_tasks[task_id]
-            
         except Exception as e:
+            print(f"❌ SSE 스트림 오류: {e}")
+            import traceback
+            traceback.print_exc()
             yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
     
     return Response(
@@ -686,7 +697,6 @@ def kream_search_progress(task_id):
         mimetype='text/event-stream',
         headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
-
 
 @app.route('/export_kream_to_excel', methods=['POST'])
 def export_kream_to_excel():

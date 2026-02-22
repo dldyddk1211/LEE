@@ -1288,42 +1288,63 @@
             
             let updatedCount = 0;
             
-            // ===== 메시지 이벤트 =====
+            // ===== 1. MESSAGE 이벤트 (일반 메시지) =====
             kreamEventSource.addEventListener('message', (event) => {
               try {
-                if (kreamSearchStopped) {
-                  addLog('⏹️ 크림 검색 중단됨', 'warning');
-                  kreamEventSource.close();
-                  kreamSearchEventSource = null;
-                  
-                  resultBtn.disabled = false;
-                  resultBtn.textContent = '🔍 검색';
-                  document.getElementById('stopBtn').style.display = 'none';
-                  document.getElementById('resetBtn').style.display = 'block';
-                  
-                  return;
-                }
+                if (kreamSearchStopped) return;
                 
                 const data = JSON.parse(event.data);
+                console.log('📩 message 이벤트:', data);
                 
                 if (data.message) {
                   addLog(data.message, data.level || 'info');
                 }
+              } catch (e) {
+                console.error('message 파싱 오류:', e);
+              }
+            });
+            
+            // ===== 2. PROGRESS 이벤트 (진행률) =====
+            kreamEventSource.addEventListener('progress', (event) => {
+              try {
+                if (kreamSearchStopped) return;
                 
-                if (data.progress !== undefined) {
-                  updateProgress(data.current || 0, data.total || productCodes.length);
+                const data = JSON.parse(event.data);
+                console.log('📊 progress 이벤트:', data);
+                
+                if (data.current !== undefined && data.total !== undefined) {
+                  updateProgress(data.current, data.total);
+                  addLog(`⏳ 진행 중: ${data.current}/${data.total}`, 'info');
                 }
+              } catch (e) {
+                console.error('progress 파싱 오류:', e);
+              }
+            });
+            
+            // ===== 3. RESULT 이벤트 (검색 결과) ✅ 이게 핵심! =====
+            kreamEventSource.addEventListener('result', (event) => {
+              try {
+                if (kreamSearchStopped) return;
                 
-                if (data.product_code && data.result) {
-                  const productCode = data.product_code;
-                  const kreamData = data.result;
+                const data = JSON.parse(event.data);
+                console.log('✅ result 이벤트:', data);
+                
+                const index = data.index;
+                const result = data.result;
+                
+                if (result && result.success && result.kream_data) {
+                  const productCode = productCodes[index];
+                  const kreamData = result.kream_data;
                   
-                  const index = collectedData.findIndex(item => item.상품번호 === productCode);
+                  // collectedData에서 해당 상품 찾기
+                  const itemIndex = collectedData.findIndex(item => item.상품번호 === productCode);
                   
-                  if (index !== -1 && kreamData.success) {
-                    collectedData[index].크림평균가 = kreamData.average_price || '-';
-                    collectedData[index].크림판매량 = kreamData.sales_count || 0;
+                  if (itemIndex !== -1) {
+                    // 크림 데이터 업데이트
+                    collectedData[itemIndex].크림평균가 = kreamData.avg_price || '-';
+                    collectedData[itemIndex].크림판매량 = kreamData.sales || '-';
                     
+                    // 가격 비교 계산
                     const extractPrice = (priceStr) => {
                       if (!priceStr || priceStr === '-' || priceStr === 'N/A') return null;
                       const numStr = String(priceStr).replace(/[^0-9]/g, '');
@@ -1331,72 +1352,117 @@
                       return isNaN(price) ? null : price;
                     };
                     
-                    const chinaPrice = extractPrice(collectedData[index].중국노출);
-                    const kreamPrice = extractPrice(kreamData.average_price);
+                    const chinaPrice = extractPrice(collectedData[itemIndex].중국노출);
+                    const kreamPrice = extractPrice(kreamData.avg_price);
                     
                     if (chinaPrice !== null && kreamPrice !== null) {
-                      collectedData[index].크림비교 = chinaPrice - kreamPrice;
+                      collectedData[itemIndex].크림비교 = chinaPrice - kreamPrice;
                     } else {
-                      collectedData[index].크림비교 = 0;
+                      collectedData[itemIndex].크림비교 = 0;
                     }
                     
                     updatedCount++;
+                    
+                    // ✅ 테이블 즉시 업데이트!
                     renderTable();
                     
-                    addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
+                    addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode} - ${kreamData.avg_price}`, 'success');
                   }
+                } else if (result && !result.success) {
+                  const productCode = productCodes[index];
+                  addLog(`⚠️ [${index + 1}/${productCodes.length}] ${productCode} - ${result.error || '검색 실패'}`, 'warning');
                 }
               } catch (e) {
-                console.error('파싱 오류:', e);
+                console.error('result 파싱 오류:', e);
               }
             });
             
-            // ===== 완료 이벤트 =====
-            kreamEventSource.addEventListener('complete', async () => {
-              addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
-              kreamEventSource.close();
-              kreamSearchEventSource = null;
-              
-              resultBtn.disabled = false;
-              resultBtn.textContent = '🔍 검색';
-              document.getElementById('stopBtn').style.display = 'none';
-              document.getElementById('resetBtn').style.display = 'block';
-              
-              updateProgress(0, 100);
-              
-              // ✅ 크림 검색 결과를 스케줄러에 저장
+            // ===== 4. COMPLETE 이벤트 (완료) =====
+            kreamEventSource.addEventListener('complete', async (event) => {
               try {
-                addLog('💾 크림 검색 결과 저장 중...', 'info');
+                const data = JSON.parse(event.data);
+                console.log('🏁 complete 이벤트:', data);
                 
-                const saveResponse = await fetch('/api/scheduler/save', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
+                addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
+                
+                kreamEventSource.close();
+                kreamSearchEventSource = null;
+                
+                resultBtn.disabled = false;
+                resultBtn.textContent = '🔍 검색';
+                document.getElementById('stopBtn').style.display = 'none';
+                document.getElementById('resetBtn').style.display = 'block';
+                
+                updateProgress(0, 100);
+                
+                // ✅ 스케줄러에 저장
+                addLog('💾 스케줄러에 저장 중...', 'info');
+                
+                try {
+                  const kreamData = collectedData.filter(item => 
+                    item.크림평균가 && item.크림평균가 !== '-' && item.크림평균가 !== 'N/A'
+                  );
+                  
+                  console.log('💾 저장할 데이터:', kreamData.length + '개');
+                  
+                  if (kreamData.length === 0) {
+                    addLog('⚠️ 저장할 크림 데이터가 없습니다', 'warning');
+                    return;
+                  }
+                  
+                  const savePayload = {
                     keyword: `크림검색_${productCodes.length}개`,
                     mode: 'kream',
-                    collected_count: updatedCount,
-                    kream_count: updatedCount,
+                    collected_count: kreamData.length,
+                    kream_count: kreamData.length,
                     duration_seconds: 0,
-                    data: collectedData.filter(item => item.크림평균가 && item.크림평균가 !== '-')
-                  })
-                });
-                
-                const saveResult = await saveResponse.json();
-                
-                if (saveResult.success) {
-                  addLog(`✅ 스케줄러 저장 완료: ${saveResult.task_id}`, 'success');
-                } else {
-                  addLog(`⚠️ 스케줄러 저장 실패: ${saveResult.error}`, 'warning');
+                    data: kreamData
+                  };
+                  
+                  console.log('📤 저장 요청:', savePayload);
+                  
+                  const saveResponse = await fetch('/api/scheduler/save', {
+                    method: 'POST',
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(savePayload)
+                  });
+                  
+                  console.log('📥 저장 응답 상태:', saveResponse.status);
+                  
+                  if (!saveResponse.ok) {
+                    const errorText = await saveResponse.text();
+                    console.error('❌ 저장 실패 응답:', errorText);
+                    throw new Error(`HTTP ${saveResponse.status}: ${errorText}`);
+                  }
+                  
+                  const saveResult = await saveResponse.json();
+                  console.log('✅ 저장 결과:', saveResult);
+                  
+                  if (saveResult.success) {
+                    addLog(`✅ 스케줄러 저장 완료: ${saveResult.task_id}`, 'success');
+                  } else {
+                    addLog(`⚠️ 스케줄러 저장 실패: ${saveResult.error || '알 수 없는 오류'}`, 'warning');
+                  }
+                  
+                } catch (error) {
+                  console.error('❌ 스케줄러 저장 오류:', error);
+                  addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
                 }
-              } catch (error) {
-                console.error('스케줄러 저장 오류:', error);
-                addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
+                
+              } catch (parseError) {
+                console.error('❌ 완료 이벤트 파싱 오류:', parseError);
+                addLog('❌ 완료 데이터 처리 오류', 'error');
               }
             });
             
-            // ===== 에러 이벤트 =====
-            kreamEventSource.addEventListener('error', () => {
+            // ===== 5. ERROR 이벤트 (오류) =====
+            kreamEventSource.addEventListener('error', (event) => {
+              console.error('❌ error 이벤트:', event);
               addLog('❌ 연결 오류', 'error');
+              
               kreamEventSource.close();
               kreamSearchEventSource = null;
               
@@ -1407,7 +1473,9 @@
             });
             
           } catch (error) {
-            addLog('❌ 오류: ' + error, 'error');
+            console.error('❌ 크림 검색 시작 오류:', error);
+            addLog('❌ 오류: ' + error.message, 'error');
+            
             resultBtn.disabled = false;
             resultBtn.textContent = '🔍 검색';
             document.getElementById('stopBtn').style.display = 'none';
@@ -1415,7 +1483,7 @@
           }
         });
       }
-      
+
         
       document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
         pageSize = parseInt(e.target.value, 10) || 20;
