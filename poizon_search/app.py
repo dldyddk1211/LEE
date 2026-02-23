@@ -21,6 +21,8 @@ from datetime import datetime
 # 전역 변수
 kream_search_tasks = {}
 kream_search = None
+musinsa_search = None  # ✅ 전역 변수 추가
+
 
 # kream_search 모듈 import
 try:
@@ -43,6 +45,25 @@ except ImportError:
             except ImportError:
                 print("⚠️ kream_search 모듈을 찾을 수 없습니다")
                 kream_search = None
+
+try:
+    from musinsa_data import musinsa_search
+    print("✅ musinsa_search 모듈 로드 성공")
+except ImportError:
+    try:
+        import musinsa_data.musinsa_search as musinsa_search
+        print("✅ musinsa_search 모듈 로드 성공 (직접 import)")
+    except ImportError:
+        import sys
+        musinsa_data_path = os.path.join(os.path.dirname(__file__), 'musinsa_data')
+        if os.path.exists(musinsa_data_path):
+            sys.path.insert(0, musinsa_data_path)
+            try:
+                import musinsa_search
+                print("✅ musinsa_search 모듈 로드 성공 (sys.path)")
+            except ImportError:
+                print("⚠️ musinsa_search 모듈을 찾을 수 없습니다")
+                musinsa_search = None
 
 app = Flask(__name__)
 
@@ -297,6 +318,75 @@ def run_comparison(products):
         work_type = None
         estimated_items = 0
         current_items = 0
+            
+def run_musinsa_search(keyword, max_pages):
+    """무신사 검색 작업"""
+    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
+    
+    is_working = True
+    import time as time_module
+    work_start_time = time_module.time()
+    work_type = 'musinsa'
+    estimated_items = max_pages * 10
+    current_items = 0
+    stop_flag = False
+    
+    try:
+        result = musinsa_search.search_musinsa_keyword_detail(
+            keyword=keyword,
+            max_items=max_pages * 10,
+            callback=log_callback
+        )
+        
+        if result.get('success'):
+            try:
+                end_time = time_module.time()
+                duration_seconds = int(end_time - work_start_time)
+                
+                task_data = {
+                    'keyword': f'무신사_{keyword}',
+                    'mode': 'musinsa',
+                    'collected_count': result.get('total_items', 0),
+                    'kream_count': 0,
+                    'duration_seconds': duration_seconds,
+                    'data': result.get('results', [])
+                }
+                
+                task_id = save_task_to_history(task_data)
+                if task_id:
+                    print(f"💾 스케줄러 저장 완료: {task_id}")
+                else:
+                    print(f"⚠️ 스케줄러 저장 실패")
+                    
+            except Exception as e:
+                print(f"⚠️ 스케줄러 저장 오류: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            log_queue.put({
+                'type': 'complete',
+                'total_items': result.get('total_items', 0),
+                'data': result.get('results', [])
+            })
+        else:
+            log_queue.put({
+                'type': 'error',
+                'message': result.get('error', '알 수 없는 오류')
+            })
+    except Exception as e:
+        if not stop_flag:
+            log_queue.put({
+                'type': 'error',
+                'message': str(e)
+            })
+    finally:
+        is_working = False
+        work_start_time = None
+        work_type = None
+        estimated_items = 0
+        current_items = 0
+
+
 
 # ==========================================
 # 라우트
@@ -392,7 +482,10 @@ def start():
         log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
         
     elif mode == 'musinsa':
-        log_queue.put({'type': 'error', 'message': '🟤 무신사 검색 기능은 준비 중입니다'})
+        # ✅ 무신사 검색 활성화
+        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_pages))
+        thread.daemon = True
+        thread.start()
     
     else:
         thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
@@ -803,6 +896,86 @@ def start_sourcing():
         'popup_url': f'/kream_popup?session_id={session_id}'
     })
 
+
+@app.route('/shutdown_musinsa_browser')
+def shutdown_musinsa_browser():
+    """무신사 브라우저 종료"""
+    try:
+        if musinsa_search:
+            musinsa_search.close_musinsa_browser()
+            return jsonify({'success': True, 'message': '무신사 브라우저 종료 완료'})
+        else:
+            return jsonify({'success': False, 'error': 'musinsa_search 모듈 없음'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ✅ 무신사 로그인 라우트 추가
+@app.route('/check_musinsa_login')
+def check_musinsa_login():
+    """무신사 로그인"""
+    print("\n" + "="*60)
+    print("🔍 /check_musinsa_login 호출")
+    print("="*60)
+    
+    try:
+        if musinsa_search is None:
+            return jsonify({
+                'logged_in': False,
+                'message': 'musinsa_search 모듈을 찾을 수 없습니다'
+            }), 500
+        
+        result = musinsa_search.login_musinsa()
+        print(f"✅ login_musinsa 실행 완료: {result}")
+        
+        return jsonify({
+            'logged_in': result.get('success', False),
+            'message': result.get('message', '')
+        })
+        
+    except Exception as e:
+        print(f"❌ Exception: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'logged_in': False,
+            'message': f'오류: {str(e)}'
+        }), 500
+    
+# ✅ POIZON 로그인 라우트 추가
+@app.route('/check_poizon_login')
+def check_poizon_login():
+    """POIZON 로그인"""
+    print("\n" + "="*60)
+    print("🔍 /check_poizon_login 호출")
+    print("="*60)
+    
+    try:
+        from poizon_data.poizon_search import perform_login
+        print("✅ perform_login import 성공")
+        
+        result = perform_login()
+        print(f"✅ perform_login 실행 완료: {result}")
+        
+        return jsonify({
+            'logged_in': result.get('success', False),
+            'message': result.get('message', '')
+        })
+        
+    except ImportError as e:
+        print(f"❌ ImportError: {e}")
+        return jsonify({
+            'logged_in': False,
+            'message': f'모듈을 찾을 수 없습니다: {str(e)}'
+        }), 500
+    except Exception as e:
+        print(f"❌ Exception: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'logged_in': False,
+            'message': f'오류: {str(e)}'
+        }), 500
 
 # ==========================================
 # 서버 시작
