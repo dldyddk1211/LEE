@@ -1,5 +1,4005 @@
 [
   {
+    "id": "task_1771951157007",
+    "timestamp": "2026-02-25T01:39:17.007019",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 113,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260128/5949607/5949607_17707754784379_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5885336/5885336_17707754498675_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "product_code": "FQ3739-121",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873365/5873365_17681807860247_500.jpg",
+        "name": "캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873364/5873364_17681807555849_500.jpg",
+        "name": "캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022888/6022888_17709489095368_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022885/6022885_17709489042181_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022891/6022891_17709489185576_500.jpg",
+        "name": "나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "product_code": "A261JK115P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022884/6022884_17709488989381_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022880/6022880_17709488882659_500.jpg",
+        "name": "나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022878/6022878_17709488829892_500.jpg",
+        "name": "나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771949889845",
+    "timestamp": "2026-02-25T01:18:09.845728",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 112,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260128/5949607/5949607_17707754784379_500.jpg",
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5885336/5885336_17707754498675_500.jpg",
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-121",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873365/5873365_17681807860247_500.jpg",
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873364/5873364_17681807555849_500.jpg",
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022888/6022888_17709489095368_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022885/6022885_17709489042181_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022891/6022891_17709489185576_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK115P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022884/6022884_17709488989381_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022880/6022880_17709488882659_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022878/6022878_17709488829892_500.jpg",
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771948530336",
+    "timestamp": "2026-02-25T00:55:30.336271",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 113,
+    "data": [
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-121",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK115P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771946946093",
+    "timestamp": "2026-02-25T00:29:06.093712",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 2,
+    "kream_count": 0,
+    "duration_seconds": 29,
+    "data": [
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771946197287",
+    "timestamp": "2026-02-25T00:16:37.287820",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 111,
+    "data": [
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771946030798",
+    "timestamp": "2026-02-25T00:13:50.798371",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 112,
+    "data": [
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771945325176",
+    "timestamp": "2026-02-25T00:02:05.176661",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 6,
+    "kream_count": 0,
+    "duration_seconds": 71,
+    "data": [
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키 ACG",
+        "price": 0,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "나이키",
+        "price": 0,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "name": "플레이키즈프로",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771945062621",
+    "timestamp": "2026-02-24T23:57:42.621856",
+    "keyword": "무신사_코르체즈",
+    "mode": "musinsa",
+    "collected_count": 3,
+    "kream_count": 0,
+    "duration_seconds": 35,
+    "data": [
+      {
+        "name": "나이키 에어 포스 1",
+        "price": 0,
+        "product_code": "IO8755-600",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5774914",
+        "source": "MUSINSA",
+        "keyword": "코르체즈"
+      },
+      {
+        "name": "나이키 에어 포스 1",
+        "price": 0,
+        "product_code": "IO8755-600",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5542085",
+        "source": "MUSINSA",
+        "keyword": "코르체즈"
+      },
+      {
+        "name": "-",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5816830",
+        "source": "MUSINSA",
+        "keyword": "코르체즈"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771944993997",
+    "timestamp": "2026-02-24T23:56:33.997761",
+    "keyword": "무신사_나이키 에어 포스",
+    "mode": "musinsa",
+    "collected_count": 4,
+    "kream_count": 0,
+    "duration_seconds": 50,
+    "data": [
+      {
+        "name": "나이키 에어 포스 1",
+        "price": 0,
+        "product_code": "IO8755-600",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873323",
+        "source": "MUSINSA",
+        "keyword": "나이키 에어 포스"
+      },
+      {
+        "name": "나이키 에어 포스 1",
+        "price": 0,
+        "product_code": "IO8755-600",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5816828",
+        "source": "MUSINSA",
+        "keyword": "나이키 에어 포스"
+      },
+      {
+        "name": "나이키 에어 포스 1",
+        "price": 0,
+        "product_code": "IO8755-600",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5858881",
+        "source": "MUSINSA",
+        "keyword": "나이키 에어 포스"
+      },
+      {
+        "name": "-",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5904759",
+        "source": "MUSINSA",
+        "keyword": "나이키 에어 포스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771939096679",
+    "timestamp": "2026-02-24T22:18:16.679595",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 111,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260128/5949607/5949607_17707754784379_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5885336/5885336_17707754498675_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873365/5873365_17681807860247_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873364/5873364_17681807555849_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771938971458",
+    "timestamp": "2026-02-24T22:16:11.458440",
+    "keyword": "무신사_런닝화",
+    "mode": "musinsa",
+    "collected_count": 3,
+    "kream_count": 0,
+    "duration_seconds": 37,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045986",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045979",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039348",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771938458070",
+    "timestamp": "2026-02-24T22:07:38.070429",
+    "keyword": "무신사_런닝화",
+    "mode": "musinsa",
+    "collected_count": 4,
+    "kream_count": 0,
+    "duration_seconds": 38,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045986",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045979",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039348",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039343",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771938392379",
+    "timestamp": "2026-02-24T22:06:32.379449",
+    "keyword": "무신사_런닝화",
+    "mode": "musinsa",
+    "collected_count": 5,
+    "kream_count": 0,
+    "duration_seconds": 46,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045986",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6045979",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039348",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039343/6039343_17718363284683_big.jpg",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039343",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      },
+      {
+        "image_url": "",
+        "product_code": "-",
+        "name": "-",
+        "price": 0,
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6039337",
+        "source": "MUSINSA",
+        "keyword": "런닝화"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771937930785",
+    "timestamp": "2026-02-24T21:58:50.785176",
+    "keyword": "무신사_퓨마",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 86,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015700/6015700_17714662129207_big.jpg",
+        "product_code": "092404-01",
+        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 블랙 / 092404-01",
+        "price": 44670,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015700",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015698/6015698_17709610484216_big.jpg",
+        "product_code": "092404-03",
+        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 그레이스카이 / 092404-03",
+        "price": 44670,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015698",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015697/6015697_17709609541548_big.jpg",
+        "product_code": "026996-01",
+        "name": "푸마(PUMA) 레이스 데이 5패널 캡 - 블랙 / 026996-01",
+        "price": 44670,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015697",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015696/6015696_17709609698916_big.jpg",
+        "product_code": "026996-02",
+        "name": "푸마(PUMA) 레이스 데이 5패널 캡 - 실버 미스트 / 026996-02",
+        "price": 44670,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015696",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015728/6015728_17709614292214_big.jpg",
+        "product_code": "402960-11",
+        "name": "푸마(PUMA) 스프린트 - 그레이:블랙 / 402960-11",
+        "price": 135820,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015728",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015702/6015702_17709610161602_big.jpg",
+        "product_code": "027098-01",
+        "name": "푸마(PUMA) 스쿠데리아 페라리 레플리카 샤를 르클레르 캡 - 레드 / 027098-01",
+        "price": 53790,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015702",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015701/6015701_17709609986763_big.jpg",
+        "product_code": "027096-01",
+        "name": "푸마(PUMA) 스쿠데리아 페라리 레플리카 해밀턴 트러커 캡 - 레드 / 027096-01",
+        "price": 53790,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6015701",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024101/6024101_17714664097586_big.jpg",
+        "product_code": "407820-03",
+        "name": "푸마(PUMA) H-Street 발렛 우먼스 - 블랙:실버 / 407820-03",
+        "price": 108480,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6024101",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024100/6024100_17714663705807_big.jpg",
+        "product_code": "403700-01",
+        "name": "푸마(PUMA) 스웨이드 찰스 F. 스테드 - 블랙:화이트 / 403700-01",
+        "price": 144940,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6024100",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024099/6024099_17714662466730_big.jpg",
+        "product_code": "092404-02",
+        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 애플 스프리츠 / 092404-02",
+        "price": 44670,
+        "brand": "푸마",
+        "url": "https://www.musinsa.com/products/6024099",
+        "source": "MUSINSA",
+        "keyword": "퓨마"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771937825583",
+    "timestamp": "2026-02-24T21:57:05.583803",
+    "keyword": "아디다스",
+    "mode": "keyword",
+    "collected_count": 0,
+    "kream_count": 0,
+    "duration_seconds": 12,
+    "data": [],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771936472520",
+    "timestamp": "2026-02-24T21:34:32.520424",
+    "keyword": "무신사_아디다스",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6041194/detail_6041194_17718232732207_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JY8234",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6041194",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6040682/detail_6040682_17718202963839_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 스탠 스미스 LO 발레 JQ6940",
+        "price": 127980,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6040682",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034595/detail_6034595_17715570295169_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JZ4358",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034595",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034581/detail_6034581_17715568587783_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) 4WAY ANKLE 1/1 팬츠 JY8239",
+        "price": 144030,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034581",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034573/detail_6034573_17715567975598_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8840",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034573",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034570/detail_6034570_17715567854910_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8839",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034570",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034566/detail_6034566_17715567602622_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8837",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034566",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034564/detail_6034564_17715567484488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8838",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034564",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011261/detail_6011261_17707983000488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 페로자 - 초크펄:블랙:레드 / KJ6176",
+        "price": 131700,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011261",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011260/detail_6011260_17707983414870_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 아디제로 EVO SL M - 초크펄:블랙:레드 / KJ3670",
+        "price": 195203,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011260",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771936398013",
+    "timestamp": "2026-02-24T21:33:18.013110",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 42,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771936171478",
+    "timestamp": "2026-02-24T21:29:31.478675",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771936113821",
+    "timestamp": "2026-02-24T21:28:33.821835",
+    "keyword": "무신사_데상트",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048515/6048515_17719139915355_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 여성 골지 부츠컷 레깅스  DR12WFPT32",
+        "price": 139150,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048515",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048511/6048511_17719139842263_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048511",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048509/6048509_17719139754452_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048509",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048505/6048505_17719139664599_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048505",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048504/6048504_17719139540564_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048504",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048500/6048500_17719139425841_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 엔지니어드 풀오버  DR11MFKP24",
+        "price": 330333,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048500",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025302/6025302_17709630453098_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025302",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025300/6025300_17709630377309_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025300",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025298/6025298_17709630290468_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025298",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025297/6025297_17709630217965_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025297",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771935190937",
+    "timestamp": "2026-02-24T21:13:10.937750",
+    "keyword": "크림검색_10개",
+    "mode": "kream",
+    "collected_count": 10,
+    "kream_count": 10,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/7bb3ea432cab4b09bc783ffe11e8b793.jpg",
+        "상품번호": "DD1503-101",
+        "제품명": "(W) 나이키 덩크 로우 블랙",
+        "SPU_ID": "1273668",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩97,000",
+        "중국노출": "₩87,000",
+        "중국시장최근30일판매량": 11000,
+        "중국시장최근30일판매량_원본": "11,000+",
+        "현지판매자최근30일판매량": 300,
+        "현지판매자최근30일판매량_원본": "300+",
+        "크림비교": 5000,
+        "크림평균가": "82,000원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/002d13339da643c9a095b9a2f32d0fb9.jpg",
+        "상품번호": "DD1391-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "1237613",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩99,000",
+        "중국노출": "₩69,000",
+        "중국시장최근30일판매량": 14000,
+        "중국시장최근30일판매량_원본": "14,000+",
+        "현지판매자최근30일판매량": 200,
+        "현지판매자최근30일판매량_원본": "200+",
+        "크림비교": -9000,
+        "크림평균가": "78,000원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/004c2d2062f84205aa501129943c2b61.jpg",
+        "상품번호": "CW1590-100",
+        "제품명": "(GS) 나이키 덩크 로우 블랙",
+        "SPU_ID": "1282514",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩80,000",
+        "중국노출": "₩75,000",
+        "중국시장최근30일판매량": 8800,
+        "중국시장최근30일판매량_원본": "8,800+",
+        "현지판매자최근30일판매량": 400,
+        "현지판매자최근30일판매량_원본": "400+",
+        "크림비교": 2200,
+        "크림평균가": "72,800원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/d3d8d591b1c84d89a8cf9fb036468c92.jpg",
+        "상품번호": "HF5441-105",
+        "제품명": "나이키 덩크 로우 레트로 화이트 라이트 스모크 그레이",
+        "SPU_ID": "17126151",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩94,000",
+        "중국노출": "₩92,000",
+        "중국시장최근30일판매량": 26000,
+        "중국시장최근30일판매량_원본": "26,000+",
+        "현지판매자최근30일판매량": 500,
+        "현지판매자최근30일판매량_원본": "500+",
+        "크림비교": -3200,
+        "크림평균가": "95,200원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251222/e6abf74c910e4df9a494fe5b65322849.jpg",
+        "상품번호": "IQ1118-220",
+        "제품명": "나이키 덩크 로우탑 스케이트보드 신발 남녀공용 베이지 엄버",
+        "SPU_ID": "32310634",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩133,000",
+        "중국노출": "₩120,000",
+        "중국시장최근30일판매량": 30000,
+        "중국시장최근30일판매량_원본": "30,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5",
+        "크림비교": 8000,
+        "크림평균가": "112,000원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/ec01d3eda6e84db58647625703c0b138.jpg",
+        "상품번호": "HF5441-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "16804703",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩105,000",
+        "중국노출": "₩96,000",
+        "중국시장최근30일판매량": 21000,
+        "중국시장최근30일판매량_원본": "21,000+",
+        "현지판매자최근30일판매량": 1400,
+        "현지판매자최근30일판매량_원본": "1,400+",
+        "크림비교": -3200,
+        "크림평균가": "99,200원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20260116/6e8459788343467abb9e0f5b986423dd.jpg",
+        "상품번호": "IQ1145-610",
+        "제품명": "나이키 덩크 스케이트보드화 로우탑 베이지 핑크 여성",
+        "SPU_ID": "33048845",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩123,000",
+        "중국노출": "₩118,000",
+        "중국시장최근30일판매량": 20000,
+        "중국시장최근30일판매량_원본": "20,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5",
+        "크림비교": -50400,
+        "크림평균가": "168,400원",
+        "크림판매량": "26/02/21"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/f616bbbe5bf54d32b0646f5f32e0aae0.jpg",
+        "상품번호": "DD1503-103",
+        "제품명": "(W) 나이키 덩크 로우 포톤 더스트",
+        "SPU_ID": "1362140",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩91,000",
+        "중국노출": "₩80,000",
+        "중국시장최근30일판매량": 7500,
+        "중국시장최근30일판매량_원본": "7,500+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+",
+        "크림비교": -4200,
+        "크림평균가": "84,200원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251207/f2f8bbc0e9b74fb68f8b5dc5d9b764f9.jpg",
+        "상품번호": "DD1391-103",
+        "제품명": "나이키 덩크 로우 레트로 그레이 포그",
+        "SPU_ID": "1647608",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩98,000",
+        "중국노출": "₩61,000",
+        "중국시장최근30일판매량": 6500,
+        "중국시장최근30일판매량_원본": "6,500+",
+        "현지판매자최근30일판매량": 93,
+        "현지판매자최근30일판매량_원본": "93",
+        "크림비교": -35000,
+        "크림평균가": "96,000원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/6c8447a89bc24797a6429732cc71ab5d.jpg",
+        "상품번호": "DD1503-124",
+        "제품명": "(W) 나이키 덩크 로우 세일 카카오 와우",
+        "SPU_ID": "3939329",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩95,000",
+        "중국노출": "₩77,000",
+        "중국시장최근30일판매량": 3800,
+        "중국시장최근30일판매량_원본": "3,800+",
+        "현지판매자최근30일판매량": 42,
+        "현지판매자최근30일판매량_원본": "42",
+        "크림비교": -11600,
+        "크림평균가": "88,600원",
+        "크림판매량": "26/02/22"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771935016589",
+    "timestamp": "2026-02-24T21:10:16.589940",
+    "keyword": "덩크",
+    "mode": "keyword",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 14,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/7bb3ea432cab4b09bc783ffe11e8b793.jpg",
+        "상품번호": "DD1503-101",
+        "제품명": "(W) 나이키 덩크 로우 블랙",
+        "SPU_ID": "1273668",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩97,000",
+        "중국노출": "₩87,000",
+        "중국시장최근30일판매량": 11000,
+        "중국시장최근30일판매량_원본": "11,000+",
+        "현지판매자최근30일판매량": 300,
+        "현지판매자최근30일판매량_원본": "300+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/002d13339da643c9a095b9a2f32d0fb9.jpg",
+        "상품번호": "DD1391-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "1237613",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩99,000",
+        "중국노출": "₩69,000",
+        "중국시장최근30일판매량": 14000,
+        "중국시장최근30일판매량_원본": "14,000+",
+        "현지판매자최근30일판매량": 200,
+        "현지판매자최근30일판매량_원본": "200+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/004c2d2062f84205aa501129943c2b61.jpg",
+        "상품번호": "CW1590-100",
+        "제품명": "(GS) 나이키 덩크 로우 블랙",
+        "SPU_ID": "1282514",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩80,000",
+        "중국노출": "₩75,000",
+        "중국시장최근30일판매량": 8800,
+        "중국시장최근30일판매량_원본": "8,800+",
+        "현지판매자최근30일판매량": 400,
+        "현지판매자최근30일판매량_원본": "400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/d3d8d591b1c84d89a8cf9fb036468c92.jpg",
+        "상품번호": "HF5441-105",
+        "제품명": "나이키 덩크 로우 레트로 화이트 라이트 스모크 그레이",
+        "SPU_ID": "17126151",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩94,000",
+        "중국노출": "₩92,000",
+        "중국시장최근30일판매량": 26000,
+        "중국시장최근30일판매량_원본": "26,000+",
+        "현지판매자최근30일판매량": 500,
+        "현지판매자최근30일판매량_원본": "500+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251222/e6abf74c910e4df9a494fe5b65322849.jpg",
+        "상품번호": "IQ1118-220",
+        "제품명": "나이키 덩크 로우탑 스케이트보드 신발 남녀공용 베이지 엄버",
+        "SPU_ID": "32310634",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩133,000",
+        "중국노출": "₩120,000",
+        "중국시장최근30일판매량": 30000,
+        "중국시장최근30일판매량_원본": "30,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/ec01d3eda6e84db58647625703c0b138.jpg",
+        "상품번호": "HF5441-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "16804703",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩105,000",
+        "중국노출": "₩96,000",
+        "중국시장최근30일판매량": 21000,
+        "중국시장최근30일판매량_원본": "21,000+",
+        "현지판매자최근30일판매량": 1400,
+        "현지판매자최근30일판매량_원본": "1,400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20260116/6e8459788343467abb9e0f5b986423dd.jpg",
+        "상품번호": "IQ1145-610",
+        "제품명": "나이키 덩크 스케이트보드화 로우탑 베이지 핑크 여성",
+        "SPU_ID": "33048845",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩123,000",
+        "중국노출": "₩118,000",
+        "중국시장최근30일판매량": 20000,
+        "중국시장최근30일판매량_원본": "20,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/f616bbbe5bf54d32b0646f5f32e0aae0.jpg",
+        "상품번호": "DD1503-103",
+        "제품명": "(W) 나이키 덩크 로우 포톤 더스트",
+        "SPU_ID": "1362140",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩91,000",
+        "중국노출": "₩80,000",
+        "중국시장최근30일판매량": 7500,
+        "중국시장최근30일판매량_원본": "7,500+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251207/f2f8bbc0e9b74fb68f8b5dc5d9b764f9.jpg",
+        "상품번호": "DD1391-103",
+        "제품명": "나이키 덩크 로우 레트로 그레이 포그",
+        "SPU_ID": "1647608",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩98,000",
+        "중국노출": "₩61,000",
+        "중국시장최근30일판매량": 6500,
+        "중국시장최근30일판매량_원본": "6,500+",
+        "현지판매자최근30일판매량": 93,
+        "현지판매자최근30일판매량_원본": "93"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/6c8447a89bc24797a6429732cc71ab5d.jpg",
+        "상품번호": "DD1503-124",
+        "제품명": "(W) 나이키 덩크 로우 세일 카카오 와우",
+        "SPU_ID": "3939329",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩95,000",
+        "중국노출": "₩77,000",
+        "중국시장최근30일판매량": 3800,
+        "중국시장최근30일판매량_원본": "3,800+",
+        "현지판매자최근30일판매량": 42,
+        "현지판매자최근30일판매량_원본": "42"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771934922080",
+    "timestamp": "2026-02-24T21:08:42.080276",
+    "keyword": "무신사_덩크",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885367/detail_5885367_17682954727058_big.jpg?w=1200",
+        "product_code": "IQ1145-610",
+        "name": "나이키(NIKE) 덩크 로우 W - 실트 레드:라이트 본:버건디 크러시:세일 / IQ1145-610",
+        "price": 147730,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885367",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251229/5858868/detail_5858868_17676702027858_big.jpg?w=1200",
+        "product_code": "IB6651-003",
+        "name": "나이키(NIKE) 덩크 로우 레트로 SE M - 팬텀 / IB6651-003",
+        "price": 139000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5858868",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251223/5848613/detail_5848613_17671469090236_big.jpg?w=1200",
+        "product_code": "IO4244-101",
+        "name": "나이키(NIKE) 덩크 로우 W - 세일:화이트:메탈릭 골드:리넨 / IO4244-101",
+        "price": 130250,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5848613",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251201/5792029/detail_5792029_17660336202530_big.jpg?w=1200",
+        "product_code": "IB6651-200",
+        "name": "나이키(NIKE) 덩크 로우 레트로 SE M - 케이브 스톤 / IB6651-200",
+        "price": 139000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5792029",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251125/5774900/detail_5774900_17678369403334_big.jpg?w=1200",
+        "product_code": "IO4244-100",
+        "name": "나이키(NIKE) 덩크 로우 W - 세일:화이트:메탈릭 골드:펄 핑크 / IO4244-100",
+        "price": 130250,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5774900",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251125/5774899/detail_5774899_17660337024355_big.jpg?w=1200",
+        "product_code": "IB7746-200",
+        "name": "나이키(NIKE) 덩크 로우 레트로 프리미엄 M - 라이트 브리티시 탠:라이트 초콜릿:트와인 / IB7746-200",
+        "price": 139000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5774899",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20251103/5676866/5676866_17630951980175_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아이오페(IOPE) 맨 올데이 퍼펙트 톤업 올인원 120g (슬램덩크 키링 증정)",
+        "price": 25990,
+        "brand": "아이오페",
+        "url": "https://www.musinsa.com/products/5676866",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20251103/5676865/5676865_17630950922516_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아이오페(IOPE) 맨 올데이 퍼펙트 올인원 120g (슬램덩크 키링 증정)",
+        "price": 25990,
+        "brand": "아이오페",
+        "url": "https://www.musinsa.com/products/5676865",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20250929/5542091/detail_5542091_17593970814593_big.jpg?w=1200",
+        "product_code": "HQ2053-002",
+        "name": "나이키(NIKE) 덩크 로우 GORE-TEX M - 라이트 본:밍크 브라운:세일 / HQ2053-002",
+        "price": 148860,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5542091",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20250829/5378925/detail_5378925_17567721354329_big.jpg?w=1200",
+        "product_code": "IB4417-105",
+        "name": "나이키(NIKE) 덩크 로우 W - 세일:메탈릭 골드:몰트 / IB4417-105",
+        "price": 103400,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5378925",
+        "source": "MUSINSA",
+        "keyword": "덩크"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771934083796",
+    "timestamp": "2026-02-24T20:54:43.796949",
+    "keyword": "무신사_데상트",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048515/6048515_17719139915355_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 여성 골지 부츠컷 레깅스  DR12WFPT32",
+        "price": 139150,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048515",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048511/6048511_17719139842263_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048511",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048509/6048509_17719139754452_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048509",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048505/6048505_17719139664599_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048505",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048504/6048504_17719139540564_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048504",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048500/6048500_17719139425841_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 엔지니어드 풀오버  DR11MFKP24",
+        "price": 330333,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048500",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025302/6025302_17709630453098_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025302",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025300/6025300_17709630377309_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025300",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025298/6025298_17709630290468_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025298",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025297/6025297_17709630217965_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025297",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771934035948",
+    "timestamp": "2026-02-24T20:53:55.948596",
+    "keyword": "데상트",
+    "mode": "keyword",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 18,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251209/9db6c6b581eb4ba298acf4edcd93a8fd.jpg",
+        "상품번호": "SR113RRN18",
+        "제품명": "데상트 런 스텝 그레이 SR113RRN18",
+        "SPU_ID": "29728901",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩133,000",
+        "중국노출": "₩109,000",
+        "중국시장최근30일판매량": 3400,
+        "중국시장최근30일판매량_원본": "3,400+",
+        "현지판매자최근30일판매량": 1400,
+        "현지판매자최근30일판매량_원본": "1,400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250702/de766f9814f94d1d8936d6f5c4654c93.jpg",
+        "상품번호": "SQ323UTS71",
+        "제품명": "데상트 워딩 백그래픽 반팔 티셔츠 화이트(SQ123UTS31)",
+        "SPU_ID": "23680905",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩78,000",
+        "중국노출": "₩61,000",
+        "중국시장최근30일판매량": 1500,
+        "중국시장최근30일판매량_원본": "1,500+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/2b2b6293068d44e8890acaead5580c32.jpg",
+        "상품번호": "SP123LCR18-BKWH",
+        "제품명": "데상트 크론 레이서 블랙 화이트(SQ123LCR11)",
+        "SPU_ID": "8990432",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩142,000",
+        "중국노출": "₩127,000",
+        "중국시장최근30일판매량": 2200,
+        "중국시장최근30일판매량_원본": "2,200+",
+        "현지판매자최근30일판매량": 400,
+        "현지판매자최근30일판매량_원본": "400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250321/38c8b33832b44425ae083810f3f2c8dd.jpg",
+        "상품번호": "SQ123UPS21",
+        "제품명": "데상트 터프 폴로 반팔 티셔츠 화이트(SQ123UPS21)",
+        "SPU_ID": "18776299",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩121,000",
+        "중국노출": "₩78,000",
+        "중국시장최근30일판매량": 300,
+        "중국시장최근30일판매량_원본": "300+",
+        "현지판매자최근30일판매량": 40,
+        "현지판매자최근30일판매량_원본": "40"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250502/e90d821e2a2f42b4a51b6e196af2d997.jpg",
+        "상품번호": "DSP1600B",
+        "제품명": "데상트 남성 캐주얼 반바지",
+        "SPU_ID": "11834387",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩39,000",
+        "중국노출": "₩33,000",
+        "중국시장최근30일판매량": 700,
+        "중국시장최근30일판매량_원본": "700+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250313/afe4a5c17f1b485e95cbca1a8e3072d0.jpg",
+        "상품번호": "SQ123UTS11",
+        "제품명": "데상트 터프 반팔 티셔츠 핑크(SQ123UTS11)",
+        "SPU_ID": "18776305",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩72,000",
+        "중국노출": "₩55,000",
+        "중국시장최근30일판매량": 500,
+        "중국시장최근30일판매량_원본": "500+",
+        "현지판매자최근30일판매량": 38,
+        "현지판매자최근30일판매량_원본": "38"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251222/de563045b08a41b881800bbf2d9760ba.jpg",
+        "상품번호": "SR123UPS11",
+        "제품명": "데상트 터프 폴로 반팔 티셔츠 블랙 SR123UPS11",
+        "SPU_ID": "33486053",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩111,000",
+        "중국노출": "₩96,000",
+        "중국시장최근30일판매량": 900,
+        "중국시장최근30일판매량_원본": "900+",
+        "현지판매자최근30일판매량": 600,
+        "현지판매자최근30일판매량_원본": "600+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251222/c197bb14fcbe4c27a633e9d59ed1d681.jpg",
+        "상품번호": "SR123UTL11",
+        "제품명": "데상트 터프 긴팔 티셔츠 블랙 SR123UTL11",
+        "SPU_ID": "33474847",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩78,000",
+        "중국노출": "₩65,000",
+        "중국시장최근30일판매량": 3100,
+        "중국시장최근30일판매량_원본": "3,100+",
+        "현지판매자최근30일판매량": 500,
+        "현지판매자최근30일판매량_원본": "500+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250906/531036efebf24a21bfebb64235c65b47.jpg",
+        "상품번호": "SQ323SDJ92",
+        "제품명": "데상트 2025 캐논 숏 덕 다운 자켓 블랙(SQ323SDJ92)",
+        "SPU_ID": "28483690",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩348,000",
+        "중국노출": "₩288,000",
+        "중국시장최근30일판매량": 3200,
+        "중국시장최근30일판매량_원본": "3,200+",
+        "현지판매자최근30일판매량": 81,
+        "현지판매자최근30일판매량_원본": "81"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250609/fff4d2dd6df0439181b2baad470b615e.jpg",
+        "상품번호": "SQ323UPS71",
+        "제품명": "데상트 터프 폴로 티셔츠 화이트(SQ323UPS71)",
+        "SPU_ID": "24570567",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩117,000",
+        "중국노출": "₩82,000",
+        "중국시장최근30일판매량": 700,
+        "중국시장최근30일판매량_원본": "700+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771926335318",
+    "timestamp": "2026-02-24T18:45:35.318968",
+    "keyword": "무신사_데상트",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048515/6048515_17719139915355_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 여성 골지 부츠컷 레깅스  DR12WFPT32",
+        "price": 139150,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048515",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048511/6048511_17719139842263_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048511",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048509/6048509_17719139754452_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 우븐 슬림핏 팬츠  DR12MFPT31",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048509",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048505/6048505_17719139664599_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048505",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048504/6048504_17719139540564_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 STORM-COMFORT BOA®(유니 스톰컴포트 보아핏시스템)  DR12ULSH26",
+        "price": 251923,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048504",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260224/6048500/6048500_17719139425841_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남성 엔지니어드 풀오버  DR11MFKP24",
+        "price": 330333,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6048500",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025302/6025302_17709630453098_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025302",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025300/6025300_17709630377309_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025300",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025298/6025298_17709630290468_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025298",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6025297/6025297_17709630217965_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "데상트골프(DESCENTE GOLF) 남여공용 그래픽 라운드 반팔티  DR22MFNS4Z",
+        "price": 104140,
+        "brand": "데상트골프",
+        "url": "https://www.musinsa.com/products/6025297",
+        "source": "MUSINSA",
+        "keyword": "데상트"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771926190989",
+    "timestamp": "2026-02-24T18:43:10.989291",
+    "keyword": "아디다스",
+    "mode": "keyword",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 16,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251209/917e82fcc5804057baed313791775130.jpg",
+        "상품번호": "JI0496",
+        "제품명": "아디다스 Vl 코트 2.0 세미 블루 버스트 코어 화이트",
+        "SPU_ID": "9206296",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩55,000",
+        "중국노출": "₩52,000",
+        "중국시장최근30일판매량": 40000,
+        "중국시장최근30일판매량_원본": "40,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/dcadf0f628994560983e894ea3aca225.jpg",
+        "상품번호": "KK3774",
+        "제품명": "아디다스 VL 코트 클래식 미끄럼 방지+내마모성 로우탑 독일군 스니커즈 남녀공용 레드",
+        "SPU_ID": "23223876",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩54,000",
+        "중국노출": "₩51,000",
+        "중국시장최근30일판매량": 40000,
+        "중국시장최근30일판매량_원본": "40,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251209/318fe0c373ac44168c4a829b024be271.jpg",
+        "상품번호": "JQ4238",
+        "제품명": "아디다스 바레다 내마모성 로우탑 독일군 스니커즈 남녀공용 그린 화이트",
+        "SPU_ID": "18796935",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩52,000",
+        "중국노출": "₩56,000",
+        "중국시장최근30일판매량": 24000,
+        "중국시장최근30일판매량_원본": "24,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250401/7aa886bc36884e469bfcb8afdc7728ea.jpg",
+        "상품번호": "GV5350",
+        "제품명": "아디다스 스포츠웨어 D11 빅 배플 다운 후드 자켓 블랙",
+        "SPU_ID": "2093977",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩109,000",
+        "중국노출": "₩88,000",
+        "중국시장최근30일판매량": 39000,
+        "중국시장최근30일판매량_원본": "39,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251207/ae1ab75e68a74472a95c8c07ab22850d.jpg",
+        "상품번호": "IH6185",
+        "제품명": "아디다스 그랜드 코트 베이스 00s 스웨이드 로우탑 스케이트보드 신발 남녀공용 그레이 화이트",
+        "SPU_ID": "13329335",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩60,000",
+        "중국노출": "₩57,000",
+        "중국시장최근30일판매량": 26000,
+        "중국시장최근30일판매량_원본": "26,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20260126/fbaa4a8919f44a928d36397f61c318c5.png",
+        "상품번호": "JP9959",
+        "제품명": "아디다스 엔트랩 스케이트보드화 로우탑 화이트/깊이 실버 메탈/레진 옐로우 남녀공용",
+        "SPU_ID": "13763546",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩57,000",
+        "중국노출": "₩56,000",
+        "중국시장최근30일판매량": 24000,
+        "중국시장최근30일판매량_원본": "24,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250329/02da699e6c194f588239ba8642f9ed3e.jpg",
+        "상품번호": "H46099",
+        "제품명": "아디다스 에센셜 웜 업 삼선 트랙 자켓 블랙",
+        "SPU_ID": "1719418",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩58,000",
+        "중국노출": "₩53,000",
+        "중국시장최근30일판매량": 15000,
+        "중국시장최근30일판매량_원본": "15,000+",
+        "현지판매자최근30일판매량": 500,
+        "현지판매자최근30일판매량_원본": "500+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/ff607c66f5224524b2e0d748ff75530b.png",
+        "상품번호": "HQ1801",
+        "제품명": "아디다스 Vl 코트 2.0 블랙 화이트",
+        "SPU_ID": "4962345",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩57,000",
+        "중국노출": "₩54,000",
+        "중국시장최근30일판매량": 18000,
+        "중국시장최근30일판매량_원본": "18,000+",
+        "현지판매자최근30일판매량": 22,
+        "현지판매자최근30일판매량_원본": "22"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/1aa04f5a1ab140be99ef4f0946eb615d.jpg",
+        "상품번호": "JR7077",
+        "제품명": "아디다스 그랜드 코트 베이스 00s 합성 가죽, 전사 가공 분할 소가죽 로우탑 스케이트보드 신발 남녀공용 그린 블랙 화이트",
+        "SPU_ID": "19123963",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩54,000",
+        "중국노출": "₩53,000",
+        "중국시장최근30일판매량": 16000,
+        "중국시장최근30일판매량_원본": "16,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20250402/cc53a030392246b38a595019c74f32e5.jpg",
+        "상품번호": "TR30JR-BW",
+        "제품명": "아디다스 3줄 블랙+화이트 줄무늬 남녀공용 자켓",
+        "SPU_ID": "6205363",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩72,000",
+        "중국노출": "₩72,000",
+        "중국시장최근30일판매량": 8700,
+        "중국시장최근30일판매량_원본": "8,700+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771926167509",
+    "timestamp": "2026-02-24T18:42:47.509895",
+    "keyword": "무신사_아디다스",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6041194/detail_6041194_17718232732207_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JY8234",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6041194",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6040682/detail_6040682_17718202963839_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 스탠 스미스 LO 발레 JQ6940",
+        "price": 127980,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6040682",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034595/detail_6034595_17715570295169_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JZ4358",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034595",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034581/detail_6034581_17715568587783_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) 4WAY ANKLE 1/1 팬츠 JY8239",
+        "price": 144030,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034581",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034573/detail_6034573_17715567975598_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8840",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034573",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034570/detail_6034570_17715567854910_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8839",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034570",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034566/detail_6034566_17715567602622_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8837",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034566",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034564/detail_6034564_17715567484488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8838",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034564",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011261/detail_6011261_17707983000488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 페로자 - 초크펄:블랙:레드 / KJ6176",
+        "price": 131700,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011261",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011260/detail_6011260_17707983414870_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 아디제로 EVO SL M - 초크펄:블랙:레드 / KJ3670",
+        "price": 195203,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011260",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771925684247",
+    "timestamp": "2026-02-24T18:34:44.247757",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771925418323",
+    "timestamp": "2026-02-24T18:30:18.323335",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771925342567",
+    "timestamp": "2026-02-24T18:29:02.567528",
+    "keyword": "크림검색_10개",
+    "mode": "kream",
+    "collected_count": 8,
+    "kream_count": 8,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/e6d8ceec010d43b398a366a6dfe76265.jpg",
+        "상품번호": "CW2288-111",
+        "제품명": "나이키 에어 포스 1 07 가죽 내마모성 로우탑 스케이트보드 신발 남성 퓨어 화이트",
+        "SPU_ID": "1237506",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩122,000",
+        "중국노출": "₩115,000",
+        "중국시장최근30일판매량": 41000,
+        "중국시장최근30일판매량_원본": "41,000+",
+        "현지판매자최근30일판매량": 3400,
+        "현지판매자최근30일판매량_원본": "3,400+",
+        "크림비교": 5200,
+        "크림평균가": "109,800원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251209/82dfe339d5ab4ecda1717de90ba89335.jpg",
+        "상품번호": "415445-102",
+        "제품명": "나이키 에어 군주 4 화이트 네이비 텍스타일, 가죽 미끄럼방지 로우탑 청키 스니커즈 남성 블루 화이트",
+        "SPU_ID": "10903",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩76,000",
+        "중국노출": "₩73,000",
+        "중국시장최근30일판매량": 27000,
+        "중국시장최근30일판매량_원본": "27,000+",
+        "현지판매자최근30일판매량": 300,
+        "현지판매자최근30일판매량_원본": "300+",
+        "크림비교": -2400,
+        "크림평균가": "75,400원",
+        "크림판매량": "26/02/19"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251207/1b520d2f371d4f209aa09f98cf4beabd.jpg",
+        "상품번호": "FZ0627-010",
+        "제품명": "나이키 에어포스 1 '07 블랙 화이트",
+        "SPU_ID": "5633013",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩107,000",
+        "중국노출": "₩99,000",
+        "중국시장최근30일판매량": 63000,
+        "중국시장최근30일판매량_원본": "63,000+",
+        "현지판매자최근30일판매량": 400,
+        "현지판매자최근30일판매량_원본": "400+",
+        "크림비교": -9400,
+        "크림평균가": "108,400원",
+        "크림판매량": "26/02/23"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/04595976f3ed4b1194d6cfbc1d7d92e5.jpg",
+        "상품번호": "DV5456-104",
+        "제품명": "(GS) 나이키 코트 버로우 로우 리크래프트 화이트 블랙",
+        "SPU_ID": "5393642",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩58,000",
+        "중국노출": "₩56,000",
+        "중국시장최근30일판매량": 42000,
+        "중국시장최근30일판매량_원본": "42,000+",
+        "현지판매자최근30일판매량": 2700,
+        "현지판매자최근30일판매량_원본": "2,700+",
+        "크림비교": 5000,
+        "크림평균가": "51,000원",
+        "크림판매량": "26/02/22"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/cce47a111e60409ba6e4c1b4ebf0c1d1.jpg",
+        "상품번호": "CJ9179-200",
+        "제품명": "나이키 에어포스 1 '07 Wb 플랙스",
+        "SPU_ID": "47668",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩123,000",
+        "중국노출": "₩114,000",
+        "중국시장최근30일판매량": 35000,
+        "중국시장최근30일판매량_원본": "35,000+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+",
+        "크림비교": -18600,
+        "크림평균가": "132,600원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/002d13339da643c9a095b9a2f32d0fb9.jpg",
+        "상품번호": "DD1391-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "1237613",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩99,000",
+        "중국노출": "₩69,000",
+        "중국시장최근30일판매량": 14000,
+        "중국시장최근30일판매량_원본": "14,000+",
+        "현지판매자최근30일판매량": 200,
+        "현지판매자최근30일판매량_원본": "200+",
+        "크림비교": -9600,
+        "크림평균가": "78,600원",
+        "크림판매량": "N/A"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/809fe11c9126495c8bf288532d929158.jpg",
+        "상품번호": "DH2920-111",
+        "제품명": "나이키 에어 포스 1 레 가죽 미끄럼 방지, 쿠셔닝, 내마모성 로우탑 아동 스케이트보드화 퓨어 화이트 남녀공용",
+        "SPU_ID": "1389355",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩88,000",
+        "중국노출": "₩85,000",
+        "중국시장최근30일판매량": 13000,
+        "중국시장최근30일판매량_원본": "13,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5",
+        "크림비교": -17000,
+        "크림평균가": "102,000원",
+        "크림판매량": "26/02/22"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251224/4a1e85d5dfb24fcd9db6f57c2eef555c.jpg",
+        "상품번호": "DV5456-111",
+        "제품명": "나이키 코트 Borough 가죽 미끄럼 방지+내마모성 로우탑 아동 스케이트보드화 화이트 핑크",
+        "SPU_ID": "9659042",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩58,000",
+        "중국노출": "₩52,000",
+        "중국시장최근30일판매량": 21000,
+        "중국시장최근30일판매량_원본": "21,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5",
+        "크림비교": -178000,
+        "크림평균가": "230,000원",
+        "크림판매량": "N/A"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771925204917",
+    "timestamp": "2026-02-24T18:26:44.917836",
+    "keyword": "나이키",
+    "mode": "keyword",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 14,
+    "data": [
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/e6d8ceec010d43b398a366a6dfe76265.jpg",
+        "상품번호": "CW2288-111",
+        "제품명": "나이키 에어 포스 1 07 가죽 내마모성 로우탑 스케이트보드 신발 남성 퓨어 화이트",
+        "SPU_ID": "1237506",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩122,000",
+        "중국노출": "₩115,000",
+        "중국시장최근30일판매량": 41000,
+        "중국시장최근30일판매량_원본": "41,000+",
+        "현지판매자최근30일판매량": 3400,
+        "현지판매자최근30일판매량_원본": "3,400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251209/82dfe339d5ab4ecda1717de90ba89335.jpg",
+        "상품번호": "415445-102",
+        "제품명": "나이키 에어 군주 4 화이트 네이비 텍스타일, 가죽 미끄럼방지 로우탑 청키 스니커즈 남성 블루 화이트",
+        "SPU_ID": "10903",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩76,000",
+        "중국노출": "₩73,000",
+        "중국시장최근30일판매량": 27000,
+        "중국시장최근30일판매량_원본": "27,000+",
+        "현지판매자최근30일판매량": 300,
+        "현지판매자최근30일판매량_원본": "300+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/b109f99c34df43b6ae3b4465000ddd03.jpg",
+        "상품번호": "CW2288-001",
+        "제품명": "나이키 에어 포스 1 07 M - 블랙 / CW2288-001",
+        "SPU_ID": "1237477",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩107,000",
+        "중국노출": "₩99,000",
+        "중국시장최근30일판매량": 36000,
+        "중국시장최근30일판매량_원본": "36,000+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251207/1b520d2f371d4f209aa09f98cf4beabd.jpg",
+        "상품번호": "FZ0627-010",
+        "제품명": "나이키 에어포스 1 '07 블랙 화이트",
+        "SPU_ID": "5633013",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩107,000",
+        "중국노출": "₩99,000",
+        "중국시장최근30일판매량": 63000,
+        "중국시장최근30일판매량_원본": "63,000+",
+        "현지판매자최근30일판매량": 400,
+        "현지판매자최근30일판매량_원본": "400+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/04595976f3ed4b1194d6cfbc1d7d92e5.jpg",
+        "상품번호": "DV5456-104",
+        "제품명": "(GS) 나이키 코트 버로우 로우 리크래프트 화이트 블랙",
+        "SPU_ID": "5393642",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩58,000",
+        "중국노출": "₩56,000",
+        "중국시장최근30일판매량": 42000,
+        "중국시장최근30일판매량_원본": "42,000+",
+        "현지판매자최근30일판매량": 2700,
+        "현지판매자최근30일판매량_원본": "2,700+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251205/cce47a111e60409ba6e4c1b4ebf0c1d1.jpg",
+        "상품번호": "CJ9179-200",
+        "제품명": "나이키 에어포스 1 '07 Wb 플랙스",
+        "SPU_ID": "47668",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩123,000",
+        "중국노출": "₩114,000",
+        "중국시장최근30일판매량": 35000,
+        "중국시장최근30일판매량_원본": "35,000+",
+        "현지판매자최근30일판매량": 100,
+        "현지판매자최근30일판매량_원본": "100+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251128/82975a8523044841a22e5d384dcddf45.jpg",
+        "상품번호": "IQ1119-011",
+        "제품명": "나이키 에어 포스 1 통기성 좋은 로우탑 스케이트보드 신발 남성 화이트",
+        "SPU_ID": "32334179",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩161,000",
+        "중국노출": "₩154,000",
+        "중국시장최근30일판매량": 42000,
+        "중국시장최근30일판매량_원본": "42,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251206/002d13339da643c9a095b9a2f32d0fb9.jpg",
+        "상품번호": "DD1391-100",
+        "제품명": "나이키 덩크 로우 레트로 블랙",
+        "SPU_ID": "1237613",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩99,000",
+        "중국노출": "₩69,000",
+        "중국시장최근30일판매량": 14000,
+        "중국시장최근30일판매량_원본": "14,000+",
+        "현지판매자최근30일판매량": 200,
+        "현지판매자최근30일판매량_원본": "200+"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251225/809fe11c9126495c8bf288532d929158.jpg",
+        "상품번호": "DH2920-111",
+        "제품명": "나이키 에어 포스 1 레 가죽 미끄럼 방지, 쿠셔닝, 내마모성 로우탑 아동 스케이트보드화 퓨어 화이트 남녀공용",
+        "SPU_ID": "1389355",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩88,000",
+        "중국노출": "₩85,000",
+        "중국시장최근30일판매량": 13000,
+        "중국시장최근30일판매량_원본": "13,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      },
+      {
+        "이미지URL": "https://cdn.poizon.com/pro-img/origin-img/20251224/4a1e85d5dfb24fcd9db6f57c2eef555c.jpg",
+        "상품번호": "DV5456-111",
+        "제품명": "나이키 코트 Borough 가죽 미끄럼 방지+내마모성 로우탑 아동 스케이트보드화 화이트 핑크",
+        "SPU_ID": "9659042",
+        "상태": "입찰 가능",
+        "최근30일평균거래가": "₩58,000",
+        "중국노출": "₩52,000",
+        "중국시장최근30일판매량": 21000,
+        "중국시장최근30일판매량_원본": "21,000+",
+        "현지판매자최근30일판매량": 5,
+        "현지판매자최근30일판매량_원본": "<5"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771925176385",
+    "timestamp": "2026-02-24T18:26:16.385282",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771923530002",
+    "timestamp": "2026-02-24T17:58:50.002026",
+    "keyword": "무신사_나이키 조던",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260204/5980955/detail_5980955_17706813530597_big.jpg?w=1200",
+        "product_code": "HV0823-108",
+        "name": "나이키(NIKE) 에어 조던 4 레트로 W - 페일 아이보리:터프 레드:시에라 레드 / HV0823-108",
+        "price": 258130,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5980955",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260204/5980963/detail_5980963_17706812986245_big.jpg?w=1200",
+        "product_code": "DZ5485-003",
+        "name": "나이키(NIKE) 에어 조던 1 레트로 하이 OG M - 쿨 그레이:세일:게임 로얄:블랙 / DZ5485-003",
+        "price": 218570,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5980963",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949615/detail_5949615_17697508632541_big.jpg?w=1200",
+        "product_code": "IB8597-001",
+        "name": "나이키(NIKE) 조던 포인트 W - 블랙:세일 / IB8597-001",
+        "price": 141470,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949615",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251202/5797203/detail_5797203_17706814022253_big.jpg?w=1200",
+        "product_code": "IF1007-016",
+        "name": "나이키(NIKE) 조던 플라이트 플리스 모드 크롭 크루넥 스웻셔츠 W - 이니그마 스톤:코블스톤 / IF1007-016",
+        "price": 117500,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5797203",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251202/5797187/detail_5797187_17700946179973_big.jpg?w=1200",
+        "product_code": "FV7295-050",
+        "name": "나이키(NIKE) 조던 브루클린 플리스 크루넥 스웻셔츠 M - 그레이 헤더:화이트 / FV7295-050",
+        "price": 74310,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5797187",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949609/detail_5949609_17697504066535_big.jpg?w=1200",
+        "product_code": "IF3016-133",
+        "name": "나이키(NIKE) 조던 오버사이즈 레트로 티셔츠 M - 세일:인프라레드 23 / IF3016-133",
+        "price": 48100,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949609",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949608/detail_5949608_17700947060184_big.jpg?w=1200",
+        "product_code": "IF3016-045",
+        "name": "나이키(NIKE) 조던 오버사이즈 레트로 티셔츠 M - 오프 누아르:인프라레드 23 / IF3016-045",
+        "price": 48100,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949608",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260123/5932928/detail_5932928_17700946513675_big.jpg?w=1200",
+        "product_code": "IB8597-600",
+        "name": "나이키(NIKE) 조던 포인트 W - 칠레 레드:딥 마룬:푸에블로 레드 / IB8597-600",
+        "price": 130250,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5932928",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260106/5870697/detail_5870697_17690717462583_big.jpg?w=1200",
+        "product_code": "HQ6998-200",
+        "name": "나이키(NIKE) 에어 조던 1 레트로 로우 M - 미디엄 올리브:서밋 화이트:세일:블랙 / HQ6998-200",
+        "price": 179000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5870697",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20251201/5792031/detail_5792031_17648347111486_big.jpg?w=1200",
+        "product_code": "IO7448-400",
+        "name": "나이키(NIKE) 에어 조던 1 로우 SE M - 옵시디언:유니버시티 골드:칠레 레드:옵시디언 / IO7448-400",
+        "price": 139000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5792031",
+        "source": "MUSINSA",
+        "keyword": "나이키 조던"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771922982829",
+    "timestamp": "2026-02-24T17:49:42.829025",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771903958215",
+    "timestamp": "2026-02-24T12:32:38.215249",
+    "keyword": "무신사_아디다스",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 40,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6041194/detail_6041194_17718232732207_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JY8234",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6041194",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6040682/detail_6040682_17718202963839_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 스탠 스미스 LO 발레 JQ6940",
+        "price": 127980,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6040682",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034595/detail_6034595_17715570295169_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JZ4358",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034595",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034581/detail_6034581_17715568587783_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) 4WAY ANKLE 1/1 팬츠 JY8239",
+        "price": 144030,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034581",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034573/detail_6034573_17715567975598_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8840",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034573",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034570/detail_6034570_17715567854910_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8839",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034570",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034566/detail_6034566_17715567602622_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8837",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034566",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034564/detail_6034564_17715567484488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8838",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034564",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011261/detail_6011261_17707983000488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 페로자 - 초크펄:블랙:레드 / KJ6176",
+        "price": 131700,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011261",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011260/detail_6011260_17707983414870_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 아디제로 EVO SL M - 초크펄:블랙:레드 / KJ3670",
+        "price": 195203,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011260",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771903841539",
+    "timestamp": "2026-02-24T12:30:41.539823",
+    "keyword": "무신사_아디다스",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 40,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6041194/detail_6041194_17718232732207_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JY8234",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6041194",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6040682/detail_6040682_17718202963839_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 스탠 스미스 LO 발레 JQ6940",
+        "price": 127980,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6040682",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034595/detail_6034595_17715570295169_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JZ4358",
+        "price": 162260,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034595",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034581/detail_6034581_17715568587783_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) 4WAY ANKLE 1/1 팬츠 JY8239",
+        "price": 144030,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034581",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034573/detail_6034573_17715567975598_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8840",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034573",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034570/detail_6034570_17715567854910_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8839",
+        "price": 35560,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034570",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034566/detail_6034566_17715567602622_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8837",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034566",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034564/detail_6034564_17715567484488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8838",
+        "price": 44670,
+        "brand": "아디다스 골프",
+        "url": "https://www.musinsa.com/products/6034564",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011261/detail_6011261_17707983000488_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 페로자 - 초크펄:블랙:레드 / KJ6176",
+        "price": 131700,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011261",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011260/detail_6011260_17707983414870_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "아디다스(ADIDAS) 아우디 아디제로 EVO SL M - 초크펄:블랙:레드 / KJ3670",
+        "price": 195203,
+        "brand": "아디다스",
+        "url": "https://www.musinsa.com/products/6011260",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771903493967",
+    "timestamp": "2026-02-24T12:24:53.967665",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 39,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771902999196",
+    "timestamp": "2026-02-24T12:16:39.196950",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 41,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5948239/detail_5948239_17700945926015_big.jpg?w=1200",
+        "product_code": "CT8529-001",
+        "name": "나이키(NIKE) 에어 조던 6 레트로 인프라레드 세일즈맨 M - 블랙:라이트 크림슨 / CT8529-001",
+        "price": 259000,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5948239",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771898005022",
+    "timestamp": "2026-02-24T10:53:25.022071",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 54,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
+        "product_code": "FQ3739-506",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
+        "product_code": "FQ3739-121",
+        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
+        "product_code": "IB7561-001",
+        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
+        "product_code": "IB0183-200",
+        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "brand": "나이키",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
+        "product_code": "-",
+        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "brand": "플레이키즈프로",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1771890784932",
     "timestamp": "2026-02-24T08:53:04.932330",
     "keyword": "무신사_나이키",

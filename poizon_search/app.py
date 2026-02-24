@@ -250,6 +250,88 @@ def run_scraper(keyword, max_pages, skip_login=False):
         estimated_items = 0
         current_items = 0
 
+
+# ✅ 무신사 검색 실행 함수 추가
+def run_musinsa_search(keyword, max_pages):
+    """무신사 검색 실행 (Thread-Safe)"""
+    try:
+        log_queue.put({'type': 'log', 'message': f'🟤 무신사 검색 시작: {keyword}', 'level': 'info'})
+        
+        # 콜백 함수: 로그를 큐에 추가
+        def callback(message, level='info'):
+            try:
+                # PROGRESS: 형식 처리
+                if message.startswith('PROGRESS:'):
+                    parts = message.replace('PROGRESS:', '').split('/')
+                    current = int(parts[0])
+                    total = int(parts[1])
+                    
+                    log_queue.put({
+                        'type': 'progress',
+                        'current': current,
+                        'total': total
+                    })
+                
+                # DATA: 형식 처리
+                elif message.startswith('DATA:'):
+                    data_str = message.replace('DATA:', '')
+                    item = json.loads(data_str)
+                    
+                    log_queue.put({
+                        'type': 'data',
+                        'item': item
+                    })
+                
+                # 일반 로그
+                else:
+                    log_queue.put({
+                        'type': 'log',
+                        'message': message,
+                        'level': level
+                    })
+                    
+            except Exception as e:
+                print(f"❌ 콜백 오류: {e}")
+        
+        # 무신사 검색 실행
+        result = musinsa_search.search_musinsa_keyword_detail(
+            keyword=keyword,
+            max_items=max_pages * 10,
+            callback=callback
+        )
+        
+        # 검색 완료
+        if result.get('success'):
+            log_queue.put({
+                'type': 'complete',
+                'data': result.get('results', []),
+                'keyword': keyword,
+                'total_items': result.get('total_items', 0)
+            })
+            
+            log_queue.put({
+                'type': 'log',
+                'message': f"✅ 무신사 검색 완료! {result.get('total_items', 0)}개 수집",
+                'level': 'success'
+            })
+        else:
+            error_msg = result.get('error', '알 수 없는 오류')
+            log_queue.put({
+                'type': 'error',
+                'message': f"❌ 무신사 검색 실패: {error_msg}"
+            })
+            
+    except Exception as e:
+        print(f"\n❌ 무신사 검색 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        log_queue.put({
+            'type': 'error',
+            'message': f"❌ 무신사 검색 오류: {str(e)}"
+        })
+
+
 def run_comparison(products):
     """리스트 비교 작업"""
     global result_data, stop_flag, current_browser, is_working, work_start_time, work_type, estimated_items, current_items
@@ -458,11 +540,11 @@ def check_status():
     })
 
 @app.route('/start')
-def start():
-    keyword = request.args.get('keyword', '나이키')
-    max_pages = int(request.args.get('max_pages', 20))
-    skip_login = request.args.get('skip_login', 'false').lower() == 'true'
+def start_search():
     mode = request.args.get('mode', 'poizon')
+    keyword = request.args.get('keyword', '')
+    max_pages = int(request.args.get('max_pages', 1))
+    skip_login = request.args.get('skip_login', 'false') == 'true'
     
     # mode 처리
     if mode == 'keyword':

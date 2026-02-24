@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 ############################
 # ===== 전역 변수 ===== #
-############################
+###########################
 
 # 중단 플래그
 stop_flag = False
@@ -16,7 +16,7 @@ stop_flag = False
 # 로그 콜백 함수
 LOG_CALLBACK = None
 
-# 전역 브라우저 객체
+# ✅ 전역 브라우저 객체 (Thread-Local 제거!)
 _playwright = None
 _browser = None
 _context = None
@@ -107,39 +107,21 @@ def get_browser():
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
         )
         
-       
-        # ✅ 쿠키 로드 (상세 로그 추가)
+        # 쿠키 로드
         if os.path.exists(COOKIE_FILE):
             try:
                 print(f"\n🍪 쿠키 로드 시작...")
-                print(f"  → 쿠키 파일: {COOKIE_FILE}")
-                
                 with open(COOKIE_FILE, 'r', encoding='utf-8') as f:
                     cookies = json.load(f)
                 
-                print(f"  → 로드된 쿠키 개수: {len(cookies)}개")
-                
-                # ✅ 무신사 쿠키만 필터링
                 musinsa_cookies = [c for c in cookies if 'musinsa.com' in c.get('domain', '')]
-                print(f"  → 무신사 쿠키: {len(musinsa_cookies)}개")
                 
                 if len(musinsa_cookies) > 0:
-                    # ✅ 쿠키 적용
                     _context.add_cookies(cookies)
                     print(f"  ✅ 쿠키 로드 완료")
                     
-                    # ✅ 주요 쿠키 확인
-                    cookie_names = [c.get('name', '') for c in musinsa_cookies]
-                    print(f"  → 쿠키 목록: {', '.join(cookie_names[:5])}...")
-                else:
-                    print(f"  ⚠️ 무신사 쿠키가 없습니다!")
-                    
             except Exception as e:
                 print(f"  ⚠️ 쿠키 로드 실패: {e}")
-                import traceback
-                traceback.print_exc()
-        else:
-            print(f"  ⚠️ 쿠키 파일 없음: {COOKIE_FILE}")
         
         _page = _context.new_page()
         
@@ -204,25 +186,39 @@ def close_musinsa_browser():
 ############################
 # ===== 로그인 함수 ===== #
 ############################
+
 def login_musinsa():
-    """무신사 로그인 - 로그인 후 브라우저 닫기"""
-    global _browser, _context, _page
+    """무신사 로그인 - 쿠키 체크 후 필요시에만 브라우저 열기"""
+    global _playwright, _browser, _context, _page  # ✅ global 선언 추가
+    
+    # ✅ 쿠키 파일 체크
+    if os.path.exists(COOKIE_FILE):
+        file_size = os.path.getsize(COOKIE_FILE)
+        
+        if file_size > 10:
+            with open(COOKIE_FILE, 'r', encoding='utf-8') as f:
+                cookies = json.load(f)
+            
+            musinsa_cookies = [c for c in cookies if 'musinsa.com' in c.get('domain', '')]
+            
+            if len(musinsa_cookies) > 0:
+                print("♻️ 이미 로그인되어 있습니다 (쿠키 유효)")
+                return {
+                    'success': True,
+                    'message': '✅ 이미 로그인되어 있습니다 (쿠키 사용)'
+                }
     
     try:
         print("\n" + "="*60)
         print("🔐 무신사 로그인 시작")
         print("="*60)
         
-        # 기존 브라우저가 있으면 종료
+        # ✅ 기존 브라우저가 있으면 종료
         if _browser is not None:
-            try:
-                print("  → 기존 브라우저 종료 중...")
-                close_musinsa_browser()
-                time.sleep(1)
-            except:
-                pass
+            close_musinsa_browser()
+            time.sleep(1)
         
-        # 새 브라우저 시작
+        # ✅ 새 브라우저 시작
         print("\n🌐 브라우저 시작 중...")
         
         _playwright = sync_playwright().start()
@@ -260,7 +256,6 @@ def login_musinsa():
         
         # 무신사 메인 페이지 이동
         print(f"\n📱 무신사 메인 페이지로 이동...")
-        print(f"   URL: {MUSINSA_MAIN_URL}")
         
         _page.goto(MUSINSA_MAIN_URL, wait_until='domcontentloaded', timeout=30000)
         time.sleep(2)
@@ -285,7 +280,6 @@ def login_musinsa():
         print("\n🔍 로그인 상태 확인 중...")
         
         try:
-            # 로그인 버튼 확인
             login_button = _page.locator('a[href*="/auth/login"]').first
             
             if login_button.count() > 0 and login_button.is_visible():
@@ -368,86 +362,37 @@ def login_musinsa():
                 if login_check.count() == 0 or not login_check.is_visible():
                     print("\n✅ 자동 로그인 성공!")
                     
-                    # ✅ 로그인 성공 후 잠시 대기 (쿠키 완전 생성 대기)
-                    print("  → 쿠키 생성 대기 중...")
-                    time.sleep(2)
+                    # 쿠키 저장
+                    cookies = _context.cookies()
+                    with open(COOKIE_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(cookies, f, ensure_ascii=False, indent=2)
                     
-                    # ✅ 쿠키 저장
-                    try:
-                        cookies = _context.cookies()
-                        
-                        # ✅ 쿠키 내용 확인
-                        print(f"  → 저장할 쿠키 개수: {len(cookies)}개")
-                        
-                        # ✅ 도메인 확인
-                        musinsa_cookies = [c for c in cookies if 'musinsa.com' in c.get('domain', '')]
-                        print(f"  → 무신사 쿠키: {len(musinsa_cookies)}개")
-                        
-                        if len(musinsa_cookies) == 0:
-                            print("  ⚠️ 무신사 쿠키가 없습니다!")
-                        
-                        # ✅ 쿠키 저장
-                        with open(COOKIE_FILE, 'w', encoding='utf-8') as f:
-                            json.dump(cookies, f, ensure_ascii=False, indent=2)
-                        
-                        print(f"  ✅ 쿠키 저장 완료: {COOKIE_FILE}")
-                        
-                        # ✅ 저장된 파일 확인
-                        if os.path.exists(COOKIE_FILE):
-                            file_size = os.path.getsize(COOKIE_FILE)
-                            print(f"  ✅ 쿠키 파일 크기: {file_size} bytes")
-                        else:
-                            print(f"  ❌ 쿠키 파일 저장 실패!")
-                            
-                    except Exception as e:
-                        print(f"  ⚠️ 쿠키 저장 실패: {e}")
-                        import traceback
-                        traceback.print_exc()
+                    print(f"  ✅ 쿠키 저장 완료: {COOKIE_FILE}")
                     
-                    # ✅ 브라우저 닫기
+                    # 브라우저 닫기
                     print("\n🔒 로그인 완료! 브라우저 닫는 중...")
                     close_musinsa_browser()
-                    
-                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                    print("💡 로그인 완료! 대기 상태로 전환합니다")
-                    print("💡 검색 시작 버튼을 누르면 백그라운드로 검색합니다")
-                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                     
                     return {'success': True, 'message': '로그인 성공'}
                 else:
                     print("\n❌ 자동 로그인 실패")
-                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                    print("💡 브라우저에서 수동으로 로그인해주세요")
-                    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                     return {'success': True, 'message': '수동 로그인 필요'}
             else:
                 print("  ✅ 이미 로그인되어 있음!")
                 
-                # ✅ 쿠키 저장
-                try:
-                    cookies = _context.cookies()
-                    with open(COOKIE_FILE, 'w') as f:
-                        json.dump(cookies, f)
-                    print("  ✅ 쿠키 저장 완료")
-                except Exception as e:
-                    print(f"  ⚠️ 쿠키 저장 실패: {e}")
+                # 쿠키 저장
+                cookies = _context.cookies()
+                with open(COOKIE_FILE, 'w') as f:
+                    json.dump(cookies, f)
                 
-                # ✅ 브라우저 닫기
+                # 브라우저 닫기
                 print("\n🔒 로그인 확인 완료! 브라우저 닫는 중...")
                 close_musinsa_browser()
-                
-                print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-                print("💡 로그인 완료! 대기 상태로 전환합니다")
-                print("💡 검색 시작 버튼을 누르면 백그라운드로 검색합니다")
-                print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
                 
                 return {'success': True, 'message': '로그인 완료'}
                 
         except Exception as e:
             print(f"\n⚠️ 로그인 확인 오류: {e}")
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("💡 브라우저에서 수동으로 로그인해주세요")
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             return {'success': True, 'message': '수동 로그인 필요'}
             
     except Exception as e:
@@ -460,7 +405,6 @@ def login_musinsa():
 ############################
 # ===== 상품 상세 정보 추출 ===== #
 ############################
-
 def extract_product_detail(page):
     """무신사 상품 상세 정보 추출"""
     try:
@@ -470,188 +414,399 @@ def extract_product_detail(page):
         print("📦 상품 정보 추출 시작")
         print("="*50)
         
-        # ===== 1. 이미지 URL =====
+        # ✅ 페이지가 완전히 로드될 때까지 대기
+        time.sleep(5.0)
+                
+        # ===== 이미지 URL 추출 ===== ✅ 수정
         try:
-            print("🖼️  이미지 URL 추출 중...")
-            
-            # 메인 이미지 선택자
-            img_selectors = [
-                'div.Swiper__ImageBox-sc-j9bha0-2 img',  # 메인 이미지
-                'img.Swiper__Img-sc-j9bha0-8',
-                '.swiper-slide img[src*="image.msscdn.net"]'
-            ]
+            log("🖼️ 이미지 URL 추출 중...", 'info')
             
             image_url = None
             
-            for selector in img_selectors:
+            # ✅ 1순위: 상세 페이지 제일 첫 이미지 (Thumbnail 0)
+            try:
+                first_img = page.locator('img[alt="Thumbnail 0"]').first
+                if first_img.count() > 0:
+                    src = first_img.get_attribute('src')
+                    if src and 'image.msscdn.net' in src:
+                        image_url = src
+                        log(f"  ✅ 이미지 (1순위 - Thumbnail 0): {src[:80]}...", 'info')
+            except Exception as e:
+                log(f"  ⚠️ 1순위 실패: {e}", 'warning')
+            
+            # ✅ 2순위: Swiper 대표 이미지
+            if not image_url:
                 try:
-                    img = page.locator(selector).first
-                    if img.count() > 0:
-                        src = img.get_attribute('src')
+                    swiper_img = page.locator('div.Swiper__ImageBox-sc-j9bha0-2 img').first
+                    if swiper_img.count() > 0:
+                        src = swiper_img.get_attribute('src')
                         if src and 'image.msscdn.net' in src:
                             image_url = src
-                            print(f"  ✅ 이미지 URL: {src[:80]}...")
-                            break
+                            log(f"  ✅ 이미지 (2순위 - Swiper): {src[:80]}...", 'info')
                 except Exception as e:
-                    print(f"  ⚠️ {selector} 시도 실패: {e}")
-                    continue
+                    log(f"  ⚠️ 2순위 실패: {e}", 'warning')
             
-            product_info['image_url'] = image_url
-            
-        except Exception as e:
-            print(f"  ❌ 이미지 추출 오류: {e}")
-            product_info['image_url'] = None
-        
-        # ===== 2. 품번 (상품코드) =====
-        try:
-            print("🔢 품번 추출 중...")
-            
-            # dd 태그에서 품번 추출
-            code_selectors = [
-                'dd.text-body_13px_reg',
-                'dd[data-mds="Typography"]',
-                'dd.text-gray-600'
-            ]
-            
-            product_code = None
-            
-            for selector in code_selectors:
+            # ✅ 3순위: 일반 상품 이미지 (alt에 상품명 포함)
+            if not image_url:
                 try:
-                    code_elements = page.locator(selector).all()
+                    # alt 속성에 상품번호나 상품명이 포함된 이미지
+                    product_imgs = page.locator('img[alt*="/"]').all()  # "FQ3739-506" 같은 패턴
                     
-                    for element in code_elements:
-                        text = element.text_content().strip()
-                        
-                        # "FQ3739-506" 형식 찾기 (영문+숫자-숫자)
-                        import re
-                        if re.match(r'^[A-Z0-9]+-[A-Z0-9]+$', text):
-                            product_code = text
-                            print(f"  ✅ 품번: {product_code}")
-                            break
-                    
-                    if product_code:
-                        break
-                        
+                    for img in product_imgs[:5]:  # 상위 5개만 확인
+                        try:
+                            src = img.get_attribute('src')
+                            alt = img.get_attribute('alt')
+                            
+                            if src and 'image.msscdn.net' in src:
+                                # 배너 이미지 제외 (banner, logo, icon 등)
+                                if alt and not any(word in alt.lower() for word in ['banner', 'logo', 'icon', 'ad']):
+                                    image_url = src
+                                    log(f"  ✅ 이미지 (3순위 - alt): {src[:80]}...", 'info')
+                                    break
+                        except:
+                            continue
                 except Exception as e:
-                    print(f"  ⚠️ {selector} 시도 실패: {e}")
-                    continue
+                    log(f"  ⚠️ 3순위 실패: {e}", 'warning')
             
-            product_info['product_code'] = product_code or '-'
+            # ✅ 최종: 아무 이미지나 (image.msscdn.net)
+            if not image_url:
+                try:
+                    all_imgs = page.locator('img[src*="image.msscdn.net"]').all()
+                    
+                    for img in all_imgs[:10]:  # 상위 10개만
+                        try:
+                            src = img.get_attribute('src')
+                            
+                            # 썸네일이 아닌 큰 이미지 우선
+                            if src and ('_big.jpg' in src or '_500.jpg' in src):
+                                image_url = src
+                                log(f"  ✅ 이미지 (최종): {src[:80]}...", 'info')
+                                break
+                        except:
+                            continue
+                except Exception as e:
+                    log(f"  ⚠️ 최종 시도 실패: {e}", 'warning')
             
+            # ✅ 이미지 URL 정제
+            if image_url:
+                # ?w= 쿼리스트링 제거
+                if '?w=' in image_url:
+                    image_url = image_url.split('?w=')[0]
+                
+                # /thumbnails/ 경로 정리
+                if '/thumbnails/images/' in image_url:
+                    image_url = image_url.replace('/thumbnails/images/', '/images/')
+                elif '/thumbnails/' in image_url:
+                    image_url = image_url.replace('/thumbnails/', '/images/')
+                
+                product_info['image_url'] = image_url
+                log(f"  ✅ 최종 이미지 URL: {image_url[:80]}...", 'success')
+            else:
+                product_info['image_url'] = ''
+                log("  ⚠️ 이미지를 찾을 수 없습니다", 'warning')
+                
         except Exception as e:
-            print(f"  ❌ 품번 추출 오류: {e}")
-            product_info['product_code'] = '-'
-        
-        # ===== 3. 제품명 =====
-        try:
-            print("📝 제품명 추출 중...")
+            log(f"  ❌ 이미지 추출 오류: {e}", 'error')
+            product_info['image_url'] = ''
             
-            # img 태그의 alt 속성에서 제품명 추출
-            name_selectors = [
-                'img.Swiper__Img-sc-j9bha0-8[alt]',
-                'div.Swiper__ImageBox-sc-j9bha0-2 img[alt]',
-                '.swiper-slide img[alt]'
-            ]
+           
+        # ===== 제품명 추출 ===== ✅ 수정
+        try:
+            log("📝 제품명 추출 중...", 'info')
             
             product_name = None
             
-            for selector in name_selectors:
+            # ✅ 1순위: span.GoodsName-sc-1tpr922-1 (상품명 전용 클래스)
+            try:
+                name_elem = page.locator('span.GoodsName-sc-1tpr922-1').first
+                if name_elem.count() > 0 and name_elem.is_visible(timeout=3000):
+                    product_name = name_elem.text_content()
+                    if product_name:
+                        product_info['name'] = product_name.strip()
+                        log(f"  ✅ 제품명 (1순위 - GoodsName): {product_info['name'][:80]}...", 'info')
+            except Exception as e:
+                log(f"  ⚠️ 1순위 실패: {e}", 'warning')
+            
+            # ✅ 2순위: span[class*="GoodsName"] (클래스 부분 매칭)
+            if not product_name:
                 try:
-                    img = page.locator(selector).first
-                    if img.count() > 0:
-                        alt = img.get_attribute('alt')
-                        if alt and len(alt) > 0:
-                            product_name = alt.strip()
-                            print(f"  ✅ 제품명: {product_name[:50]}...")
-                            break
+                    name_elem = page.locator('span[class*="GoodsName"]').first
+                    if name_elem.count() > 0:
+                        product_name = name_elem.text_content()
+                        if product_name:
+                            product_info['name'] = product_name.strip()
+                            log(f"  ✅ 제품명 (2순위 - GoodsName*): {product_info['name'][:80]}...", 'info')
                 except Exception as e:
-                    print(f"  ⚠️ {selector} 시도 실패: {e}")
-                    continue
+                    log(f"  ⚠️ 2순위 실패: {e}", 'warning')
             
-            product_info['name'] = product_name or '-'
+            # ✅ 3순위: text-title_18px_med 중에서 긴 텍스트 (50자 이상)
+            if not product_name:
+                try:
+                    name_elems = page.locator('span.text-title_18px_med').all()
+                    
+                    for elem in name_elems:
+                        try:
+                            text = elem.text_content()
+                            
+                            # 50자 이상인 것만 (상품명은 보통 길다)
+                            if text and len(text) >= 50:
+                                product_name = text
+                                product_info['name'] = product_name.strip()
+                                log(f"  ✅ 제품명 (3순위 - 긴 텍스트): {product_info['name'][:80]}...", 'info')
+                                break
+                        except:
+                            continue
+                except Exception as e:
+                    log(f"  ⚠️ 3순위 실패: {e}", 'warning')
             
+            # ✅ 4순위: 품번 패턴이 포함된 span
+            if not product_name:
+                try:
+                    spans = page.locator('span[data-mds="Typography"]').all()
+                    
+                    for span in spans:
+                        try:
+                            text = span.text_content()
+                            
+                            # 품번 패턴 포함 (예: "FQ3739-506")
+                            import re
+                            if text and re.search(r'[A-Z]{2,3}\d{4,5}-\d{2,3}', text):
+                                product_name = text
+                                product_info['name'] = product_name.strip()
+                                log(f"  ✅ 제품명 (4순위 - 품번 포함): {product_info['name'][:80]}...", 'info')
+                                break
+                        except:
+                            continue
+                except Exception as e:
+                    log(f"  ⚠️ 4순위 실패: {e}", 'warning')
+            
+            # ✅ 최종: 못 찾으면 '-'
+            if not product_name:
+                product_info['name'] = '-'
+                log("  ⚠️ 제품명을 찾을 수 없습니다", 'warning')
+                
         except Exception as e:
-            print(f"  ❌ 제품명 추출 오류: {e}")
+            log(f"  ⚠️ 제품명 추출 실패: {e}", 'warning')
             product_info['name'] = '-'
-        
-        # ===== 4. 최대혜택가 =====
+
+        # ===== 가격 추출 ===== ✅ 수정
         try:
-            print("💰 최대혜택가 추출 중...")
-            
-            # "61,720원" 텍스트 찾기
-            price_selectors = [
-                'span.text-title_18px_semi.text-red',
-                'span.text-red[data-mds="Typography"]',
-                'div.MaxBenefitPriceTitle__PointDetailTooltip-sc-8vaunm-1 span.text-red'
-            ]
+            log("💰 최대혜택가 추출 중...", 'info')
             
             price = None
             
-            for selector in price_selectors:
+            # ✅ 1순위: span.text-title_18px_semi.text-red (최대혜택가)
+            try:
+                price_elem = page.locator('span.text-title_18px_semi.text-red').first
+                if price_elem.count() > 0 and price_elem.is_visible(timeout=3000):
+                    price_text = price_elem.text_content()
+                    if price_text and '원' in price_text:
+                        # 숫자만 추출
+                        import re
+                        numbers = re.findall(r'\d+', price_text.replace(',', ''))
+                        if numbers:
+                            price = int(''.join(numbers))
+                            product_info['price'] = price
+                            log(f"  ✅ 최대혜택가 (1순위): {price:,}원", 'info')
+            except Exception as e:
+                log(f"  ⚠️ 1순위 실패: {e}", 'warning')
+            
+            # ✅ 2순위: "최대혜택가" 라벨 앞의 가격
+            if not price:
                 try:
-                    price_elements = page.locator(selector).all()
-                    
-                    for element in price_elements:
-                        text = element.text_content().strip()
-                        
-                        # "61,720원" 형식 찾기
-                        if '원' in text and any(c.isdigit() for c in text):
-                            # 숫자만 추출
-                            import re
-                            price_num = int(re.sub(r'[^0-9]', '', text))
+                    # JavaScript로 "최대혜택가" 앞에 있는 가격 찾기
+                    price = page.evaluate("""
+                        () => {
+                            const allText = document.body.innerText;
                             
-                            if price_num > 0:
-                                price = price_num
-                                print(f"  ✅ 최대혜택가: {price:,}원")
-                                break
+                            // "61,720원 최대혜택가" 패턴 찾기
+                            const pricePattern = /([0-9]{1,3}(?:,?[0-9]{3})*)\s*원\s*최대혜택가/;
+                            const match = allText.match(pricePattern);
+                            
+                            if (match && match[1]) {
+                                const priceStr = match[1].replace(/,/g, '');
+                                return parseInt(priceStr);
+                            }
+                            
+                            return null;
+                        }
+                    """)
                     
-                    if price:
-                        break
-                        
+                    if price and price > 0:
+                        product_info['price'] = price
+                        log(f"  ✅ 최대혜택가 (2순위 - JS): {price:,}원", 'info')
                 except Exception as e:
-                    print(f"  ⚠️ {selector} 시도 실패: {e}")
-                    continue
+                    log(f"  ⚠️ 2순위 실패: {e}", 'warning')
             
-            product_info['price'] = price
+            # ✅ 3순위: span.text-red 중에서 "원" 포함
+            if not price:
+                try:
+                    red_spans = page.locator('span.text-red').all()
+                    
+                    for span in red_spans:
+                        try:
+                            text = span.text_content()
+                            
+                            if text and '원' in text:
+                                # 숫자 추출
+                                import re
+                                numbers = re.findall(r'\d+', text.replace(',', ''))
+                                
+                                if numbers:
+                                    test_price = int(''.join(numbers))
+                                    
+                                    # 10,000원 ~ 10,000,000원 사이인지 확인
+                                    if 10000 <= test_price <= 10000000:
+                                        price = test_price
+                                        product_info['price'] = price
+                                        log(f"  ✅ 최대혜택가 (3순위 - text-red): {price:,}원", 'info')
+                                        break
+                        except:
+                            continue
+                except Exception as e:
+                    log(f"  ⚠️ 3순위 실패: {e}", 'warning')
             
+            # ✅ 4순위: 모든 span에서 "원" 포함된 가격
+            if not price:
+                try:
+                    all_spans = page.locator('span').all()
+                    
+                    for span in all_spans[:100]:  # 상위 100개만
+                        try:
+                            text = span.text_content()
+                            
+                            if text and '원' in text and len(text) < 20:
+                                # 숫자 추출
+                                import re
+                                numbers = re.findall(r'\d+', text.replace(',', ''))
+                                
+                                if numbers:
+                                    test_price = int(''.join(numbers))
+                                    
+                                    # 10,000원 ~ 10,000,000원 사이
+                                    if 10000 <= test_price <= 10000000:
+                                        price = test_price
+                                        product_info['price'] = price
+                                        log(f"  ✅ 최대혜택가 (4순위 - 전체): {price:,}원", 'info')
+                                        break
+                        except:
+                            continue
+                except Exception as e:
+                    log(f"  ⚠️ 4순위 실패: {e}", 'warning')
+            
+            # ✅ 최종: 못 찾으면 0
+            if not price:
+                product_info['price'] = 0
+                log("  ⚠️ 가격을 찾을 수 없습니다", 'warning')
+                
         except Exception as e:
-            print(f"  ❌ 가격 추출 오류: {e}")
-            product_info['price'] = None
+            log(f"  ⚠️ 가격 추출 실패: {e}", 'warning')
+            product_info['price'] = 0
+                
         
-        # ===== 5. 브랜드 (제품명에서 추출) =====
+        # ===== 품번 추출 ===== 
         try:
-            # "나이키(NIKE) ACG 긴소매..." → "나이키"
-            if product_info.get('name'):
-                name = product_info['name']
+            log("🔢 품번 추출 중...", 'info')
+            
+            # JavaScript로 품번 추출 (라벨 기반만)
+            product_code = page.evaluate("""
+                () => {
+                    const allText = document.body.innerText;
+                    
+                    // ✅ 1순위: '품번:' 또는 '모델번호:' 라벨 다음 텍스트 (엄격)
+                    const codeRegex1 = /(품번|모델번호|상품코드)\\s*[:\\s]+([A-Z0-9][A-Z0-9-]+)/i;
+                    const match1 = allText.match(codeRegex1);
+                    
+                    if (match1 && match1[2]) {
+                        const code = match1[2].trim();
+                        // 최소 5자 이상, 하이픈 포함
+                        if (code.length >= 5 && code.includes('-')) {
+                            return code;
+                        }
+                    }
+                    
+                    // ✅ 2순위: '품번:' 라벨 다음 텍스트 (완화)
+                    const codeRegex2 = /(품번|모델번호|상품코드)\\s*[:\\s]+([A-Z0-9-]+)/i;
+                    const match2 = allText.match(codeRegex2);
+                    
+                    if (match2 && match2[2]) {
+                        const code = match2[2].trim();
+                        // 하이픈 있고 5자 이상
+                        if (code.includes('-') && code.length >= 5) {
+                            return code;
+                        }
+                    }
+                    
+                    // ✅ 3순위: 숫자나 특수문자 앞까지만 추출
+                    const codeRegex3 = /(품번|모델번호|상품코드)\\s*[:\\s]+([A-Z0-9-]+?)(?=\\s|$|[^A-Z0-9-])/i;
+                    const match3 = allText.match(codeRegex3);
+                    
+                    if (match3 && match3[2]) {
+                        const code = match3[2].trim();
+                        if (code.length >= 5) {
+                            return code;
+                        }
+                    }
+                    
+                    return null;
+                }
+            """)
+            
+            if product_code:
+                product_info['product_code'] = product_code
+                log(f"  ✅ 품번: {product_code}", 'info')
+            else:
+                product_info['product_code'] = '-'
+                log("  ⚠️ 품번을 찾을 수 없습니다", 'warning')
                 
-                # "나이키(NIKE)" 형식에서 앞부분만 추출
-                import re
-                brand_match = re.match(r'^([^\(]+)', name)
-                
-                if brand_match:
-                    brand = brand_match.group(1).strip()
-                    product_info['brand'] = brand
-                    print(f"  ✅ 브랜드: {brand}")
+        except Exception as e:
+            log(f"  ⚠️ 품번 추출 실패: {e}", 'warning')
+            product_info['product_code'] = '-'
+        
+        # ===== 브랜드 추출 ===== ✅ 수정
+        try:
+            log("🏷️ 브랜드 추출 중...", 'info')
+            
+            # 방법 1: URL에서 브랜드 추출
+            current_url = page.url
+            if '/brands/' in current_url:
+                brand = current_url.split('/brands/')[1].split('/')[0]
+                product_info['brand'] = brand
+                log(f"  ✅ 브랜드 (URL): {brand}", 'info')
+            else:
+                # 방법 2: a 태그에서 추출
+                brand_elem = page.locator('a[href*="/brands/"]').first
+                if brand_elem.count() > 0:
+                    brand = brand_elem.text_content()
+                    product_info['brand'] = brand.strip() if brand else '-'
+                    log(f"  ✅ 브랜드: {product_info['brand']}", 'info')
                 else:
                     product_info['brand'] = '-'
-            else:
-                product_info['brand'] = '-'
-                
+                    
         except Exception as e:
-            print(f"  ⚠️ 브랜드 추출 오류: {e}")
+            log(f"  ⚠️ 브랜드 추출 실패: {e}", 'warning')
             product_info['brand'] = '-'
         
         print("="*50)
         print("✅ 상품 정보 추출 완료")
         print("="*50)
         
+        # ✅ 추출한 데이터 출력
+        print(f"📊 추출된 데이터:")
+        print(f"  이미지: {product_info.get('image_url', '')[:50]}...")
+        print(f"  품번: {product_info.get('product_code', '-')}")
+        print(f"  제품명: {product_info.get('name', '-')[:50]}...")
+        print(f"  가격: {product_info.get('price', 0):,}원")
+        print(f"  브랜드: {product_info.get('brand', '-')}")
+        
         return product_info
         
     except Exception as e:
-        print(f"\n❌ 상품 정보 추출 오류: {e}")
+        log(f"❌ 상품 정보 추출 오류: {e}", 'error')
         import traceback
         traceback.print_exc()
         return None
+    
 
 
 ############################
@@ -660,7 +815,7 @@ def extract_product_detail(page):
 
 def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
     """무신사 키워드 검색 + 상품 상세 정보 추출 (무한 스크롤)"""
-    global LOG_CALLBACK, stop_flag, _page
+    global LOG_CALLBACK, stop_flag
     LOG_CALLBACK = callback
     stop_flag = False
     
@@ -683,25 +838,24 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 'results': []
             }
         
-        # 백그라운드 브라우저 시작
+        # ✅ Thread-Local 브라우저 가져오기
         log("🌐 백그라운드 브라우저 시작...", 'info')
-        _page = get_browser()
+        page = get_browser()
         
         log("🌐 무신사 검색 시작...", 'info')
-        log(f"   키워드: {keyword}", 'info')
         
         # 검색 페이지로 직접 이동
         search_url = f"{MUSINSA_SEARCH_URL}?q={keyword}"
         log(f"  → 검색 URL: {search_url}", 'info')
         
-        _page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
-        wait_stable(_page, 3000)
+        page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
+        wait_stable(page, 1500)
         
         # 로그인 상태 확인
         log("  → 로그인 상태 확인 중...", 'info')
         
         try:
-            login_button = _page.locator('a[href*="/auth/login"]').first
+            login_button = page.locator('a[href*="/auth/login"]').first
             
             if login_button.count() > 0 and login_button.is_visible():
                 log("⚠️ 로그인 세션 만료!", 'error')
@@ -709,7 +863,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 
                 return {
                     'success': False,
-                    'error': '로그인 세션 만료. 무신사 모드를 다시 선택하여 로그인해주세요.',
+                    'error': '로그인 세션 만료',
                     'results': []
                 }
             else:
@@ -720,7 +874,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
         
         log("✅ 검색 페이지 로드 완료", 'success')
         
-        # ✅ 검색 결과 총 개수 추출
+        # 검색 결과 총 개수 추출
         total_count = 0
         
         try:
@@ -729,12 +883,11 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
             count_selectors = [
                 'span.text-\\[13px\\]',
                 'span[data-mds="Typography"]',
-                'span.text-gray-600'
             ]
             
             for selector in count_selectors:
                 try:
-                    elements = _page.locator(selector).all()
+                    elements = page.locator(selector).all()
                     
                     for element in elements:
                         text = element.text_content()
@@ -752,84 +905,35 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                     
                     if total_count > 0:
                         break
-                        
-                except Exception as e:
+                except:
                     continue
-            
-            if total_count == 0:
-                log("  ⚠️ 검색 결과 개수를 찾을 수 없음", 'warning')
-            
-        except Exception as e:
-            log(f"  ⚠️ 검색 결과 개수 추출 실패: {e}", 'warning')
+        except:
+            pass
         
         # 실제 수집할 개수 결정
-        if total_count > 0:
-            target_count = min(max_items, total_count)
-            log(f"  → 수집 목표: {target_count:,}개 (전체 {total_count:,}개 중)", 'info')
-        else:
-            target_count = max_items
-            log(f"  → 수집 목표: {target_count}개", 'info')
+        target_count = min(max_items, total_count) if total_count > 0 else max_items
+        log(f"  → 수집 목표: {target_count}개", 'info')
         
-        # ✅ 정렬 변경 (무신사 추천순 → 신상품(재입고)순)
+        # 정렬 변경
         log("\n🔄 정렬 변경 시작...", 'info')
         
         try:
-            log("  → '무신사 추천순' 버튼 찾는 중...", 'info')
+            sort_button = page.locator('span:has-text("무신사 추천순")').first
             
-            sort_button = None
-            sort_selectors = [
-                'span:has-text("무신사 추천순")',
-                'button:has-text("무신사 추천순")',
-            ]
-            
-            for selector in sort_selectors:
-                try:
-                    btn = _page.locator(selector).first
-                    if btn.count() > 0:
-                        sort_button = btn
-                        log(f"  ✅ 정렬 버튼 발견", 'success')
-                        break
-                except:
-                    continue
-            
-            if sort_button and sort_button.count() > 0:
-                log("  → '무신사 추천순' 클릭...", 'info')
+            if sort_button.count() > 0:
                 sort_button.click()
-                wait_stable(_page, 2000)
+                wait_stable(page, 1500)
                 
-                log("  → '신상품(재입고)순' 옵션 찾는 중...", 'info')
+                new_item_option = page.locator('span:has-text("신상품(재입고)순")').first
                 
-                new_item_option = None
-                new_item_selectors = [
-                    'span:has-text("신상품(재입고)순")',
-                    'li:has-text("신상품(재입고)순")',
-                ]
-                
-                for selector in new_item_selectors:
-                    try:
-                        option = _page.locator(selector).first
-                        if option.count() > 0 and option.is_visible():
-                            new_item_option = option
-                            log(f"  ✅ 옵션 발견", 'success')
-                            break
-                    except:
-                        continue
-                
-                if new_item_option and new_item_option.count() > 0:
-                    log("  → '신상품(재입고)순' 클릭...", 'info')
+                if new_item_option.count() > 0:
                     new_item_option.click()
-                    wait_stable(_page, 3000)
-                    
+                    wait_stable(page, 1500)
                     log("  ✅ 정렬 변경 완료!", 'success')
-                else:
-                    log("  ⚠️ '신상품(재입고)순' 옵션을 찾을 수 없음", 'warning')
-            else:
-                log("  ⚠️ '무신사 추천순' 버튼을 찾을 수 없음", 'warning')
-                
-        except Exception as e:
-            log(f"  ⚠️ 정렬 변경 실패: {e}", 'warning')
+        except:
+            log("  ⚠️ 정렬 변경 실패", 'warning')
         
-        # ✅ 무한 스크롤로 상품 링크 수집
+        # 무한 스크롤로 상품 링크 수집
         log("\n🔄 무한 스크롤 시작...", 'info')
         
         product_links = []
@@ -841,7 +945,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
             scroll_count += 1
             
             # 현재 페이지의 상품 링크 추출
-            current_links = _page.evaluate("""
+            current_links = page.evaluate("""
                 () => {
                     const links = [];
                     const productCards = document.querySelectorAll('a[href*="/products/"]');
@@ -865,7 +969,6 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 log(f"  [{scroll_count}회 스크롤] 수집: {len(product_links):,}/{target_count:,}개", 'info')
             else:
                 no_new_items_count += 1
-                log(f"  [{scroll_count}회 스크롤] 새 상품 없음 ({no_new_items_count}/3)", 'warning')
                 
                 if no_new_items_count >= 3:
                     log("  ⚠️ 더 이상 새로운 상품이 없습니다.", 'warning')
@@ -876,10 +979,8 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 break
             
             # 페이지 끝까지 스크롤
-            _page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            
-            wait_time = random.uniform(1.5, 2.5)
-            time.sleep(wait_time)
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            time.sleep(random.uniform(3.0, 4.0))
         
         # 실제 수집할 링크
         product_links = product_links[:target_count]
@@ -887,25 +988,22 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
         log(f"\n📋 최종 수집 링크: {len(product_links)}개", 'success')
         log(f"🔍 상세 정보 수집 시작...\n", 'info')
         
-        # ✅ 각 상품 상세 페이지 방문
+        # 각 상품 상세 페이지 방문
         for idx, product_url in enumerate(product_links, 1):
             if stop_flag:
                 log("\n⏹️ 사용자가 검색을 중단했습니다.", 'warning')
                 break
             
-            log(f"\n{'='*60}", 'info')
             log(f"[{idx}/{len(product_links)}] 상품 정보 수집", 'info')
-            log(f"{'='*60}", 'info')
             
             if callback:
                 callback(f"PROGRESS:{idx}/{len(product_links)}", 'progress')
             
             try:
-                log(f"  → URL: {product_url}", 'info')
-                _page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
-                wait_stable(_page, 2000)
+                page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
+                wait_stable(page, 3000)
                 
-                product_info = extract_product_detail(_page)
+                product_info = extract_product_detail(page)
                 
                 if product_info:
                     product_info['url'] = product_url
@@ -920,9 +1018,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                     log(f"  ✅ 수집 완료: {product_info.get('name', 'N/A')[:50]}", 'success')
                 
                 if idx < len(product_links):
-                    delay = random.uniform(1.5, 3.0)
-                    log(f"  💤 {delay:.1f}초 대기...", 'info')
-                    time.sleep(delay)
+                    time.sleep(random.uniform(2.0, 3.0))
                 
             except Exception as e:
                 log(f"  ❌ 상품 정보 수집 실패: {e}", 'error')
