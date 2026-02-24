@@ -250,88 +250,6 @@ def run_scraper(keyword, max_pages, skip_login=False):
         estimated_items = 0
         current_items = 0
 
-
-# ✅ 무신사 검색 실행 함수 추가
-def run_musinsa_search(keyword, max_pages):
-    """무신사 검색 실행 (Thread-Safe)"""
-    try:
-        log_queue.put({'type': 'log', 'message': f'🟤 무신사 검색 시작: {keyword}', 'level': 'info'})
-        
-        # 콜백 함수: 로그를 큐에 추가
-        def callback(message, level='info'):
-            try:
-                # PROGRESS: 형식 처리
-                if message.startswith('PROGRESS:'):
-                    parts = message.replace('PROGRESS:', '').split('/')
-                    current = int(parts[0])
-                    total = int(parts[1])
-                    
-                    log_queue.put({
-                        'type': 'progress',
-                        'current': current,
-                        'total': total
-                    })
-                
-                # DATA: 형식 처리
-                elif message.startswith('DATA:'):
-                    data_str = message.replace('DATA:', '')
-                    item = json.loads(data_str)
-                    
-                    log_queue.put({
-                        'type': 'data',
-                        'item': item
-                    })
-                
-                # 일반 로그
-                else:
-                    log_queue.put({
-                        'type': 'log',
-                        'message': message,
-                        'level': level
-                    })
-                    
-            except Exception as e:
-                print(f"❌ 콜백 오류: {e}")
-        
-        # 무신사 검색 실행
-        result = musinsa_search.search_musinsa_keyword_detail(
-            keyword=keyword,
-            max_items=max_pages * 10,
-            callback=callback
-        )
-        
-        # 검색 완료
-        if result.get('success'):
-            log_queue.put({
-                'type': 'complete',
-                'data': result.get('results', []),
-                'keyword': keyword,
-                'total_items': result.get('total_items', 0)
-            })
-            
-            log_queue.put({
-                'type': 'log',
-                'message': f"✅ 무신사 검색 완료! {result.get('total_items', 0)}개 수집",
-                'level': 'success'
-            })
-        else:
-            error_msg = result.get('error', '알 수 없는 오류')
-            log_queue.put({
-                'type': 'error',
-                'message': f"❌ 무신사 검색 실패: {error_msg}"
-            })
-            
-    except Exception as e:
-        print(f"\n❌ 무신사 검색 오류: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        log_queue.put({
-            'type': 'error',
-            'message': f"❌ 무신사 검색 오류: {str(e)}"
-        })
-
-
 def run_comparison(products):
     """리스트 비교 작업"""
     global result_data, stop_flag, current_browser, is_working, work_start_time, work_type, estimated_items, current_items
@@ -401,26 +319,55 @@ def run_comparison(products):
         estimated_items = 0
         current_items = 0
             
-def run_musinsa_search(keyword, max_pages):
-    """무신사 검색 작업"""
+
+# ==========================================
+# 무신사 검색 실행 함수
+# ==========================================
+
+def run_musinsa_search(keyword, max_items):
+    """무신사 검색 실행 (스레드)"""
     global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
+    
+    print(f"\n{'='*60}")
+    print(f"🟤 run_musinsa_search 시작")
+    print(f"  keyword: {keyword}")
+    print(f"  max_items: {max_items}")
+    print(f"  max_items 타입: {type(max_items)}")
+    print(f"{'='*60}\n")
     
     is_working = True
     import time as time_module
     work_start_time = time_module.time()
     work_type = 'musinsa'
-    estimated_items = max_pages * 10
+    
+    # ✅ max_items 처리
+    if max_items == 'max':
+        estimated_items = 1000  # 임시 추정값
+    else:
+        try:
+            estimated_items = int(max_items)
+        except:
+            estimated_items = 10
+    
     current_items = 0
     stop_flag = False
     
     try:
+        # ✅ max_items를 그대로 전달 (문자열 'max' 또는 숫자)
         result = musinsa_search.search_musinsa_keyword_detail(
             keyword=keyword,
-            max_items=max_pages * 10,
+            max_items=max_items,  # ✅ 'max' 또는 숫자 그대로 전달
             callback=log_callback
         )
         
+        print(f"\n{'='*60}")
+        print(f"✅ run_musinsa_search 완료")
+        print(f"  성공: {result.get('success')}")
+        print(f"  수집 개수: {result.get('total_items', 0)}")
+        print(f"{'='*60}\n")
+        
         if result.get('success'):
+            # ✅ 스케줄러에 저장
             try:
                 end_time = time_module.time()
                 duration_seconds = int(end_time - work_start_time)
@@ -445,6 +392,7 @@ def run_musinsa_search(keyword, max_pages):
                 import traceback
                 traceback.print_exc()
             
+            # 검색 완료 메시지
             log_queue.put({
                 'type': 'complete',
                 'total_items': result.get('total_items', 0),
@@ -455,7 +403,12 @@ def run_musinsa_search(keyword, max_pages):
                 'type': 'error',
                 'message': result.get('error', '알 수 없는 오류')
             })
+            
     except Exception as e:
+        print(f"\n❌ run_musinsa_search 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        
         if not stop_flag:
             log_queue.put({
                 'type': 'error',
@@ -467,7 +420,6 @@ def run_musinsa_search(keyword, max_pages):
         work_type = None
         estimated_items = 0
         current_items = 0
-
 
 
 # ==========================================
@@ -543,8 +495,35 @@ def check_status():
 def start_search():
     mode = request.args.get('mode', 'poizon')
     keyword = request.args.get('keyword', '')
-    max_pages = int(request.args.get('max_pages', 1))
     skip_login = request.args.get('skip_login', 'false') == 'true'
+    
+    # ✅ max_pages 처리 (POIZON용)
+    max_pages_str = request.args.get('max_pages', '1')
+    try:
+        if max_pages_str and max_pages_str != 'NaN':
+            max_pages = int(max_pages_str)
+        else:
+            max_pages = 1
+    except ValueError:
+        max_pages = 1
+    
+    # ✅ max_items 처리 (무신사용)
+    max_items_str = request.args.get('max_items', 'max')
+    if max_items_str == 'max':
+        max_items = 'max'  # ✅ 문자열 그대로
+    else:
+        try:
+            max_items = int(max_items_str)
+        except ValueError:
+            max_items = 'max'
+    
+    print(f"\n{'='*60}")
+    print(f"📡 /start 라우트 호출:")
+    print(f"  mode: {mode}")
+    print(f"  keyword: {keyword}")
+    print(f"  max_pages: {max_pages}")
+    print(f"  max_items: {max_items} (타입: {type(max_items)})")
+    print(f"{'='*60}\n")
     
     # mode 처리
     if mode == 'keyword':
@@ -556,20 +535,22 @@ def start_search():
     
     # 모드별 처리
     if mode == 'poizon':
+        # POIZON 검색 (max_pages 사용)
         thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
+        thread.daemon = True
+        thread.start()
+        
+    elif mode == 'musinsa':
+        # ✅ 무신사 검색 (max_items 사용)
+        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items))
         thread.daemon = True
         thread.start()
         
     elif mode == 'kream':
         log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
         
-    elif mode == 'musinsa':
-        # ✅ 무신사 검색 활성화
-        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_pages))
-        thread.daemon = True
-        thread.start()
-    
     else:
+        # 기본: POIZON
         thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
         thread.daemon = True
         thread.start()
@@ -585,7 +566,10 @@ def start_search():
             except queue.Empty:
                 yield f"data: {json.dumps({'type': 'ping'})}\n\n"
     
-    return Response(generate(), mimetype='text/event-stream')
+    response = Response(generate(), mimetype='text/event-stream')
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['X-Accel-Buffering'] = 'no'
+    return response
 
 
 @app.route('/upload_excel', methods=['POST'])

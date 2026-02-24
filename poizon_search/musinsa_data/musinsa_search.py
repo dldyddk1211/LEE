@@ -813,7 +813,7 @@ def extract_product_detail(page):
 # ===== 키워드 검색 (상세 정보) ===== #
 ############################
 
-def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
+def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
     """무신사 키워드 검색 + 상품 상세 정보 추출 (무한 스크롤)"""
     global LOG_CALLBACK, stop_flag
     LOG_CALLBACK = callback
@@ -824,7 +824,31 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
     log("=" * 60, 'info')
     
     log(f"📊 검색 키워드: {keyword}", 'info')
-    log(f"📦 수집 목표: {max_items}개\n", 'info')
+    
+    # ✅ max_items 디버깅 로그
+    print(f"\n{'='*60}")
+    print(f"🔍 max_items 확인:")
+    print(f"  값: {max_items}")
+    print(f"  타입: {type(max_items)}")
+    print(f"  문자열 비교: {max_items == 'max'}")
+    print(f"{'='*60}\n")
+    
+    # ✅ max_items 처리 (타입 안전하게)
+    is_max_mode = False
+    max_items_int = 10  # 기본값
+    
+    if isinstance(max_items, str) and max_items.lower() == 'max':
+        is_max_mode = True
+        log(f"📦 수집 목표: 최대 수량 (전체)\n", 'info')
+    else:
+        try:
+            max_items_int = int(max_items)
+            is_max_mode = False
+            log(f"📦 수집 목표: {max_items_int}개\n", 'info')
+        except (ValueError, TypeError):
+            log(f"⚠️ max_items 값이 잘못되었습니다: {max_items}, 기본값 10 사용", 'warning')
+            max_items_int = 10
+            is_max_mode = False
     
     results = []
     
@@ -838,7 +862,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 'results': []
             }
         
-        # ✅ Thread-Local 브라우저 가져오기
+        # 백그라운드 브라우저 시작
         log("🌐 백그라운드 브라우저 시작...", 'info')
         page = get_browser()
         
@@ -849,7 +873,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
         log(f"  → 검색 URL: {search_url}", 'info')
         
         page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
-        wait_stable(page, 1500)
+        wait_stable(page, 3000)
         
         # 로그인 상태 확인
         log("  → 로그인 상태 확인 중...", 'info')
@@ -863,7 +887,7 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
                 
                 return {
                     'success': False,
-                    'error': '로그인 세션 만료',
+                    'error': '로그인 세션 만료. 무신사 모드를 다시 선택하여 로그인해주세요.',
                     'results': []
                 }
             else:
@@ -874,45 +898,64 @@ def search_musinsa_keyword_detail(keyword, max_items=10, callback=None):
         
         log("✅ 검색 페이지 로드 완료", 'success')
         
-        # 검색 결과 총 개수 추출
+        # ✅ 검색 결과 총 개수 추출
         total_count = 0
         
         try:
             log("\n📊 검색 결과 개수 확인 중...", 'info')
             
-            count_selectors = [
-                'span.text-\\[13px\\]',
-                'span[data-mds="Typography"]',
-            ]
+            count_elems = page.locator('span.text-gray-600[data-mds="Typography"]').all()
             
-            for selector in count_selectors:
+            for elem in count_elems:
                 try:
-                    elements = page.locator(selector).all()
+                    text = elem.text_content()
                     
-                    for element in elements:
-                        text = element.text_content()
+                    if '개' in text and any(c.isdigit() for c in text):
+                        log(f"  → 발견된 텍스트: {text}", 'info')
                         
-                        if '개' in text and any(c.isdigit() for c in text):
-                            log(f"  → 발견된 텍스트: {text}", 'info')
+                        import re
+                        numbers = re.findall(r'\d+', text.replace(',', ''))
+                        
+                        if numbers:
+                            total_count = int(''.join(numbers))
+                            log(f"  ✅ 총 검색 결과: {total_count:,}개", 'success')
                             
-                            import re
-                            numbers = re.findall(r'\d+', text.replace(',', ''))
+                            # 검색 결과 개수를 프론트엔드로 전달
+                            if callback:
+                                callback(f"TOTAL_COUNT:{total_count}", 'info')
                             
-                            if numbers:
-                                total_count = int(numbers[0])
-                                log(f"  ✅ 총 검색 결과: {total_count:,}개", 'success')
-                                break
-                    
-                    if total_count > 0:
-                        break
+                            break
                 except:
                     continue
-        except:
-            pass
+                    
+        except Exception as e:
+            log(f"  ⚠️ 검색 결과 개수 추출 실패: {e}", 'warning')
         
-        # 실제 수집할 개수 결정
-        target_count = min(max_items, total_count) if total_count > 0 else max_items
-        log(f"  → 수집 목표: {target_count}개", 'info')
+        # ✅ 실제 수집할 개수 결정 (타입 안전)
+        if is_max_mode:
+            # max 모드
+            if total_count > 0:
+                target_count = total_count
+                log(f"  → 수집 목표: {target_count:,}개 (전체)", 'info')
+            else:
+                target_count = 1000
+                log(f"  → 수집 목표: {target_count}개 (개수 미확인, 제한 설정)", 'warning')
+        else:
+            # 숫자 모드 (둘 다 int이므로 안전하게 비교 가능)
+            if total_count > 0:
+                target_count = min(max_items_int, total_count)
+                log(f"  → 수집 목표: {target_count:,}개 (요청: {max_items_int}, 전체: {total_count:,})", 'info')
+            else:
+                target_count = max_items_int
+                log(f"  → 수집 목표: {target_count:,}개 (전체 개수 미확인)", 'info')
+        
+        print(f"\n{'='*60}")
+        print(f"🎯 최종 수집 목표:")
+        print(f"  is_max_mode: {is_max_mode}")
+        print(f"  total_count: {total_count}")
+        print(f"  target_count: {target_count}")
+        print(f"{'='*60}\n")
+        
         
         # 정렬 변경
         log("\n🔄 정렬 변경 시작...", 'info')

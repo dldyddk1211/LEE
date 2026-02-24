@@ -1,5 +1,355 @@
 [
   {
+    "id": "task_1771956821285",
+    "timestamp": "2026-02-25T03:13:41.285919",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 3,
+    "kream_count": 0,
+    "duration_seconds": 184,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260128/5949607/5949607_17707754784379_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5885336/5885336_17707754498675_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "product_code": "FQ3739-121",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873365/5873365_17681807860247_500.jpg",
+        "name": "캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771956345356",
+    "timestamp": "2026-02-25T03:05:45.356113",
+    "keyword": "무신사_아디다스",
+    "mode": "musinsa",
+    "collected_count": 2,
+    "kream_count": 0,
+    "duration_seconds": 32,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6041194/6041194_17718232716879_500.jpg",
+        "name": "WIND CREW JY8234",
+        "price": 162260,
+        "product_code": "JY8234",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6041194",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      },
+      {
+        "image_url": "",
+        "name": "-",
+        "price": 0,
+        "product_code": "-",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6040682",
+        "source": "MUSINSA",
+        "keyword": "아디다스"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771954859379",
+    "timestamp": "2026-02-25T02:40:59.379119",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 112,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260128/5949607/5949607_17707754784379_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
+        "price": 61720,
+        "product_code": "FQ3739-506",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5949607",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5885336/5885336_17707754498675_500.jpg",
+        "name": "ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
+        "price": 61720,
+        "product_code": "FQ3739-121",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5885336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873365/5873365_17681807860247_500.jpg",
+        "name": "캄 2.0 W - 블랙 / IB7561-001",
+        "price": 56030,
+        "product_code": "IB7561-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873365",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873364/5873364_17681807555849_500.jpg",
+        "name": "캄 2.0 M - 리넨 / IB0183-200",
+        "price": 56030,
+        "product_code": "IB0183-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873364",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022888/6022888_17709489095368_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 화이트",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022888",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022885/6022885_17709489042181_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 핑크",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022885",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022891/6022891_17709489185576_500.jpg",
+        "name": "나이키오버사이즈윈드러너 (토들러) 핑크",
+        "price": 68970,
+        "product_code": "A261JK115P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022891",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022884/6022884_17709488989381_500.jpg",
+        "name": "나이키컬러블럭윈드러너 (토들러) 블랙",
+        "price": 76710,
+        "product_code": "A261JK162P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022884",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022880/6022880_17709488882659_500.jpg",
+        "name": "나이키체리윈드러너 (토들러) 아이보리",
+        "price": 84460,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022880",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260213/6022878/6022878_17709488829892_500.jpg",
+        "name": "나이키체리윈드러너 (토들러) 네이비",
+        "price": 84460,
+        "product_code": "A261JK189P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6022878",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771954643107",
+    "timestamp": "2026-02-25T02:37:23.107158",
+    "keyword": "무신사_조던패딩",
+    "mode": "musinsa",
+    "collected_count": 10,
+    "kream_count": 0,
+    "duration_seconds": 112,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686559/5686559_17625039510785_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (주니어) 블랙",
+        "price": 92360,
+        "product_code": "N254VE388P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686559",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686557/5686557_17625039558721_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (토들러) 실버",
+        "price": 79980,
+        "product_code": "N254VE188P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686557",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686554/5686554_17625039609240_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (토들러) 블랙",
+        "price": 79980,
+        "product_code": "N254VE188P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686554",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686553/5686553_17625039659435_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (주니어) 실버",
+        "price": 92360,
+        "product_code": "N254VE388P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686553",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251017/5609645/5609645_17615342047915_500.jpg",
+        "name": "조던 플라이트 마운틴사이드 패딩 팬츠 M - 블랙:다크 스모크 그레이 / HV0731-010",
+        "price": 140990,
+        "product_code": "HV0731-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5609645",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251014/5590711/5590711_17606683914754_500.jpg",
+        "name": "조던 브루클린 퀼팅 패딩 재킷 W - 라이트 오어우드 브라운:화이트 / HV0418-104",
+        "price": 125500,
+        "product_code": "HV0418-104",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5590711",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250912/5450633/5450633_17604870837584_500.jpg",
+        "name": "조던 플라이트 패딩 마운틴사이드 풀오버 후디 M - 블랙:다크 스모크 그레이 / HV1864-010",
+        "price": 129960,
+        "product_code": "HV1864-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5450633",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251021/5619405/5619405_17610232067882_500.jpg",
+        "name": "조던후드다운베스트 (주니어) 블랙",
+        "price": 107710,
+        "product_code": "N254VE330P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5619405",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251021/5619403/5619403_17610232022561_500.jpg",
+        "name": "조던다운베스트 (토들러) 블랙",
+        "price": 92210,
+        "product_code": "N254VE144P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5619403",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251021/5619398/5619398_17610231964774_500.jpg",
+        "name": "조던다운베스트 (주니어) 블랙",
+        "price": 107710,
+        "product_code": "N254VE344P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5619398",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1771952536909",
+    "timestamp": "2026-02-25T02:02:16.909772",
+    "keyword": "무신사_조던패딩",
+    "mode": "musinsa",
+    "collected_count": 4,
+    "kream_count": 0,
+    "duration_seconds": 49,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686559/5686559_17625039510785_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (주니어) 블랙",
+        "price": 92360,
+        "product_code": "N254VE388P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686559",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686557/5686557_17625039558721_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (토들러) 실버",
+        "price": 79980,
+        "product_code": "N254VE188P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686557",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686554/5686554_17625039609240_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (토들러) 블랙",
+        "price": 79980,
+        "product_code": "N254VE188P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686554",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251105/5686553/5686553_17625039659435_500.jpg",
+        "name": "조던샤이니모노그램다운베스트 (주니어) 실버",
+        "price": 92360,
+        "product_code": "N254VE388P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5686553",
+        "source": "MUSINSA",
+        "keyword": "조던패딩"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1771951157007",
     "timestamp": "2026-02-25T01:39:17.007019",
     "keyword": "무신사_나이키",

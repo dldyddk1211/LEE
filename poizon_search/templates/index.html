@@ -1343,17 +1343,12 @@
       const modeId = 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
       const modeBtn = document.getElementById(modeId);
       
-      console.log('모드 버튼 ID:', modeId);
-      
       if (modeBtn) {
         modeBtn.classList.add('active');
-        console.log('✅ 모드 버튼 활성화 완료');
-      } else {
-        console.error('❌ 버튼을 찾을 수 없음:', modeId);
       }
       
       const keywordInput = document.getElementById('keyword');
-      const maxPagesInput = document.getElementById('maxPages');
+      const maxPagesElement = document.getElementById('maxPages');  // ✅ 변수명 변경
       const startBtn = document.getElementById('startBtn');
       
       // ✅ 시작 버튼 기존 모드 클래스 제거
@@ -1366,19 +1361,31 @@
       if (mode === 'poizon') {
         startBtnText = '🟣 포이즌 검색 시작';
         startBtnClass = 'mode-poizon';
+        
+        // ✅ POIZON: 기존 방식 (1페이지 10건)
+        maxPagesElement.value = '1';
+        maxPagesElement.type = 'number';
+        maxPagesElement.parentElement.querySelector('label').textContent = '검색 페이지 수 (1페이지 10건)';
+        maxPagesElement.parentElement.querySelector('.hint').textContent = '접속 완료 후 설정 가능합니다';
+        
       } else if (mode === 'musinsa') {
         startBtnText = '🟤 무신사 검색 시작';
         startBtnClass = 'mode-musinsa';
+        
+        // ✅ 무신사: max 방식 (1페이지 20건)
+        maxPagesElement.value = 'max';
+        maxPagesElement.type = 'text';
+        maxPagesElement.parentElement.querySelector('label').textContent = '검색 수량 (최대 = 전체)';
+        maxPagesElement.parentElement.querySelector('.hint').textContent = 'max = 검색 결과 전체, 숫자 = 해당 개수만 수집 (1페이지 = 20건)';
+        
       } else if (mode === 'kream') {
         startBtnText = '🛒 크림 검색 시작';
         startBtnClass = 'mode-kream';
+        
       } else if (mode === 'compare') {
         startBtnText = '📋 리스트 비교 시작';
         startBtnClass = 'mode-compare';
       }
-      
-      console.log('시작 버튼 텍스트:', startBtnText);
-      console.log('시작 버튼 클래스:', startBtnClass);
       
       // ✅ 텍스트 설정
       startBtn.textContent = startBtnText;
@@ -1387,9 +1394,6 @@
       if (startBtnClass) {
         startBtn.classList.add(startBtnClass);
       }
-      
-      console.log('시작 버튼 실제 텍스트:', startBtn.textContent);
-      console.log('시작 버튼 클래스 목록:', startBtn.classList.toString());
       
       // 모드별 UI 설정
       if (mode === 'compare') {
@@ -1401,7 +1405,7 @@
       } else {
         keywordInput.disabled = false;
         keywordInput.parentElement.style.display = 'block';
-        maxPagesInput.disabled = false;
+        maxPagesElement.disabled = false;
         startBtn.style.display = 'block';
         startBtn.disabled = false;
         document.getElementById('uploadLabel').style.display = 'none';
@@ -1424,9 +1428,6 @@
       addLog(`💡 키워드를 입력하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
       
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('activateMode 완료');
-      console.log('현재 selectedMode:', selectedMode);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
 
     function startCollection() {
@@ -1436,11 +1437,12 @@
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       
       const keyword = document.getElementById('keyword').value.trim();
-      const maxPages = parseInt(document.getElementById('maxPages').value, 10);
+      const maxPagesValue = document.getElementById('maxPages').value;
       
       console.log('키워드:', keyword);
-      console.log('페이지 수:', maxPages);
-      
+      console.log('maxPagesValue:', maxPagesValue);
+      console.log('maxPagesValue 타입:', typeof maxPagesValue);
+          
       // 모드가 선택되지 않았으면 알림
       if (!selectedMode) {
         console.error('❌ 모드가 선택되지 않음!');
@@ -1453,11 +1455,22 @@
       // ✅ 모드별 로직 분리
       if (selectedMode === 'poizon') {
         console.log('→ startPoizonSearch() 호출');
+        
+        const maxPages = parseInt(maxPagesValue, 10);
+        if (isNaN(maxPages) || maxPages < 1) {
+          alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
+          document.getElementById('maxPages').focus();
+          return;
+        }
+        
         startPoizonSearch(keyword, maxPages);
         
       } else if (selectedMode === 'musinsa') {
         console.log('→ startMusinsaSearch() 호출');
-        startMusinsaSearch(keyword, maxPages);
+        console.log('  maxPagesValue:', maxPagesValue);
+        
+        // ✅ 무신사는 maxPagesValue를 그대로 전달 (함수 내부에서 체크)
+        startMusinsaSearch(keyword, maxPagesValue);
         
       } else if (selectedMode === 'kream') {
         console.log('→ 크림 모드 (비활성)');
@@ -1474,6 +1487,8 @@
       
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
+
+
     // ✅ POIZON 검색 함수 (새로 분리)
     function startPoizonSearch(keyword, maxPages) {
       // 로그인 체크
@@ -1488,6 +1503,12 @@
         return;
       }
       
+      // ✅ POIZON은 기존 방식 유지 (페이지 단위)
+      const numPages = parseInt(maxPages);
+      if (isNaN(numPages) || numPages < 1) {
+        alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
+        return;
+      }
       // 기존 이벤트 소스 닫기
       if (eventSource) eventSource.close();
       
@@ -2161,8 +2182,15 @@
     
     console.log('✅ 데이터 로드 완료!');
   };
+
+  function startMusinsaSearch(keyword, maxPagesValue) {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🟤 startMusinsaSearch 호출');
+    console.log('  keyword:', keyword);
+    console.log('  maxPagesValue:', maxPagesValue);
+    console.log('  maxPagesValue 타입:', typeof maxPagesValue);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
-  function startMusinsaSearch(keyword, maxPages) {
     // 로그인 체크
     if (!isMusinsaLoggedIn) {
       alert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
@@ -2170,10 +2198,41 @@
     }
     
     // 키워드 체크
-    if (!keyword) {
+    if (!keyword || keyword.trim() === '') {
       alert('⚠️ 검색 키워드를 입력해주세요!');
       return;
     }
+    
+    // ✅ 검색 수량 빈칸 체크
+    if (!maxPagesValue || maxPagesValue.trim() === '') {
+      alert('⚠️ 검색 수량을 입력해주세요!\n\n"max" = 전체 수집\n숫자 = 해당 개수만 수집');
+      document.getElementById('maxPages').focus();
+      return;
+    }
+    
+    const maxPagesInput = maxPagesValue.trim();
+    console.log('  → trim 후:', maxPagesInput);
+    
+    // ✅ maxPagesInput 처리 (무신사 전용)
+    let targetCount;
+    
+    if (maxPagesInput.toLowerCase() === 'max') {
+      targetCount = 'max';
+      console.log('  ✅ 전체 수집 모드 (max)');
+    } else {
+      // 숫자인 경우
+      const numPages = parseInt(maxPagesInput);
+      if (isNaN(numPages) || numPages < 1) {
+        alert('⚠️ 검색 수량은 "max" 또는 1 이상의 숫자여야 합니다!\n\n예시:\n- max (전체 수집)\n- 5 (100개 수집)\n- 10 (200개 수집)');
+        document.getElementById('maxPages').focus();
+        return;
+      }
+      
+      targetCount = numPages * 20;  // ✅ 1페이지 = 20건
+      console.log(`  ✅ ${numPages}페이지 = ${targetCount}개`);
+    }
+    
+    console.log('  → 최종 targetCount:', targetCount);
     
     // 기존 이벤트 소스 닫기
     if (eventSource) eventSource.close();
@@ -2188,18 +2247,27 @@
     document.getElementById('stopBtn').style.display = 'block';
     
     addLog(`🟤 무신사 검색 시작: "${keyword}"`, 'info');
+    if (targetCount === 'max') {
+      addLog(`📦 수집 모드: 전체 수집`, 'info');
+    } else {
+      addLog(`📦 수집 모드: ${targetCount}개`, 'info');
+    }
     
-    // SSE 시작
-    let url = `/start?mode=musinsa&max_pages=${maxPages}&skip_login=true`;
-    if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+    // ✅ SSE URL 생성 (디버깅 추가)
+    let url = `/start?mode=musinsa&skip_login=true`;
+    url += `&keyword=${encodeURIComponent(keyword)}`;
+    url += `&max_items=${targetCount}`;
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📡 SSE URL:', url);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     eventSource = new EventSource(url);
-   
+    
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-    // ✅ 디버깅 로그 추가
-    console.log('📩 무신사 SSE 이벤트:', data);
+      
+      console.log('📩 무신사 SSE 이벤트:', data);
       
       if (data.type === 'log') addLog(data.message, data.level || 'info');
       if (data.type === 'progress') updateProgress(data.current, data.total);
@@ -2209,7 +2277,7 @@
       }
 
       if (data.type === 'complete') {
-        console.log('✅ complete 이벤트 수신!'); // ✅ 추가
+        console.log('✅ complete 이벤트 수신!');
         addLog('✅ 무신사 검색 완료!', 'success');
         
         if (data.data && Array.isArray(data.data)) {
@@ -2217,11 +2285,7 @@
           renderTable();
         }
 
-        // ✅ 무신사 검색 옵션 표시 (여기가 빠져있었음!)
-        console.log('🔍 musinsaSearchOptions 표시 시도...'); // ✅ 추가
         document.getElementById('musinsaSearchOptions').style.display = 'block';
-        console.log('musinsaSearchOptions.display:', document.getElementById('musinsaSearchOptions').style.display); // ✅ 추가
-        
         document.getElementById('resetBtn').style.display = 'block';
         setModeButtonsEnabled(true);
         document.getElementById('stopBtn').style.display = 'none';
@@ -2232,23 +2296,25 @@
         eventSource = null;
       }
     };
-  
-      eventSource.onerror = (error) => {
-        console.error('EventSource 오류:', error);
-        addLog('❌ 연결 오류 발생', 'error');
-        
-        eventSource.close();
-        eventSource = null;
-        
-        document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('resetBtn').style.display = 'block';
-        setModeButtonsEnabled(true);
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('startBtn').textContent = '🟤 무신사 검색 시작';
-      };
-    }
+
+    eventSource.onerror = (error) => {
+      console.error('EventSource 오류:', error);
+      addLog('❌ 연결 오류 발생', 'error');
+      
+      eventSource.close();
+      eventSource = null;
+      
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'block';
+      setModeButtonsEnabled(true);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = '🟤 무신사 검색 시작';
+    };
     
-    function performPoizonLogin(mode) {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+  function performPoizonLogin(mode) {
     addLog('🔄 POIZON 로그인 시작...', 'info');
     addLog('💡 브라우저가 자동으로 열립니다', 'info');
     
