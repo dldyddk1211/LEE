@@ -873,7 +873,7 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
         log(f"  → 검색 URL: {search_url}", 'info')
         
         page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
-        wait_stable(page, 3000)
+        wait_stable(page, 2000)
         
         # 로그인 상태 확인
         log("  → 로그인 상태 확인 중...", 'info')
@@ -955,26 +955,32 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
         print(f"  total_count: {total_count}")
         print(f"  target_count: {target_count}")
         print(f"{'='*60}\n")
-        
-        
-        # 정렬 변경
-        log("\n🔄 정렬 변경 시작...", 'info')
-        
-        try:
-            sort_button = page.locator('span:has-text("무신사 추천순")').first
-            
-            if sort_button.count() > 0:
-                sort_button.click()
-                wait_stable(page, 1500)
-                
-                new_item_option = page.locator('span:has-text("신상품(재입고)순")').first
-                
-                if new_item_option.count() > 0:
-                    new_item_option.click()
-                    wait_stable(page, 1500)
-                    log("  ✅ 정렬 변경 완료!", 'success')
-        except:
-            log("  ⚠️ 정렬 변경 실패", 'warning')
+         
+
+        # ❌ 정렬 변경 제거 (추천순 그대로 사용)
+        # log("\n🔄 정렬 변경 시작...", 'info')
+        # 
+        # try:
+        #     sort_button = page.locator('span:has-text("무신사 추천순")').first
+        #     
+        #     if sort_button.count() > 0:
+        #         sort_button.click()
+        #         wait_stable(page, 1500)
+        #         
+        #         new_item_option = page.locator('span:has-text("신상품(재입고)순")').first
+        #         
+        #         if new_item_option.count() > 0:
+        #             new_item_option.click()
+        #             wait_stable(page, 1500)
+        #             log("  ✅ 정렬 변경 완료!", 'success')
+        # except:
+        #     log("  ⚠️ 정렬 변경 실패", 'warning')
+
+        # ✅ 추천순 그대로 사용
+        log("\n📊 무신사 추천순으로 수집합니다", 'info')
+
+        # 무한 스크롤로 상품 링크 수집
+        log("\n🔄 무한 스크롤 시작...", 'info')
         
         # 무한 스크롤로 상품 링크 수집
         log("\n🔄 무한 스크롤 시작...", 'info')
@@ -1044,7 +1050,7 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
             
             try:
                 page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
-                wait_stable(page, 3000)
+                wait_stable(page, 1500)
                 
                 product_info = extract_product_detail(page)
                 
@@ -1061,7 +1067,7 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
                     log(f"  ✅ 수집 완료: {product_info.get('name', 'N/A')[:50]}", 'success')
                 
                 if idx < len(product_links):
-                    time.sleep(random.uniform(2.0, 3.0))
+                    time.sleep(random.uniform(1.0, 2.0))
                 
             except Exception as e:
                 log(f"  ❌ 상품 정보 수집 실패: {e}", 'error')
