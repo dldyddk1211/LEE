@@ -67,6 +67,9 @@ except ImportError:
 
 app = Flask(__name__)
 
+app.secret_key = 'inventory_secret_key_2024!'  # 아무 문자열이나 가능
+
+
 # ✅ 스케줄러 Blueprint 등록
 try:
     from scheduler_data.scheduler_api import scheduler_bp, save_task_to_history
@@ -1055,6 +1058,16 @@ def check_poizon_login():
             'logged_in': False,
             'message': f'오류: {str(e)}'
         }), 500
+
+
+
+# 구글 시트 자동 동기화 시작
+try:
+    from inventory_data.sheets_sync import sync_once, start_sync_background
+    start_sync_background()
+    print("✅ 구글 시트 자동 동기화 시작")
+except Exception as e:
+    print(f"⚠️ 시트 동기화 시작 실패: {e}")
 
 # ==========================================
 # 서버 시작

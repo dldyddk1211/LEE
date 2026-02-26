@@ -1,231 +1,794 @@
-import os
-import json
-import sqlite3
-from datetime import datetime
-from flask import Blueprint, jsonify, request, send_file
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재고관리 시스템</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
 
-# Blueprint 생성
-inventory_bp = Blueprint('inventory', __name__, url_prefix='/api/inventory')
+  /* 잠금 화면 */
+  #lock-screen {
+    position: fixed; inset: 0; background: #0f1117;
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .lock-box {
+    background: #1a1d27; border: 1px solid #2d3148; border-radius: 20px;
+    padding: 48px 40px; width: 380px; text-align: center; animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  .lock-icon { font-size: 52px; margin-bottom: 16px; }
+  .lock-title { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .lock-sub { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+  #lock-input {
+    width: 100%; padding: 14px 18px; background: #12151f; border: 1px solid #2d3148;
+    border-radius: 10px; color: #e2e8f0; font-size: 18px; font-family: inherit;
+    outline: none; text-align: center; letter-spacing: 3px; transition: border-color 0.2s; margin-bottom: 14px;
+  }
+  #lock-input:focus { border-color: #6366f1; }
+  #lock-input.shake { animation: shake 0.35s ease; border-color: #dc2626; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-10px);} 60%{transform:translateX(10px);} }
+  #lock-btn {
+    width: 100%; padding: 14px; background: #6366f1; color: #fff; border: none;
+    border-radius: 10px; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer; transition: background 0.2s;
+  }
+  #lock-btn:hover { background: #5558e3; }
+  #lock-btn:disabled { background: #3d3f5c; cursor: not-allowed; }
+  #lock-error { margin-top: 14px; font-size: 13px; color: #f87171; min-height: 20px; }
 
-# 경로 설정
-INVENTORY_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(INVENTORY_DIR, 'inventory.db')
+  /* 메인 */
+  #main-wrap { display: none; }
 
-# ==========================================
-# 데이터베이스 초기화
-# ==========================================
+  .header {
+    background: #1a1d27; border-bottom: 1px solid #2d3148;
+    padding: 14px 24px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .header h1 span { color: #6366f1; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
 
-def init_db():
-    """데이터베이스 테이블 생성"""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    
-    # 재고 테이블
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_code TEXT UNIQUE NOT NULL,
-            name TEXT NOT NULL,
-            category TEXT,
-            brand TEXT,
-            quantity INTEGER DEFAULT 0,
-            price INTEGER DEFAULT 0,
-            location TEXT,
-            notes TEXT,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # 입출고 기록 테이블
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_id INTEGER NOT NULL,
-            type TEXT NOT NULL,
-            quantity INTEGER NOT NULL,
-            before_qty INTEGER,
-            after_qty INTEGER,
-            reason TEXT,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (product_id) REFERENCES products (id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
-    print("✅ 재고관리 DB 초기화 완료")
+  /* 탭 */
+  .tabs {
+    display: flex; gap: 4px; background: #12151f;
+    padding: 4px; border-radius: 10px; margin-right: 8px;
+  }
+  .tab-btn {
+    padding: 7px 16px; border: none; border-radius: 7px;
+    font-size: 13px; font-family: inherit; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; color: #64748b; background: transparent;
+  }
+  .tab-btn.active { background: #6366f1; color: #fff; }
+  .tab-btn:hover:not(.active) { color: #e2e8f0; }
 
-# 앱 시작 시 DB 초기화
-init_db()
+  .logout-btn {
+    padding: 7px 14px; background: transparent; border: 1px solid #2d3148;
+    border-radius: 8px; color: #64748b; font-size: 13px; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: #dc2626; color: #f87171; }
 
-# ==========================================
-# HTML 페이지 제공
-# ==========================================
+  /* 요약 카드 */
+  .summary-bar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; padding: 16px 24px; background: #0f1117;
+  }
+  .summary-card {
+    background: #1a1d27; border: 1px solid #2d3148; border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .summary-card .label { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+  .summary-card .value { font-size: 20px; font-weight: 700; color: #fff; }
+  .summary-card .value.green { color: #34d399; }
+  .summary-card .value.blue  { color: #60a5fa; }
+  .summary-card .value.yellow{ color: #fbbf24; }
 
-@inventory_bp.route('/page')
-def serve_inventory_page():
-    """재고관리 HTML 페이지 제공"""
-    try:
-        html_path = os.path.join(INVENTORY_DIR, 'inventory.html')
-        
-        if os.path.exists(html_path):
-            return send_file(html_path)
-        else:
-            return jsonify({'error': 'inventory.html 파일을 찾을 수 없습니다'}), 404
-            
-    except Exception as e:
-        print(f"❌ HTML 제공 오류: {e}")
-        return jsonify({'error': str(e)}), 500
+  .container { padding: 0 24px 24px; }
 
-# ==========================================
-# API 엔드포인트
-# ==========================================
+  /* 툴바 */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px; flex-wrap: wrap; padding-top: 16px;
+  }
+  .search-box { flex: 1; min-width: 200px; position: relative; }
+  .search-box input {
+    width: 100%; padding: 9px 14px 9px 38px; background: #1a1d27;
+    border: 1px solid #2d3148; border-radius: 8px; color: #e2e8f0;
+    font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: #6366f1; }
+  .search-box::before { content:'🔍'; position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:13px; }
 
-@inventory_bp.route('/products', methods=['GET'])
-def get_products():
-    """전체 상품 목록 조회"""
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM products ORDER BY updated_at DESC')
-        products = [dict(row) for row in cursor.fetchall()]
-        
-        conn.close()
-        
-        return jsonify({
-            'success': True,
-            'products': products
-        })
-    except Exception as e:
-        print(f"상품 조회 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  .btn {
+    padding: 9px 16px; border: none; border-radius: 8px; font-size: 13px;
+    font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #5558e3; }
+  .btn-success { background: #059669; color: #fff; }
+  .btn-success:hover { background: #047857; }
+  .btn-danger  { background: #dc2626; color: #fff; }
+  .btn-danger:hover  { background: #b91c1c; }
+  .btn-ghost { background: #1a1d27; color: #94a3b8; border: 1px solid #2d3148; }
+  .btn-ghost:hover { border-color: #6366f1; color: #6366f1; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
 
-@inventory_bp.route('/product/<int:product_id>', methods=['GET'])
-def get_product(product_id):
-    """특정 상품 조회"""
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute('SELECT * FROM products WHERE id = ?', (product_id,))
-        product = cursor.fetchone()
-        
-        conn.close()
-        
-        if product:
-            return jsonify({'success': True, 'product': dict(product)})
-        else:
-            return jsonify({'success': False, 'error': '상품을 찾을 수 없습니다'}), 404
-            
-    except Exception as e:
-        print(f"상품 조회 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  select.filter-select {
+    padding: 9px 12px; background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 8px; color: #e2e8f0; font-size: 13px; font-family: inherit; outline: none; cursor: pointer;
+  }
 
-@inventory_bp.route('/product', methods=['POST'])
-def add_product():
-    """새 상품 추가"""
-    try:
-        data = request.json
-        
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            INSERT INTO products 
-            (product_code, name, category, brand, quantity, price, location, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            data['product_code'],
-            data['name'],
-            data.get('category', ''),
-            data.get('brand', ''),
-            data.get('quantity', 0),
-            data.get('price', 0),
-            data.get('location', ''),
-            data.get('notes', '')
-        ))
-        
-        conn.commit()
-        product_id = cursor.lastrowid
-        conn.close()
-        
-        return jsonify({
-            'success': True,
-            'message': '상품이 추가되었습니다',
-            'product_id': product_id
-        })
-        
-    except sqlite3.IntegrityError:
-        return jsonify({'success': False, 'error': '이미 존재하는 상품코드입니다'}), 400
-    except Exception as e:
-        print(f"상품 추가 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  /* 테이블 */
+  .table-wrap {
+    background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 12px; overflow: auto; max-height: calc(100vh - 320px);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #12151f; position: sticky; top: 0; z-index: 10; }
+  th {
+    padding: 12px 14px; text-align: left; color: #64748b;
+    font-weight: 500; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.05em; border-bottom: 1px solid #2d3148; white-space: nowrap;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1e2235; vertical-align: middle; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1e2235; }
 
-@inventory_bp.route('/product/<int:product_id>', methods=['PUT'])
-def update_product(product_id):
-    """상품 정보 수정"""
-    try:
-        data = request.json
-        
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            UPDATE products 
-            SET name=?, category=?, brand=?, price=?, location=?, notes=?, updated_at=?
-            WHERE id=?
-        ''', (
-            data['name'],
-            data.get('category', ''),
-            data.get('brand', ''),
-            data.get('price', 0),
-            data.get('location', ''),
-            data.get('notes', ''),
-            datetime.now().isoformat(),
-            product_id
-        ))
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'message': '상품 정보가 수정되었습니다'})
-        
-    except Exception as e:
-        print(f"상품 수정 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  .badge {
+    display: inline-block; padding: 3px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge-green  { background: rgba(5,150,105,0.15); color: #34d399; }
+  .badge-yellow { background: rgba(217,119,6,0.15);  color: #fbbf24; }
+  .badge-red    { background: rgba(220,38,38,0.15);  color: #f87171; }
+  .badge-blue   { background: rgba(96,165,250,0.15); color: #60a5fa; }
+  .badge-gray   { background: rgba(100,116,139,0.15);color: #94a3b8; }
 
-@inventory_bp.route('/product/<int:product_id>', methods=['DELETE'])
-def delete_product(product_id):
-    """상품 삭제"""
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
-        
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'message': '상품이 삭제되었습니다'})
-        
-    except Exception as e:
-        print(f"상품 삭제 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .num.pos { color: #34d399; }
+  .num.neg { color: #f87171; }
 
-@inventory_bp.route('/import/sheets', methods=['POST'])
-def import_from_sheets():
-    """구글 스프레드시트에서 데이터 가져오기"""
-    try:
-        # TODO: 구글 스프레드시트 API 연동
-        return jsonify({
-            'success': False,
-            'error': '아직 구현되지 않았습니다'
-        }), 501
-        
-    except Exception as e:
-        print(f"시트 가져오기 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+  .empty-state { text-align: center; padding: 60px 20px; color: #4a5568; }
+  .empty-state p { margin-top: 10px; font-size: 14px; }
+
+  /* 페이징 */
+  .pagination {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 16px; font-size: 13px; color: #94a3b8;
+  }
+  .page-btn {
+    padding: 6px 12px; background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 6px; color: #94a3b8; font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .page-btn:hover { border-color: #6366f1; color: #6366f1; }
+  .page-btn.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .sync-info { font-size: 11px; color: #4a5568; }
+
+  /* 모달 */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; }
+  .modal-overlay.active { display:flex; }
+  .modal { background:#1a1d27; border:1px solid #2d3148; border-radius:16px; width:500px; max-width:95vw; max-height:90vh; overflow-y:auto; padding:28px; }
+  .modal-title { font-size:18px; font-weight:700; margin-bottom:24px; color:#fff; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; margin-bottom:6px; font-size:13px; color:#94a3b8; }
+  .form-group input, .form-group textarea {
+    width:100%; padding:10px 14px; background:#12151f; border:1px solid #2d3148;
+    border-radius:8px; color:#e2e8f0; font-size:14px; font-family:inherit; outline:none; transition:border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color:#6366f1; }
+  .form-group textarea { resize:vertical; min-height:80px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; }
+
+  /* 토스트 */
+  .toast {
+    position:fixed; bottom:24px; right:24px; padding:12px 20px; border-radius:10px;
+    font-size:14px; font-weight:500; z-index:9999;
+    transform:translateY(100px); opacity:0; transition:all 0.3s; pointer-events:none;
+  }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.success { background:#059669; color:#fff; }
+  .toast.error   { background:#dc2626; color:#fff; }
+  .toast.info    { background:#3b82f6; color:#fff; }
+
+  .spinner {
+    display:inline-block; width:16px; height:16px;
+    border:2px solid #2d3148; border-top-color:#6366f1;
+    border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .required { color:#f87171; }
+</style>
+</head>
+<body>
+
+<!-- 잠금 화면 -->
+<div id="lock-screen">
+  <div class="lock-box">
+    <div class="lock-icon">🔐</div>
+    <div class="lock-title">재고관리 시스템</div>
+    <div class="lock-sub">비밀번호를 입력하세요</div>
+    <input type="password" id="lock-input" placeholder="비밀번호" maxlength="30"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <button id="lock-btn" onclick="doLogin()">입력</button>
+    <div id="lock-error"></div>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div id="main-wrap">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>📦 <span>재고</span>관리 시스템</h1>
+    <div class="header-right">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('sales')">📋 판매내역</button>
+        <button class="tab-btn" onclick="switchTab('products')">📦 재고관리</button>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">🔒 잠금</button>
+    </div>
+  </div>
+
+  <!-- 요약 카드 -->
+  <div class="summary-bar" id="summary-bar">
+    <div class="summary-card">
+      <div class="label">총 건수</div>
+      <div class="value blue" id="sum-count">-</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">총 판매금액</div>
+      <div class="value" id="sum-sale">-</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">총 원가</div>
+      <div class="value yellow" id="sum-cost">-</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">총 마진</div>
+      <div class="value green" id="sum-margin">-</div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- 판매내역 탭 -->
+    <div id="tab-sales">
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="sales-search" placeholder="상품명, 품번, 브랜드, 구매자 검색..." onkeydown="if(event.key==='Enter') searchSales()">
+        </div>
+        <select class="filter-select" id="brand-filter" onchange="searchSales()">
+          <option value="">전체 브랜드</option>
+        </select>
+        <select class="filter-select" id="status-filter" onchange="searchSales()">
+          <option value="">전체 상태</option>
+        </select>
+        <button class="btn btn-success" onclick="doSync()">🔄 동기화</button>
+        <span class="sync-info" id="sync-info"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>순번</th>
+              <th>일자</th>
+              <th>판매일자</th>
+              <th>브랜드</th>
+              <th>상품명</th>
+              <th>품번</th>
+              <th>사이즈</th>
+              <th>수량</th>
+              <th>상태</th>
+              <th>판매사이트</th>
+              <th>판매금액</th>
+              <th>최저가</th>
+              <th>입금금액</th>
+              <th>원가</th>
+              <th>마진</th>
+              <th>마진률</th>
+              <th>입금확인</th>
+              <th>구매자</th>
+              <th>결제내역</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody id="sales-tbody">
+            <tr><td colspan="20" style="text-align:center;padding:40px;color:#4a5568;">
+              <span class="spinner"></span> 로딩 중...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="sales-pagination"></div>
+    </div>
+
+    <!-- 재고관리 탭 -->
+    <div id="tab-products" style="display:none;">
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="prod-search" placeholder="상품코드, 상품명, 브랜드 검색..." oninput="filterProducts()">
+        </div>
+        <select class="filter-select" id="category-filter" onchange="filterProducts()">
+          <option value="">전체 카테고리</option>
+        </select>
+        <button class="btn btn-primary" onclick="openAddModal()">+ 상품 추가</button>
+        <button class="btn btn-ghost" onclick="loadProducts()">🔄 새로고침</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>상품코드</th><th>상품명</th><th>카테고리</th><th>브랜드</th>
+              <th>재고수량</th><th>단가</th><th>위치</th><th>수정일</th><th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="product-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:#4a5568;">
+              <span class="spinner"></span> 로딩 중...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 상품 추가/수정 모달 -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">상품 추가</div>
+    <input type="hidden" id="edit-id">
+    <div class="form-group">
+      <label>상품코드 <span class="required">*</span></label>
+      <input type="text" id="f-code" placeholder="예: NK-AIR-001">
+    </div>
+    <div class="form-group">
+      <label>상품명 <span class="required">*</span></label>
+      <input type="text" id="f-name" placeholder="상품명을 입력하세요">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>카테고리</label>
+        <input type="text" id="f-category" placeholder="예: 신발">
+      </div>
+      <div class="form-group">
+        <label>브랜드</label>
+        <input type="text" id="f-brand" placeholder="예: Nike">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>재고수량</label>
+        <input type="number" id="f-quantity" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>단가 (원)</label>
+        <input type="number" id="f-price" value="0" min="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>보관위치</label>
+      <input type="text" id="f-location" placeholder="예: A-1-3">
+    </div>
+    <div class="form-group">
+      <label>메모</label>
+      <textarea id="f-notes" placeholder="기타 메모사항"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveProduct()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/inventory';
+let allProducts = [];
+let currentTab = 'sales';
+let salesPage = 1;
+const salesLimit = 100;
+
+// ==========================================
+// 초기화
+// ==========================================
+document.addEventListener('DOMContentLoaded', async () => {
+  const res = await fetch(`${API}/check_auth`).catch(() => null);
+  if (res && res.ok) {
+    const data = await res.json();
+    data.authenticated ? showMain() : showLock();
+  } else {
+    showLock();
+  }
+});
+
+// ==========================================
+// 로그인 / 로그아웃
+// ==========================================
+async function doLogin() {
+  const input = document.getElementById('lock-input');
+  const btn   = document.getElementById('lock-btn');
+  const errEl = document.getElementById('lock-error');
+  const pw    = input.value;
+  if (!pw) return;
+
+  btn.disabled = true;
+  btn.textContent = '확인 중...';
+  errEl.textContent = '';
+
+  try {
+    const res  = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    if (data.success) {
+      input.value = '';
+      showMain();
+    } else {
+      errEl.textContent = '❌ 비밀번호가 틀렸습니다';
+      input.value = '';
+      input.classList.add('shake');
+      setTimeout(() => input.classList.remove('shake'), 400);
+      input.focus();
+    }
+  } catch (e) {
+    errEl.textContent = '서버 연결 오류';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '입력';
+  }
+}
+
+async function doLogout() {
+  await fetch(`${API}/logout`, { method: 'POST' });
+  showLock();
+}
+
+function showLock() {
+  document.getElementById('lock-screen').style.display = 'flex';
+  document.getElementById('main-wrap').style.display = 'none';
+  setTimeout(() => document.getElementById('lock-input').focus(), 100);
+}
+
+function showMain() {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('main-wrap').style.display = 'block';
+  loadSales();
+  loadSummary();
+}
+
+// ==========================================
+// 탭 전환
+// ==========================================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'sales') || (i === 1 && tab === 'products'));
+  });
+  document.getElementById('tab-sales').style.display    = tab === 'sales'    ? '' : 'none';
+  document.getElementById('tab-products').style.display = tab === 'products' ? '' : 'none';
+  document.getElementById('summary-bar').style.display  = tab === 'sales'    ? 'grid' : 'none';
+
+  if (tab === 'products') loadProducts();
+}
+
+// ==========================================
+// 판매 요약
+// ==========================================
+async function loadSummary() {
+  try {
+    const res  = await fetch(`${API}/sales/summary`);
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('sum-count').textContent  = data.total_count.toLocaleString() + '건';
+      document.getElementById('sum-sale').textContent   = formatNum(data.total_sale) + '원';
+      document.getElementById('sum-cost').textContent   = formatNum(data.total_cost) + '원';
+      document.getElementById('sum-margin').textContent = formatNum(data.total_margin) + '원';
+    }
+  } catch (e) {}
+}
+
+// ==========================================
+// 판매 데이터 로드
+// ==========================================
+async function loadSales(page = 1) {
+  salesPage = page;
+  const keyword = document.getElementById('sales-search').value;
+  const brand   = document.getElementById('brand-filter').value;
+  const status  = document.getElementById('status-filter').value;
+
+  const params = new URLSearchParams({ keyword, brand, status, page, limit: salesLimit });
+
+  try {
+    const res  = await fetch(`${API}/sales?${params}`);
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+
+    if (!data.success) { showToast(data.error, 'error'); return; }
+
+    renderSalesTable(data.sales);
+    renderPagination(data.total, page, salesLimit);
+    updateFilters(data.brands, data.statuses);
+
+    if (data.last_synced) {
+      document.getElementById('sync-info').textContent =
+        '마지막 동기화: ' + data.last_synced.slice(0, 16).replace('T', ' ');
+    }
+  } catch (e) {
+    showToast('서버 오류', 'error');
+  }
+}
+
+function searchSales() { loadSales(1); }
+
+function renderSalesTable(sales) {
+  const tbody = document.getElementById('sales-tbody');
+  if (!sales.length) {
+    tbody.innerHTML = `<tr><td colspan="20"><div class="empty-state">📭<p>데이터가 없습니다</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sales.map(s => {
+    const statusBadge = getStatusBadge(s.status);
+    const margin = s.margin || 0;
+    const marginClass = margin > 0 ? 'pos' : margin < 0 ? 'neg' : '';
+
+    return `<tr>
+      <td>${esc(s.seq)}</td>
+      <td>${esc(s.date)}</td>
+      <td>${esc(s.sale_date)}</td>
+      <td>${esc(s.brand)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${esc(s.name)}</td>
+      <td><span style="font-family:monospace;font-size:11px;color:#6366f1;">${esc(s.product_code)}</span></td>
+      <td>${esc(s.size)}</td>
+      <td style="text-align:center;">${s.quantity || ''}</td>
+      <td>${statusBadge}</td>
+      <td>${esc(s.sale_site)}</td>
+      <td class="num">${s.sale_price ? formatNum(s.sale_price) : ''}</td>
+      <td class="num">${s.min_price  ? formatNum(s.min_price)  : ''}</td>
+      <td class="num">${s.deposit_price ? formatNum(s.deposit_price) : ''}</td>
+      <td class="num">${s.cost_price ? formatNum(s.cost_price) : ''}</td>
+      <td class="num ${marginClass}">${margin ? formatNum(margin) : ''}</td>
+      <td style="text-align:center;">${esc(s.margin_rate)}</td>
+      <td style="text-align:center;">${esc(s.deposit_check)}</td>
+      <td>${esc(s.buyer)}</td>
+      <td>${esc(s.payment)}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;">${esc(s.notes)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function getStatusBadge(status) {
+  if (!status) return '';
+  const map = {
+    '판매완료': 'badge-green', '판매중': 'badge-blue',
+    '취소': 'badge-red', '반품': 'badge-red',
+    '대기': 'badge-yellow', '보류': 'badge-yellow'
+  };
+  const cls = map[status] || 'badge-gray';
+  return `<span class="badge ${cls}">${esc(status)}</span>`;
+}
+
+function renderPagination(total, page, limit) {
+  const totalPages = Math.ceil(total / limit);
+  const el = document.getElementById('sales-pagination');
+
+  if (totalPages <= 1) { el.innerHTML = `<span>총 ${total.toLocaleString()}건</span>`; return; }
+
+  let html = `<span style="margin-right:8px;">총 ${total.toLocaleString()}건</span>`;
+  html += `<button class="page-btn" onclick="loadSales(${page-1})" ${page<=1?'disabled':''}>◀</button>`;
+
+  const start = Math.max(1, page - 2);
+  const end   = Math.min(totalPages, page + 2);
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn ${i===page?'active':''}" onclick="loadSales(${i})">${i}</button>`;
+  }
+
+  html += `<button class="page-btn" onclick="loadSales(${page+1})" ${page>=totalPages?'disabled':''}>▶</button>`;
+  html += `<span style="margin-left:8px;">${page}/${totalPages}페이지</span>`;
+  el.innerHTML = html;
+}
+
+function updateFilters(brands, statuses) {
+  const bf = document.getElementById('brand-filter');
+  const sf = document.getElementById('status-filter');
+  const curBrand  = bf.value;
+  const curStatus = sf.value;
+
+  bf.innerHTML = '<option value="">전체 브랜드</option>' +
+    brands.map(b => `<option value="${b}" ${b===curBrand?'selected':''}>${b}</option>`).join('');
+  sf.innerHTML = '<option value="">전체 상태</option>' +
+    statuses.map(s => `<option value="${s}" ${s===curStatus?'selected':''}>${s}</option>`).join('');
+}
+
+// ==========================================
+// 수동 동기화
+// ==========================================
+async function doSync() {
+  showToast('동기화 중...', 'info');
+  try {
+    const res  = await fetch(`${API}/sales/sync`, { method: 'POST' });
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      loadSales(1);
+      loadSummary();
+    } else {
+      showToast(data.error || '동기화 실패', 'error');
+    }
+  } catch (e) {
+    showToast('서버 오류', 'error');
+  }
+}
+
+// ==========================================
+// 재고 상품
+// ==========================================
+async function loadProducts() {
+  try {
+    const res  = await fetch(`${API}/products`);
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+    if (data.success) {
+      allProducts = data.products;
+      updateCategories(allProducts);
+      renderProductTable(allProducts);
+    }
+  } catch (e) { showToast('서버 오류', 'error'); }
+}
+
+function updateCategories(products) {
+  const sel = document.getElementById('category-filter');
+  const cur = sel.value;
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+  sel.innerHTML = '<option value="">전체 카테고리</option>' +
+    cats.map(c => `<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+function filterProducts() {
+  const q   = document.getElementById('prod-search').value.toLowerCase();
+  const cat = document.getElementById('category-filter').value;
+  renderProductTable(allProducts.filter(p => {
+    const mq = !q || [p.product_code,p.name,p.brand,p.category].some(v => v && v.toLowerCase().includes(q));
+    return mq && (!cat || p.category === cat);
+  }));
+}
+
+function renderProductTable(products) {
+  const tbody = document.getElementById('product-tbody');
+  if (!products.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">📭<p>등록된 상품이 없습니다</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = products.map(p => {
+    const qc  = p.quantity === 0 ? 'badge-red' : p.quantity < 5 ? 'badge-yellow' : 'badge-green';
+    const upd = p.updated_at ? p.updated_at.slice(0,10) : '-';
+    return `<tr>
+      <td><span style="font-family:monospace;font-size:11px;color:#6366f1;">${esc(p.product_code)}</span></td>
+      <td>${esc(p.name)}</td>
+      <td>${esc(p.category||'-')}</td>
+      <td>${esc(p.brand||'-')}</td>
+      <td><span class="badge ${qc}">${p.quantity}개</span></td>
+      <td class="num">${p.price ? p.price.toLocaleString()+'원' : '-'}</td>
+      <td>${esc(p.location||'-')}</td>
+      <td>${upd}</td>
+      <td><div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="openEditModal(${p.id})">수정</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id},'${esc(p.name)}')">삭제</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ==========================================
+// 모달
+// ==========================================
+function openAddModal() {
+  document.getElementById('modal-title').textContent = '상품 추가';
+  document.getElementById('edit-id').value = '';
+  ['f-code','f-name','f-category','f-brand','f-location','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-quantity').value = 0;
+  document.getElementById('f-price').value    = 0;
+  document.getElementById('f-code').disabled  = false;
+  document.getElementById('product-modal').classList.add('active');
+}
+
+function openEditModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-title').textContent  = '상품 수정';
+  document.getElementById('edit-id').value    = id;
+  document.getElementById('f-code').value     = p.product_code;
+  document.getElementById('f-code').disabled  = true;
+  document.getElementById('f-name').value     = p.name;
+  document.getElementById('f-category').value = p.category || '';
+  document.getElementById('f-brand').value    = p.brand    || '';
+  document.getElementById('f-quantity').value = p.quantity;
+  document.getElementById('f-price').value    = p.price;
+  document.getElementById('f-location').value = p.location || '';
+  document.getElementById('f-notes').value    = p.notes    || '';
+  document.getElementById('product-modal').classList.add('active');
+}
+
+function closeModal() { document.getElementById('product-modal').classList.remove('active'); }
+
+async function saveProduct() {
+  const id   = document.getElementById('edit-id').value;
+  const code = document.getElementById('f-code').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  if (!code || !name) { showToast('상품코드와 상품명은 필수입니다', 'error'); return; }
+
+  const body = {
+    product_code: code, name,
+    category: document.getElementById('f-category').value.trim(),
+    brand:    document.getElementById('f-brand').value.trim(),
+    quantity: parseInt(document.getElementById('f-quantity').value) || 0,
+    price:    parseInt(document.getElementById('f-price').value)    || 0,
+    location: document.getElementById('f-location').value.trim(),
+    notes:    document.getElementById('f-notes').value.trim()
+  };
+
+  try {
+    const res  = await fetch(id ? `${API}/product/${id}` : `${API}/product`, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+    if (data.success) { showToast(data.message, 'success'); closeModal(); loadProducts(); }
+    else showToast(data.error || '저장 실패', 'error');
+  } catch (e) { showToast('서버 오류', 'error'); }
+}
+
+async function deleteProduct(id, name) {
+  if (!confirm(`"${name}" 상품을 삭제하시겠습니까?`)) return;
+  try {
+    const res  = await fetch(`${API}/product/${id}`, { method: 'DELETE' });
+    if (res.status === 401) { showLock(); return; }
+    const data = await res.json();
+    if (data.success) { showToast('삭제되었습니다', 'success'); loadProducts(); }
+    else showToast(data.error || '삭제 실패', 'error');
+  } catch (e) { showToast('서버 오류', 'error'); }
+}
+
+// ==========================================
+// 유틸
+// ==========================================
+function formatNum(n) {
+  return Number(n).toLocaleString();
+}
+
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+document.getElementById('product-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

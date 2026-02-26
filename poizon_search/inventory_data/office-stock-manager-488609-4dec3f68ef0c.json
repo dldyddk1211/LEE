@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "office-stock-manager-488609",
+  "private_key_id": "4dec3f68ef0cca4ef0f6ffc60daa2d3f152dcc50",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCv7bmo3KUOzwQz\nOrwf4gllDSIIui55AHlsZG3BtTYdeftM/8Q+ZUzgcIkZ9tX5U90h148w/CuvQ57z\ntbv0w7+VKW7t16PwuOq3Nk2YBOi//u59fFBuFh1UZs3qlxuh98wR6jkI0/wpNftv\nLmZGeenoAy4yulQ7wiJEGOYC7j5ebjD5catQDse3ketBeRaZ2owaxMEVFMOPcLUC\ndfJleiaFF906IXsk1zRYO/+DzWrtIvMHT7DCzjmszg2VQd6ERbEig93vzEEON2lh\nt/I6uCohOjzTzA6yCK3YAFi/S4+UmiUEX9FJiagUqAathPMhJXhjeCe3YqeAFG/A\nu7CCtwAXAgMBAAECggEARDGOW2W3t19IXgFA5czs3lYyYJamp/Gmn3zoTINNCCz9\n27FypMsIeyE0C7Px6jT3TQRs9UxyNHwuM4K46h4sd4m5fYkue4N6O+1ZM3mHrNCJ\nKmwTEzEQSmSVIf9Tzzspx7H2TLU7E9Bgd47RRzU/lVcSQ8iVGRrdxG6wTeeCloBT\nwi63/VO+vjlIDr/al1vhOWmYcmta29xYqgcQYEW69fhVwt/3pjlkwtUugjVbrVpV\nQdxBFsgjgARU8wLOg8DOlyEXnukUOW07mxm6HNq/QrSc0cbsPYaFmZpB6Jg9B6TB\nGau22Xs51hhMtOpqjUvcsTMJGXI8r9pnL1y71glaUQKBgQDps+QxLICrbt+peOZE\nTsbzr7+a/VA/Dknm1K2VmGFDsp06XCtbXX06AjP+MKd7TsmHddWPRqG8ekDu1HpO\n7NWvNpghaZ0Q4ljhy26R8KgmK0EhyVNXEn+8Zm2gaQ0z+4sFDf9zX0zAa/8or4rq\ntugPkCwOLcxz8f7ftoZ18j3dEQKBgQDAtri2VeJTghd0uBpdCogJ0McqF+klXfl6\nKkxzzerdjgP8+Lgy1UNIqPVX8NRxDhJeY+MTrHZQGYkyAeWUwW6ApRhquKJzmU9K\nMpAWNbpWL/1aXPExHHim3reiH3OYXtwJBvC/+clYP/Wp4o4TFGl1K2VuY5EHxeba\njyjEIKcqpwKBgQDWja/WsVujh9PQ28zTM1uVx2jqGtt8OFsCj4iZiV7qbuXH+WxY\nofjgs7sWB4cLPqboNPcOZbMAvWA1o15ybR40kLOUIUjwgk1FZqWpWD6XZCiUoydf\nDf21cnf8x9U2Px4/Ur2OJxTop32G1bp8h9V+zEaV8df9LlNnAURqri27cQKBgF9G\ntyGmamPg8FnLX3VabJF1v9HGyoSn5lyIpw2l45Uvzjb2fJLdLwuwRMP6k/1k+J3k\nAnNKk5/cUCECIRAfZdOCTAUPTXmbdUD4qJXicEKGLVrMko42Rkwx1lX3+L1/QIfR\n/5raErpnvLwF/zndoJnGH7qozR4rsIujtYLppdwHAoGBALtkQgvJFOpBLqxch1dr\nZ+JvF7VffetAzvnnnc67IzggWXJk5bUJHoNMGVQ2mBzwntvAqxnCUH5KxTcEmZI0\nJNwLldPflHvssTtJPlM0RCWtUwLU3Y/F4sjaxQLG6kry5dXcP0NHQ8rYVX6KkhXO\n8Jr96faE1iJp4I/1E3r0Jy3K\n-----END PRIVATE KEY-----\n",
+  "client_email": "sheets-reader@office-stock-manager-488609.iam.gserviceaccount.com",
+  "client_id": "113347365756836147732",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sheets-reader%40office-stock-manager-488609.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
