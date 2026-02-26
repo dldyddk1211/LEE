@@ -543,17 +543,34 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
 
             log(f"\n[4] 키워드 입력: {SEARCH_KEYWORD}")
             wait_for_inputs(page)
-            
-            # 검색창 클릭하여 활성화
+                        
+            # ✅ 검색창 클리어 및 입력
             try:
                 search_input = page.locator("input[placeholder*='상품명']").first
+                
+                # JavaScript로 값 비우기
+                search_input.evaluate("el => el.value = ''")
+                wait_stable(page, 200)
+                
+                # 클릭하여 포커스
                 search_input.click()
-                wait_stable(page, 300)
-            except:
-                pass
-            
-            fill_first(page, ["input[placeholder*='상품명']"], SEARCH_KEYWORD, "키워드")
-
+                wait_stable(page, 200)
+                
+                # 전체 선택 후 삭제 (잔여 데이터 제거)
+                page.keyboard.press("Control+A")
+                wait_stable(page, 100)
+                page.keyboard.press("Backspace")
+                wait_stable(page, 200)
+                
+                # 새 키워드 입력
+                search_input.type(SEARCH_KEYWORD, delay=50)
+                log(f"  ✅ 키워드 입력 완료: {SEARCH_KEYWORD}")
+                
+            except Exception as e:
+                log(f"  ❌ 키워드 입력 실패: {e}", 'error')
+                fill_first(page, ["input[placeholder*='상품명']"], SEARCH_KEYWORD, "키워드")
+                
+          
             try:
                 click_first(page, ["button:has-text('검색 및 입찰')"], "검색")
             except Exception:
@@ -1141,32 +1158,49 @@ def run_excel_comparison(products, callback=None):
                 log(f"\n[{idx}/{total}] 🔍 검색: {product_code}", 'info')
                 
                 search_query = product_code if product_code else product_name
-                
+                                
                 try:
-                    # 검색창 찾기
+                    # ✅ 검색창 찾기
                     search_input = None
                     for selector in ["input[placeholder*='상품명']", "input[type='text']"]:
                         try:
                             search_input = page.locator(selector).first
-                            break
+                            if search_input.count() > 0:
+                                break
                         except:
                             continue
                     
                     if not search_input:
                         log(f"  ❌ 검색창 없음")
+                        fail_data = create_fail_data(product, '검색창 없음')
+                        results.append(fail_data)
+                        send_result(callback, product_code, fail_data)
                         continue
                     
-                    # 검색창 클리어
+                    # ✅ 검색창 완전 클리어
                     try:
+                        # JavaScript로 값 비우기
+                        search_input.evaluate("el => el.value = ''")
+                        wait_stable(page, 200)
+                        
+                        # 클릭 + 포커스
                         search_input.click()
+                        wait_stable(page, 200)
+                        
+                        # 키보드로 완전 삭제
                         page.keyboard.press("Control+A")
-                        page.keyboard.press("Delete")
                         wait_stable(page, 100)
-                    except:
-                        pass
+                        page.keyboard.press("Backspace")
+                        wait_stable(page, 300)
+                        
+                        log(f"  → 검색창 클리어 완료")
+                        
+                    except Exception as e:
+                        log(f"  ⚠️ 클리어 실패: {e}")
                     
-                    # 검색어 입력
-                    search_input.type(search_query, delay=30)
+                    # ✅ 검색어 입력
+                    search_input.type(search_query, delay=50)
+                    log(f"  ✅ 검색어 입력: {search_query}")
                     wait_stable(page, 200)
                     
                     # Enter로 검색
