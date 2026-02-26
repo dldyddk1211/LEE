@@ -79,6 +79,14 @@ except Exception as e:
         print("⚠️ 스케줄러 없이 실행 중")
         return None
 
+# ✅ 재고관리 Blueprint 등록
+try:
+    from inventory_data.inventory_api import inventory_bp
+    app.register_blueprint(inventory_bp)
+    print("✅ 재고관리 등록 성공")
+except Exception as e:
+    print(f"⚠️ 재고관리 로드 실패: {e}")
+
 # 캐시 비활성화
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -559,13 +567,18 @@ def start_search():
         while True:
             try:
                 data = log_queue.get(timeout=1)
+                
+                # ✅ complete 이벤트일 때 mode 정보 추가!
+                if data.get('type') == 'complete':
+                    data['mode'] = mode  # ⬅️ 이 줄 추가!
+                
                 yield f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
                 
                 if data.get('type') in ['complete', 'error']:
                     break
             except queue.Empty:
                 yield f"data: {json.dumps({'type': 'ping'})}\n\n"
-    
+        
     response = Response(generate(), mimetype='text/event-stream')
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['X-Accel-Buffering'] = 'no'

@@ -583,11 +583,31 @@
                 
                 const response = await fetch(`/api/scheduler/task/${taskId}`);
                 const result = await response.json();
-                
+
+                // ✅ 디버깅 로그 추가 (이 부분이 없었음!)
+                console.log('━━━━━━━━━━━━━━━━━━━━');
+                console.log('🔍 스케줄러 응답 데이터:');
+                console.log('  전체:', result);
+                console.log('  task:', result.task);
+                console.log('  keyword:', result.task?.keyword);
+                console.log('  mode:', result.task?.mode);  // ⬅️ mode 값 확인!
+                console.log('  data 개수:', result.task?.data?.length);
+                console.log('━━━━━━━━━━━━━━━━━━━━');
+                        
                 if (result.success && result.task) {
                     // opener를 통해 메인 창에 데이터 전달
                     if (window.opener && window.opener.loadHistoryData) {
-                        window.opener.loadHistoryData(result.task.data, result.task.keyword);
+                         // ✅ mode 전달 확인 로그 추가
+                        console.log('📤 메인 페이지로 데이터 전달:');
+                        console.log('  data:', result.task.data.length + '개');
+                        console.log('  keyword:', result.task.keyword);
+                        console.log('  mode:', result.task.mode);
+                       
+                        window.opener.loadHistoryData(
+                            result.task.data, 
+                            result.task.keyword, 
+                            result.task.mode  // ⬅️ 이 줄 추가!
+                        );
                         alert(`✅ "${result.task.keyword}" 데이터를 메인 화면에 불러왔습니다!`);
                         window.close();
                     } else {
@@ -695,6 +715,44 @@
         function closeScheduler() {
             if (confirm('스케줄러 창을 닫으시겠습니까?')) {
                 window.close();
+            }
+        }
+
+        async function viewTaskData(taskId) {
+            try {
+                console.log('📋 작업 데이터 불러오기:', taskId);
+                
+                const response = await fetch(`/api/scheduler/task/${taskId}`);
+                const result = await response.json();
+                
+                // ✅ 디버깅 로그 추가
+                console.log('━━━━━━━━━━━━━━━━━━━━');
+                console.log('🔍 스케줄러 응답 데이터:');
+                console.log('  task:', result.task);
+                console.log('  keyword:', result.task.keyword);
+                console.log('  mode:', result.task.mode);  // ⬅️ mode 값 확인!
+                console.log('  data 개수:', result.task.data.length);
+                console.log('━━━━━━━━━━━━━━━━━━━━');
+                
+                if (result.success && result.task) {
+                    if (window.opener && window.opener.loadHistoryData) {
+                        window.opener.loadHistoryData(
+                            result.task.data, 
+                            result.task.keyword, 
+                            result.task.mode  // ⬅️ 이 값이 undefined일 수 있음
+                        );
+                        alert(`✅ "${result.task.keyword}" 데이터를 메인 화면에 불러왔습니다!`);
+                        window.close();
+                    } else {
+                        alert('⚠️ 메인 창을 찾을 수 없습니다. 창을 다시 열어주세요.');
+                    }
+                } else {
+                    throw new Error(result.error || '데이터를 찾을 수 없습니다');
+                }
+                
+            } catch (error) {
+                console.error('❌ 데이터 로드 실패:', error);
+                alert('데이터를 불러올 수 없습니다: ' + error.message);
             }
         }
     </script>
