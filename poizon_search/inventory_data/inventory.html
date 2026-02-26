@@ -508,11 +508,14 @@ async function loadSummary() {
 // ==========================================
 async function loadSales(page = 1) {
   salesPage = page;
-  const keyword = document.getElementById('sales-search').value;
+
+
+  const keyword = document.getElementById('sales-search').value.trim();
+  const keywords = keyword.split(/\s+/).filter(k => k.length > 0).join(',');
   const brand   = document.getElementById('brand-filter').value;
   const status  = document.getElementById('status-filter').value;
 
-  const params = new URLSearchParams({ keyword, brand, status, page, limit: salesLimit });
+  const params = new URLSearchParams({ keyword: keywords, brand, status, page, limit: salesLimit });
 
   try {
     const res  = await fetch(`${API}/sales?${params}`);

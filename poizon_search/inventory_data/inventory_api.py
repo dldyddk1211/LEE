@@ -111,8 +111,13 @@ def get_sales():
 
         where, params = ['1=1'], []
         if keyword:
-            where.append('(name LIKE ? OR product_code LIKE ? OR brand LIKE ? OR buyer LIKE ?)')
-            params.extend([f'%{keyword}%'] * 4)
+            keywords = [k.strip() for k in keyword.split(',') if k.strip()]
+            if keywords:
+                kw_conditions = []
+                for kw in keywords:
+                    kw_conditions.append('(name LIKE ? OR product_code LIKE ? OR brand LIKE ? OR buyer LIKE ?)')
+                    params.extend([f'%{kw}%'] * 4)
+                where.append('(' + ' OR '.join(kw_conditions) + ')')
         if brand:
             where.append('brand = ?')
             params.append(brand)
