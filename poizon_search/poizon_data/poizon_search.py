@@ -11,7 +11,7 @@ from openpyxl.styles import Font, Alignment, PatternFill
 import requests
 from io import BytesIO
 from datetime import datetime
-
+import platform
 
 # 중단 플래그
 stop_flag = False
@@ -665,13 +665,33 @@ def perform_login():
                     'message': '✅ 이미 접속되어 있습니다 (쿠키 사용)'
                 }
         
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=HEADLESS,
-                channel='chrome',
-                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
-            )
-            context = browser.new_context(viewport=None, no_viewport=True)
+            with sync_playwright() as p:
+                # ✅ OS 감지 후 브라우저 실행
+                current_os = platform.system()
+                
+                if current_os == 'Darwin':  # macOS
+                    browser = p.chromium.launch(
+                        headless=HEADLESS,
+                        args=[
+                            '--start-maximized',
+                            '--disable-blink-features=AutomationControlled',
+                        ]
+                    )
+                else:  # Windows/Linux
+                    browser = p.chromium.launch(
+                        headless=HEADLESS,
+                        channel='chrome',
+                        args=[
+                            '--start-maximized',
+                            '--disable-blink-features=AutomationControlled',
+                        ]
+                    )
+                
+                context = browser.new_context(
+                    viewport=None,
+                    no_viewport=True
+                )
+    
             page = context.new_page()
             
             log("\n[1] POIZON 접속 중...", 'info')
@@ -1064,11 +1084,20 @@ def run_excel_comparison(products, callback=None):
         
         # 브라우저 열기
         with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=HEADLESS,
-                channel='chrome',
-                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
-            )
+            current_os = platform.system()
+            
+            if current_os == 'Darwin':
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
+            else:
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    channel='chrome',
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
+            
             context = browser.new_context(viewport=None, no_viewport=True)
             
             # 쿠키 로드
