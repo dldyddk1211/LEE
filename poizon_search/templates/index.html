@@ -2219,10 +2219,13 @@
         
         // 데이터 설정
         collectedData = data;
-        
-        // ✅ mode 파라미터로 정확히 설정
         if (mode) {
-            selectedMode = mode;
+            // ✅ musinsa_kream → musinsa로 변환
+            if (mode === 'musinsa_kream') {
+                selectedMode = 'musinsa';
+            } else {
+                selectedMode = mode;
+            }
         } else {
             // ✅ mode가 없으면 데이터 구조로 추측
             if (data.length > 0) {
