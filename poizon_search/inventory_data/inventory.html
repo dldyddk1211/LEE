@@ -368,8 +368,16 @@
       <button class="modal-close" onclick="closeAggregate()">✕</button>
     </div>
     <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="search-box" style="flex:1;">
+          <input type="text" id="agg-search" placeholder="브랜드, 모델명, 품번 검색..."
+            oninput="filterAggregate()" onkeydown="if(event.key==='Escape') this.value=''||filterAggregate()">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="filterAggregate()">🔍 검색</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('agg-search').value='';filterAggregate()">✕ 초기화</button>
+      </div>
       <div class="agg-meta" id="agg-meta"></div>
-      <div class="table-wrap" style="max-height:calc(88vh - 140px);">
+      <div class="table-wrap" style="max-height:calc(88vh - 180px);">
         <table>
           <thead>
             <tr>
@@ -402,6 +410,7 @@ let salesPage = 1;
 let stockPage = 1;
 let salesLimit = 100;   // 판매탭 페이지당 건수
 let stockLimit = 100;   // 재고탭 페이지당 건수
+let aggAllData = [];    // 재고합산 전체 데이터 (검색용)
 
 // ==========================================
 // 초기화
@@ -712,76 +721,105 @@ async function doSync() {
 // ==========================================
 async function showAggregate() {
   document.getElementById('agg-modal').classList.add('active');
+  document.getElementById('agg-search').value = '';
   document.getElementById('agg-tbody').innerHTML =
-    `<tr><td colspan="6" style="text-align:center;padding:40px;color:#4a5568;"><span class="spinner"></span> 집계 중...</td></tr>`;
+    `<tr><td colspan="7" style="text-align:center;padding:40px;color:#4a5568;"><span class="spinner"></span> 집계 중...</td></tr>`;
   document.getElementById('agg-meta').textContent = '';
 
   try {
-    // 전체 재고 데이터를 한번에 가져옴
     const res  = await fetch(`${API}/stock?limit=99999&page=1`);
     if (res.status === 401) { showLock(); return; }
     const data = await res.json();
     if (!data.success) { showToast(data.error, 'error'); return; }
 
-    const rows = data.stock;
-
-    // 브랜드 + 모델명 + 사이즈 기준으로 그룹핑
     const map = {};
-    rows.forEach(r => {
+    data.stock.forEach(r => {
       const brand = r.brand        || '-';
       const name  = r.name         || '-';
       const code  = r.product_code || '-';
       const size  = r.size         || '-';
       const key   = `${brand}||${name}||${code}||${size}`;
-      if (!map[key]) {
-        map[key] = { brand, name, code, size, qty: 0, cost: 0 };
-      }
+      if (!map[key]) map[key] = { brand, name, code, size, qty: 0, cost: 0 };
       map[key].qty  += Number(r.quantity)   || 0;
       map[key].cost += Number(r.cost_price) || 0;
     });
 
-    // 브랜드 → 모델명 → 사이즈 순으로 정렬
-    const grouped = Object.values(map).sort((a, b) => {
+    // 브랜드 → 모델명 → 사이즈 정렬 후 전역 저장
+    aggAllData = Object.values(map).sort((a, b) => {
       if (a.brand !== b.brand) return a.brand.localeCompare(b.brand);
       if (a.name  !== b.name)  return a.name.localeCompare(b.name);
       return a.size.localeCompare(b.size);
     });
 
-    const totalQty  = grouped.reduce((s, r) => s + r.qty,  0);
-    const totalCost = grouped.reduce((s, r) => s + r.cost, 0);
+    renderAggTable(aggAllData);
 
-    document.getElementById('agg-meta').textContent =
-      `총 ${grouped.length}개 품목 · 수량 합계 ${totalQty.toLocaleString()}개 · 원가 합계 ${totalCost.toLocaleString()}원`;
-
-    if (!grouped.length) {
-      document.getElementById('agg-tbody').innerHTML =
-        `<tr><td colspan="7"><div class="empty-state">📭<p>재고 데이터가 없습니다</p></div></td></tr>`;
-      return;
-    }
-
-    // 같은 모델명 연속 시 rowspan 처리 (시각적으로 묶기)
-    let html = '';
-    let prevKey = null;
-    grouped.forEach((r, i) => {
-      const nameKey = `${r.brand}||${r.name}`;
-      const isNew   = nameKey !== prevKey;
-      prevKey       = nameKey;
-      const rowStyle = isNew && i > 0 ? 'border-top:2px solid #2d3148;' : '';
-      html += `<tr style="${rowStyle}">
-        <td style="color:#64748b;font-size:11px;">${i + 1}</td>
-        <td>${esc(r.brand)}</td>
-        <td style="font-weight:500;color:#e2e8f0;">${esc(r.name)}</td>
-        <td><span style="font-family:monospace;font-size:11px;color:#6366f1;">${esc(r.code)}</span></td>
-        <td><span class="badge badge-blue" style="min-width:52px;text-align:center;">${esc(r.size)}</span></td>
-        <td style="text-align:center;font-weight:700;color:#34d399;font-size:15px;">${r.qty}</td>
-        <td class="num">${r.cost ? formatNum(r.cost) + '원' : '-'}</td>
-      </tr>`;
-    });
-
-    document.getElementById('agg-tbody').innerHTML = html;
+    // 검색창 포커스
+    setTimeout(() => document.getElementById('agg-search').focus(), 100);
   } catch (e) {
     showToast('서버 오류', 'error');
   }
+}
+
+// 검색 필터링
+function filterAggregate() {
+  const q = document.getElementById('agg-search').value.trim().toLowerCase();
+  if (!q) {
+    renderAggTable(aggAllData);
+    return;
+  }
+  const filtered = aggAllData.filter(r =>
+    r.brand.toLowerCase().includes(q) ||
+    r.name.toLowerCase().includes(q)  ||
+    r.code.toLowerCase().includes(q)
+  );
+  renderAggTable(filtered, q);
+}
+
+// 테이블 렌더링 (검색어 하이라이트 포함)
+function renderAggTable(rows, highlight = '') {
+  const totalQty  = rows.reduce((s, r) => s + r.qty,  0);
+  const totalCost = rows.reduce((s, r) => s + r.cost, 0);
+
+  const all = aggAllData.length;
+  const cur = rows.length;
+  document.getElementById('agg-meta').innerHTML =
+    `<span style="color:#94a3b8;">${cur !== all ? `<span style="color:#6366f1;font-weight:600;">${cur}개 품목 검색됨</span> / 전체 ${all}개` : `총 ${all}개 품목`}</span>` +
+    ` &nbsp;·&nbsp; 수량 합계 <b style="color:#34d399;">${totalQty.toLocaleString()}개</b>` +
+    ` &nbsp;·&nbsp; 원가 합계 <b style="color:#fbbf24;">${totalCost.toLocaleString()}원</b>`;
+
+  if (!rows.length) {
+    document.getElementById('agg-tbody').innerHTML =
+      `<tr><td colspan="7"><div class="empty-state">🔍<p>"${esc(highlight)}" 검색 결과가 없습니다</p></div></td></tr>`;
+    return;
+  }
+
+  let html = '';
+  let prevKey = null;
+  rows.forEach((r, i) => {
+    const nameKey  = `${r.brand}||${r.name}`;
+    const isNew    = nameKey !== prevKey;
+    prevKey        = nameKey;
+    const rowStyle = isNew && i > 0 ? 'border-top:2px solid #2d3148;' : '';
+
+    // 하이라이트 처리
+    const hl = (str) => {
+      if (!highlight) return esc(str);
+      const re = new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+      return esc(str).replace(re, '<mark style="background:#6366f1;color:#fff;border-radius:2px;padding:0 2px;">$1</mark>');
+    };
+
+    html += `<tr style="${rowStyle}">
+      <td style="color:#64748b;font-size:11px;">${i + 1}</td>
+      <td>${hl(r.brand)}</td>
+      <td style="font-weight:500;color:#e2e8f0;">${hl(r.name)}</td>
+      <td><span style="font-family:monospace;font-size:11px;color:#6366f1;">${hl(r.code)}</span></td>
+      <td><span class="badge badge-blue" style="min-width:52px;text-align:center;">${esc(r.size)}</span></td>
+      <td style="text-align:center;font-weight:700;color:#34d399;font-size:15px;">${r.qty}</td>
+      <td class="num">${r.cost ? formatNum(r.cost) + '원' : '-'}</td>
+    </tr>`;
+  });
+
+  document.getElementById('agg-tbody').innerHTML = html;
 }
 
 function closeAggregate() {
