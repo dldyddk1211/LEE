@@ -928,6 +928,10 @@
             <th>크림평균가</th>
             <th onclick="sortBy('크림비교')">
               크림비교 <span id="sort크림비교">⇅</span>
+            </th>
+            <th onclick="sortBy('크림판매량')">
+              크림판매량 <span id="sort크림판매량">⇅</span>
+            </th>
           </tr>
         `;
       } else {
@@ -1044,13 +1048,20 @@
             compareCell.style.color = '#999';
             data.크림비교 = 0;
           }
+          // ↓ 여기에 추가!
+          // 크림판매량
+          const kreamSalesCell = row.insertCell();
+          if (data.크림판매량 && data.크림판매량 !== '-') {
+              kreamSalesCell.textContent = Number(data.크림판매량).toLocaleString() + '개';
+          } else {
+              kreamSalesCell.textContent = '-';
+          }
           
         } else if (selectedMode === 'musinsa') {
           // ===== 무신사 모드 렌더링 =====
           
           // 상품번호
           row.insertCell().textContent = data.product_code || '-';
-          
           // 제품명
           row.insertCell().textContent = data.name || '-';
           
@@ -1074,6 +1085,7 @@
             const numStr = String(priceStr).replace(/[^0-9]/g, '');
             const price = parseInt(numStr);
             return isNaN(price) ? null : price;
+
           };
           
           const musinsaPrice = data.price;  // 이미 숫자
@@ -1102,6 +1114,10 @@
             compareCell.style.color = '#999';
             data.크림비교 = 0;
           }
+          const kreamSalesCell = row.insertCell();
+          kreamSalesCell.textContent = data.크림판매량 
+            ? Number(data.크림판매량).toLocaleString() + '개' 
+            : '-';
           
         } else if (selectedMode === 'compare') {
                   // 엑셀 상품번호
@@ -2023,6 +2039,9 @@
                   } else {
                     collectedData[itemIndex].크림비교 = 0;
                   }
+                  const kreamSalesCell = row.insertCell();
+                  kreamSalesCell.textContent = data.크림판매량 ? Number(data.크림판매량).toLocaleString() + '개' : '-';
+
                 }
                 
                 updatedCount++;

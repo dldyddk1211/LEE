@@ -902,7 +902,40 @@ def background_kream_search(task_id, product_codes, progress_queue):
                                 const sum = prices.reduce((a, b) => a + b, 0);
                                 avg_price = Math.round(sum / prices.length);
                             }
-                            
+                            // 거래량 추출 - 상세 페이지에서
+                            let sales_text = '';
+                            const allDivs = document.querySelectorAll('.text_body');
+                            for (let div of allDivs) {
+                                const p = div.querySelector('p');
+                                if (p) {
+                                    const text = p.textContent.trim();
+                                    if (text.startsWith('거래')) {
+                                        sales_text = text.replace('거래', '').trim();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // text_body 못찾으면 p 태그 전체 검색
+                            if (!sales_text) {
+                                const allP = document.querySelectorAll('p');
+                                for (let p of allP) {
+                                    const text = p.textContent.trim();
+                                    // "거래 " 다음에 숫자가 오는 것만 허용
+                                    if (text.startsWith('거래 ') && /거래 [\d.]+만?/.test(text)) {
+                                        sales_text = text.replace('거래', '').trim();
+                                        break;
+                                    }
+                                }
+                            }
+                            return {
+                                prices: prices.slice(0, 5),
+                                count: Math.min(prices.length, 5),
+                                avg_price: avg_price,
+                                first_trade_date: trade_dates.length > 0 ? trade_dates[0] : '',
+                                sales_text: sales_text
+                            };
+
                             return {
                                 prices: prices.slice(0, 5),
                                 count: Math.min(prices.length, 5),
@@ -911,19 +944,34 @@ def background_kream_search(task_id, product_codes, progress_queue):
                             };
                         }
                     """)
-                    
                     prices = trade_info.get('prices', [])
                     count = trade_info.get('count', 0)
                     avg_price = trade_info.get('avg_price', 0)
                     first_trade_date = trade_info.get('first_trade_date', 'N/A')
-                    
+
                     kream_avg_price = f"{avg_price:,}원" if avg_price > 0 else "N/A"
-                    kream_sales = first_trade_date if first_trade_date else "N/A"
-                    
+
+                    sales_text = trade_info.get('sales_text', '')
+                    kream_sales_num = 0
+
+                    if sales_text:
+                        if '만' in sales_text:
+                            try:
+                                kream_sales_num = int(float(sales_text.replace('만', '').strip()) * 10000)
+                            except:
+                                kream_sales_num = 0
+                        else:
+                            try:
+                                kream_sales_num = int(sales_text.replace(',', '').strip())
+                            except:
+                                kream_sales_num = 0
+
+                    print(f"  ✅ 거래량: {sales_text} → {kream_sales_num}")
+
                     if count > 0:
                         print(f"  ✅ 거래 정보 추출 완료!")
                         print(f"     💰 크림 평균가: {kream_avg_price}")
-                        print(f"     📦 크림 판매량: {kream_sales}")
+                        print(f"     📦 크림 거래량: {kream_sales_num}")
                         
                         success_count += 1
                         
@@ -935,7 +983,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
                                     'success': True,
                                     'kream_data': {
                                         'avg_price': kream_avg_price,
-                                        'sales': kream_sales
+                                        'sales': kream_sales_num   # ← 여기에 넣어야 함
                                     }
                                 }
                             }
