@@ -235,15 +235,15 @@
     <h1>📦 <span>재고</span>관리 시스템</h1>
     <div class="header-right">
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('sales')">📋 판매내역</button>
-        <button class="tab-btn" onclick="switchTab('stock')">📦 재고현황</button>
+        <button class="tab-btn active" onclick="switchTab('stock')">📦 재고현황</button>
+        <button class="tab-btn" onclick="switchTab('sales')">📋 판매내역</button>
       </div>
       <button class="logout-btn" onclick="doLogout()">🔒 잠금</button>
     </div>
   </div>
 
   <!-- 요약 카드 (판매내역 탭) -->
-  <div class="summary-bar" id="summary-sales" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="summary-bar" id="summary-sales" style="display:none; grid-template-columns: repeat(4, 1fr);">
     <div class="summary-card">
       <div class="label">총 판매건수</div>
       <div class="value blue" id="sum-count">-</div>
@@ -263,7 +263,7 @@
   </div>
 
   <!-- 요약 카드 (재고 탭) -->
-  <div class="summary-bar" id="summary-stock" style="display:none; grid-template-columns: repeat(3, 1fr);">
+  <div class="summary-bar" id="summary-stock" style="grid-template-columns: repeat(3, 1fr);">
     <div class="summary-card">
       <div class="label">재고 품목 수</div>
       <div class="value orange" id="stk-count">-</div>
@@ -281,7 +281,7 @@
   <div class="container">
 
     <!-- 판매내역 탭 -->
-    <div id="tab-sales">
+    <div id="tab-sales" style="display:none;">
       <div class="toolbar">
         <div class="search-box">
           <input type="text" id="sales-search" placeholder="상품명, 품번, 브랜드, 구매자 검색..." onkeydown="if(event.key==='Enter') searchSales()">
@@ -319,7 +319,7 @@
     </div>
 
     <!-- 재고현황 탭 (판매일자 없는 것 = 미판매 재고) -->
-    <div id="tab-stock" style="display:none;">
+    <div id="tab-stock">
       <div class="toolbar">
         <div class="search-box">
           <input type="text" id="stock-search" placeholder="상품명, 품번, 브랜드 검색..." onkeydown="if(event.key==='Enter') searchStock()">
@@ -405,7 +405,7 @@
 
 <script>
 const API = '/api/inventory';
-let currentTab = 'sales';
+let currentTab = 'stock';
 let salesPage = 1;
 let stockPage = 1;
 let salesLimit = 100;   // 판매탭 페이지당 건수
@@ -478,8 +478,8 @@ function showLock() {
 function showMain() {
   document.getElementById('lock-screen').style.display = 'none';
   document.getElementById('main-wrap').style.display = 'block';
-  loadSales();
-  loadSalesSummary();
+  loadStock();
+  loadStockSummary();
 }
 
 // ==========================================
@@ -490,7 +490,7 @@ function switchTab(tab) {
 
   // 탭 버튼 active 상태
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && tab === 'sales') || (i === 1 && tab === 'stock'));
+    b.classList.toggle('active', (i === 0 && tab === 'stock') || (i === 1 && tab === 'sales'));
   });
 
   // 탭 패널 표시
@@ -504,6 +504,9 @@ function switchTab(tab) {
   if (tab === 'stock') {
     loadStock();
     loadStockSummary();
+  } else {
+    loadSales();
+    loadSalesSummary();
   }
 }
 
