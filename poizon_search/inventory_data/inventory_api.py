@@ -91,7 +91,34 @@ def serve_inventory_page():
         return jsonify({'error': str(e)}), 500
 
 # ==========================================
-# 판매 데이터 (구글 시트 동기화)
+# 공통 쿼리 빌더
+# ==========================================
+
+def build_query(keyword, brand, status):
+    """검색 조건 공통 빌더"""
+    where, params = ['1=1'], []
+
+    if keyword:
+        keywords = [k.strip() for k in keyword.split(',') if k.strip()]
+        if keywords:
+            kw_conditions = []
+            for kw in keywords:
+                kw_conditions.append('(name LIKE ? OR product_code LIKE ? OR brand LIKE ? OR buyer LIKE ?)')
+                params.extend([f'%{kw}%'] * 4)
+            where.append('(' + ' OR '.join(kw_conditions) + ')')
+
+    if brand:
+        where.append('brand = ?')
+        params.append(brand)
+
+    if status:
+        where.append('status = ?')
+        params.append(status)
+
+    return where, params
+
+# ==========================================
+# 판매 데이터 - 판매일자 있는 것만
 # ==========================================
 
 @inventory_bp.route('/sales')
@@ -109,21 +136,10 @@ def get_sales():
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        where, params = ['1=1'], []
-        if keyword:
-            keywords = [k.strip() for k in keyword.split(',') if k.strip()]
-            if keywords:
-                kw_conditions = []
-                for kw in keywords:
-                    kw_conditions.append('(name LIKE ? OR product_code LIKE ? OR brand LIKE ? OR buyer LIKE ?)')
-                    params.extend([f'%{kw}%'] * 4)
-                where.append('(' + ' OR '.join(kw_conditions) + ')')
-        if brand:
-            where.append('brand = ?')
-            params.append(brand)
-        if status:
-            where.append('status = ?')
-            params.append(status)
+        where, params = build_query(keyword, brand, status)
+
+        # ★ 핵심: 판매일자가 있는 것만 (판매완료 데이터)
+        where.append("(sale_date IS NOT NULL AND sale_date != '')")
 
         ws = ' AND '.join(where)
 
@@ -141,10 +157,11 @@ def get_sales():
         row = cursor.fetchone()
         last_synced = row[0] if row else None
 
-        cursor.execute('SELECT DISTINCT brand FROM sales WHERE brand != "" ORDER BY brand')
+        # 판매내역 기준 필터 옵션
+        cursor.execute(f"SELECT DISTINCT brand FROM sales WHERE (sale_date IS NOT NULL AND sale_date != '') AND brand != '' ORDER BY brand")
         brands = [r[0] for r in cursor.fetchall()]
 
-        cursor.execute('SELECT DISTINCT status FROM sales WHERE status != "" ORDER BY status')
+        cursor.execute(f"SELECT DISTINCT status FROM sales WHERE (sale_date IS NOT NULL AND sale_date != '') AND status != '' ORDER BY status")
         statuses = [r[0] for r in cursor.fetchall()]
 
         conn.close()
@@ -158,6 +175,68 @@ def get_sales():
         print(f"판매 조회 오류: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# ==========================================
+# 재고 데이터 - 판매일자 없는 것만 (미판매 재고)
+# ==========================================
+
+@inventory_bp.route('/stock')
+def get_stock():
+    if not is_authenticated():
+        return jsonify({'success': False, 'error': '인증 필요'}), 401
+    try:
+        keyword = request.args.get('keyword', '')
+        brand   = request.args.get('brand', '')
+        status  = request.args.get('status', '')
+        page    = int(request.args.get('page', 1))
+        limit   = int(request.args.get('limit', 100))
+
+        conn = sqlite3.connect(DB_FILE)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        where, params = build_query(keyword, brand, status)
+
+        # ★ 핵심: 판매일자가 없는 것만 (미판매 재고)
+        where.append("(sale_date IS NULL OR sale_date = '')")
+
+        ws = ' AND '.join(where)
+
+        cursor.execute(f'SELECT COUNT(*) FROM sales WHERE {ws}', params)
+        total = cursor.fetchone()[0]
+
+        offset = (page - 1) * limit
+        cursor.execute(
+            f'SELECT * FROM sales WHERE {ws} ORDER BY CAST(NULLIF(seq,"") AS INTEGER) ASC LIMIT ? OFFSET ?',
+            params + [limit, offset]
+        )
+        stock = [dict(r) for r in cursor.fetchall()]
+
+        cursor.execute('SELECT synced_at FROM sales ORDER BY id DESC LIMIT 1')
+        row = cursor.fetchone()
+        last_synced = row[0] if row else None
+
+        # 재고 기준 필터 옵션
+        cursor.execute("SELECT DISTINCT brand FROM sales WHERE (sale_date IS NULL OR sale_date = '') AND brand != '' ORDER BY brand")
+        brands = [r[0] for r in cursor.fetchall()]
+
+        cursor.execute("SELECT DISTINCT status FROM sales WHERE (sale_date IS NULL OR sale_date = '') AND status != '' ORDER BY status")
+        statuses = [r[0] for r in cursor.fetchall()]
+
+        conn.close()
+
+        return jsonify({
+            'success': True, 'stock': stock,
+            'total': total, 'page': page, 'limit': limit,
+            'last_synced': last_synced, 'brands': brands, 'statuses': statuses
+        })
+    except Exception as e:
+        print(f"재고 조회 오류: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ==========================================
+# 판매 요약 (판매내역 기준)
+# ==========================================
+
 @inventory_bp.route('/sales/summary')
 def get_sales_summary():
     if not is_authenticated():
@@ -165,18 +244,61 @@ def get_sales_summary():
     try:
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*), SUM(sale_price), SUM(margin), SUM(cost_price) FROM sales')
+
+        # 판매내역 요약 (판매일자 있는 것)
+        cursor.execute("""
+            SELECT COUNT(*), SUM(sale_price), SUM(margin), SUM(cost_price)
+            FROM sales
+            WHERE sale_date IS NOT NULL AND sale_date != ''
+        """)
+        row = cursor.fetchone()
+
+        # 재고 건수 (판매일자 없는 것)
+        cursor.execute("SELECT COUNT(*) FROM sales WHERE sale_date IS NULL OR sale_date = ''")
+        stock_count = cursor.fetchone()[0]
+
+        conn.close()
+        return jsonify({
+            'success': True,
+            'total_count':   row[0] or 0,
+            'total_sale':    row[1] or 0,
+            'total_margin':  row[2] or 0,
+            'total_cost':    row[3] or 0,
+            'stock_count':   stock_count or 0
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ==========================================
+# 재고 요약 (재고탭 기준)
+# ==========================================
+
+@inventory_bp.route('/stock/summary')
+def get_stock_summary():
+    if not is_authenticated():
+        return jsonify({'success': False, 'error': '인증 필요'}), 401
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT COUNT(*), SUM(cost_price), SUM(quantity)
+            FROM sales
+            WHERE sale_date IS NULL OR sale_date = ''
+        """)
         row = cursor.fetchone()
         conn.close()
         return jsonify({
             'success': True,
-            'total_count':  row[0] or 0,
-            'total_sale':   row[1] or 0,
-            'total_margin': row[2] or 0,
-            'total_cost':   row[3] or 0
+            'stock_count':      row[0] or 0,
+            'total_cost_price': row[1] or 0,
+            'total_quantity':   row[2] or 0
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# ==========================================
+# 수동 동기화
+# ==========================================
 
 @inventory_bp.route('/sales/sync', methods=['POST'])
 def manual_sync():
@@ -186,80 +308,5 @@ def manual_sync():
         from inventory_data.sheets_sync import sync_once
         count = sync_once()
         return jsonify({'success': True, 'count': count, 'message': f'{count}건 동기화 완료'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-# ==========================================
-# 재고 상품 API
-# ==========================================
-
-@inventory_bp.route('/products')
-def get_products():
-    if not is_authenticated():
-        return jsonify({'success': False, 'error': '인증 필요'}), 401
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM products ORDER BY updated_at DESC')
-        products = [dict(r) for r in cursor.fetchall()]
-        conn.close()
-        return jsonify({'success': True, 'products': products})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@inventory_bp.route('/product', methods=['POST'])
-def add_product():
-    if not is_authenticated():
-        return jsonify({'success': False, 'error': '인증 필요'}), 401
-    try:
-        data = request.json
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO products (product_code, name, category, brand, quantity, price, location, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (data['product_code'], data['name'], data.get('category',''), data.get('brand',''),
-              data.get('quantity',0), data.get('price',0), data.get('location',''), data.get('notes','')))
-        conn.commit()
-        pid = cursor.lastrowid
-        conn.close()
-        return jsonify({'success': True, 'message': '상품이 추가되었습니다', 'product_id': pid})
-    except sqlite3.IntegrityError:
-        return jsonify({'success': False, 'error': '이미 존재하는 상품코드입니다'}), 400
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@inventory_bp.route('/product/<int:product_id>', methods=['PUT'])
-def update_product(product_id):
-    if not is_authenticated():
-        return jsonify({'success': False, 'error': '인증 필요'}), 401
-    try:
-        data = request.json
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute('''
-            UPDATE products SET name=?, category=?, brand=?, price=?, location=?, notes=?, updated_at=?
-            WHERE id=?
-        ''', (data['name'], data.get('category',''), data.get('brand',''),
-              data.get('price',0), data.get('location',''), data.get('notes',''),
-              datetime.now().isoformat(), product_id))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True, 'message': '수정되었습니다'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@inventory_bp.route('/product/<int:product_id>', methods=['DELETE'])
-def delete_product(product_id):
-    if not is_authenticated():
-        return jsonify({'success': False, 'error': '인증 필요'}), 401
-    try:
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True, 'message': '삭제되었습니다'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
