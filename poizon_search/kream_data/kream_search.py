@@ -975,6 +975,15 @@ def background_kream_search(task_id, product_codes, progress_queue):
                         
                         success_count += 1
                         
+                        # ✅ 크림 고유 ID 추출
+                        current_url = page.url
+                        product_id = None
+
+                    if '/products/' in current_url:
+                        # https://kream.co.kr/products/675570 → 675570
+                        product_id = current_url.split('/products/')[-1].split('?')[0].split('#')[0]
+                        print(f"✅ 크림 ID 추출: {product_id}")
+
                         progress_queue.put({
                             'event': 'result',
                             'data': {
@@ -982,8 +991,9 @@ def background_kream_search(task_id, product_codes, progress_queue):
                                 'result': {
                                     'success': True,
                                     'kream_data': {
-                                        'avg_price': kream_avg_price,
-                                        'sales': kream_sales_num   # ← 여기에 넣어야 함
+                                        'avg_price': avg_price,
+                                        'product_id': product_id,  # ✅ 크림 ID 추가
+                                        'url': f'https://kream.co.kr/products/{product_id}' if product_id else None  # ✅ URL 수정
                                     }
                                 }
                             }
