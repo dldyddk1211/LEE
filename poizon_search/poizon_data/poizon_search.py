@@ -1419,7 +1419,212 @@ def send_result(callback, product_code, data):
             log(f"  ❌ [DEBUG] traceback: {traceback.format_exc()}", 'error')
             traceback.print_exc()  # ← 직접 print!
 
-
+def search_multiple_products(product_codes, progress_queue):
+    """
+    여러 상품을 포이즌에서 검색 (무신사→포이즌용)
+    
+    Args:
+        product_codes: 검색할 상품번호 리스트
+        progress_queue: 진행 상황 전달용 큐
+    """
+    import time as time_module
+    import random
+    
+    try:
+        total = len(product_codes)
+        
+        progress_queue.put({
+            'event': 'message',
+            'data': {'message': f'🟣 포이즌 검색 시작: {total}개'}
+        })
+        
+        with sync_playwright() as p:
+            # OS에 맞게 브라우저 실행
+            current_os = platform.system()
+            
+            if current_os == 'Darwin':
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
+            else:
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    channel='chrome',
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
+            
+            context = browser.new_context(viewport=None, no_viewport=True)
+            
+            # 쿠키 로드
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                    context.add_cookies(cookies)
+                except:
+                    pass
+            
+            page = context.new_page()
+            
+            # 초기 설정
+            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+            wait_stable(page, 2000)
+            set_language_korean(page)
+            wait_stable(page, 1000)
+            
+            # 키워드 검색 탭 활성화
+            try:
+                keyword_tab_selectors = [
+                    "text='상품명'",
+                    "span:has-text('상품명')",
+                    ".ant-tabs-tab:has-text('상품명')",
+                ]
+                for selector in keyword_tab_selectors:
+                    try:
+                        tab = page.locator(selector).first
+                        if tab.count() > 0:
+                            tab.click()
+                            wait_stable(page, 500)
+                            break
+                    except:
+                        continue
+            except:
+                pass
+            
+            # 각 상품 검색
+            for idx, product_code in enumerate(product_codes, 1):
+                if stop_flag:
+                    break
+                
+                # 진행상황
+                progress_queue.put({
+                    'event': 'progress',
+                    'data': {
+                        'current': idx,
+                        'total': total
+                    }
+                })
+                
+                try:
+                    # 검색창 찾기
+                    search_input = page.locator("input[placeholder*='상품명']").first
+                    
+                    # 검색창 완전 클리어
+                    search_input.evaluate("el => el.value = ''")
+                    wait_stable(page, 200)
+                    search_input.click()
+                    wait_stable(page, 200)
+                    page.keyboard.press("Control+A")
+                    wait_stable(page, 100)
+                    page.keyboard.press("Backspace")
+                    wait_stable(page, 200)
+                    
+                    # 검색어 입력
+                    search_input.type(product_code, delay=50)
+                    wait_stable(page, 200)
+                    
+                    # Enter로 검색
+                    page.keyboard.press("Enter")
+                    wait_stable(page, 2000)
+                    
+                    # 정렬 시도
+                    try_sort_descending(page)
+                    wait_stable(page, 1000)
+                    
+                    # 테이블 대기
+                    try:
+                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=10000)
+                    except:
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'product_code': product_code,
+                                'success': False,
+                                'error': '검색 결과 없음'
+                            }
+                        })
+                        continue
+                    
+                    # 첫 번째 결과 파싱
+                    data = page.evaluate("""
+                        () => {
+                            const rows = document.querySelectorAll('.ant-table-tbody tr:not(.ant-table-measure-row)');
+                            if (rows.length === 0) return null;
+                            
+                            const row = rows[0];
+                            const cells = row.querySelectorAll('td');
+                            
+                            return {
+                                cn_exposure: cells[6]?.textContent?.trim() || '-',
+                                cn_sales: cells[7]?.textContent?.trim() || '0',
+                                local_sales: cells[8]?.textContent?.trim() || '0'
+                            };
+                        }
+                    """)
+                    
+                    if data:
+                        # 숫자 추출
+                        cn_sales_num = extract_number(data['cn_sales'])
+                        local_sales_num = extract_number(data['local_sales'])
+                        
+                        result = {
+                            'product_code': product_code,
+                            'success': True,
+                            'poizon_data': {
+                                '중국노출': data['cn_exposure'],
+                                '중국시장최근30일판매량': cn_sales_num,
+                                '현지판매자최근30일판매량': local_sales_num
+                            }
+                        }
+                        
+                        # 실시간 전송
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': result
+                        })
+                    else:
+                        progress_queue.put({
+                            'event': 'result',
+                            'data': {
+                                'product_code': product_code,
+                                'success': False,
+                                'error': '데이터 파싱 실패'
+                            }
+                        })
+                    
+                except Exception as e:
+                    print(f"  ❌ 상품 {product_code} 검색 오류: {e}")
+                    progress_queue.put({
+                        'event': 'result',
+                        'data': {
+                            'product_code': product_code,
+                            'success': False,
+                            'error': str(e)
+                        }
+                    })
+                
+                # 다음 상품 대기
+                time_module.sleep(random.uniform(1.0, 2.0))
+            
+            browser.close()
+        
+        # 완료
+        progress_queue.put({
+            'event': 'complete',
+            'data': {
+                'message': f'✅ 포이즌 검색 완료'
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ search_multiple_products 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        progress_queue.put({
+            'event': 'error',
+            'data': {'error': str(e)}
+        })
 
 if __name__ == "__main__":
     print("=" * 60)

@@ -16,7 +16,10 @@ import openpyxl
 import uuid
 import time
 from datetime import datetime
-
+import uuid
+import queue
+import threading
+from flask import stream_with_context
 
 # 전역 변수
 kream_search_tasks = {}
@@ -1058,6 +1061,111 @@ def check_poizon_login():
             'logged_in': False,
             'message': f'오류: {str(e)}'
         }), 500
+
+
+# ==========================================
+# 무신사→포이즌 검색 API
+# ==========================================
+
+@app.route('/start_poizon_search', methods=['POST'])
+def start_poizon_search():
+    """무신사 상품번호로 포이즌 검색 시작"""
+    try:
+        data = request.json
+        product_codes = data.get('product_codes', [])
+        
+        if not product_codes:
+            return jsonify({'success': False, 'error': '상품번호가 없습니다'}), 400
+        
+        # Task ID 생성
+        task_id = str(uuid.uuid4())
+        
+        # 글로벌 딕셔너리에 작업 등록
+        if not hasattr(app, 'poizon_tasks'):
+            app.poizon_tasks = {}
+        
+        app.poizon_tasks[task_id] = {
+            'product_codes': product_codes,
+            'status': 'pending',
+            'queue': queue.Queue()
+        }
+        
+        return jsonify({
+            'success': True,
+            'task_id': task_id,
+            'total_products': len(product_codes)
+        })
+        
+    except Exception as e:
+        print(f"❌ start_poizon_search 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/poizon_search_progress/<task_id>')
+def poizon_search_progress(task_id):
+    """포이즌 검색 진행 상황 SSE"""
+    
+    if not hasattr(app, 'poizon_tasks') or task_id not in app.poizon_tasks:
+        def error_gen():
+            yield f"event: error\ndata: {json.dumps({'error': 'Task not found'})}\n\n"
+        return Response(error_gen(), mimetype='text/event-stream')
+    
+    task = app.poizon_tasks[task_id]
+    product_codes = task['product_codes']
+    progress_queue = task['queue']
+    
+    # 백그라운드 스레드 시작
+    def run_background():
+        try:
+            from poizon_data import poizon_search
+            poizon_search.search_multiple_products(product_codes, progress_queue)
+        except Exception as e:
+            print(f"❌ 백그라운드 검색 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            progress_queue.put({'event': 'error', 'data': {'error': str(e)}})
+    
+    thread = threading.Thread(target=run_background)
+    thread.daemon = True
+    thread.start()
+    
+    # SSE 스트림
+    def generate():
+        try:
+            while True:
+                try:
+                    msg = progress_queue.get(timeout=30)
+                    
+                    event_type = msg.get('event', 'message')
+                    event_data = msg.get('data', {})
+                    
+                    yield f"event: {event_type}\ndata: {json.dumps(event_data, ensure_ascii=False)}\n\n"
+                    
+                    if event_type in ['complete', 'error']:
+                        if task_id in app.poizon_tasks:
+                            del app.poizon_tasks[task_id]
+                        break
+                    
+                except queue.Empty:
+                    yield f"event: ping\ndata: {json.dumps({'status': 'alive'})}\n\n"
+                    
+        except Exception as e:
+            print(f"❌ SSE 스트림 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+            'Connection': 'keep-alive'
+        }
+    )
 
 
 

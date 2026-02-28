@@ -730,34 +730,10 @@
       <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
     </h3>
 
-      <!-- ✅ POIZON 검색 옵션 (오른쪽 위로 이동) -->
-        <div id="resultSearchOptions" style="display: none;">
-          <div class="search-options-container">
-            <button id="resultKreamSearchBtn" class="search-execute-btn">
-              🔍 크림 검색
-            </button>
-            
-            <div class="search-divider"></div>
-            
-            <div class="search-checkboxes">
-              <label class="search-label">
-                <input type="checkbox" id="resultSearchKream" checked class="search-checkbox">
-                <span class="search-label-text">🛒 크림</span>
-              </label>
-              
-              <label class="search-label search-label-disabled">
-                <input type="checkbox" id="resultSearchMusinsa" disabled class="search-checkbox">
-                <span class="search-label-text">🟤 무신사</span>
-                <span class="search-label-badge">(준비중)</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
         <!-- ✅ 무신사 검색 옵션 (오른쪽 위로 이동) -->
         <div id="musinsaSearchOptions" style="display: none;">
           <div class="search-options-container">
-            <button id="musinsaKreamSearchBtn" class="search-execute-btn">
+            <button id="musinsaSearchBtn" class="search-execute-btn">
               🔍 크림 검색
             </button>
             
@@ -769,10 +745,9 @@
                 <span class="search-label-text">🛒 크림</span>
               </label>
               
-              <label class="search-label search-label-disabled">
-                <input type="checkbox" id="musinsaSearchPoizon" disabled class="search-checkbox">
+              <label class="search-label">
+                <input type="checkbox" id="musinsaSearchPoizon" class="search-checkbox">
                 <span class="search-label-text">🟣 포이즌</span>
-                <span class="search-label-badge">(준비중)</span>
               </label>
             </div>
           </div>
@@ -929,8 +904,12 @@
             <th onclick="sortBy('크림비교')">
               크림비교 <span id="sort크림비교">⇅</span>
             </th>
-            <th onclick="sortBy('크림판매량')">
-              크림판매량 <span id="sort크림판매량">⇅</span>
+            <th>포이즌노출가</th>
+            <th onclick="sortBy('포이즌중국판매량')">
+              중국판매량 <span id="sort포이즌중국판매량">⇅</span>
+            </th>
+            <th onclick="sortBy('포이즌현업자판매량')">
+              현업자판매량 <span id="sort포이즌현업자판매량">⇅</span>
             </th>
           </tr>
         `;
@@ -1114,6 +1093,22 @@
             compareCell.style.color = '#999';
             data.크림비교 = 0;
           }
+          // ===== 포이즌 데이터 (신규) =====
+          
+          // 포이즌 노출가
+          const poizonPriceCell = row.insertCell();
+          poizonPriceCell.textContent = data.포이즌노출가 || '-';
+          
+          // 중국 판매량
+          const poizonSalesCell = row.insertCell();
+          const poizonSales = data.포이즌중국판매량 || 0;
+          poizonSalesCell.textContent = poizonSales ? poizonSales.toLocaleString() + '개' : '-';
+          
+          // 현업자 판매량
+          const poizonLocalCell = row.insertCell();
+          const poizonLocal = data.포이즌현업자판매량 || 0;
+          poizonLocalCell.textContent = poizonLocal ? poizonLocal.toLocaleString() + '개' : '-';
+
           const kreamSalesCell = row.insertCell();
           kreamSalesCell.textContent = data.크림판매량 
             ? Number(data.크림판매량).toLocaleString() + '개' 
@@ -1363,7 +1358,13 @@
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('downloadBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
-      document.getElementById('resultSearchOptions').style.display = 'none';
+      
+      // ✅ 존재하는 요소만 제어
+      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
+      if (musinsaSearchOptions) {
+        musinsaSearchOptions.style.display = 'none';
+      }
+      
       document.getElementById('uploadListSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
       
@@ -1774,10 +1775,15 @@
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
       document.getElementById('downloadBtn').style.display = 'none';
-      document.getElementById('resultSearchOptions').style.display = 'none';
+      
+      // ✅ 존재하는 요소만 제어
+      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
+      if (musinsaSearchOptions) {
+        musinsaSearchOptions.style.display = 'none';
+      }
+      
       document.getElementById('uploadListSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
-      
       // 크림 검색 버튼 복원
       const resultBtn = document.getElementById('resultKreamSearchBtn');
       if (resultBtn) {
@@ -1907,90 +1913,402 @@
         btn.disabled = false;
         btn.style.opacity = '1';
       });
+                    
+    // ===== 통합된 크림 검색 함수 ===== ✅
+      async function startKreamSearch(buttonId, codeFieldName, checkboxId, sourceName) {
+        const btn = document.getElementById(buttonId);
+        
+        console.log(`🔍 ${sourceName} 크림 검색 버튼 클릭!`);
+        
+        if (collectedData.length === 0) {
+          alert('❌ 수집된 데이터가 없습니다.');
+          return;
+        }
+        
+        // ✅ 필드명에 따라 품번 추출
+        const productCodes = collectedData
+          .map(item => item[codeFieldName])
+          .filter(code => code && code !== '-');
+        
+        console.log(`📦 ${sourceName} 추출된 품번:`, productCodes);
+        
+        if (productCodes.length === 0) {
+          alert(`❌ 검색 가능한 품번이 없습니다.${sourceName === '무신사' ? '\n무신사 상품에 품번이 없는 경우가 많습니다.' : ''}`);
+          return;
+        }
+        
+        const searchKream = document.getElementById(checkboxId).checked;
+        if (!searchKream) {
+          alert('⚠️ 크림 검색을 선택해주세요!');
+          return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = '🔄 검색 중...';
+        document.getElementById('stopBtn').style.display = 'block';
+        document.getElementById('resetBtn').style.display = 'none';
+        kreamSearchStopped = false;
+        
+        addLog(`🔍 ${sourceName}→크림 검색 시작: ${productCodes.length}개`, 'info');
+        
+        try {
+          const response = await fetch('/start_kream_search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_codes: productCodes })
+          });
+          
+          const result = await response.json();
+          
+          if (!result.success) {
+            throw new Error(result.error);
+          }
+          
+          const taskId = result.task_id;
+          addLog(`✅ 작업 ID: ${taskId}`, 'info');
+          
+          const kreamEventSource = new EventSource(`/kream_search_progress/${taskId}`);
+          kreamSearchEventSource = kreamEventSource;
+          
+          let updatedCount = 0;
+          
+          // ===== MESSAGE 이벤트 =====
+          kreamEventSource.addEventListener('message', (event) => {
+            try {
+              if (kreamSearchStopped) return;
+              
+              const data = JSON.parse(event.data);
+              console.log('📩 message 이벤트:', data);
+              
+              if (data.message) {
+                addLog(data.message, data.level || 'info');
+              }
+            } catch (e) {
+              console.error('message 파싱 오류:', e);
+            }
+          });
+          
+          // ===== PROGRESS 이벤트 =====
+          kreamEventSource.addEventListener('progress', (event) => {
+            try {
+              if (kreamSearchStopped) return;
+              
+              const data = JSON.parse(event.data);
+              console.log('📊 progress 이벤트:', data);
+              
+              if (data.current !== undefined && data.total !== undefined) {
+                updateProgress(data.current, data.total);
+                addLog(`⏳ 진행 중: ${data.current}/${data.total}`, 'info');
+              }
+            } catch (e) {
+              console.error('progress 파싱 오류:', e);
+            }
+          });
+          
+          // ===== RESULT 이벤트 =====
+          kreamEventSource.addEventListener('result', (event) => {
+            try {
+              if (kreamSearchStopped) return;
+              
+              const data = JSON.parse(event.data);
+              console.log('✅ result 이벤트:', data);
+              
+              const index = data.index;
+              const result = data.result;
+              
+              if (result && result.success && result.kream_data) {
+                const productCode = productCodes[index];
+                const kreamData = result.kream_data;
+                
+                // ✅ 필드명으로 상품 찾기
+                const itemIndex = collectedData.findIndex(item => item[codeFieldName] === productCode);
+                
+                if (itemIndex !== -1) {
+                  // 크림 데이터 업데이트
+                  collectedData[itemIndex].크림평균가 = kreamData.avg_price || '-';
+                  collectedData[itemIndex].크림판매량 = kreamData.sales || '-';
                   
-  // ===== 통합된 크림 검색 함수 ===== ✅
-    async function startKreamSearch(buttonId, codeFieldName, checkboxId, sourceName) {
-      const btn = document.getElementById(buttonId);
+                  // ✅ POIZON인 경우 가격 비교 계산
+                  if (codeFieldName === '상품번호') {
+                    const extractPrice = (priceStr) => {
+                      if (!priceStr || priceStr === '-' || priceStr === 'N/A') return null;
+                      const numStr = String(priceStr).replace(/[^0-9]/g, '');
+                      const price = parseInt(numStr);
+                      return isNaN(price) ? null : price;
+                    };
+                    
+                    const chinaPrice = extractPrice(collectedData[itemIndex].중국노출);
+                    const kreamPrice = extractPrice(kreamData.avg_price);
+                    
+                    if (chinaPrice !== null && kreamPrice !== null) {
+                      collectedData[itemIndex].크림비교 = chinaPrice - kreamPrice;
+                    } else {
+                      collectedData[itemIndex].크림비교 = 0;
+                    }
+                    const kreamSalesCell = row.insertCell();
+                    kreamSalesCell.textContent = data.크림판매량 ? Number(data.크림판매량).toLocaleString() + '개' : '-';
+
+                  }
+                  
+                  updatedCount++;
+                  
+                  // 테이블 즉시 업데이트
+                  renderTable();
+                  
+                  addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode} - ${kreamData.avg_price}`, 'success');
+                }
+              } else if (result && !result.success) {
+                const productCode = productCodes[index];
+                addLog(`⚠️ [${index + 1}/${productCodes.length}] ${productCode} - ${result.error || '검색 실패'}`, 'warning');
+              }
+            } catch (e) {
+              console.error('result 파싱 오류:', e);
+            }
+          });
+          
+          // ===== COMPLETE 이벤트 =====
+          kreamEventSource.addEventListener('complete', async (event) => {
+              try {
+                  const data = JSON.parse(event.data);
+                  console.log('🏁 complete 이벤트:', data);
+                  
+                  addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
+                  
+                  kreamEventSource.close();
+                  kreamSearchEventSource = null;
+                  
+                  btn.disabled = false;
+                  btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
+                  document.getElementById('stopBtn').style.display = 'none';
+                  document.getElementById('resetBtn').style.display = 'block';
+                  
+                  updateProgress(0, 100);
+                  
+                  // ✅ 스케줄러에 저장 (POIZON + 무신사)
+                  addLog('💾 스케줄러에 저장 중...', 'info');
+                  
+                  try {
+                      const kreamData = collectedData.filter(item => 
+                          item.크림평균가 && item.크림평균가 !== '-' && item.크림평균가 !== 'N/A'
+                      );
+                      
+                      console.log('💾 저장할 데이터:', kreamData.length + '개');
+                      
+                      if (kreamData.length === 0) {
+                          addLog('⚠️ 저장할 크림 데이터가 없습니다', 'warning');
+                          return;
+                      }
+                      
+                      // ✅ sourceName에 따라 mode 결정
+                      let mode = 'kream';  // 기본값
+                      if (sourceName === 'POIZON') {
+                          mode = 'kream';  // POIZON→크림
+                      } else if (sourceName === '무신사') {
+                          mode = 'musinsa_kream';  // 무신사→크림 ⬅️ 새로운 모드!
+                      }
+                      
+                      const savePayload = {
+                          keyword: `${sourceName}→크림검색_${productCodes.length}개`,
+                          mode: mode,  // ⬅️ 모드 자동 설정
+                          collected_count: kreamData.length,
+                          kream_count: kreamData.length,
+                          duration_seconds: 0,
+                          data: kreamData
+                      };
+                      
+                      console.log('📤 저장 요청:', savePayload);
+                      
+                      const saveResponse = await fetch('/api/scheduler/save', {
+                          method: 'POST',
+                          headers: { 
+                              'Content-Type': 'application/json',
+                              'Accept': 'application/json'
+                          },
+                          body: JSON.stringify(savePayload)
+                      });
+                      
+                      console.log('📥 저장 응답 상태:', saveResponse.status);
+                      
+                      if (!saveResponse.ok) {
+                          const errorText = await saveResponse.text();
+                          console.error('❌ 저장 실패 응답:', errorText);
+                          throw new Error(`HTTP ${saveResponse.status}: ${errorText}`);
+                      }
+                      
+                      const saveResult = await saveResponse.json();
+                      console.log('✅ 저장 결과:', saveResult);
+                      
+                      if (saveResult.success) {
+                          addLog(`✅ 스케줄러 저장 완료: ${saveResult.task_id}`, 'success');
+                      } else {
+                          addLog(`⚠️ 스케줄러 저장 실패: ${saveResult.error || '알 수 없는 오류'}`, 'warning');
+                      }
+                      
+                  } catch (error) {
+                      console.error('❌ 스케줄러 저장 오류:', error);
+                      addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
+                  }
+                  
+              } catch (parseError) {
+                  console.error('❌ 완료 이벤트 파싱 오류:', parseError);
+                  addLog('❌ 완료 데이터 처리 오류', 'error');
+              }
+          });
+          
+          // ===== ERROR 이벤트 =====
+          kreamEventSource.addEventListener('error', (event) => {
+            console.error('❌ error 이벤트:', event);
+            addLog('❌ 연결 오류', 'error');
+            
+            kreamEventSource.close();
+            kreamSearchEventSource = null;
+            
+            btn.disabled = false;
+            btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'block';
+          });
+          
+        } catch (error) {
+          console.error('❌ 크림 검색 시작 오류:', error);
+          addLog('❌ 오류: ' + error.message, 'error');
+          
+          btn.disabled = false;
+          btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
+          document.getElementById('stopBtn').style.display = 'none';
+          document.getElementById('resetBtn').style.display = 'block';
+        }
+      }
       
-      console.log(`🔍 ${sourceName} 크림 검색 버튼 클릭!`);
+      // ===== POIZON 크림 검색 버튼 =====
+      const musinsaSearchBtn = document.getElementById('musinsaSearchBtn');  // ✅ 수정!
+      if (musinsaSearchBtn) {
+        musinsaSearchBtn.addEventListener('click', async () => {
+          console.log('━━━━━━━━━━━━━━━━━━━━');
+          console.log('🟤 무신사 검색 버튼 클릭!');
+          
+          if (collectedData.length === 0) {
+            alert('❌ 수집된 데이터가 없습니다.');
+            return;
+          }
+          
+          const searchKream = document.getElementById('musinsaSearchKream').checked;
+          const searchPoizon = document.getElementById('musinsaSearchPoizon').checked;
+          
+          console.log('  체크박스 상태:');
+          console.log('    크림:', searchKream);
+          console.log('    포이즌:', searchPoizon);
+          
+          if (!searchKream && !searchPoizon) {
+            alert('⚠️ 크림 또는 포이즌 중 하나 이상 선택해주세요!');
+            return;
+          }
+          
+          if (searchKream && searchPoizon) {
+            console.log('  → 크림 검색 후 포이즌 검색');
+            addLog('📊 크림 검색을 먼저 시작합니다...', 'info');
+            await startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
+            addLog('📊 크림 검색 완료. 이제 포이즌 검색을 시작합니다...', 'info');
+            setTimeout(() => startPoizonSearchFromMusinsa(), 2000);
+          } else if (searchKream) {
+            console.log('  → 크림 검색만');
+            addLog('🛒 크림 검색만 진행합니다', 'info');
+            await startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
+          } else if (searchPoizon) {
+            console.log('  → 포이즌 검색만');
+            addLog('🟣 포이즌 검색만 진행합니다', 'info');
+            startPoizonSearchFromMusinsa();
+          }
+          
+          console.log('━━━━━━━━━━━━━━━━━━━━');
+        });
+      }
+
+    // ===== 포이즌 검색 함수 (무신사용) =====
+    async function startPoizonSearchFromMusinsa() {
+      console.log('🟣 무신사→포이즌 검색 시작!');
       
       if (collectedData.length === 0) {
         alert('❌ 수집된 데이터가 없습니다.');
         return;
       }
       
-      // ✅ 필드명에 따라 품번 추출
       const productCodes = collectedData
-        .map(item => item[codeFieldName])
+        .map(item => item.product_code)
         .filter(code => code && code !== '-');
       
-      console.log(`📦 ${sourceName} 추출된 품번:`, productCodes);
+      console.log(`📦 추출된 품번: ${productCodes.length}개`, productCodes);
       
       if (productCodes.length === 0) {
-        alert(`❌ 검색 가능한 품번이 없습니다.${sourceName === '무신사' ? '\n무신사 상품에 품번이 없는 경우가 많습니다.' : ''}`);
+        alert('❌ 검색 가능한 품번이 없습니다.');
         return;
       }
       
-      const searchKream = document.getElementById(checkboxId).checked;
-      if (!searchKream) {
-        alert('⚠️ 크림 검색을 선택해주세요!');
-        return;
-      }
-      
+      const btn = document.getElementById('musinsaSearchBtn');
       btn.disabled = true;
-      btn.textContent = '🔄 검색 중...';
+      btn.textContent = '🔄 포이즌 검색 중...';
       document.getElementById('stopBtn').style.display = 'block';
-      document.getElementById('resetBtn').style.display = 'none';
-      kreamSearchStopped = false;
       
-      addLog(`🔍 ${sourceName}→크림 검색 시작: ${productCodes.length}개`, 'info');
+      addLog(`🟣 무신사→포이즌 검색 시작: ${productCodes.length}개`, 'info');
       
       try {
-        const response = await fetch('/start_kream_search', {
+        const response = await fetch('/start_poizon_search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ product_codes: productCodes })
         });
         
         const result = await response.json();
+        console.log('📦 API 결과:', result);
         
         if (!result.success) {
           throw new Error(result.error);
         }
         
         const taskId = result.task_id;
+        console.log(`✅ Task ID: ${taskId}`);
         addLog(`✅ 작업 ID: ${taskId}`, 'info');
         
-        const kreamEventSource = new EventSource(`/kream_search_progress/${taskId}`);
-        kreamSearchEventSource = kreamEventSource;
+        const sseUrl = `/poizon_search_progress/${taskId}`;
+        console.log('🔌 SSE URL:', sseUrl);
+        const poizonEventSource = new EventSource(sseUrl);
         
         let updatedCount = 0;
         
-        // ===== MESSAGE 이벤트 =====
-        kreamEventSource.addEventListener('message', (event) => {
+        poizonEventSource.onopen = () => {
+          console.log('✅ SSE 연결 성공!');
+          addLog('🔌 포이즌 검색 서버 연결 성공', 'success');
+        };
+        
+        poizonEventSource.onmessage = (event) => {
+          console.log('💬 기본 메시지:', event.data);
           try {
-            if (kreamSearchStopped) return;
-            
             const data = JSON.parse(event.data);
-            console.log('📩 message 이벤트:', data);
-            
             if (data.message) {
-              addLog(data.message, data.level || 'info');
+              addLog(data.message, 'info');
             }
           } catch (e) {
-            console.error('message 파싱 오류:', e);
+            console.log('메시지 파싱 실패:', e);
           }
-        });
+        };
         
-        // ===== PROGRESS 이벤트 =====
-        kreamEventSource.addEventListener('progress', (event) => {
+        poizonEventSource.onerror = (error) => {
+          console.error('❌ SSE 에러:', error);
+          addLog('❌ 연결 오류 또는 완료', 'error');
+          
+          poizonEventSource.close();
+          
+          btn.disabled = false;
+          btn.textContent = '🔍 검색 시작';
+          document.getElementById('stopBtn').style.display = 'none';
+          document.getElementById('resetBtn').style.display = 'block';
+        };
+        
+        poizonEventSource.addEventListener('progress', (event) => {
+          console.log('📊 PROGRESS:', event.data);
           try {
-            if (kreamSearchStopped) return;
-            
             const data = JSON.parse(event.data);
-            console.log('📊 progress 이벤트:', data);
-            
-            if (data.current !== undefined && data.total !== undefined) {
+            if (data.current && data.total) {
               updateProgress(data.current, data.total);
               addLog(`⏳ 진행 중: ${data.current}/${data.total}`, 'info');
             }
@@ -1999,197 +2317,66 @@
           }
         });
         
-        // ===== RESULT 이벤트 =====
-        kreamEventSource.addEventListener('result', (event) => {
+        poizonEventSource.addEventListener('result', (event) => {
+          console.log('✅ RESULT:', event.data);
           try {
-            if (kreamSearchStopped) return;
-            
             const data = JSON.parse(event.data);
-            console.log('✅ result 이벤트:', data);
             
-            const index = data.index;
-            const result = data.result;
-            
-            if (result && result.success && result.kream_data) {
-              const productCode = productCodes[index];
-              const kreamData = result.kream_data;
+            if (data.success && data.poizon_data) {
+              const productCode = data.product_code;
+              const poizonData = data.poizon_data;
               
-              // ✅ 필드명으로 상품 찾기
-              const itemIndex = collectedData.findIndex(item => item[codeFieldName] === productCode);
+              const itemIndex = collectedData.findIndex(item => item.product_code === productCode);
               
               if (itemIndex !== -1) {
-                // 크림 데이터 업데이트
-                collectedData[itemIndex].크림평균가 = kreamData.avg_price || '-';
-                collectedData[itemIndex].크림판매량 = kreamData.sales || '-';
-                
-                // ✅ POIZON인 경우 가격 비교 계산
-                if (codeFieldName === '상품번호') {
-                  const extractPrice = (priceStr) => {
-                    if (!priceStr || priceStr === '-' || priceStr === 'N/A') return null;
-                    const numStr = String(priceStr).replace(/[^0-9]/g, '');
-                    const price = parseInt(numStr);
-                    return isNaN(price) ? null : price;
-                  };
-                  
-                  const chinaPrice = extractPrice(collectedData[itemIndex].중국노출);
-                  const kreamPrice = extractPrice(kreamData.avg_price);
-                  
-                  if (chinaPrice !== null && kreamPrice !== null) {
-                    collectedData[itemIndex].크림비교 = chinaPrice - kreamPrice;
-                  } else {
-                    collectedData[itemIndex].크림비교 = 0;
-                  }
-                  const kreamSalesCell = row.insertCell();
-                  kreamSalesCell.textContent = data.크림판매량 ? Number(data.크림판매량).toLocaleString() + '개' : '-';
-
-                }
+                collectedData[itemIndex].포이즌노출가 = poizonData.중국노출 || '-';
+                collectedData[itemIndex].포이즌중국판매량 = poizonData.중국시장최근30일판매량 || 0;
+                collectedData[itemIndex].포이즌현업자판매량 = poizonData.현지판매자최근30일판매량 || 0;
                 
                 updatedCount++;
-                
-                // 테이블 즉시 업데이트
                 renderTable();
                 
-                addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode} - ${kreamData.avg_price}`, 'success');
+                addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
               }
-            } else if (result && !result.success) {
-              const productCode = productCodes[index];
-              addLog(`⚠️ [${index + 1}/${productCodes.length}] ${productCode} - ${result.error || '검색 실패'}`, 'warning');
+            } else {
+              console.log('검색 실패:', data);
+              addLog(`⚠️ ${data.product_code}: ${data.error}`, 'warning');
             }
           } catch (e) {
             console.error('result 파싱 오류:', e);
           }
         });
         
-        // ===== COMPLETE 이벤트 =====
-        kreamEventSource.addEventListener('complete', async (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('🏁 complete 이벤트:', data);
-                
-                addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
-                
-                kreamEventSource.close();
-                kreamSearchEventSource = null;
-                
-                btn.disabled = false;
-                btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
-                document.getElementById('stopBtn').style.display = 'none';
-                document.getElementById('resetBtn').style.display = 'block';
-                
-                updateProgress(0, 100);
-                
-                // ✅ 스케줄러에 저장 (POIZON + 무신사)
-                addLog('💾 스케줄러에 저장 중...', 'info');
-                
-                try {
-                    const kreamData = collectedData.filter(item => 
-                        item.크림평균가 && item.크림평균가 !== '-' && item.크림평균가 !== 'N/A'
-                    );
-                    
-                    console.log('💾 저장할 데이터:', kreamData.length + '개');
-                    
-                    if (kreamData.length === 0) {
-                        addLog('⚠️ 저장할 크림 데이터가 없습니다', 'warning');
-                        return;
-                    }
-                    
-                    // ✅ sourceName에 따라 mode 결정
-                    let mode = 'kream';  // 기본값
-                    if (sourceName === 'POIZON') {
-                        mode = 'kream';  // POIZON→크림
-                    } else if (sourceName === '무신사') {
-                        mode = 'musinsa_kream';  // 무신사→크림 ⬅️ 새로운 모드!
-                    }
-                    
-                    const savePayload = {
-                        keyword: `${sourceName}→크림검색_${productCodes.length}개`,
-                        mode: mode,  // ⬅️ 모드 자동 설정
-                        collected_count: kreamData.length,
-                        kream_count: kreamData.length,
-                        duration_seconds: 0,
-                        data: kreamData
-                    };
-                    
-                    console.log('📤 저장 요청:', savePayload);
-                    
-                    const saveResponse = await fetch('/api/scheduler/save', {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(savePayload)
-                    });
-                    
-                    console.log('📥 저장 응답 상태:', saveResponse.status);
-                    
-                    if (!saveResponse.ok) {
-                        const errorText = await saveResponse.text();
-                        console.error('❌ 저장 실패 응답:', errorText);
-                        throw new Error(`HTTP ${saveResponse.status}: ${errorText}`);
-                    }
-                    
-                    const saveResult = await saveResponse.json();
-                    console.log('✅ 저장 결과:', saveResult);
-                    
-                    if (saveResult.success) {
-                        addLog(`✅ 스케줄러 저장 완료: ${saveResult.task_id}`, 'success');
-                    } else {
-                        addLog(`⚠️ 스케줄러 저장 실패: ${saveResult.error || '알 수 없는 오류'}`, 'warning');
-                    }
-                    
-                } catch (error) {
-                    console.error('❌ 스케줄러 저장 오류:', error);
-                    addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
-                }
-                
-            } catch (parseError) {
-                console.error('❌ 완료 이벤트 파싱 오류:', parseError);
-                addLog('❌ 완료 데이터 처리 오류', 'error');
-            }
-        });
-        
-        // ===== ERROR 이벤트 =====
-        kreamEventSource.addEventListener('error', (event) => {
-          console.error('❌ error 이벤트:', event);
-          addLog('❌ 연결 오류', 'error');
+        poizonEventSource.addEventListener('complete', (event) => {
+          console.log('🎉 COMPLETE:', event.data);
           
-          kreamEventSource.close();
-          kreamSearchEventSource = null;
+          addLog(`✅ 포이즌 검색 완료! ${updatedCount}개 업데이트`, 'success');
+          
+          poizonEventSource.close();
           
           btn.disabled = false;
-          btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
+          btn.textContent = '🔍 검색 시작';
           document.getElementById('stopBtn').style.display = 'none';
           document.getElementById('resetBtn').style.display = 'block';
+          
+          updateProgress(0, 100);
+        });
+        
+        poizonEventSource.addEventListener('ping', (event) => {
+          console.log('🏓 PING:', event.data);
         });
         
       } catch (error) {
-        console.error('❌ 크림 검색 시작 오류:', error);
+        console.error('❌ 포이즌 검색 시작 오류:', error);
         addLog('❌ 오류: ' + error.message, 'error');
         
         btn.disabled = false;
-        btn.textContent = buttonId === 'resultKreamSearchBtn' ? '🔍 검색' : '🔍 크림 검색';
+        btn.textContent = '🔍 검색 시작';
         document.getElementById('stopBtn').style.display = 'none';
         document.getElementById('resetBtn').style.display = 'block';
       }
     }
-    
-    // ===== POIZON 크림 검색 버튼 =====
-    const resultBtn = document.getElementById('resultKreamSearchBtn');
-    if (resultBtn) {
-      resultBtn.addEventListener('click', () => {
-        startKreamSearch('resultKreamSearchBtn', '상품번호', 'resultSearchKream', 'POIZON');
-      });
-    }
-    
-    // ===== 무신사 크림 검색 버튼 =====
-    const musinsaBtn = document.getElementById('musinsaKreamSearchBtn');
-    if (musinsaBtn) {
-      musinsaBtn.addEventListener('click', () => {
-        startKreamSearch('musinsaKreamSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
-      });
-    }
-        
+             
       document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
         pageSize = parseInt(e.target.value, 10) || 20;
         currentPage = 1;
