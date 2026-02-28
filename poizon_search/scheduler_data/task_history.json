@@ -1,5 +1,487 @@
 [
   {
+    "id": "task_1772276837129",
+    "timestamp": "2026-02-28T20:07:17.129212",
+    "keyword": "무신사_조던 바람막이",
+    "mode": "musinsa",
+    "collected_count": 4,
+    "kream_count": 0,
+    "duration_seconds": 34,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251125/5774866/5774866_17663692106402_500.jpg",
+        "name": "조던 브루클린 하이크 마이크 반사 디자인 드래프트 재킷 M - 메탈릭 실버 / IF1877-095",
+        "price": 183113,
+        "product_code": "IF1877-095",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5774866",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260114/5894711/5894711_17684557717752_500.jpg",
+        "name": "조던 브루클린 후드 드래프트 재킷 M - 라이트 스모크 그레이:아이언 그레이:화이트:블랙 / HF9333-077",
+        "price": 121520,
+        "product_code": "HF9333-077",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5894711",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240122/3813042/3813042_17084970823643_500.jpg",
+        "name": "조던 컬러블럭 윈드자켓 (토들러) 카멜",
+        "price": 46770,
+        "product_code": "N241JK121P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3813042",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240122/3813059/3813059_17084970018833_500.jpg",
+        "name": "조던 컬러블럭 윈드자켓 (토들러) 블루",
+        "price": 46770,
+        "product_code": "N241JK121P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3813059",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772276147654",
+    "timestamp": "2026-02-28T19:55:47.654446",
+    "keyword": "무신사→크림검색_2개",
+    "mode": "musinsa_kream",
+    "collected_count": 1,
+    "kream_count": 1,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
+        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
+        "price": 192903,
+        "product_code": "HV0532-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5520301",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩",
+        "크림비교": -71903,
+        "포이즌비교": -73903,
+        "크림평균가": 121000,
+        "크림판매량": 88,
+        "크림URL": "https://kream.co.kr/products/675570",
+        "포이즌노출가": "₩119,000",
+        "포이즌중국판매량": 5,
+        "포이즌현업자판매량": 5
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772276126824",
+    "timestamp": "2026-02-28T19:55:26.824760",
+    "keyword": "무신사_조던 패딩",
+    "mode": "musinsa",
+    "collected_count": 2,
+    "kream_count": 0,
+    "duration_seconds": 19,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
+        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
+        "price": 192903,
+        "product_code": "HV0532-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5520301",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240927/4470896/4470896_17274035007362_500.jpg",
+        "name": "조던 아웃포켓다운베스트 (주니어) 혼합",
+        "price": 91230,
+        "product_code": "N244VE345P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4470896",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772275577822",
+    "timestamp": "2026-02-28T19:46:17.822664",
+    "keyword": "무신사→크림검색_20개",
+    "mode": "musinsa_kream",
+    "collected_count": 8,
+    "kream_count": 8,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250418/5042975/5042975_17454032311548_500.jpg",
+        "name": "아디제로 EVO SL M - 블랙:화이트 / JP7149",
+        "price": 198550,
+        "product_code": "JP7149",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5042975",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -59750,
+        "포이즌비교": -76550,
+        "크림평균가": 138800,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/389369",
+        "포이즌노출가": "₩122,000",
+        "포이즌중국판매량": 6700,
+        "포이즌현업자판매량": 55
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260113/5888836/5888836_17683571485492_500.jpg",
+        "name": "아디제로 보스턴 13 M - 화이트:블랙 / JS4939",
+        "price": 158230,
+        "product_code": "JS4939",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5888836",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -30230,
+        "포이즌비교": -49230,
+        "크림평균가": 128000,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/546070",
+        "포이즌노출가": "₩109,000",
+        "포이즌중국판매량": 2500,
+        "포이즌현업자판매량": 7
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250418/5042959/5042959_17454036504171_500.jpg",
+        "name": "아디제로 EVO SL M - 화이트:블랙 / JH6206",
+        "price": 185303,
+        "product_code": "JH6206",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5042959",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -49703,
+        "포이즌비교": -70303,
+        "포이즌노출가": "₩115,000",
+        "포이즌중국판매량": 11000,
+        "포이즌현업자판매량": 200,
+        "크림평균가": 135600,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/363672"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251121/5762418/5762418_17639520843156_500.jpg",
+        "name": "아디제로 EVO SL M - 블랙 / KH9858",
+        "price": 185303,
+        "product_code": "KH9858",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5762418",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -38703,
+        "포이즌비교": -32303,
+        "포이즌노출가": "₩153,000",
+        "포이즌중국판매량": 21,
+        "포이즌현업자판매량": 21,
+        "크림평균가": 146600,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/703152"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250131/4748797/4748797_17383161314586_500.jpg",
+        "name": "울트라부스트 1.0 - 화이트 / HQ4202",
+        "price": 193223,
+        "product_code": "HQ4202",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4748797",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -49423,
+        "포이즌비교": -55223,
+        "포이즌노출가": "₩138,000",
+        "포이즌중국판매량": 77,
+        "포이즌현업자판매량": 22,
+        "크림평균가": 143800,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/385531"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5884226/5884226_17682026805765_500.jpg",
+        "name": "아디제로 보스턴 13 M - 블랙:화이트 / JS4938",
+        "price": 158230,
+        "product_code": "JS4938",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5884226",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -40830,
+        "포이즌비교": -52230,
+        "포이즌노출가": "₩106,000",
+        "포이즌중국판매량": 1500,
+        "포이즌현업자판매량": 5,
+        "크림평균가": 117400,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/513547"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5874433/5874433_17678489033570_500.jpg",
+        "name": "테렉스 아그라빅 GTX 트레일 러닝화 - 블랙 / JR5240",
+        "price": 185303,
+        "product_code": "JR5240",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5874433",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": -3503,
+        "포이즌비교": -26303,
+        "포이즌노출가": "₩159,000",
+        "포이즌중국판매량": 5,
+        "포이즌현업자판매량": 5,
+        "크림평균가": 181800,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/718486"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260126/5935015/5935015_17695045755031_500.jpg",
+        "name": "아디제로 보스턴 13 M - 화이트:실버:핑크 / JQ9666",
+        "price": 158230,
+        "product_code": "JQ9666",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5935015",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화",
+        "크림비교": 39770,
+        "포이즌비교": -44230,
+        "포이즌노출가": "₩114,000",
+        "포이즌중국판매량": 4600,
+        "포이즌현업자판매량": 5,
+        "크림평균가": 198000,
+        "크림판매량": "-",
+        "크림URL": "https://kream.co.kr/products/779323"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772275407492",
+    "timestamp": "2026-02-28T19:43:27.492799",
+    "keyword": "무신사_아디다스 런닝화",
+    "mode": "musinsa",
+    "collected_count": 20,
+    "kream_count": 0,
+    "duration_seconds": 168,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250418/5042975/5042975_17454032311548_500.jpg",
+        "name": "아디제로 EVO SL M - 블랙:화이트 / JP7149",
+        "price": 198550,
+        "product_code": "JP7149",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5042975",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260113/5888836/5888836_17683571485492_500.jpg",
+        "name": "아디제로 보스턴 13 M - 화이트:블랙 / JS4939",
+        "price": 158230,
+        "product_code": "JS4939",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5888836",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250418/5042959/5042959_17454036504171_500.jpg",
+        "name": "아디제로 EVO SL M - 화이트:블랙 / JH6206",
+        "price": 185303,
+        "product_code": "JH6206",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5042959",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251121/5762418/5762418_17639520843156_500.jpg",
+        "name": "아디제로 EVO SL M - 블랙 / KH9858",
+        "price": 185303,
+        "product_code": "KH9858",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5762418",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5875827/5875827_17677775213490_500.jpg",
+        "name": "아디제로 아디오스 9 JQ0777",
+        "price": 155600,
+        "product_code": "JQ0777",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5875827",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250911/5445459/5445459_17575805983869_500.jpg",
+        "name": "아디스타 BYD JR0282",
+        "price": 193223,
+        "product_code": "JR0282",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5445459",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250131/4748797/4748797_17383161314586_500.jpg",
+        "name": "울트라부스트 1.0 - 화이트 / HQ4202",
+        "price": 193223,
+        "product_code": "HQ4202",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4748797",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250911/5445452/5445452_17575806244374_500.jpg",
+        "name": "아디스타 4 러닝화 JR0315",
+        "price": 146400,
+        "product_code": "JR0315",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5445452",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260112/5884226/5884226_17682026805765_500.jpg",
+        "name": "아디제로 보스턴 13 M - 블랙:화이트 / JS4938",
+        "price": 158230,
+        "product_code": "JS4938",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5884226",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250829/5380162/5380162_17564567771630_500.jpg",
+        "name": "트레드스피드 JR5856",
+        "price": 109570,
+        "product_code": "JR5856",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5380162",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260123/5931099/5931099_17694041593686_500.jpg",
+        "name": "아디제로 보스턴 13 M - 다크블루:화이트 / JS4940",
+        "price": 158230,
+        "product_code": "JS4940",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5931099",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260226/6058038/6058038_17720810970356_500.jpg",
+        "name": "아디제로 EVO SL EXO KI4763",
+        "price": 193223,
+        "product_code": "KI4763",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6058038",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260226/6058036/6058036_17720811090912_500.jpg",
+        "name": "아디제로 EVO SL EXO KI4764",
+        "price": 193223,
+        "product_code": "KI4764",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6058036",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260225/6053675/6053675_17720124390685_500.jpg",
+        "name": "아디제로 아디오스 9 JQ0764",
+        "price": 155600,
+        "product_code": "JQ0764",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6053675",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6041131/6041131_17718410040609_500.jpg",
+        "name": "아디제로 드라이브 RC 러닝화 KJ6207",
+        "price": 174020,
+        "product_code": "KJ6207",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/6041131",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260209/5994872/5994872_17706910957992_500.jpg",
+        "name": "아디제로 보스턴 13 M - 블랙:라임 / JQ1670",
+        "price": 158230,
+        "product_code": "JQ1670",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5994872",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260120/5916487/5916487_17689693864246_500.jpg",
+        "name": "슈퍼노바 이즈 2 M JQ4254",
+        "price": 91150,
+        "product_code": "JQ4254",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5916487",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5874433/5874433_17678489033570_500.jpg",
+        "name": "테렉스 아그라빅 GTX 트레일 러닝화 - 블랙 / JR5240",
+        "price": 185303,
+        "product_code": "JR5240",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5874433",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260126/5935015/5935015_17695045755031_500.jpg",
+        "name": "아디제로 보스턴 13 M - 화이트:실버:핑크 / JQ9666",
+        "price": 158230,
+        "product_code": "JQ9666",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5935015",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240523/4152091/4152091_17167775314936_500.jpg",
+        "name": "아디스타 쿠션 - 차콜:블루 / IG6924",
+        "price": 58990,
+        "product_code": "IG6924",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4152091",
+        "source": "MUSINSA",
+        "keyword": "아디다스 런닝화"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1772275197181",
     "timestamp": "2026-02-28T19:39:57.181305",
     "keyword": "무신사→크림검색_2개",
@@ -8674,415 +9156,6 @@
         "url": "https://www.musinsa.com/products/6039343",
         "source": "MUSINSA",
         "keyword": "런닝화"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771938392379",
-    "timestamp": "2026-02-24T22:06:32.379449",
-    "keyword": "무신사_런닝화",
-    "mode": "musinsa",
-    "collected_count": 5,
-    "kream_count": 0,
-    "duration_seconds": 46,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045986",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045979",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039348",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039343/6039343_17718363284683_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039343",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039337",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771937930785",
-    "timestamp": "2026-02-24T21:58:50.785176",
-    "keyword": "무신사_퓨마",
-    "mode": "musinsa",
-    "collected_count": 10,
-    "kream_count": 0,
-    "duration_seconds": 86,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015700/6015700_17714662129207_big.jpg",
-        "product_code": "092404-01",
-        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 블랙 / 092404-01",
-        "price": 44670,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015700",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015698/6015698_17709610484216_big.jpg",
-        "product_code": "092404-03",
-        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 그레이스카이 / 092404-03",
-        "price": 44670,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015698",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015697/6015697_17709609541548_big.jpg",
-        "product_code": "026996-01",
-        "name": "푸마(PUMA) 레이스 데이 5패널 캡 - 블랙 / 026996-01",
-        "price": 44670,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015697",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015696/6015696_17709609698916_big.jpg",
-        "product_code": "026996-02",
-        "name": "푸마(PUMA) 레이스 데이 5패널 캡 - 실버 미스트 / 026996-02",
-        "price": 44670,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015696",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015728/6015728_17709614292214_big.jpg",
-        "product_code": "402960-11",
-        "name": "푸마(PUMA) 스프린트 - 그레이:블랙 / 402960-11",
-        "price": 135820,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015728",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015702/6015702_17709610161602_big.jpg",
-        "product_code": "027098-01",
-        "name": "푸마(PUMA) 스쿠데리아 페라리 레플리카 샤를 르클레르 캡 - 레드 / 027098-01",
-        "price": 53790,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015702",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260212/6015701/6015701_17709609986763_big.jpg",
-        "product_code": "027096-01",
-        "name": "푸마(PUMA) 스쿠데리아 페라리 레플리카 해밀턴 트러커 캡 - 레드 / 027096-01",
-        "price": 53790,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6015701",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024101/6024101_17714664097586_big.jpg",
-        "product_code": "407820-03",
-        "name": "푸마(PUMA) H-Street 발렛 우먼스 - 블랙:실버 / 407820-03",
-        "price": 108480,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6024101",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024100/6024100_17714663705807_big.jpg",
-        "product_code": "403700-01",
-        "name": "푸마(PUMA) 스웨이드 찰스 F. 스테드 - 블랙:화이트 / 403700-01",
-        "price": 144940,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6024100",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/images/goods_img/20260213/6024099/6024099_17714662466730_big.jpg",
-        "product_code": "092404-02",
-        "name": "푸마(PUMA) 에브리데이 러닝 웨이스트 백 - 애플 스프리츠 / 092404-02",
-        "price": 44670,
-        "brand": "푸마",
-        "url": "https://www.musinsa.com/products/6024099",
-        "source": "MUSINSA",
-        "keyword": "퓨마"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771937825583",
-    "timestamp": "2026-02-24T21:57:05.583803",
-    "keyword": "아디다스",
-    "mode": "keyword",
-    "collected_count": 0,
-    "kream_count": 0,
-    "duration_seconds": 12,
-    "data": [],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771936472520",
-    "timestamp": "2026-02-24T21:34:32.520424",
-    "keyword": "무신사_아디다스",
-    "mode": "musinsa",
-    "collected_count": 10,
-    "kream_count": 0,
-    "duration_seconds": 41,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6041194/detail_6041194_17718232732207_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JY8234",
-        "price": 162260,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6041194",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260223/6040682/detail_6040682_17718202963839_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스(ADIDAS) 스탠 스미스 LO 발레 JQ6940",
-        "price": 127980,
-        "brand": "아디다스",
-        "url": "https://www.musinsa.com/products/6040682",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034595/detail_6034595_17715570295169_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) WIND CREW JZ4358",
-        "price": 162260,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034595",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034581/detail_6034581_17715568587783_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) 4WAY ANKLE 1/1 팬츠 JY8239",
-        "price": 144030,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034581",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034573/detail_6034573_17715567975598_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8840",
-        "price": 35560,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034573",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034570/detail_6034570_17715567854910_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) MT VISOR KD8839",
-        "price": 35560,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034570",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034566/detail_6034566_17715567602622_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8837",
-        "price": 44670,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034566",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260220/6034564/detail_6034564_17715567484488_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스 골프(ADIDAS GOLF) MT CAP KD8838",
-        "price": 44670,
-        "brand": "아디다스 골프",
-        "url": "https://www.musinsa.com/products/6034564",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011261/detail_6011261_17707983000488_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스(ADIDAS) 아우디 페로자 - 초크펄:블랙:레드 / KJ6176",
-        "price": 131700,
-        "brand": "아디다스",
-        "url": "https://www.musinsa.com/products/6011261",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260211/6011260/detail_6011260_17707983414870_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "아디다스(ADIDAS) 아우디 아디제로 EVO SL M - 초크펄:블랙:레드 / KJ3670",
-        "price": 195203,
-        "brand": "아디다스",
-        "url": "https://www.musinsa.com/products/6011260",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771936398013",
-    "timestamp": "2026-02-24T21:33:18.013110",
-    "keyword": "무신사_나이키",
-    "mode": "musinsa",
-    "collected_count": 10,
-    "kream_count": 0,
-    "duration_seconds": 42,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260128/5949607/detail_5949607_17707754864966_big.jpg?w=1200",
-        "product_code": "FQ3739-506",
-        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 볼드 베리/서밋 화이트 / FQ3739-506",
-        "price": 61720,
-        "brand": "나이키",
-        "url": "https://www.musinsa.com/products/5949607",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260112/5885336/detail_5885336_17707754583356_big.jpg?w=1200",
-        "product_code": "FQ3739-121",
-        "name": "나이키(NIKE) ACG 긴소매 티셔츠 M - 서밋 화이트 / FQ3739-121",
-        "price": 61720,
-        "brand": "나이키",
-        "url": "https://www.musinsa.com/products/5885336",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873365/detail_5873365_17681807950082_big.jpg?w=1200",
-        "product_code": "IB7561-001",
-        "name": "나이키(NIKE) 캄 2.0 W - 블랙 / IB7561-001",
-        "price": 56030,
-        "brand": "나이키",
-        "url": "https://www.musinsa.com/products/5873365",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/prd_img/20260107/5873364/detail_5873364_17681807648549_big.jpg?w=1200",
-        "product_code": "IB0183-200",
-        "name": "나이키(NIKE) 캄 2.0 M - 리넨 / IB0183-200",
-        "price": 56030,
-        "brand": "나이키",
-        "url": "https://www.musinsa.com/products/5873364",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022888/6022888_17709489095368_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 화이트",
-        "price": 76710,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022888",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022885/6022885_17709489042181_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 핑크",
-        "price": 76710,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022885",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022891/6022891_17709489185576_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키오버사이즈윈드러너 (토들러) 핑크",
-        "price": 68970,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022891",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022884/6022884_17709488989381_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키컬러블럭윈드러너 (토들러) 블랙",
-        "price": 76710,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022884",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022880/6022880_17709488882659_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 아이보리",
-        "price": 84460,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022880",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "https://image.msscdn.net/thumbnails/images/goods_img/20260213/6022878/6022878_17709488829892_big.jpg?w=1200",
-        "product_code": "-",
-        "name": "플레이키즈프로(PLAYKIZPRO) 나이키체리윈드러너 (토들러) 네이비",
-        "price": 84460,
-        "brand": "플레이키즈프로",
-        "url": "https://www.musinsa.com/products/6022878",
-        "source": "MUSINSA",
-        "keyword": "나이키"
       }
     ],
     "status": "completed"

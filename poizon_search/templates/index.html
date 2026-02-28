@@ -984,7 +984,24 @@
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
 
+      // ✅ 가격 포맷 함수 추가!
+      const formatPrice = (price) => {
+        if (!price || price === '-' || price === 'N/A') return '-';
+        
+        // 이미 "원"이 붙어있으면 제거
+        let priceStr = String(price).replace(/원/g, '').replace(/,/g, '').trim();
+        
+        // 숫자로 변환
+        let numPrice = parseInt(priceStr);
+        
+        if (isNaN(numPrice)) return '-';
+        
+        // 천 단위 구분자 + "원"
+        return numPrice.toLocaleString() + '원';
+      };
+
       const totalItems = collectedData.length;
+
       const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
       if (currentPage > totalPages) currentPage = totalPages;
 
@@ -1006,8 +1023,8 @@
         if (selectedMode === 'poizon') {
           row.insertCell().textContent = data.상품번호 || '-';
           row.insertCell().textContent = data.제품명 || '-';
-          row.insertCell().textContent = data.최근30일평균거래가 || '-';
-          row.insertCell().textContent = data.중국노출 || '-';
+          row.insertCell().textContent = formatPrice(data.최근30일평균거래가);  // ✅ 변경
+          row.insertCell().textContent = formatPrice(data.중국노출);  // ✅ 변경
           row.insertCell().textContent = (data.중국시장최근30일판매량 || 0).toLocaleString() + '개';
           row.insertCell().textContent = (data.현지판매자최근30일판매량 || 0).toLocaleString() + '개';
           // 크림평균가 (링크 추가)
@@ -1016,13 +1033,12 @@
             const link = document.createElement('a');
             link.href = data.크림URL;
             link.target = '_blank';
-            link.textContent = data.크림평균가;
+            link.textContent = formatPrice(data.크림평균가);  // ✅ 변경
             link.style.color = '#4285f4';
             link.style.textDecoration = 'underline';
-            link.style.cursor = 'pointer';
             kreamPriceCell.appendChild(link);
           } else {
-            kreamPriceCell.textContent = data.크림평균가 || '-';
+            kreamPriceCell.textContent = formatPrice(data.크림평균가);  // ✅ 변경
           }
           
           const compareCell = row.insertCell();
@@ -1040,7 +1056,7 @@
             const priceDiff = chinaPrice - kreamPrice;
             data.크림비교 = priceDiff;
             
-            compareCell.textContent = priceDiff.toLocaleString() + '원';
+            compareCell.textContent = formatPrice(priceDiff);  // ✅ 변경
             
             if (priceDiff > 0) {
               compareCell.style.color = '#dc3545';
@@ -1078,11 +1094,7 @@
           
           const priceCell = row.insertCell();
           const musinsaPrice = data.price;
-          if (musinsaPrice) {
-            priceCell.textContent = musinsaPrice.toLocaleString() + '원';
-          } else {
-            priceCell.textContent = '-';
-          }
+          priceCell.textContent = formatPrice(musinsaPrice);  
           
           const kreamPriceCell = row.insertCell();
           if (data.크림평균가 && data.크림평균가 !== '-' && data.크림URL) {
@@ -1104,7 +1116,7 @@
             const priceDiff = kreamPrice - musinsaPrice;
             data.크림비교 = priceDiff;
             
-            compareCell.textContent = priceDiff.toLocaleString() + '원';
+            compareCell.textContent = formatPrice(priceDiff);  // ✅ 변경
             
             if (priceDiff > 20000) {
               compareCell.style.color = '#28a745';
@@ -1133,7 +1145,7 @@
           }
      
           const poizonPriceCell = row.insertCell();
-          poizonPriceCell.textContent = data.포이즌노출가 || '-';
+          poizonPriceCell.textContent = formatPrice(data.포이즌노출가);  // ✅ 변경
           
           const poizonCompareCell = row.insertCell();
           const poizonPrice = extractPrice(data.포이즌노출가);
@@ -1142,7 +1154,7 @@
             const poizonPriceDiff = poizonPrice - musinsaPrice;
             data.포이즌비교 = poizonPriceDiff;
             
-            poizonCompareCell.textContent = poizonPriceDiff.toLocaleString() + '원';
+            poizonCompareCell.textContent = formatPrice(poizonPriceDiff);  // ✅ 변경
             
             if (poizonPriceDiff > 20000) {
               poizonCompareCell.style.color = '#28a745';
@@ -1177,12 +1189,12 @@
           row.insertCell().textContent = data.제품명 || '-';
           
           const excelPrice = data.엑셀_할인가 || 0;
-          row.insertCell().textContent = excelPrice ? excelPrice.toLocaleString() + '원' : '-';
+          row.insertCell().textContent = formatPrice(data.엑셀_할인가);  // ✅ 변경
           
           row.insertCell().textContent = data.엑셀_재고 || '-';
           
           const cnPrice = data.중국노출_숫자 || 0;
-          row.insertCell().textContent = cnPrice ? cnPrice.toLocaleString() + '원' : '-';
+          row.insertCell().textContent = formatPrice(data.중국노출_숫자);  // ✅ 변경
           
           const priceDiff = data.가격차이 || 0;
           const diffCell = row.insertCell();
@@ -1205,8 +1217,8 @@
         else {
           row.insertCell().textContent = data.상품번호 || '-';
           row.insertCell().textContent = data.제품명 || '-';
-          row.insertCell().textContent = data.최근30일평균거래가 || '-';
-          row.insertCell().textContent = data.중국노출 || '-';
+          row.insertCell().textContent = formatPrice(data.최근30일평균거래가);  // ✅ 변경
+          row.insertCell().textContent = formatPrice(data.중국노출);  // ✅ 변경
           row.insertCell().textContent = (data.중국시장최근30일판매량 || 0).toLocaleString() + '개';
         }
       });

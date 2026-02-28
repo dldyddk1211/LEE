@@ -992,6 +992,7 @@ def background_kream_search(task_id, product_codes, progress_queue):
                                     'success': True,
                                     'kream_data': {
                                         'avg_price': avg_price,
+                                        'sales': kream_sales_num,
                                         'product_id': product_id,  # ✅ 크림 ID 추가
                                         'url': f'https://kream.co.kr/products/{product_id}' if product_id else None  # ✅ URL 수정
                                     }
