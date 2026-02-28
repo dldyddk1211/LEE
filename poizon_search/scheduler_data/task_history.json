@@ -1,5 +1,105 @@
 [
   {
+    "id": "task_1772276998730",
+    "timestamp": "2026-02-28T20:09:58.730060",
+    "keyword": "무신사→크림검색_4개",
+    "mode": "musinsa_kream",
+    "collected_count": 2,
+    "kream_count": 2,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251125/5774866/5774866_17663692106402_500.jpg",
+        "name": "조던 브루클린 하이크 마이크 반사 디자인 드래프트 재킷 M - 메탈릭 실버 / IF1877-095",
+        "price": 183113,
+        "product_code": "IF1877-095",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5774866",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이",
+        "크림비교": -7113,
+        "포이즌비교": 45887,
+        "크림평균가": 176000,
+        "크림판매량": 1,
+        "크림URL": "https://kream.co.kr/products/747010",
+        "포이즌노출가": "₩229,000",
+        "포이즌중국판매량": 5,
+        "포이즌현업자판매량": 5
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260114/5894711/5894711_17684557717752_500.jpg",
+        "name": "조던 브루클린 후드 드래프트 재킷 M - 라이트 스모크 그레이:아이언 그레이:화이트:블랙 / HF9333-077",
+        "price": 121520,
+        "product_code": "HF9333-077",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5894711",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이",
+        "크림비교": -10920,
+        "포이즌비교": -22520,
+        "크림평균가": 110600,
+        "크림판매량": 3,
+        "크림URL": "https://kream.co.kr/products/614345",
+        "포이즌노출가": "₩99,000",
+        "포이즌중국판매량": 5,
+        "포이즌현업자판매량": 5
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772276945599",
+    "timestamp": "2026-02-28T20:09:05.599214",
+    "keyword": "무신사_조던 바람막이",
+    "mode": "musinsa",
+    "collected_count": 4,
+    "kream_count": 0,
+    "duration_seconds": 35,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251125/5774866/5774866_17663692106402_500.jpg",
+        "name": "조던 브루클린 하이크 마이크 반사 디자인 드래프트 재킷 M - 메탈릭 실버 / IF1877-095",
+        "price": 183113,
+        "product_code": "IF1877-095",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5774866",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260114/5894711/5894711_17684557717752_500.jpg",
+        "name": "조던 브루클린 후드 드래프트 재킷 M - 라이트 스모크 그레이:아이언 그레이:화이트:블랙 / HF9333-077",
+        "price": 121520,
+        "product_code": "HF9333-077",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5894711",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240122/3813042/3813042_17084970823643_500.jpg",
+        "name": "조던 컬러블럭 윈드자켓 (토들러) 카멜",
+        "price": 46770,
+        "product_code": "N241JK121P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3813042",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240122/3813059/3813059_17084970018833_500.jpg",
+        "name": "조던 컬러블럭 윈드자켓 (토들러) 블루",
+        "price": 46770,
+        "product_code": "N241JK121P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3813059",
+        "source": "MUSINSA",
+        "keyword": "조던 바람막이"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1772276837129",
     "timestamp": "2026-02-28T20:07:17.129212",
     "keyword": "무신사_조던 바람막이",
@@ -9062,100 +9162,6 @@
         "url": "https://www.musinsa.com/products/6022878",
         "source": "MUSINSA",
         "keyword": "나이키"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771938971458",
-    "timestamp": "2026-02-24T22:16:11.458440",
-    "keyword": "무신사_런닝화",
-    "mode": "musinsa",
-    "collected_count": 3,
-    "kream_count": 0,
-    "duration_seconds": 37,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045986",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045979",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039348",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1771938458070",
-    "timestamp": "2026-02-24T22:07:38.070429",
-    "keyword": "무신사_런닝화",
-    "mode": "musinsa",
-    "collected_count": 4,
-    "kream_count": 0,
-    "duration_seconds": 38,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045986/6045986_17718964909338_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045986",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260224/6045979/6045979_17718964791731_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6045979",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260223/6039348/6039348_17718360628363_big.jpg",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039348",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
-      },
-      {
-        "image_url": "",
-        "product_code": "-",
-        "name": "-",
-        "price": 0,
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/6039343",
-        "source": "MUSINSA",
-        "keyword": "런닝화"
       }
     ],
     "status": "completed"
