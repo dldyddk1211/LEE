@@ -684,24 +684,23 @@ def download(filename):
 
 @app.route('/shutdown_kream_browser')
 def shutdown_kream_browser():
-    """크림 브라우저 종료"""
     try:
         if kream_search:
             kream_search.close_kream_browser()
-            return jsonify({'success': True, 'message': '크림 브라우저 종료 완료'})
-        else:
-            return jsonify({'success': False, 'error': 'kream_search 모듈 없음'})
+        return jsonify({'success': True}), 200
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"⚠️ 크림 브라우저 종료 오류 (무시): {e}")
+        return jsonify({'success': True}), 200  # ⬅️ 핵심!
 
 @app.route('/shutdown_browser')
 def shutdown_browser():
     try:
         from poizon_data.poizon_search import close_browser_session
         close_browser_session()
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'message': 'POIZON 브라우저 종료 완료'}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"⚠️ POIZON 브라우저 종료 중 오류 (무시): {e}")
+        return jsonify({'success': True, 'message': '이미 종료됨 또는 오류 무시'}), 200  # ✅ 200 반환!
 
 @app.route('/stop', methods=['POST'])
 def stop():
@@ -984,15 +983,13 @@ def start_sourcing():
 
 @app.route('/shutdown_musinsa_browser')
 def shutdown_musinsa_browser():
-    """무신사 브라우저 종료"""
     try:
         if musinsa_search:
             musinsa_search.close_musinsa_browser()
-            return jsonify({'success': True, 'message': '무신사 브라우저 종료 완료'})
-        else:
-            return jsonify({'success': False, 'error': 'musinsa_search 모듈 없음'})
+        return jsonify({'success': True}), 200
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"⚠️ 무신사 브라우저 종료 오류 (무시): {e}")
+        return jsonify({'success': True}), 200  # ⬅️ 핵심!
 
 
 # ✅ 무신사 로그인 라우트 추가

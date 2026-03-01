@@ -709,40 +709,40 @@ def perform_login():
                     no_viewport=True
                 )
     
-            page = context.new_page()
-            
-            log("\n[1] POIZON 접속 중...", 'info')
-            page.goto(LOGIN_URL, wait_until="domcontentloaded")
-            wait_stable(page, 500)
-            
-            lang_success = set_language_korean(page)
-            if not lang_success:
-                raise Exception("언어 변경 실패")
-            
-            log("\n[2] 로그인 진행 중...", 'info')
-            wait_for_inputs(page)
-            page.locator("input").nth(0).fill(POIZON_ID)
-            log("  → ID 입력 완료")
-            page.locator("input").nth(1).fill(POIZON_PW)
-            log("  → PW 입력 완료")
+                page = context.new_page()
+                
+                log("\n[1] POIZON 접속 중...", 'info')
+                page.goto(LOGIN_URL, wait_until="domcontentloaded")
+                wait_stable(page, 500)
+                
+                lang_success = set_language_korean(page)
+                if not lang_success:
+                    raise Exception("언어 변경 실패")
+                
+                log("\n[2] 로그인 진행 중...", 'info')
+                wait_for_inputs(page)
+                page.locator("input").nth(0).fill(POIZON_ID)
+                log("  → ID 입력 완료")
+                page.locator("input").nth(1).fill(POIZON_PW)
+                log("  → PW 입력 완료")
 
-            try:
-                click_first(page, ["button:has-text('로그인')"], "로그인")
-            except Exception:
-                page.locator("input").nth(1).press("Enter")
+                try:
+                    click_first(page, ["button:has-text('로그인')"], "로그인")
+                except Exception:
+                    page.locator("input").nth(1).press("Enter")
 
-            wait_stable(page, 400)
-            log("  ✅ 로그인 완료", 'success')
-            
-            cookies = context.cookies()
-            with open(COOKIE_FILE, 'w') as f:
-                json.dump(cookies, f)
-            log("  💾 쿠키 저장 완료", 'success')
-            
-            page.wait_for_timeout(1000)
-            browser.close()
-            
-            log("\n✅ POIZON 접속 완료! 이제 데이터 수집을 시작할 수 있습니다", 'success')
+                wait_stable(page, 400)
+                log("  ✅ 로그인 완료", 'success')
+                
+                cookies = context.cookies()
+                with open(COOKIE_FILE, 'w') as f:
+                    json.dump(cookies, f)
+                log("  💾 쿠키 저장 완료", 'success')
+                
+                page.wait_for_timeout(1000)
+                browser.close()
+                
+                log("\n✅ POIZON 접속 완료! 이제 데이터 수집을 시작할 수 있습니다", 'success')
             
             return {
                 'success': True,

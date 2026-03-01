@@ -650,42 +650,45 @@
     <h3>🚀 STEP 1: 수집 모드 선택</h3>
     <p id="loginMessage">먼저 아래에서 수집 모드를 선택해주세요. 각 모드 선택 시 자동으로 로그인됩니다.</p>
   </div>
-
     <div class="mode-selector">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
       <div class="mode-buttons">
-        <button class="mode-btn" id="modeKream" onclick="selectMode('kream')" disabled>
+        <!-- ✅ 모든 버튼에서 disabled 제거! -->
+        <!-- ✅ onclick 제거! -->
+        <button class="mode-btn" id="modeKream">
           <span class="mode-icon">🛒</span>
           <span class="mode-text">크림 검색</span>
         </button>
-        
-        <button class="mode-btn" id="modePoizon" onclick="selectMode('poizon')" disabled>
+
+        <button class="mode-btn" id="modePoizon">
           <span class="mode-icon">🟣</span>
           <span class="mode-text">포이즌 검색</span>
         </button>
-        
-        <button class="mode-btn" id="modeMusinsa" onclick="selectMode('musinsa')" disabled>
+
+        <button class="mode-btn" id="modeMusinsa">
           <span class="mode-icon">🟤</span>
           <span class="mode-text">무신사 검색</span>
         </button>
-        
-        <button class="mode-btn" id="modeCompare" onclick="selectMode('compare')" disabled>
+
+        <button class="mode-btn" id="modeCompare">
           <span class="mode-icon">📋</span>
           <span class="mode-text">리스트 비교</span>
         </button>
 
-        <button class="mode-btn" id="modeScheduler" onclick="selectMode('scheduler')" disabled>
+        <button class="mode-btn" id="modeScheduler">
           <span class="mode-icon">📅</span>
           <span class="mode-text">스케줄러</span>
         </button>
-          <button class="mode-btn" id="modeInventory" onclick="selectMode('inventory')">
+
+        <button class="mode-btn" id="modeInventory">
           <span class="mode-icon">📦</span>
           <span class="mode-text">사무실 재고</span>
         </button>
-        <button class="mode-btn" id="modeSettings" onclick="selectMode('settings')" disabled>
+
+        <button class="mode-btn" id="modeSettings">
           <span class="mode-icon">⚙️</span>
           <span class="mode-text">설정</span>
-        </button>
+        </button>      
       </div>
     </div>
 
@@ -807,60 +810,83 @@
   let uploadedProducts = [];
   let kreamSearchEventSource = null;
   let kreamSearchStopped = false;
+  let isCollecting = false;  // 수집 중인지 여부
 
-    function performMusinsaLogin(mode) {
-    addLog('🔄 무신사 로그인 시작...', 'info');
-    addLog('💡 브라우저가 자동으로 열립니다', 'info');
-    
-    // 로그인 상태 UI 업데이트
-    const loginStatus = document.getElementById('loginStatus');
-    const loginMessage = document.getElementById('loginMessage');
-    
-    loginStatus.querySelector('h3').textContent = '🔐 무신사 로그인 중...';
-    loginMessage.textContent = '브라우저가 열리고 자동으로 로그인됩니다. 잠시만 기다려주세요.';
-    
-    fetch('/check_musinsa_login')
-      .then(response => {
-        console.log('무신사 로그인 응답 상태:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        return response.json();
-      })
-      .then(data => {
-        console.log('무신사 로그인 응답 데이터:', data);
-        
-        if (data && data.logged_in) {
-          isMusinsaLoggedIn = true;
+    // ✅ safeFetch 함수 추가!
+    async function safeFetch(url) {
+      try {
+        const r = await fetch(url);
+        return r.ok;  // 200~299면 true, 나머지 false
+      } catch (e) {
+        console.log(`safeFetch 오류 (무시): ${url}`, e);
+        return false;
+      }
+    }
+
+
+    async function performMusinsaLogin(mode) {
+      addLog('🔄 무신사 로그인 시작...', 'info');
+      addLog('💡 브라우저가 자동으로 열립니다', 'info');
+      
+      // 로그인 상태 UI 업데이트
+      const loginStatus = document.getElementById('loginStatus');
+      const loginMessage = document.getElementById('loginMessage');
+      
+      loginStatus.querySelector('h3').textContent = '🔐 무신사 로그인 중...';
+      loginMessage.textContent = '브라우저가 열리고 자동으로 로그인됩니다. 잠시만 기다려주세요.';
+
+        // ✅ 기존 브라우저 종료 후 재시작
+      try {
+        addLog('🔄 기존 무신사 브라우저 종료 중...', 'info');
+        await fetch('/shutdown_musinsa_browser');
+        await new Promise(resolve => setTimeout(resolve, 2000));  // 2초 대기
+        addLog('✅ 브라우저 종료 완료', 'success');
+      } catch (err) {
+        console.log('브라우저 종료 오류 (무시):', err);
+      }
+      
+      fetch('/check_musinsa_login')
+        .then(response => {
+          console.log('무신사 로그인 응답 상태:', response.status);
           
-          loginStatus.querySelector('h3').textContent = '✅ 무신사 로그인 완료!';
-          loginMessage.textContent = '무신사 로그인 완료! 키워드를 입력하고 수집을 시작하세요.';
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
           
-          addLog('✅ 무신사 로그인 완료!', 'success');
+          return response.json();
+        })
+        .then(data => {
+          console.log('무신사 로그인 응답 데이터:', data);
           
-          // ✅ 로그인 성공 후 모드 활성화
-          console.log('activateMode 호출:', mode);
-          activateMode(mode);
+          if (data && data.logged_in) {
+            isMusinsaLoggedIn = true;
+            
+            loginStatus.querySelector('h3').textContent = '✅ 무신사 로그인 완료!';
+            loginMessage.textContent = '무신사 로그인 완료! 키워드를 입력하고 수집을 시작하세요.';
+            
+            addLog('✅ 무신사 로그인 완료!', 'success');
+            
+            // ✅ 로그인 성공 후 모드 활성화
+            console.log('activateMode 호출:', mode);
+            activateMode(mode);
+            
+          } else {
+            loginStatus.querySelector('h3').textContent = '❌ 무신사 로그인 실패';
+            loginMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
+            
+            const errorMsg = data && data.message ? data.message : '알 수 없는 오류';
+            addLog('⚠️ 무신사 로그인 실패: ' + errorMsg, 'warning');
+          }
+        })
+        .catch(err => {
+          console.error('무신사 로그인 오류:', err);
           
-        } else {
-          loginStatus.querySelector('h3').textContent = '❌ 무신사 로그인 실패';
-          loginMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
+          loginStatus.querySelector('h3').textContent = '❌ 무신사 로그인 오류';
+          loginMessage.textContent = '로그인 중 오류가 발생했습니다.';
           
-          const errorMsg = data && data.message ? data.message : '알 수 없는 오류';
-          addLog('⚠️ 무신사 로그인 실패: ' + errorMsg, 'warning');
-        }
-      })
-      .catch(err => {
-        console.error('무신사 로그인 오류:', err);
-        
-        loginStatus.querySelector('h3').textContent = '❌ 무신사 로그인 오류';
-        loginMessage.textContent = '로그인 중 오류가 발생했습니다.';
-        
-        addLog('❌ 무신사 로그인 오류: ' + err.message, 'error');
-      });
-  }
+          addLog('❌ 무신사 로그인 오류: ' + err.message, 'error');
+        });
+    }
     function updateTableHeader(mode) {
       const tableHeader = document.getElementById('tableHeader');
       let headerHTML = '';
@@ -1282,17 +1308,26 @@
       addLog(`🔄 ${column} ${sortDirection === 'desc' ? '내림차순' : '오름차순'} 정렬`, 'info');
     }
 
-    function selectMode(mode) {
+    async function selectMode(mode) {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log(`📊 모드 선택: ${mode}`);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       
-
-            // 재고관리 모드
-      if (mode === 'inventory') {
-          window.open('/api/inventory/page', 'inventoryPopup', 'width=1400,height=900');
-          return;
+      if (isCollecting && selectedMode !== mode) {
+        let modeName = selectedMode;
+        if (selectedMode === 'poizon') modeName = 'POIZON';
+        if (selectedMode === 'musinsa') modeName = '무신사';
+        if (selectedMode === 'compare') modeName = '리스트 비교';
+        
+        alert(`⚠️ ${modeName} 모드 수집 중입니다!\n\n수집이 완료되거나 중단된 후에 모드를 변경할 수 있습니다.`);
+        return;
       }
+      // 재고관리 모드
+      if (mode === 'inventory') {
+        window.open('/api/inventory/page', 'inventoryPopup', 'width=1400,height=900');
+        return;
+      }
+      
       // 스케줄러와 설정은 특수 처리
       if (mode === 'scheduler') {
         window.open('/api/scheduler/page', 'schedulerPopup', 'width=1200,height=800');
@@ -1320,9 +1355,14 @@
       if (selectedMode !== null) {
         console.log(`🔄 기존 모드 (${selectedMode}) 리셋`);
         addLog(`🔄 ${selectedMode} 모드 종료 중...`, 'info');
+        
         resetModeUI();
+        
+        // ✅ 브라우저 종료 대기 (2초로 증가)
+        addLog('⏳ 브라우저 종료 대기 중...', 'info');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        addLog('✅ 브라우저 종료 완료', 'success');
       }
-      
       // ===== 모드별 처리 =====
       
       // 🟣 포이즌 모드
@@ -1330,12 +1370,10 @@
         console.log('🟣 포이즌 모드 처리');
         
         if (!isLoggedIn) {
-          // 로그인 필요
           console.log('→ 로그인 필요');
           addLog('🟣 POIZON 모드 선택 - 로그인 시작', 'info');
           performPoizonLogin(mode);
         } else {
-          // 이미 로그인됨 → 바로 활성화
           console.log('→ 이미 로그인됨, 바로 활성화');
           addLog('🟣 POIZON 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
@@ -1347,12 +1385,10 @@
       if (mode === 'musinsa') {
         console.log('🟤 무신사 모드 처리');
         if (!isMusinsaLoggedIn) {
-          // 로그인 필요
           console.log('→ 로그인 필요');
           addLog('🟤 무신사 모드 선택 - 로그인 시작', 'info');
           performMusinsaLogin(mode);
         } else {
-          // 이미 로그인됨 → 바로 활성화
           console.log('→ 이미 로그인됨, 바로 활성화');
           addLog('🟤 무신사 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
@@ -1365,12 +1401,10 @@
         console.log('📋 리스트 비교 모드 처리');
         
         if (!isLoggedIn) {
-          // POIZON 로그인 필요
           console.log('→ POIZON 로그인 필요');
           addLog('📋 리스트 비교 - POIZON 로그인 필요', 'info');
           performPoizonLogin(mode);
         } else {
-          // 이미 로그인됨 → 바로 활성화
           console.log('→ 이미 로그인됨, 바로 활성화');
           addLog('📋 리스트 비교 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
@@ -1380,9 +1414,8 @@
       
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
-
 // ✅ 모드 UI 리셋 함수 (새로 추가)
-   function resetModeUI() {
+    async function resetModeUI() {
       console.log('🔄 모드 UI 리셋');
       
       // 1. 진행 중인 작업 중단
@@ -1396,26 +1429,41 @@
         kreamSearchEventSource = null;
       }
       
-      // 2. 데이터 초기화
+      // ✅ 2. 현재 모드의 브라우저 닫기
+      try {
+          if (selectedMode === 'musinsa') {
+            console.log('  → 무신사 브라우저 종료 요청');
+            await fetch('/shutdown_musinsa_browser');  // ✅ await 추가!
+            console.log('  ✅ 무신사 브라우저 종료 완료');
+            
+          } else if (selectedMode === 'poizon' || selectedMode === 'compare') {
+            console.log('  → POIZON 브라우저 종료 요청');
+            await fetch('/shutdown_browser');  // ✅ await 추가!
+            console.log('  ✅ POIZON 브라우저 종료 완료');
+          }
+        } catch (err) {
+          console.warn('브라우저 종료 오류:', err);
+        }
+      
+      // 3. 데이터 초기화
       collectedData = [];
       uploadedProducts = [];
       currentPage = 1;
       
-      // 3. 테이블 초기화
+      // 4. 테이블 초기화
       document.getElementById('tableBody').innerHTML = '';
       document.getElementById('uploadTableBody').innerHTML = '';
       document.getElementById('resultCount').textContent = '0';
       document.getElementById('uploadCount').textContent = '0';
       
-      // 4. 프로그레스 바 초기화
+      // 5. 프로그레스 바 초기화
       updateProgress(0, 100);
       
-      // 5. 버튼 상태 초기화
+      // 6. 버튼 상태 초기화
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('downloadBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
       
-      // ✅ 존재하는 요소만 제어
       const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
       if (musinsaSearchOptions) {
         musinsaSearchOptions.style.display = 'none';
@@ -1424,20 +1472,18 @@
       document.getElementById('uploadListSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
       
-      // 6. 시작 버튼 복원
+      // 7. 시작 버튼 복원
       const startBtn = document.getElementById('startBtn');
       startBtn.disabled = false;
       startBtn.textContent = '🚀 수집 시작';
       startBtn.style.display = 'block';
-      
-      // ✅ 시작 버튼 색상 클래스 제거
       startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
       
-      // 7. 업로드 버튼 숨김
+      // 8. 업로드 버튼 숨김
       document.getElementById('uploadLabel').style.display = 'none';
       document.getElementById('startCompareBtn').style.display = 'none';
       
-      // 8. 모든 모드 버튼 비활성 상태로
+      // 9. 모든 모드 버튼 비활성 상태로
       document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
       
       console.log('✅ 모드 UI 리셋 완료');
@@ -1470,6 +1516,18 @@
       
       // ✅ 시작 버튼 기존 모드 클래스 제거
       startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
+
+      // ✅ 검색 옵션 초기화 (모두 숨김)
+      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
+      if (musinsaSearchOptions) {
+        musinsaSearchOptions.style.display = 'none';
+      }
+      
+      // resultSearchOptions가 있다면 숨김 (POIZON용)
+      const resultSearchOptions = document.getElementById('resultSearchOptions');
+      if (resultSearchOptions) {
+        resultSearchOptions.style.display = 'none';
+      }
       
       // ✅ 모드별 시작 버튼 텍스트 및 색상 설정
       let startBtnText = '🚀 수집 시작';
@@ -1484,7 +1542,7 @@
         maxPagesElement.type = 'number';
         maxPagesElement.parentElement.querySelector('label').textContent = '검색 페이지 수 (1페이지 10건)';
         maxPagesElement.parentElement.querySelector('.hint').textContent = '접속 완료 후 설정 가능합니다';
-        
+
       } else if (mode === 'musinsa') {
         startBtnText = '🟤 무신사 검색 시작';
         startBtnClass = 'mode-musinsa';
@@ -1629,6 +1687,9 @@
       // 기존 이벤트 소스 닫기
       if (eventSource) eventSource.close();
       
+      // ✅ 수집 시작
+      isCollecting = true;
+
       // 데이터 초기화
       collectedData = [];
       
@@ -1658,6 +1719,8 @@
 
         if (data.type === 'complete') {
           addLog('✅ 포이즌 검색 완료!', 'success');
+           // ✅ 수집 완료
+          isCollecting = false;
           
           if (data.data && Array.isArray(data.data)) {
             collectedData = data.data;
@@ -1684,6 +1747,8 @@
       eventSource.onerror = (error) => {
         console.error('EventSource 오류:', error);
         addLog('❌ 연결 오류 발생', 'error');
+          // ✅ 수집 중단
+        isCollecting = false;
         
         eventSource.close();
         eventSource = null;
@@ -1694,10 +1759,15 @@
         document.getElementById('startBtn').disabled = false;
         document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
       };
+
+
     }
 
     function stopCollection() {
       fetch('/stop', { method: 'POST' });
+      // ✅ 수집 중단
+      isCollecting = false;
+
       if (eventSource) {
         eventSource.close();
         eventSource = null;
@@ -1719,12 +1789,17 @@
       addLog('⏹️ 수집 중단', 'error');
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
+      // ✅ 모든 버튼 다시 활성화
+      setModeButtonsEnabled(true);
+
     }
 
     function resetAll() {
       addLog('🔄 리셋 시작...', 'info');
       
+        
       // 진행 중인 작업 중단
+      isCollecting = false;
       isLoggedIn = false;
       isMusinsaLoggedIn = false;
       isKreamLoggedIn = false;
@@ -1772,13 +1847,13 @@
       
       // ===== 2. 백그라운드 브라우저 종료 =====
         // 백그라운드 브라우저 종료
-        Promise.all([
-          fetch('/shutdown_browser'),      // POIZON 브라우저 종료
-          fetch('/shutdown_kream_browser'),  // 크림 브라우저 종료
-          fetch('/shutdown_musinsa_browser') // ✅ 무신사 브라우저 종료
-        ])
-          .then(() => {
-            addLog('  ✓ 모든 브라우저 종료', 'info');
+            Promise.all([
+              fetch('/shutdown_browser'),           // ✅ await 제거, 쉼표 사용
+              fetch('/shutdown_kream_browser'),     // ✅ 크림 브라우저 종료
+              fetch('/shutdown_musinsa_browser')    // ✅ 무신사 브라우저 종료
+            ])
+              .then(() => {
+                addLog('  ✓ 모든 브라우저 종료', 'info');
             
             // 로그인 상태 초기화
             isLoggedIn = false;
@@ -1960,8 +2035,16 @@
         });
     }
 
+    window.onload = async () => {  // ✅ async 추가!
+      // ✅ 안전한 브라우저 정리 (500 오류 무시)
+      await Promise.all([
+        safeFetch('/shutdown_browser'),
+        safeFetch('/shutdown_kream_browser'),
+        safeFetch('/shutdown_musinsa_browser')
+      ]);
+      
+      console.log('✅ 기존 브라우저 정리 시도 완료 (오류 무시됨)');
 
-    window.onload = () => {
       addLog('👋 POIZON 데이터 수집기 시작!', 'info');
       addLog('💡 수집 모드를 선택하면 자동으로 로그인됩니다', 'info');
 
@@ -1969,6 +2052,14 @@
         btn.disabled = false;
         btn.style.opacity = '1';
       });
+      // ✅ 모드 버튼 이벤트 리스너 추가!
+        document.getElementById('modeKream').addEventListener('click', () => selectMode('kream'));
+        document.getElementById('modePoizon').addEventListener('click', () => selectMode('poizon'));
+        document.getElementById('modeMusinsa').addEventListener('click', () => selectMode('musinsa'));
+        document.getElementById('modeCompare').addEventListener('click', () => selectMode('compare'));
+        document.getElementById('modeScheduler').addEventListener('click', () => selectMode('scheduler'));
+        document.getElementById('modeInventory').addEventListener('click', () => selectMode('inventory'));
+        document.getElementById('modeSettings').addEventListener('click', () => selectMode('settings'));
                     
     // ===== 통합된 크림 검색 함수 ===== ✅
       async function startKreamSearch(buttonId, codeFieldName, checkboxId, sourceName) {
@@ -2449,7 +2540,7 @@
         renderTable();
       });
     };
-
+  
 
 
     // ==========================================
@@ -2529,6 +2620,7 @@
         
         // 기존 모드 클래스 제거
         startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
+        
         
         // 모드별 시작 버튼 설정
         if (selectedMode === 'poizon') {
@@ -2621,6 +2713,9 @@
     // 기존 이벤트 소스 닫기
     if (eventSource) eventSource.close();
     
+    // ✅ 수집 시작
+    isCollecting = true;
+
     // 데이터 초기화
     collectedData = [];
     
@@ -2663,7 +2758,9 @@
       if (data.type === 'complete') {
         console.log('✅ complete 이벤트 수신!');
         addLog('✅ 무신사 검색 완료!', 'success');
-        
+        // ✅ 수집 완료
+        isCollecting = false;
+
         if (data.data && Array.isArray(data.data)) {
           collectedData = data.data;
           renderTable();
@@ -2684,7 +2781,9 @@
     eventSource.onerror = (error) => {
       console.error('EventSource 오류:', error);
       addLog('❌ 연결 오류 발생', 'error');
-      
+          // ✅ 수집 중단
+      isCollecting = false;
+
       eventSource.close();
       eventSource = null;
       
@@ -2698,31 +2797,97 @@
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   }
 
-  function performPoizonLogin(mode) {
-    addLog('🔄 POIZON 로그인 시작...', 'info');
+  async function performPoizonLogin(mode) {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🟣 [ENTRY] performPoizonLogin 시작!');
+    console.log('  📌 전달받은 mode:', mode);
+    console.log('  📌 현재 selectedMode:', selectedMode);
+    console.log('  📌 현재 시간:', new Date().toLocaleTimeString());
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    addLog(`🔄 POIZON 로그인 시작 (모드: ${mode})...`, 'info');
     addLog('💡 브라우저가 자동으로 열립니다', 'info');
     
-    // 로그인 상태 UI 업데이트
     const loginStatus = document.getElementById('loginStatus');
     const loginMessage = document.getElementById('loginMessage');
     
     loginStatus.querySelector('h3').textContent = '🔐 POIZON 로그인 중...';
     loginMessage.textContent = '브라우저가 열리고 자동으로 로그인됩니다. 잠시만 기다려주세요.';
     
+    // ===== STEP 1: 브라우저 종료 =====
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔄 [STEP 1] 브라우저 종료 시작');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    try {
+      addLog('🔄 기존 POIZON 브라우저 종료 중...', 'info');
+      
+      console.log('  → safeFetch 호출 시작: /shutdown_browser');
+      console.log('  → 호출 시간:', new Date().toLocaleTimeString());
+      
+      const shutdownResult = await safeFetch('/shutdown_browser');
+      
+      console.log('  → safeFetch 결과:', shutdownResult);
+      console.log('  → 완료 시간:', new Date().toLocaleTimeString());
+      
+      console.log('  → 2초 대기 시작...');
+      await new Promise(r => setTimeout(r, 2000));
+      console.log('  → 2초 대기 완료!');
+      
+      addLog('✅ 브라우저 종료 완료', 'success');
+      console.log('✅ [STEP 1 완료]');
+      
+    } catch (err) {
+      console.error('❌ [STEP 1 오류]:', err);
+      console.log('  브라우저 종료 오류 (무시):', err);
+    }
+    
+    // ===== STEP 2: 로그인 요청 =====
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔄 [STEP 2] POIZON 로그인 요청 시작');
+    console.log('  → 호출할 URL: /check_poizon_login');
+    console.log('  → 요청 시간:', new Date().toLocaleTimeString());
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
     fetch('/check_poizon_login')
       .then(response => {
-        console.log('POIZON 로그인 응답 상태:', response.status);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📩 [RESPONSE] HTTP 응답 수신!');
+        console.log('  📌 status:', response.status);
+        console.log('  📌 ok:', response.ok);
+        console.log('  📌 statusText:', response.statusText);
+        console.log('  📌 headers:', [...response.headers.entries()]);
+        console.log('  📌 응답 시간:', new Date().toLocaleTimeString());
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          console.error('❌ [ERROR] HTTP 응답 실패!');
+          console.error('  → status:', response.status);
+          console.error('  → statusText:', response.statusText);
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
+        console.log('✅ [OK] HTTP 200, JSON 파싱 시작...');
         return response.json();
       })
       .then(data => {
-        console.log('POIZON 로그인 응답 데이터:', data);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📦 [DATA] JSON 파싱 완료!');
+        console.log('  📌 전체 data 객체:');
+        console.log(JSON.stringify(data, null, 2));
+        console.log('  📌 data.logged_in:', data.logged_in);
+        console.log('  📌 data.message:', data.message);
+        console.log('  📌 data.error:', data.error);
+        console.log('  📌 파싱 시간:', new Date().toLocaleTimeString());
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
+        // ===== 성공 분기 =====
         if (data && data.logged_in) {
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          console.log('✅ [SUCCESS] 로그인 성공 분기 진입!');
+          console.log('  → isLoggedIn 설정: true');
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          
           isLoggedIn = true;
           
           loginStatus.querySelector('h3').textContent = '✅ POIZON 로그인 완료!';
@@ -2730,219 +2895,251 @@
           
           addLog('✅ POIZON 로그인 완료!', 'success');
           
-          // ✅ 로그인 성공 후 모드 활성화
-          console.log('activateMode 호출:', mode);
+          console.log('  → activateMode 호출 시작');
+          console.log('  → 전달할 mode:', mode);
           activateMode(mode);
+          console.log('  → activateMode 호출 완료');
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
           
-        } else {
+        } 
+        // ===== 실패 분기 =====
+        else {
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          console.log('❌ [FAIL] 로그인 실패 분기 진입!');
+          console.log('  → data.logged_in이 false이거나 없음');
+          console.log('  → data:', data);
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          
           loginStatus.querySelector('h3').textContent = '❌ POIZON 로그인 실패';
           loginMessage.textContent = '로그인에 실패했습니다. 다시 시도해주세요.';
           
           const errorMsg = data && data.message ? data.message : '알 수 없는 오류';
+          console.log('  → 오류 메시지:', errorMsg);
           addLog('⚠️ POIZON 로그인 실패: ' + errorMsg, 'warning');
+          console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         }
       })
       .catch(err => {
-        console.error('POIZON 로그인 오류:', err);
+        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.error('❌ [CATCH] 오류 핸들러 진입!');
+        console.error('  📌 모드:', mode);
+        console.error('  📌 selectedMode:', selectedMode);
+        console.error('  📌 오류 타입:', err.constructor.name);
+        console.error('  📌 오류 메시지:', err.message);
+        console.error('  📌 오류 스택:');
+        console.error(err.stack);
+        console.error('  📌 발생 시간:', new Date().toLocaleTimeString());
+        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
         loginStatus.querySelector('h3').textContent = '❌ POIZON 로그인 오류';
         loginMessage.textContent = '로그인 중 오류가 발생했습니다.';
         
-        addLog('❌ POIZON 로그인 오류: ' + err.message, 'error');
+        addLog(`❌ POIZON 로그인 오류 (모드: ${mode}): ${err.message}`, 'error');
+        
+        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       });
+    
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🟣 [EXIT] performPoizonLogin 함수 종료');
+    console.log('  (fetch는 비동기로 계속 실행됨)');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+    async function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      
+      if (!file) {
+          alert('⚠️ 파일을 선택해주세요!');
+          return;
+      }
+      
+      console.log('📤 파일 업로드:', file.name);
+      addLog(`📤 파일 업로드: ${file.name}`, 'info');
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+          addLog('📊 엑셀 파일 분석 중...', 'info');
+          
+          const response = await fetch('/upload_excel', {
+              method: 'POST',
+              body: formData
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+              uploadedProducts = result.products;
+              
+              addLog(`✅ 엑셀 분석 완료: ${result.count}개 상품`, 'success');
+              
+              // 업로드 리스트 테이블 표시
+              document.getElementById('uploadListSection').style.display = 'block';
+              document.getElementById('uploadCount').textContent = result.count;
+              
+              // 업로드 리스트 테이블 렌더링
+              renderUploadList(uploadedProducts);
+              
+              // 검색 시작 버튼 활성화
+              document.getElementById('startCompareBtn').style.display = 'block';
+              document.getElementById('startCompareBtn').disabled = false;
+              
+              addLog('💡 "🔍 검색 시작" 버튼을 클릭하세요', 'info');
+              
+          } else {
+              addLog(`❌ 업로드 실패: ${result.error}`, 'error');
+              alert(`❌ 업로드 실패: ${result.error}`);
+          }
+          
+      } catch (error) {
+          console.error('업로드 오류:', error);
+          addLog(`❌ 업로드 오류: ${error.message}`, 'error');
+          alert(`❌ 업로드 오류: ${error.message}`);
+      }
+    }
+    function renderUploadList(products) {
+        const tbody = document.getElementById('uploadTableBody');
+        tbody.innerHTML = '';
+        
+        products.forEach((product, idx) => {
+            const row = tbody.insertRow();
+            
+            // #
+            row.insertCell().textContent = idx + 1;
+            
+            // 상품번호
+            row.insertCell().textContent = product.code || '-';
+            
+            // 제품명
+            row.insertCell().textContent = product.name || '-';
+            
+            // 정가
+            const originalPrice = product.original_price || 0;
+            row.insertCell().textContent = originalPrice ? originalPrice.toLocaleString() + '원' : '-';
+            
+            // 할인가
+            const salePrice = product.sale_price || 0;
+            row.insertCell().textContent = salePrice ? salePrice.toLocaleString() + '원' : '-';
+            
+            // 재고
+            row.insertCell().textContent = product.stock || '0';
+        });
+        
+        addLog(`📋 업로드 리스트 표시 완료: ${products.length}개`, 'success');
     }
 
-      async function handleExcelUpload(event) {
-        const file = event.target.files[0];
-        
-        if (!file) {
-            alert('⚠️ 파일을 선택해주세요!');
+    async function startComparisonFromUpload() {
+        if (uploadedProducts.length === 0) {
+            alert('⚠️ 업로드된 상품이 없습니다!');
             return;
         }
         
-        console.log('📤 파일 업로드:', file.name);
-        addLog(`📤 파일 업로드: ${file.name}`, 'info');
+        console.log('🔍 리스트 비교 시작:', uploadedProducts.length + '개');
+        addLog(`🔍 리스트 비교 시작: ${uploadedProducts.length}개 상품`, 'info');
+                  
+        // ✅ 수집 시작
+        isCollecting = true;
+
+        // UI 상태 변경
+        setModeButtonsEnabled(false);
+        document.getElementById('startCompareBtn').disabled = true;
+        document.getElementById('startCompareBtn').textContent = '🔄 비교 중...';
+        document.getElementById('stopBtn').style.display = 'block';
         
-        const formData = new FormData();
-        formData.append('file', file);
+        // 데이터 초기화
+        collectedData = [];
         
         try {
-            addLog('📊 엑셀 파일 분석 중...', 'info');
-            
-            const response = await fetch('/upload_excel', {
+            const response = await fetch('/compare_prices', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ products: uploadedProducts })
             });
             
-            const result = await response.json();
-            
-            if (result.success) {
-                uploadedProducts = result.products;
-                
-                addLog(`✅ 엑셀 분석 완료: ${result.count}개 상품`, 'success');
-                
-                // 업로드 리스트 테이블 표시
-                document.getElementById('uploadListSection').style.display = 'block';
-                document.getElementById('uploadCount').textContent = result.count;
-                
-                // 업로드 리스트 테이블 렌더링
-                renderUploadList(uploadedProducts);
-                
-                // 검색 시작 버튼 활성화
-                document.getElementById('startCompareBtn').style.display = 'block';
-                document.getElementById('startCompareBtn').disabled = false;
-                
-                addLog('💡 "🔍 검색 시작" 버튼을 클릭하세요', 'info');
-                
-            } else {
-                addLog(`❌ 업로드 실패: ${result.error}`, 'error');
-                alert(`❌ 업로드 실패: ${result.error}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
             
-        } catch (error) {
-            console.error('업로드 오류:', error);
-            addLog(`❌ 업로드 오류: ${error.message}`, 'error');
-            alert(`❌ 업로드 오류: ${error.message}`);
-        }
-    }
-        function renderUploadList(products) {
-            const tbody = document.getElementById('uploadTableBody');
-            tbody.innerHTML = '';
+            // SSE 스트림 처리
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
             
-            products.forEach((product, idx) => {
-                const row = tbody.insertRow();
+            while (true) {
+                const { done, value } = await reader.read();
                 
-                // #
-                row.insertCell().textContent = idx + 1;
+                if (done) break;
                 
-                // 상품번호
-                row.insertCell().textContent = product.code || '-';
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n\n');
                 
-                // 제품명
-                row.insertCell().textContent = product.name || '-';
-                
-                // 정가
-                const originalPrice = product.original_price || 0;
-                row.insertCell().textContent = originalPrice ? originalPrice.toLocaleString() + '원' : '-';
-                
-                // 할인가
-                const salePrice = product.sale_price || 0;
-                row.insertCell().textContent = salePrice ? salePrice.toLocaleString() + '원' : '-';
-                
-                // 재고
-                row.insertCell().textContent = product.stock || '0';
-            });
-            
-            addLog(`📋 업로드 리스트 표시 완료: ${products.length}개`, 'success');
-        }
-
-        async function startComparisonFromUpload() {
-            if (uploadedProducts.length === 0) {
-                alert('⚠️ 업로드된 상품이 없습니다!');
-                return;
-            }
-            
-            console.log('🔍 리스트 비교 시작:', uploadedProducts.length + '개');
-            addLog(`🔍 리스트 비교 시작: ${uploadedProducts.length}개 상품`, 'info');
-            
-            // UI 상태 변경
-            setModeButtonsEnabled(false);
-            document.getElementById('startCompareBtn').disabled = true;
-            document.getElementById('startCompareBtn').textContent = '🔄 비교 중...';
-            document.getElementById('stopBtn').style.display = 'block';
-            
-            // 데이터 초기화
-            collectedData = [];
-            
-            try {
-                const response = await fetch('/compare_prices', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ products: uploadedProducts })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                // SSE 스트림 처리
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                
-                while (true) {
-                    const { done, value } = await reader.read();
-                    
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n\n');
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const data = JSON.parse(line.slice(6));
-                                
-                                if (data.type === 'log') {
-                                    addLog(data.message, data.level || 'info');
-                                }
-                                
-                                if (data.type === 'progress') {
-                                    updateProgress(data.current, data.total);
-                                }
-                                
-                                if (data.type === 'product_result') {
-                                    // 상품 결과 추가
-                                    const products = data.products || [];
-                                    products.forEach(item => {
-                                        collectedData.push(item);
-                                    });
-                                    renderTable();
-                                }
-                                
-                                if (data.type === 'complete') {
-                                    addLog('✅ 리스트 비교 완료!', 'success');
-                                    
-                                    document.getElementById('stopBtn').style.display = 'none';
-                                    document.getElementById('resetBtn').style.display = 'block';
-                                    document.getElementById('resultSection').classList.add('active');
-                                    setModeButtonsEnabled(true);
-                                    document.getElementById('startCompareBtn').disabled = false;
-                                    document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
-                                    
-                                    if (data.file_path) {
-                                        document.getElementById('downloadBtn').href = `/download/${encodeURIComponent(data.file_path)}`;
-                                        document.getElementById('downloadBtn').style.display = 'block';
-                                    }
-                                }
-                                
-                                if (data.type === 'error') {
-                                    addLog(`❌ 오류: ${data.message}`, 'error');
-                                    
-                                    document.getElementById('stopBtn').style.display = 'none';
-                                    document.getElementById('resetBtn').style.display = 'block';
-                                    setModeButtonsEnabled(true);
-                                    document.getElementById('startCompareBtn').disabled = false;
-                                    document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
-                                }
-                                
-                            } catch (e) {
-                                console.error('JSON 파싱 오류:', e);
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            
+                            if (data.type === 'log') {
+                                addLog(data.message, data.level || 'info');
                             }
+                            
+                            if (data.type === 'progress') {
+                                updateProgress(data.current, data.total);
+                            }
+                            
+                            if (data.type === 'product_result') {
+                                // 상품 결과 추가
+                                const products = data.products || [];
+                                products.forEach(item => {
+                                    collectedData.push(item);
+                                });
+                                renderTable();
+                            }
+                            
+                            if (data.type === 'complete') {
+                                addLog('✅ 리스트 비교 완료!', 'success');
+                                  isCollecting = false;  // ✅ 수집 완료
+                                document.getElementById('stopBtn').style.display = 'none';
+                                document.getElementById('resetBtn').style.display = 'block';
+                                document.getElementById('resultSection').classList.add('active');
+                                setModeButtonsEnabled(true);
+                                document.getElementById('startCompareBtn').disabled = false;
+                                document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
+                                
+                                if (data.file_path) {
+                                    document.getElementById('downloadBtn').href = `/download/${encodeURIComponent(data.file_path)}`;
+                                    document.getElementById('downloadBtn').style.display = 'block';
+                                }
+                            }
+                            
+                            if (data.type === 'error') {
+                                addLog(`❌ 오류: ${data.message}`, 'error');
+                                isCollecting = false;  // ✅ 수집 중단
+                                document.getElementById('stopBtn').style.display = 'none';
+                                document.getElementById('resetBtn').style.display = 'block';
+                                setModeButtonsEnabled(true);
+                                document.getElementById('startCompareBtn').disabled = false;
+                                document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
+                            }
+                            
+                        } catch (e) {
+                            console.error('JSON 파싱 오류:', e);
                         }
                     }
                 }
-                
-            } catch (error) {
-                console.error('비교 오류:', error);
-                addLog(`❌ 비교 오류: ${error.message}`, 'error');
-                
-                document.getElementById('stopBtn').style.display = 'none';
-                document.getElementById('resetBtn').style.display = 'block';
-                setModeButtonsEnabled(true);
-                document.getElementById('startCompareBtn').disabled = false;
-                document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
             }
+            
+        } catch (error) {
+            console.error('비교 오류:', error);
+            addLog(`❌ 비교 오류: ${error.message}`, 'error');
+            
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'block';
+            setModeButtonsEnabled(true);
+            document.getElementById('startCompareBtn').disabled = false;
+            document.getElementById('startCompareBtn').textContent = '🔍 검색 시작';
         }
+    }
+
 
  </script>
 </body>
