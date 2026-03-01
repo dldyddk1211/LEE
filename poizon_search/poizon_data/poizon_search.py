@@ -1275,6 +1275,10 @@ def run_excel_comparison(products, callback=None):
                     for idx_line, line in enumerate(lines):
                         line_clean = line.strip()
                         
+
+
+
+                        
                         # 상품번호 추출
                         if not style_id:
                             if line_clean in ["상품 번호:", "상품번호:", "货号:", "번호:"] and idx_line + 1 < len(lines):
