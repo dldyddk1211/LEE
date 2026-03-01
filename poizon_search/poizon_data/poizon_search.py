@@ -1132,11 +1132,11 @@ def run_excel_comparison(products, callback=None):
             # 초기 설정
             log("\n[1] 포이즌 접속", 'info')
             page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
-            wait_stable(page, 2000)
+            wait_stable(page, 3000)
             
             # 한국어 설정
             set_language_korean(page)
-            wait_stable(page, 1000)
+            wait_stable(page, 2000)
             
             # 각 상품 검색
             log("\n[2] 상품 검색 시작", 'info')
@@ -1274,10 +1274,6 @@ def run_excel_comparison(products, callback=None):
                     
                     for idx_line, line in enumerate(lines):
                         line_clean = line.strip()
-                        
-
-
-
                         
                         # 상품번호 추출
                         if not style_id:
@@ -1472,11 +1468,63 @@ def search_multiple_products(product_codes, progress_queue):
             page = context.new_page()
             
             # 초기 설정
+
+            # 초기 설정
             page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
             wait_stable(page, 2000)
-            set_language_korean(page)
-            wait_stable(page, 1000)
-            
+
+            # ✅ 로그인 페이지 감지 및 자동 로그인
+            current_url = page.url
+            print(f"  현재 URL: {current_url}")
+
+            if 'login' in current_url.lower() or page.locator("input[type='password']").count() > 0:
+                print("  → 로그인 페이지 감지! 자동 로그인 시도...")
+                progress_queue.put({
+                    'event': 'message',
+                    'data': {'message': '🔐 로그인 중...'}
+                })
+                
+                set_language_korean(page)
+                wait_stable(page, 500)
+                wait_for_inputs(page)
+                
+                try:
+                    page.locator("input").nth(0).fill(POIZON_ID)
+                    page.locator("input").nth(1).fill(POIZON_PW)
+                    
+                    try:
+                        page.click("button:has-text('로그인')", timeout=3000)
+                    except:
+                        page.locator("input").nth(1).press("Enter")
+                    
+                    wait_stable(page, 1500)
+                    
+                    # 쿠키 저장
+                    try:
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                        print("  ✅ 자동 로그인 및 쿠키 저장 완료")
+                    except:
+                        pass
+                    
+                    # 검색 페이지로 이동
+                    page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+                    wait_stable(page, 2000)
+                    
+                except Exception as login_err:
+                    print(f"  ❌ 자동 로그인 실패: {login_err}")
+                    progress_queue.put({
+                        'event': 'error',
+                        'data': {'error': f'로그인 실패: {str(login_err)}'}
+                    })
+                    browser.close()
+                    return  # ← 함수 종료
+
+            else:
+                set_language_korean(page)
+                wait_stable(page, 1000)
+                        
             # 키워드 검색 탭 활성화
             try:
                 keyword_tab_selectors = [
@@ -1526,19 +1574,16 @@ def search_multiple_products(product_codes, progress_queue):
                     
                     # 검색어 입력
                     search_input.type(product_code, delay=50)
-                    wait_stable(page, 200)
+                    wait_stable(page, 3000)
                     
                     # Enter로 검색
                     page.keyboard.press("Enter")
                     wait_stable(page, 2000)
                     
-                    # 정렬 시도
-                    try_sort_descending(page)
-                    wait_stable(page, 1000)
-                    
+                   
                     # 테이블 대기
                     try:
-                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=10000)
+                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=5000)
                     except:
                         progress_queue.put({
                             'event': 'result',
@@ -1550,6 +1595,15 @@ def search_multiple_products(product_codes, progress_queue):
                         })
                         continue
                     
+                    # ✅ 이미지 로드를 위해 잠깐 스크롤
+                    try:
+                        page.evaluate("window.scrollTo(0, 300)")
+                        wait_stable(page, 2000)  # 이미지 로드 대기
+                        page.evaluate("window.scrollTo(0, 0)")
+                        wait_stable(page, 2000)
+                    except:
+                        pass
+
                     # 첫 번째 결과 파싱
                     data = page.evaluate("""
                         () => {
@@ -1559,29 +1613,81 @@ def search_multiple_products(product_codes, progress_queue):
                             const row = rows[0];
                             const cells = row.querySelectorAll('td');
                             
+                            // ✅ 이미지 URL - 여러 방법 시도
+                            let img_url = '';
+                            
+                            // 방법1: cells[1] img src
+                            const img1 = cells[1]?.querySelector('img');
+                            if (img1) {
+                                img_url = img1.src || img1.getAttribute('data-src') || img1.getAttribute('data-lazy') || '';
+                            }
+                            
+                            // 방법2: cells[1] src 없으면 전체 행에서 찾기
+                            if (!img_url || img_url.startsWith('data:')) {
+                                const allImgs = row.querySelectorAll('img');
+                                for (const img of allImgs) {
+                                    const src = img.src || img.getAttribute('data-src') || img.getAttribute('data-lazy') || '';
+                                    if (src && !src.startsWith('data:') && src.startsWith('http')) {
+                                        img_url = src;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // 방법3: background-image 스타일 확인
+                            if (!img_url) {
+                                const divs = cells[1]?.querySelectorAll('div');
+                                for (const div of divs || []) {
+                                    const bg = window.getComputedStyle(div).backgroundImage;
+                                    if (bg && bg !== 'none' && bg.includes('http')) {
+                                        img_url = bg.replace(/url\(["']?/, '').replace(/["']?\)$/, '');
+                                        break;
+                                    }
+                                }
+                            }
+                            
                             return {
+                                img_url: img_url,
                                 cn_exposure: cells[6]?.textContent?.trim() || '-',
                                 cn_sales: cells[7]?.textContent?.trim() || '0',
                                 local_sales: cells[8]?.textContent?.trim() || '0'
                             };
                         }
                     """)
-                    
+                  
                     if data:
                         # 숫자 추출
                         cn_sales_num = extract_number(data['cn_sales'])
                         local_sales_num = extract_number(data['local_sales'])
+                        
+                        # ✅ 디버깅: 원본 데이터 확인
+                        print(f"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                        print(f"📦 {product_code} 원본 데이터:")
+                        print(f"  중국노출: {data.get('cn_exposure', 'NONE')}")
+                        print(f"  이미지URL: {data.get('img_url', 'NONE')}")
+                        print(f"  중국판매량: {data.get('cn_sales', 'NONE')} → {cn_sales_num}")
+                        print(f"  현업자판매량: {data.get('local_sales', 'NONE')} → {local_sales_num}")
+                        print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
                         
                         result = {
                             'product_code': product_code,
                             'success': True,
                             'poizon_data': {
                                 '중국노출': data['cn_exposure'],
+                                '이미지URL': data.get('img_url', '-'),  # ✅ 추가!
                                 '중국시장최근30일판매량': cn_sales_num,
                                 '현지판매자최근30일판매량': local_sales_num
                             }
                         }
                         
+                        # ✅ 디버깅: 최종 결과 확인
+                        print(f"📤 {product_code} 전송 데이터:")
+                        print(f"  중국노출: {result['poizon_data']['중국노출']}")
+                        print(f"  이미지URL: {result['poizon_data']['이미지URL']}")
+                        print(f"  중국판매량: {result['poizon_data']['중국시장최근30일판매량']:,}개")
+                        print(f"  현업자판매량: {result['poizon_data']['현지판매자최근30일판매량']:,}개\n")
+                        
+
                         # 실시간 전송
                         progress_queue.put({
                             'event': 'result',

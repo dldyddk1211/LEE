@@ -832,23 +832,41 @@
   }
 
   function formatPrice(price) {
-    if (!price || price === '-' || price === 'N/A') return '-';
+    // null, undefined, 빈 문자열 체크
+    if (price === null || price === undefined || price === '' || price === '-' || price === 'N/A') {
+      return '-';
+    }
     
-    // ✅ 원화 기호(₩), 쉼표(,), "원" 모두 제거
+    // 숫자인 경우
+    if (typeof price === 'number') {
+      if (price === 0) return '0원';
+      return price.toLocaleString() + '원';
+    }
+    
+    // 문자열 처리
     let priceStr = String(price)
-      .replace(/₩/g, '')      // ← ✅ 추가!
-      .replace(/원/g, '')
-      .replace(/,/g, '')
-      .replace(/\s/g, '')     // ← ✅ 공백 제거
+      .replace(/₩/g, '')       // 원화 기호 제거
+      .replace(/원/g, '')       // "원" 제거
+      .replace(/,/g, '')        // 쉼표 제거
+      .replace(/\s+/g, '')      // 공백 제거
       .trim();
     
-    let numPrice = parseInt(priceStr);
+    // 빈 문자열 체크
+    if (!priceStr) return '-';
     
+    // 숫자 변환
+    let numPrice = parseInt(priceStr, 10);
+    
+    // 변환 실패 시
     if (isNaN(numPrice)) {
       console.warn('formatPrice 변환 실패:', price, '→', priceStr);
       return '-';
     }
     
+    // 0원인 경우
+    if (numPrice === 0) return '0원';
+    
+    // 정상 포맷
     return numPrice.toLocaleString() + '원';
   }
   let eventSource = null;
@@ -963,7 +981,7 @@
             <th onclick="sortBy('크림판매량')">
               크림판매량 <span id="sort크림판매량">⇅</span>
             </th>
-            <th>포이즌노출가</th>
+            <th>중국노출가</th>
             <th onclick="sortBy('포이즌비교')">
               포이즌비교 <span id="sort포이즌비교">⇅</span>
             </th>
@@ -1106,15 +1124,20 @@
         const row = tbody.insertRow();
         row.insertCell().textContent = startIdx + idx + 1;
 
+ 
+      if (selectedMode === 'poizon') {
+        // ✅ 포이즌 모드: 이미지 셀 추가
         const imgCell = row.insertCell();
         if (data.이미지URL || data.image_url) {
           const img = document.createElement('img');
           img.src = data.이미지URL || data.image_url;
           img.className = 'product-img';
+          img.alt = '상품 이미지';
           imgCell.appendChild(img);
+        } else {
+          imgCell.textContent = '-';
         }
-
-        if (selectedMode === 'poizon') {
+        
           row.insertCell().textContent = data.상품번호 || '-';
           row.insertCell().textContent = data.제품명 || '-';
           row.insertCell().textContent = formatPrice(data.최근30일평균거래가);  // ✅ 변경
@@ -1136,13 +1159,6 @@
           }
           
           const compareCell = row.insertCell();
-          const extractPrice = (priceStr) => {
-            if (!priceStr || priceStr === '-' || priceStr === 'N/A') return null;
-            const numStr = String(priceStr).replace(/[^0-9]/g, '');
-            const price = parseInt(numStr);
-            return isNaN(price) ? null : price;
-          };
-          
           const chinaPrice = extractPrice(data.중국노출);
           const kreamPrice = extractPrice(data.크림평균가);
           
@@ -1176,13 +1192,18 @@
         }
         // ===== 무신사 모드 =====
         else if (selectedMode === 'musinsa') {
-          const extractPrice = (priceStr) => {
-            if (!priceStr || priceStr === '-' || priceStr === 'N/A') return null;
-            const numStr = String(priceStr).replace(/[^0-9]/g, '');
-            const price = parseInt(numStr);
-            return isNaN(price) ? null : price;
-          };
-          
+          // ✅ 무신사 모드: 이미지 셀 추가
+          const imgCell = row.insertCell();
+          if (data.이미지URL || data.image_url) {
+            const img = document.createElement('img');
+            img.src = data.이미지URL || data.image_url;
+            img.className = 'product-img';
+            img.alt = '상품 이미지';
+            imgCell.appendChild(img);
+          } else {
+            imgCell.textContent = '-';
+          }
+
           row.insertCell().textContent = data.product_code || '-';
           row.insertCell().textContent = data.name || '-';
           
@@ -1237,12 +1258,13 @@
           } else {
             kreamSalesCell.textContent = '-';
           }
-     
+
           const poizonPriceCell = row.insertCell();
-          poizonPriceCell.textContent = formatPrice(data.포이즌노출가);  // ✅ 변경
+          const rawPoizonPrice = data.poizon_data ? data.poizon_data.중국노출 : (data.중국노출 || data.cn_exposure);
+          poizonPriceCell.textContent = purePoizonPrice !== null ? formatPrice(purePoizonPrice) : "0";
           
           const poizonCompareCell = row.insertCell();
-          const poizonPrice = extractPrice(data.포이즌노출가);
+          const poizonPrice = extractPrice(rawPoizonPrice);
           
           if (musinsaPrice !== null && poizonPrice !== null) {
             const poizonPriceDiff = poizonPrice - musinsaPrice;
@@ -1278,24 +1300,50 @@
         }
         // ===== 리스트 비교 모드 =====
         else if (selectedMode === 'compare') {
-                  
-          // 1. 상품번호
+  
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // 셀 순서: 헤더와 동일하게!
+          // # | 이미지 | 상품번호 | 제품명 | 정가 | 할인가 | 재고 |
+          // 크림평균가 | 크림비교 | 크림판매량 |
+          // 포이즌노출가 | 포이즌비교 | 중국판매량 | 현업자판매량
+          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          // ✅ 1. 이미지
+          const imgCell = row.insertCell();
+          const imageUrl = data.포이즌이미지URL || data.크림이미지URL || data.이미지URL;
+          
+          if (imageUrl && imageUrl !== '-') {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.className = 'product-img';
+            img.alt = data.제품명 || '상품 이미지';
+            img.onerror = function() {
+              this.style.display = 'none';
+              imgCell.textContent = '-';
+            };
+            imgCell.appendChild(img);
+          } else {
+            imgCell.textContent = '-';
+          }
+          
+          // 2. 상품번호
           row.insertCell().textContent = data.엑셀_상품번호 || data.상품번호 || '-';
-          // 2. 제품명
+          // 3. 제품명
           row.insertCell().textContent = data.제품명 || '-';
-          // 3. 정가
+          // 4. 정가
           row.insertCell().textContent = formatPrice(data.엑셀_정가);
-          // 4. 할인가
+          // 5. 할인가
           const excelPrice = data.엑셀_할인가 || 0;
           row.insertCell().textContent = formatPrice(data.엑셀_할인가);
-          // 5. 재고
+          // 6. 재고
           row.insertCell().textContent = data.엑셀_재고 || '-';
           
          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          // ✅ 크림 정보 (앞으로 이동!)
-          // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         // ✅ 크림 정보 (앞으로 이동!)
+         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           
-          // 4. 크림평균가 (링크)
+
+          // ✅ 7. 크림평균가 (링크) 
           const kreamPriceCell = row.insertCell();
           if (data.크림평균가 && data.크림평균가 !== '-' && data.크림URL) {
             const link = document.createElement('a');
@@ -1306,8 +1354,8 @@
           } else {
             kreamPriceCell.textContent = formatPrice(data.크림평균가);
           }
-          
-          // 5. 크림비교
+
+          // ✅ 8. 크림비교
           const kreamCompareCell = row.insertCell();
           const kreamPrice = extractPrice(data.크림평균가);
           
@@ -1334,27 +1382,28 @@
             kreamCompareCell.style.color = '#999';
             data.크림비교 = 0;
           }
-            // 6. 크림판매량
+
           const kreamSalesCell = row.insertCell();
           if (data.크림판매량 && data.크림판매량 !== '-') {
             kreamSalesCell.textContent = Number(data.크림판매량).toLocaleString() + '개';
           } else {
             kreamSalesCell.textContent = '-';
           }
-
-          
+          // ✅ 9. 크림판매량
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           // ✅ 포이즌 정보
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          
-          // 7. 포이즌노출가
+          // ✅ 10. 포이즌노출가 (수정된 부분)
           const poizonPriceCell = row.insertCell();
-          poizonPriceCell.textContent = formatPrice(data.포이즌노출가);
-          
-          // 8. 포이즌비교
+          const rawPoizonPrice = data.poizon_data ? data.poizon_data.중국노출 : (data.중국노출 || data.cn_exposure);
+  
+          // 숫자로 변환된 값을 formatPrice에 전달합니다.
+          poizonPriceCell.textContent = purePoizonPrice !== null ? formatPrice(purePoizonPrice) : "0";
+                    
+          // ✅ 11. 포이즌비교
           const poizonCompareCell = row.insertCell();
-          const poizonPrice = extractPrice(data.포이즌노출가);
-          
+          const poizonPrice = extractPrice(rawPoizonPrice);
+                    
           if (excelPrice !== null && poizonPrice !== null) {
             const poizonPriceDiff = poizonPrice - excelPrice;
             data.포이즌비교 = poizonPriceDiff;
@@ -1379,14 +1428,26 @@
             data.포이즌비교 = 0;
           }
           
-          // 9. 중국판매량
+          // 12. 중국판매량
           row.insertCell().textContent = (data.포이즌중국판매량 || 0).toLocaleString() + '개';
           
-          // 10. 현업자판매량
+          // 13. 현업자판매량
           row.insertCell().textContent = (data.포이즌현업자판매량 || 0).toLocaleString() + '개';
         }
        // ===== 기본 모드 =====
         else {
+          // ✅ 기본 모드: 이미지 셀 추가
+          const imgCell = row.insertCell();
+          if (data.이미지URL || data.image_url) {
+            const img = document.createElement('img');
+            img.src = data.이미지URL || data.image_url;
+            img.className = 'product-img';
+            img.alt = '상품 이미지';
+            imgCell.appendChild(img);
+          } else {
+            imgCell.textContent = '-';
+          }
+          
           row.insertCell().textContent = data.상품번호 || '-';
           row.insertCell().textContent = data.제품명 || '-';
           row.insertCell().textContent = formatPrice(data.최근30일평균거래가);  // ✅ 변경
@@ -1878,7 +1939,8 @@
             document.getElementById('downloadBtn').style.display = 'block';
           }
           
-          document.getElementById('resultSearchOptions').style.display = 'block';
+          const resultSearchOpts = document.getElementById('resultSearchOptions');
+          if (resultSearchOpts) resultSearchOpts.style.display = 'block';
           document.getElementById('resetBtn').style.display = 'block';
           setModeButtonsEnabled(true);
           document.getElementById('stopBtn').style.display = 'none';
@@ -1905,8 +1967,6 @@
         document.getElementById('startBtn').disabled = false;
         document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
       };
-
-
     }
 
   function stopCollection() {
