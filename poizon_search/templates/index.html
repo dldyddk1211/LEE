@@ -1168,14 +1168,11 @@
             
             compareCell.textContent = formatPrice(priceDiff);  // ✅ 변경
             
-            if (priceDiff > 30000) {
-              compareCell.style.color = '#28a745';  //녹색
-              compareCell.style.fontWeight = 'bold';
-            } else if (priceDiff > 0) {
+            if (priceDiff > 0) {
               compareCell.style.color = '#007bff';  //블루
               compareCell.style.fontWeight = 'bold';
             } else if (priceDiff < 0) {
-              compareCell.style.color = '#dc3545';  //레드
+              compareCell.style.color = '#dc3545'; //레드 
               compareCell.style.fontWeight = 'bold';
             } else {
               compareCell.style.color = '#6c757d';
@@ -1247,7 +1244,7 @@
               compareCell.style.fontWeight = 'bold';
             } else {
               compareCell.style.color = '#6c757d';
-            }  
+            }
           } else {
             compareCell.textContent = '-';
             compareCell.style.color = '#999';
@@ -1279,13 +1276,13 @@
             poizonCompareCell.textContent = formatPrice(poizonPriceDiff);  // ✅ 변경
             
             if (poizonPriceDiff > 30000) {
-              poizonCompareCell.style.color = '#28a745';
+              poizonCompareCell.style.color = '#28a745'; //녹색
               poizonCompareCell.style.fontWeight = 'bold';
             } else if (poizonPriceDiff > 0) {
-              poizonCompareCell.style.color = '#dc3545';
+              poizonCompareCell.style.color = '#007bff'; //블루
               poizonCompareCell.style.fontWeight = 'bold';
             } else if (poizonPriceDiff < 0) {
-              poizonCompareCell.style.color = '#007bff';
+              poizonCompareCell.style.color = '#dc3545'; //레드 
               poizonCompareCell.style.fontWeight = 'bold';
             } else {
               poizonCompareCell.style.color = '#6c757d';
@@ -1371,17 +1368,17 @@
             
             kreamCompareCell.textContent = formatPrice(kreamPriceDiff);
             
-            if (priceDiff > 30000) {
-              compareCell.style.color = '#28a745';  //녹색
-              compareCell.style.fontWeight = 'bold';
-            } else if (priceDiff > 0) {
-              compareCell.style.color = '#007bff';  //블루
-              compareCell.style.fontWeight = 'bold';
-            } else if (priceDiff < 0) {
-              compareCell.style.color = '#dc3545';  //레드
-              compareCell.style.fontWeight = 'bold';
+            if (kreamPriceDiff > 30000) {
+              kreamCompareCell.style.color = '#28a745';  //녹색
+              kreamCompareCell.style.fontWeight = 'bold';
+            } else if (kreamPriceDiff > 0) {
+              kreamCompareCell.style.color = '#007bff'; //블루
+              kreamCompareCell.style.fontWeight = 'bold';
+            } else if (kreamPriceDiff < 0) {
+              kreamCompareCell.style.color = '#dc3545'; //레드 
+              kreamCompareCell.style.fontWeight = 'bold';
             } else {
-              compareCell.style.color = '#6c757d';
+              kreamCompareCell.style.color = '#6c757d';
             }
           } else {
             kreamCompareCell.textContent = '-';
@@ -1414,17 +1411,17 @@
             
             poizonCompareCell.textContent = formatPrice(poizonPriceDiff);
             
-            if (priceDiff > 30000) {
-              compareCell.style.color = '#28a745';  //녹색
-              compareCell.style.fontWeight = 'bold';
-            } else if (priceDiff > 0) {
-              compareCell.style.color = '#007bff';  //블루
-              compareCell.style.fontWeight = 'bold';
-            } else if (priceDiff < 0) {
-              compareCell.style.color = '#dc3545';  //레드
-              compareCell.style.fontWeight = 'bold';
+            if (poizonPriceDiff > 30000) {
+              poizonCompareCell.style.color = '#28a745'; //녹색 
+              poizonCompareCell.style.fontWeight = 'bold';
+            } else if (poizonPriceDiff > 0) {
+              poizonCompareCell.style.color = '#007bff'; //블루
+              poizonCompareCell.style.fontWeight = 'bold';
+            } else if (poizonPriceDiff < 0) {
+              poizonCompareCell.style.color = '#dc3545'; //레드
+              poizonCompareCell.style.fontWeight = 'bold';
             } else {
-              compareCell.style.color = '#6c757d';
+              poizonCompareCell.style.color = '#6c757d';
             }
           } else {
             poizonCompareCell.textContent = '-';
