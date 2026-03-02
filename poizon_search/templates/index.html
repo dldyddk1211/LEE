@@ -1259,14 +1259,17 @@
             kreamSalesCell.textContent = '-';
           }
 
+          // ✅ 수정
+          // ✅ 10. 포이즌노출가 (단순 출력)
           const poizonPriceCell = row.insertCell();
-          const rawPoizonPrice = data.poizon_data ? data.poizon_data.중국노출 : (data.중국노출 || data.cn_exposure);
-          poizonPriceCell.textContent = purePoizonPrice !== null ? formatPrice(purePoizonPrice) : "0";
-          
+          const rawPoizonPrice = data.포이즌노출가 || data.중국노출 || '-';
+          poizonPriceCell.textContent = rawPoizonPrice;
+
+          // ✅ 11. 포이즌비교
           const poizonCompareCell = row.insertCell();
           const poizonPrice = extractPrice(rawPoizonPrice);
-          
-          if (musinsaPrice !== null && poizonPrice !== null) {
+
+          if (musinsaPrice !== null && poizonPrice !== null) {  // ✅ poizonPrice → purePoizonPrice
             const poizonPriceDiff = poizonPrice - musinsaPrice;
             data.포이즌비교 = poizonPriceDiff;
             
@@ -1393,13 +1396,11 @@
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           // ✅ 포이즌 정보
           // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          // ✅ 10. 포이즌노출가 (수정된 부분)
+          // ✅ 10. 포이즌노출가 (단순 출력)
           const poizonPriceCell = row.insertCell();
-          const rawPoizonPrice = data.poizon_data ? data.poizon_data.중국노출 : (data.중국노출 || data.cn_exposure);
-  
-          // 숫자로 변환된 값을 formatPrice에 전달합니다.
-          poizonPriceCell.textContent = purePoizonPrice !== null ? formatPrice(purePoizonPrice) : "0";
-                    
+          const rawPoizonPrice = data.포이즌노출가 || data.중국노출 || '-';
+          poizonPriceCell.textContent = rawPoizonPrice;   
+          
           // ✅ 11. 포이즌비교
           const poizonCompareCell = row.insertCell();
           const poizonPrice = extractPrice(rawPoizonPrice);
