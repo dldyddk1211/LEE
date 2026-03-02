@@ -1,5 +1,96 @@
 [
   {
+    "id": "task_1772468202663",
+    "timestamp": "2026-03-03T01:16:42.663198",
+    "keyword": "무신사→크림검색_2개",
+    "mode": "musinsa_kream",
+    "collected_count": 1,
+    "kream_count": 1,
+    "duration_seconds": 0,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
+        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
+        "price": 182163,
+        "product_code": "HV0532-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5520301",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩",
+        "크림비교": -61163,
+        "포이즌비교": 0,
+        "크림평균가": 121000,
+        "크림판매량": 88,
+        "크림URL": "https://kream.co.kr/products/675570"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772468162169",
+    "timestamp": "2026-03-03T01:16:02.169795",
+    "keyword": "무신사_조던 패딩",
+    "mode": "musinsa",
+    "collected_count": 2,
+    "kream_count": 0,
+    "duration_seconds": 21,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
+        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
+        "price": 182163,
+        "product_code": "HV0532-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5520301",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240927/4470896/4470896_17274035007362_500.jpg",
+        "name": "조던 아웃포켓다운베스트 (주니어) 혼합",
+        "price": 91230,
+        "product_code": "N244VE345P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4470896",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      }
+    ],
+    "status": "completed"
+  },
+  {
+    "id": "task_1772468056455",
+    "timestamp": "2026-03-03T01:14:16.455032",
+    "keyword": "무신사_조던 패딩",
+    "mode": "musinsa",
+    "collected_count": 2,
+    "kream_count": 0,
+    "duration_seconds": 20,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
+        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
+        "price": 182163,
+        "product_code": "HV0532-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5520301",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240927/4470896/4470896_17274035007362_500.jpg",
+        "name": "조던 아웃포켓다운베스트 (주니어) 혼합",
+        "price": 91230,
+        "product_code": "N244VE345P",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4470896",
+        "source": "MUSINSA",
+        "keyword": "조던 패딩"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1772466232598",
     "timestamp": "2026-03-03T00:43:52.598483",
     "keyword": "리스트비교→크림검색_10개",
@@ -8347,522 +8438,6 @@
         "url": "https://www.musinsa.com/products/5341675",
         "source": "MUSINSA",
         "keyword": "나이키 에어 포스"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1772185385381",
-    "timestamp": "2026-02-27T18:43:05.381641",
-    "keyword": "무신사_아디다스",
-    "mode": "musinsa",
-    "collected_count": 20,
-    "kream_count": 0,
-    "duration_seconds": 168,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250818/5329362/5329362_17569462382750_500.jpg",
-        "name": "후드 집업 - 로얄블루:화이트 / KC9318",
-        "price": 98620,
-        "product_code": "KC9318",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5329362",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250818/5329567/5329567_17573005097318_500.jpg",
-        "name": "BB 트랙탑 - 블랙:크림화이트 / KC9299",
-        "price": 117620,
-        "product_code": "KC9299",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5329567",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251111/5711835/5711835_17628387813365_500.jpg",
-        "name": "아디컬러 오버사이즈 전장 지퍼 후디 JX1546",
-        "price": 96680,
-        "product_code": "JX1546",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5711835",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250818/5329564/5329564_17587641173048_500.jpg",
-        "name": "BB 트랙탑 - 크림화이트 / KC3335",
-        "price": 115060,
-        "product_code": "KC3335",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5329564",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260203/5972529/5972529_17701744606956_500.jpg",
-        "name": "팀가이스트 풀집 후디 - 그레이포그 / KQ5525",
-        "price": 122860,
-        "product_code": "KQ5525",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5972529",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260109/5880366/5880366_17681851101604_500.jpg",
-        "name": "클래식 트랙탑 - 블랙:화이트 / KE3527",
-        "price": 90330,
-        "product_code": "KE3527",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5880366",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240102/3771089/3771089_17041852509353_500.jpg",
-        "name": "베켄바우어 트랙탑 - 블랙 / IY8077",
-        "price": 75600,
-        "product_code": "IY8077",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/3771089",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250820/5342877/5342877_17557589110938_500.jpg",
-        "name": "오버사이즈 트랙 팬츠 - 블랙 / KC2616",
-        "price": 99900,
-        "product_code": "KC2616",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5342877",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260106/5870528/5870528_17677549310376_500.jpg",
-        "name": "클래식 트랙탑 - 나이트인디고:화이트 / KE3526",
-        "price": 98100,
-        "product_code": "KE3526",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5870528",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250321/4928402/4928402_17434082785420_500.jpg",
-        "name": "프리미엄 에센셜 풀집 후디 - 블랙  / JC9579",
-        "price": 115190,
-        "product_code": "JC9579",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4928402",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250923/5511455/5511455_17586892492647_500.jpg",
-        "name": "프리미엄 에센셜 풀집 후디 - 라이트그레이헤더 / JW1071",
-        "price": 82990,
-        "product_code": "JW1071",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5511455",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240420/4071245/4071245_17135455286579_500.jpg",
-        "name": "아디컬러 클래식 파이어버드 트랙탑 IJ7058",
-        "price": 87660,
-        "product_code": "IJ7058",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4071245",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260119/5907641/5907641_17688014871919_500.jpg",
-        "name": "파이어버드 트랙탑 - 블랙 / KD8312",
-        "price": 105190,
-        "product_code": "KD8312",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5907641",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20190923/1163169/1163169_16896579905804_500.jpg",
-        "name": "삼바 OG - 화이트:블랙 / B75806",
-        "price": 119200,
-        "product_code": "B75806",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/1163169",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260126/5935028/5935028_17695049330120_500.jpg",
-        "name": "클래식 트랙탑 - 원더화이트:아우라커피 / KQ9491",
-        "price": 96350,
-        "product_code": "KQ9491",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5935028",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260119/5907643/5907643_17688015122893_500.jpg",
-        "name": "파이어버드 트랙탑 - 나이트인디고 / KD8313",
-        "price": 105190,
-        "product_code": "KD8313",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5907643",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260123/5931095/5931095_17694040485027_500.jpg",
-        "name": "BRITCORE 캘리 티셔츠 - 화이트:아우라커피 / HZ3829",
-        "price": 57460,
-        "product_code": "HZ3829",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5931095",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250904/5403193/5403193_17569778952082_500.jpg",
-        "name": "니트 트랙탑 - 원더알루미나 / KC2618",
-        "price": 127980,
-        "product_code": "KC2618",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5403193",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251117/5743970/5743970_17633864884462_500.jpg",
-        "name": "CARGO FB TT KC6267",
-        "price": 155600,
-        "product_code": "KC6267",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5743970",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250620/5198837/5198837_17506590438333_500.jpg",
-        "name": "3S 윈드브레이커 - 블랙 / JE6325",
-        "price": 82050,
-        "product_code": "JE6325",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5198837",
-        "source": "MUSINSA",
-        "keyword": "아디다스"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1772185205959",
-    "timestamp": "2026-02-27T18:40:05.959034",
-    "keyword": "무신사_나이키",
-    "mode": "musinsa",
-    "collected_count": 2,
-    "kream_count": 0,
-    "duration_seconds": 20,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251114/5735260/5735260_17633690368275_500.jpg",
-        "name": "솔로 스우시 풀집 플리스 후디 M - 블랙:블랙:화이트 / HV1085-010",
-        "price": 109480,
-        "product_code": "HV1085-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5735260",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      },
-      {
-        "image_url": "",
-        "name": "-",
-        "price": 0,
-        "product_code": "-",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4405510",
-        "source": "MUSINSA",
-        "keyword": "나이키"
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1772183808025",
-    "timestamp": "2026-02-27T18:16:48.025049",
-    "keyword": "무신사→크림검색_20개",
-    "mode": "musinsa_kream",
-    "collected_count": 20,
-    "kream_count": 20,
-    "duration_seconds": 0,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251114/5735260/5735260_17633690368275_500.jpg",
-        "name": "솔로 스우시 풀집 플리스 후디 M - 블랙:블랙:화이트 / HV1085-010",
-        "price": 109480,
-        "product_code": "HV1085-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5735260",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -15680,
-        "크림평균가": "93,800원",
-        "크림판매량": "26/02/25"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240904/4405510/4405510_17273181951595_500.jpg",
-        "name": "테크 풀집 윈드러너 후디 M - 블랙 / HV0950-010",
-        "price": 129960,
-        "product_code": "HV0950-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4405510",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -29960,
-        "크림평균가": "100,000원",
-        "크림판매량": "26/02/26"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260204/5980953/5980953_17706813653468_500.jpg",
-        "name": "리액트X 리주버네이트 M - 스프루스 아우라:라이트 실버 / HV5060-005",
-        "price": 77810,
-        "product_code": "HV5060-005",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5980953",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": 190,
-        "크림평균가": "78,000원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240923/4454243/4454243_17280182796756_500.jpg",
-        "name": "에어 포스 1 07 W - 카카오 와우:샌드드리프트 / FQ8901-259",
-        "price": 133110,
-        "product_code": "FQ8901-259",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4454243",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -17310,
-        "크림평균가": "115,800원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250115/4723275/4723275_17370909990772_500.jpg",
-        "name": "클럽 후드 재킷 M - 블랙:화이트 / HJ2013-010",
-        "price": 112770,
-        "product_code": "HJ2013-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4723275",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -36370,
-        "크림평균가": "76,400원",
-        "크림판매량": "26/02/26"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250909/5424756/5424756_17575798164127_500.jpg",
-        "name": "킬샷 2 레더 M - 바로크 브라운:라이트 브리티시 탠:세서미:코카오 와우 / IB4504-237",
-        "price": 83320,
-        "product_code": "IB4504-237",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5424756",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -4120,
-        "크림평균가": "79,200원",
-        "크림판매량": "26/02/20"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251014/5590697/5590697_17606663377369_500.jpg",
-        "name": "샥스 NZ M - 블랙 / 378341-001",
-        "price": 98390,
-        "product_code": "378341-001",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5590697",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": 10210,
-        "크림평균가": "108,600원",
-        "크림판매량": "26/02/26"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240321/3976350/3976350_17115804993997_500.jpg",
-        "name": "에어 포스 1 07 M - 화이트 / CW2288-111",
-        "price": 130250,
-        "product_code": "CW2288-111",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/3976350",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -18450,
-        "크림평균가": "111,800원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260116/5904702/5904702_17690612226486_500.jpg",
-        "name": "ACG 울프 트리 플러스 풀집 후드 미드 레이어 M - 블랙:서밋 화이트 / HJ2459-011",
-        "price": 173960,
-        "product_code": "HJ2459-011",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5904702",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": 24040,
-        "크림평균가": "198,000원",
-        "크림판매량": "26/02/23"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250909/5424761/5424761_17575763144343_500.jpg",
-        "name": "샥스 Z W - 블랙:유니버시티 레드:블랙 / HQ7540-002",
-        "price": 125230,
-        "product_code": "HQ7540-002",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5424761",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -16830,
-        "크림평균가": "108,400원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20260106/5870697/5870697_17690717355132_500.jpg",
-        "name": "에어 조던 1 레트로 로우 미디엄 올리브 앤드 서밋 화이트 M - 미디엄 올리브:서밋 화이트:세일:블랙 / HQ6998-200",
-        "price": 179000,
-        "product_code": "HQ6998-200",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5870697",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -18400,
-        "크림평균가": "160,600원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250115/4723259/4723259_17370905957385_500.jpg",
-        "name": "ACG 맥스90 티셔츠 M - 블랙 / HJ0799-010",
-        "price": 39830,
-        "product_code": "HJ0799-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4723259",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": 9170,
-        "크림평균가": "49,000원",
-        "크림판매량": "26/02/26"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250115/4723317/4723317_17385426850204_500.jpg",
-        "name": "리액트X 리주버네이트 M - 블랙 / HV5060-001",
-        "price": 77810,
-        "product_code": "HV5060-001",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4723317",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -8810,
-        "크림평균가": "69,000원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250930/5550089/5550089_17604859446296_500.jpg",
-        "name": "ACG 써마 핏 플리스 풀오버 후디 M - 블랙:앤트러사이트:서밋 화이트 / DZ3393-011",
-        "price": 121520,
-        "product_code": "DZ3393-011",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5550089",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -25520,
-        "크림평균가": "96,000원",
-        "크림판매량": "26/02/26"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520285/5520285_17591045817364_500.jpg",
-        "name": "라이프 해링턴 재킷 M - 모스우드 브라운 / IM9349-235",
-        "price": 91280,
-        "product_code": "IM9349-235",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5520285",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": 1920,
-        "크림평균가": "93,200원",
-        "크림판매량": "26/02/19"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240321/3976156/3976156_17115806053307_500.jpg",
-        "name": "스포츠웨어 윈드러너 후드 재킷 M - 블랙:화이트 / DA0002-010",
-        "price": 106330,
-        "product_code": "DA0002-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/3976156",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -19930,
-        "크림평균가": "86,400원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240715/4249831/4249831_17223983043394_500.jpg",
-        "name": "클럽 플리스 오버사이즈 프렌치 테리 풀오버 후디 M - 블랙:화이트 / HJ1817-010",
-        "price": 76320,
-        "product_code": "HJ1817-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4249831",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -12320,
-        "크림평균가": "64,000원",
-        "크림판매량": "25/11/16"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240918/4442080/4442080_17271359077800_500.jpg",
-        "name": "에어 조던 1 로우 W - 울프 그레이:화이트 / DC0774-105",
-        "price": 110850,
-        "product_code": "DC0774-105",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4442080",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -15050,
-        "크림평균가": "95,800원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240321/3976349/3976349_17115804555461_500.jpg",
-        "name": "에어 포스 1 07 M - 블랙 / CW2288-001",
-        "price": 130250,
-        "product_code": "CW2288-001",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/3976349",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -19250,
-        "크림평균가": "111,000원",
-        "크림판매량": "N/A"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20251014/5590724/5590724_17606667417807_500.jpg",
-        "name": "에어 포스 1 07 WB M - 블랙 / CJ9179-001",
-        "price": 147730,
-        "product_code": "CJ9179-001",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5590724",
-        "source": "MUSINSA",
-        "keyword": "나이키",
-        "크림비교": -40730,
-        "크림평균가": "107,000원",
-        "크림판매량": "N/A"
       }
     ],
     "status": "completed"
