@@ -1465,12 +1465,14 @@
     }
 
     // ===== 정렬 함수 ===== ✅ 여기에 추가!
+
   function sortBy(column) {
-      // POIZON과 무신사만 정렬 지원
-      if (selectedMode !== 'poizon' && selectedMode !== 'musinsa') {
-        console.log('⚠️ 정렬은 POIZON/무신사 모드에서만 지원됩니다');
-        return;
-      }
+    // ✅ compare 포함
+    if (!['poizon', 'musinsa', 'compare'].includes(selectedMode)) {
+      console.log('⚠️ 정렬 미지원 모드:', selectedMode);
+      addLog(`⚠️ 이 모드에서는 정렬이 지원되지 않습니다 (${selectedMode})`, 'warning');
+      return;
+    }
       
       console.log('🔄 정렬:', column);
       
