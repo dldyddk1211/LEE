@@ -2,11 +2,13 @@
 # 표준 라이브러리
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import os
+import sys
 import json
 import time
 import uuid
 import threading
 import queue
+import asyncio 
 from datetime import datetime
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -349,12 +351,28 @@ def run_comparison(products):
 # 무신사 검색 실행 함수
 # ==========================================
 
-def run_musinsa_search(keyword, max_items):
-    """무신사 검색 실행 (스레드)"""
-    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
+def run_musinsa_search(keyword, max_items, search_mode='keyword'):
+    """
+    무신사 검색 실행 (스레드용)
     
+    Args:
+        keyword: 검색 키워드 (search_mode='keyword'일 때만 사용)
+        max_items: 수집 개수
+        search_mode: 'keyword' 또는 'ranking'
+    """
+    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items, musinsa_stop_flag
+    musinsa_stop_flag = False
+    
+    # ✅ 즉시 테스트 메시지 전송
+    log_queue.put({
+        'type': 'log',
+        'message': '🟤 run_musinsa_search 시작됨!',
+        'level': 'info'
+    })
+
     print(f"\n{'='*60}")
     print(f"🟤 run_musinsa_search 시작")
+    print(f"  search_mode: {search_mode}")
     print(f"  keyword: {keyword}")
     print(f"  max_items: {max_items}")
     print(f"  max_items 타입: {type(max_items)}")
@@ -365,9 +383,9 @@ def run_musinsa_search(keyword, max_items):
     work_start_time = time_module.time()
     work_type = 'musinsa'
     
-    # ✅ max_items 처리
+    # max_items 처리
     if max_items == 'max':
-        estimated_items = 1000  # 임시 추정값
+        estimated_items = 1000
     else:
         try:
             estimated_items = int(max_items)
@@ -378,11 +396,28 @@ def run_musinsa_search(keyword, max_items):
     stop_flag = False
     
     try:
-        # ✅ max_items를 그대로 전달 (문자열 'max' 또는 숫자)
-        result = musinsa_search.search_musinsa_keyword_detail(
-            keyword=keyword,
-            max_items=max_items,  # ✅ 'max' 또는 숫자 그대로 전달
-            callback=log_callback
+        # 검색 모드에 따른 로그 메시지
+        if search_mode == 'keyword':
+            log_queue.put({
+                'type': 'log',
+                'message': f'🔍 무신사 키워드 검색: "{keyword}"',
+                'level': 'info'
+            })
+        else:
+            log_queue.put({
+                'type': 'log',
+                'message': '📈 무신사 랭킹 검색 시작',
+                'level': 'info'
+            })
+        
+        # ✅ asyncio.run으로 search_musinsa 호출 (callback 추가)
+        result = asyncio.run(
+            musinsa_search.search_musinsa(
+                keyword=keyword if search_mode == 'keyword' else None,
+                max_items=max_items,
+                search_mode=search_mode,
+                callback=log_callback  # ✅ 추가!
+            )
         )
         
         print(f"\n{'='*60}")
@@ -391,43 +426,51 @@ def run_musinsa_search(keyword, max_items):
         print(f"  수집 개수: {result.get('total_items', 0)}")
         print(f"{'='*60}\n")
         
-        if result.get('success'):
-            # ✅ 스케줄러에 저장
-            try:
-                end_time = time_module.time()
-                duration_seconds = int(end_time - work_start_time)
-                
-                task_data = {
-                    'keyword': f'무신사_{keyword}',
-                    'mode': 'musinsa',
-                    'collected_count': result.get('total_items', 0),
-                    'kream_count': 0,
-                    'duration_seconds': duration_seconds,
-                    'data': result.get('results', [])
-                }
-                
-                task_id = save_task_to_history(task_data)
-                if task_id:
-                    print(f"💾 스케줄러 저장 완료: {task_id}")
-                else:
-                    print(f"⚠️ 스케줄러 저장 실패")
+        if not musinsa_stop_flag:
+            if result.get('success'):
+                # 스케줄러에 저장
+                try:
+                    end_time = time_module.time()
+                    duration_seconds = int(end_time - work_start_time)
                     
-            except Exception as e:
-                print(f"⚠️ 스케줄러 저장 오류: {e}")
-                import traceback
-                traceback.print_exc()
-            
-            # 검색 완료 메시지
-            log_queue.put({
-                'type': 'complete',
-                'total_items': result.get('total_items', 0),
-                'data': result.get('results', [])
-            })
-        else:
-            log_queue.put({
-                'type': 'error',
-                'message': result.get('error', '알 수 없는 오류')
-            })
+                    task_data = {
+                        'keyword': f'무신사_{"랭킹" if search_mode == "ranking" else keyword}',
+                        'mode': 'musinsa',
+                        'collected_count': result.get('total_items', 0),
+                        'kream_count': 0,
+                        'duration_seconds': duration_seconds,
+                        'data': result.get('results', [])
+                    }
+                    
+                    task_id = save_task_to_history(task_data)
+                    if task_id:
+                        print(f"💾 스케줄러 저장 완료: {task_id}")
+                    else:
+                        print(f"⚠️ 스케줄러 저장 실패")
+                        
+                except Exception as e:
+                    print(f"⚠️ 스케줄러 저장 오류: {e}")
+                    import traceback
+                    traceback.print_exc()
+                
+                # 완료 로그
+                log_queue.put({
+                    'type': 'log',
+                    'message': f'✅ 무신사 검색 완료: {result.get("total_items", 0)}개',
+                    'level': 'success'
+                })
+                
+                # 검색 완료 메시지
+                log_queue.put({
+                    'type': 'complete',
+                    'total_items': result.get('total_items', 0),
+                    'data': result.get('results', [])
+                })
+            else:
+                log_queue.put({
+                    'type': 'error',
+                    'message': result.get('error', '알 수 없는 오류')
+                })
             
     except Exception as e:
         print(f"\n❌ run_musinsa_search 오류: {e}")
@@ -522,6 +565,9 @@ def start_search():
     keyword = request.args.get('keyword', '')
     skip_login = request.args.get('skip_login', 'false') == 'true'
     
+    # ✅ 무신사 검색 모드 추가
+    search_mode = request.args.get('search_mode', 'keyword')  # 'keyword' 또는 'ranking'
+
     # ✅ max_pages 처리 (POIZON용)
     max_pages_str = request.args.get('max_pages', '1')
     try:
@@ -546,6 +592,7 @@ def start_search():
     print(f"📡 /start 라우트 호출:")
     print(f"  mode: {mode}")
     print(f"  keyword: {keyword}")
+    print(f"  search_mode: {search_mode}")  # ✅ 추가
     print(f"  max_pages: {max_pages}")
     print(f"  max_items: {max_items} (타입: {type(max_items)})")
     print(f"{'='*60}\n")
@@ -566,8 +613,11 @@ def start_search():
         thread.start()
         
     elif mode == 'musinsa':
-        # ✅ 무신사 검색 (max_items 사용)
-        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items))
+        # ✅ 무신사 검색 (search_mode 파라미터 추가!)
+        thread = threading.Thread(
+            target=run_musinsa_search, 
+            args=(keyword, max_items, search_mode)  # ✅ search_mode 추가!
+        )
         thread.daemon = True
         thread.start()
         
@@ -581,26 +631,41 @@ def start_search():
         thread.start()
     
     def generate():
-        while True:
-            try:
-                data = log_queue.get(timeout=1)
-                
-                # ✅ complete 이벤트일 때 mode 정보 추가!
-                if data.get('type') == 'complete':
-                    data['mode'] = mode  # ⬅️ 이 줄 추가!
-                
-                yield f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
-                
-                if data.get('type') in ['complete', 'error']:
-                    break
-            except queue.Empty:
-                yield f"data: {json.dumps({'type': 'ping'})}\n\n"
-        
+        """SSE 이벤트 생성"""
+        try:
+            while True:
+                try:
+                    data = log_queue.get(timeout=1)
+                    
+                    # ✅ complete 이벤트일 때 mode 정보 추가
+                    if data.get('type') == 'complete':
+                        data['mode'] = mode
+                    
+                    yield f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+                    
+                    if data.get('type') in ['complete', 'error']:
+                        break
+                        
+                except queue.Empty:
+                    # ✅ heartbeat는 주석으로 (message 이벤트 발생 안 함)
+                    yield f": ping\n\n"
+                    
+        except Exception as e:
+            print(f"❌ SSE generate 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            error_msg = {
+                'type': 'error',
+                'message': f'서버 오류: {str(e)}'
+            }
+            yield f": ping\n\n"
+    
     response = Response(generate(), mimetype='text/event-stream')
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Connection'] = 'keep-alive'  # ✅ 추가
     return response
-
 
 @app.route('/upload_excel', methods=['POST'])
 def upload_excel():
@@ -1420,6 +1485,10 @@ def download_file(filename):
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+
+
 
 # 구글 시트 자동 동기화 시작
 try:

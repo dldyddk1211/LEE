@@ -807,23 +807,40 @@ def extract_product_detail(page):
         traceback.print_exc()
         return None
     
-
-
 ############################
 # ===== 키워드 검색 (상세 정보) ===== #
 ############################
 
-def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
-    """무신사 키워드 검색 + 상품 상세 정보 추출 (무한 스크롤)"""
+def search_musinsa(keyword=None, max_items='max', search_mode='keyword', callback=None):
+    """
+    무신사 검색
+    
+    Args:
+        keyword: 검색 키워드 (search_mode='keyword'일 때 필수)
+        max_items: 수집 개수 ('max' 또는 숫자)
+        search_mode: 'keyword' 또는 'ranking'
+        callback: 로그 콜백 함수
+    """
+    
     global LOG_CALLBACK, stop_flag
     LOG_CALLBACK = callback
     stop_flag = False
     
     log("\n" + "=" * 60, 'info')
-    log("🟤 무신사 키워드 검색 (무한 스크롤)", 'info')
+    
+    # ✅ 검색 모드에 따라 로그 메시지 분기
+    if search_mode == 'ranking':
+        log("🟤 무신사 랭킹 검색", 'info')
+    else:
+        log("🟤 무신사 키워드 검색 (무한 스크롤)", 'info')
+    
     log("=" * 60, 'info')
     
-    log(f"📊 검색 키워드: {keyword}", 'info')
+    # ✅ 키워드 검색일 때만 키워드 로그
+    if search_mode == 'keyword':
+        log(f"📊 검색 키워드: {keyword}", 'info')
+    else:
+        log(f"📊 검색 모드: 랭킹 TOP {max_items if max_items != 'max' else 1000}", 'info')
     
     # ✅ max_items 디버깅 로그
     print(f"\n{'='*60}")
@@ -868,10 +885,26 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
         
         log("🌐 무신사 검색 시작...", 'info')
         
-        # 검색 페이지로 직접 이동
-        search_url = f"{MUSINSA_SEARCH_URL}?q={keyword}"
-        log(f"  → 검색 URL: {search_url}", 'info')
+        # ✅ 검색 모드에 따라 URL 분기
+        if search_mode == 'ranking':
+            # 랭킹 URL
+            search_url = (
+                "https://www.musinsa.com/main/musinsa/ranking"
+                "?gf=A"
+                "&storeCode=musinsa"
+                "&sectionId=200"
+                "&contentsId="
+                "&categoryCode=103000"
+                "&ageBand=AGE_BAND_ALL"
+                "&subPan=product"
+            )
+            log(f"  → 랭킹 URL: {search_url}", 'info')
+        else:
+            # 키워드 검색 URL
+            search_url = f"{MUSINSA_SEARCH_URL}?q={keyword}"
+            log(f"  → 검색 URL: {search_url}", 'info')
         
+        # ✅ 페이지 이동
         page.goto(search_url, wait_until='domcontentloaded', timeout=30000)
         wait_stable(page, 2000)
         
@@ -934,15 +967,23 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
         # ✅ 실제 수집할 개수 결정 (타입 안전)
         if is_max_mode:
             # max 모드
-            if total_count > 0:
+            if search_mode == 'ranking':
+                # 랭킹은 최대 1000개
+                target_count = 1000
+                log(f"  → 수집 목표: {target_count}개 (랭킹 최대)", 'info')
+            elif total_count > 0:
                 target_count = total_count
                 log(f"  → 수집 목표: {target_count:,}개 (전체)", 'info')
             else:
                 target_count = 1000
                 log(f"  → 수집 목표: {target_count}개 (개수 미확인, 제한 설정)", 'warning')
         else:
-            # 숫자 모드 (둘 다 int이므로 안전하게 비교 가능)
-            if total_count > 0:
+            # 숫자 모드
+            if search_mode == 'ranking':
+                # 랭킹은 최대 1000개로 제한
+                target_count = min(max_items_int, 1000)
+                log(f"  → 수집 목표: {target_count}개 (랭킹 요청: {max_items_int}, 최대: 1000)", 'info')
+            elif total_count > 0:
                 target_count = min(max_items_int, total_count)
                 log(f"  → 수집 목표: {target_count:,}개 (요청: {max_items_int}, 전체: {total_count:,})", 'info')
             else:
@@ -951,11 +992,14 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
         
         print(f"\n{'='*60}")
         print(f"🎯 최종 수집 목표:")
+        print(f"  search_mode: {search_mode}")
         print(f"  is_max_mode: {is_max_mode}")
         print(f"  total_count: {total_count}")
         print(f"  target_count: {target_count}")
         print(f"{'='*60}\n")
-         
+
+    
+        # ... 나머지 무한 스크롤 및 수집 로직 동일
 
         # ❌ 정렬 변경 제거 (추천순 그대로 사용)
         # log("\n🔄 정렬 변경 시작...", 'info')
@@ -1101,6 +1145,144 @@ def search_musinsa_keyword_detail(keyword, max_items='max', callback=None):
             'results': results
         }
 
+
+############################
+# ===== 랭킹 검색 (상세 정보) ===== #
+############################
+
+async def search_musinsa_ranking(page, max_items=100):
+    """
+    무신사 랭킹 검색
+    
+    Args:
+        page: Playwright page 객체
+        max_items: 수집 개수 (기본 100)
+    """
+    
+    try:
+        # ✅ 새로운 랭킹 URL
+        ranking_url = (
+            "https://www.musinsa.com/main/musinsa/ranking"
+            "?storeCode=musinsa"
+            "&sectionId=199"
+            "&contentsId="
+            "&categoryCode=103000"
+            "&subPan=product"
+        )
+        
+        print(f"📈 무신사 랭킹 페이지 이동: {ranking_url}")
+        
+        await page.goto(ranking_url, wait_until='networkidle', timeout=30000)
+        await asyncio.sleep(2)
+        
+        products = []
+        scroll_count = 0
+        max_scrolls = 50  # 최대 스크롤 횟수
+        
+        # 최대 개수 제한
+        if max_items == 'max' or max_items > 100:
+            max_items = 100
+        
+        print(f"📦 목표: TOP {max_items}개 수집")
+        
+        while len(products) < max_items and scroll_count < max_scrolls:
+            # 현재 페이지의 상품 목록 가져오기
+            items = await page.query_selector_all('.ranking-list li.li_box')
+            
+            print(f"🔍 현재 페이지 상품 수: {len(items)}개")
+            
+            for item in items[len(products):]:
+                try:
+                    # 순위 추출
+                    rank_elem = await item.query_selector('.ranking-mark')
+                    rank = await rank_elem.inner_text() if rank_elem else str(len(products) + 1)
+                    
+                    # 상품 링크
+                    link_elem = await item.query_selector('a.img-block')
+                    product_url = await link_elem.get_attribute('href') if link_elem else ''
+                    
+                    if product_url and not product_url.startswith('http'):
+                        product_url = f"https://www.musinsa.com{product_url}"
+                    
+                    # 상품 코드 추출 (URL에서)
+                    product_code = ''
+                    if '/goods/' in product_url:
+                        product_code = product_url.split('/goods/')[-1].split('?')[0]
+                    
+                    # 브랜드명
+                    brand_elem = await item.query_selector('.item_title')
+                    brand = await brand_elem.inner_text() if brand_elem else ''
+                    
+                    # 상품명
+                    name_elem = await item.query_selector('.list_info p.list_info__name')
+                    name = await name_elem.inner_text() if name_elem else ''
+                    
+                    # 가격
+                    price_elem = await item.query_selector('.price')
+                    price_text = await price_elem.inner_text() if price_elem else '0'
+                    
+                    # 가격 파싱 (예: "89,000원" → 89000)
+                    price = int(''.join(filter(str.isdigit, price_text))) if price_text else 0
+                    
+                    # 이미지 URL
+                    img_elem = await item.query_selector('img')
+                    image_url = await img_elem.get_attribute('src') if img_elem else ''
+                    
+                    if image_url and not image_url.startswith('http'):
+                        image_url = f"https:{image_url}"
+                    
+                    # 할인율
+                    discount_elem = await item.query_selector('.rate')
+                    discount = await discount_elem.inner_text() if discount_elem else ''
+                    
+                    product = {
+                        'rank': rank,
+                        'product_code': product_code,
+                        'brand': brand,
+                        'name': f"{brand} {name}".strip(),
+                        'price': price,
+                        'discount': discount,
+                        'url': product_url,
+                        'image_url': image_url,
+                        'source': 'MUSINSA_RANKING'
+                    }
+                    
+                    products.append(product)
+                    print(f"✅ [{len(products)}/{max_items}] {rank}위 - {product['name'][:30]}... ({price:,}원)")
+                    
+                    if len(products) >= max_items:
+                        break
+                        
+                except Exception as e:
+                    print(f"⚠️ 상품 파싱 오류: {e}")
+                    continue
+            
+            # 목표 달성 시 중단
+            if len(products) >= max_items:
+                break
+            
+            # 스크롤 다운
+            await page.evaluate('window.scrollBy(0, 1000)')
+            await asyncio.sleep(1)
+            scroll_count += 1
+            
+            # 더 이상 새로운 상품이 없으면 중단
+            new_items_count = await page.evaluate('document.querySelectorAll(".ranking-list li.li_box").length')
+            if new_items_count <= len(items):
+                print("⚠️ 더 이상 상품이 없습니다")
+                break
+        
+        print(f"✅ 무신사 랭킹 수집 완료: {len(products)}개")
+        return products[:max_items]
+        
+    except Exception as e:
+        print(f"❌ 무신사 랭킹 검색 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return []
+
+
+
 def stop_search():
     """검색 중단"""
     global stop_flag
@@ -1123,8 +1305,6 @@ def test_musinsa_search():
     
     if login_result.get('success'):
         # 상세 정보 검색 테스트
-        result = search_musinsa_keyword_detail("나이키", max_items=3)
-        
         print("\n📊 테스트 결과:")
         print(json.dumps(result, ensure_ascii=False, indent=2))
     

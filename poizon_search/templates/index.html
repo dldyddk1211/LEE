@@ -638,6 +638,98 @@
       text-decoration: underline;
       color: #1a73e8;
     }
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  /* 무신사 검색 모드 스타일 */
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+  .musinsa-search-mode {
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+  }
+
+  .musinsa-search-mode h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+  }
+
+  /* 2x2 그리드 레이아웃 */
+  .search-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 0;
+  }
+
+  /* 검색 모드 카드 */
+  .search-mode-card {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 30px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 120px;
+  }
+
+  .search-mode-card:hover {
+    border-color: #a0522d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(160, 82, 45, 0.15);
+  }
+
+  .search-mode-card.active {
+    border-color: #a0522d;
+    background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+  }
+
+  .search-mode-icon {
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .search-mode-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .search-mode-card.active .search-mode-title {
+    color: #fff;
+  }
+
+  /* 반응형 - 모바일 */
+  @media (max-width: 480px) {
+    .search-mode-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    
+    .search-mode-card {
+      padding: 20px;
+      min-height: 80px;
+      flex-direction: row;
+      gap: 15px;
+      justify-content: flex-start;
+    }
+    
+    .search-mode-icon {
+      font-size: 28px;
+    }
+    
+    .search-mode-title {
+      text-align: left;
+    }
+  }
   </style>
 </head>
 
@@ -692,20 +784,58 @@
       </div>
     </div>
 
-    <div class="input-grid">
-      <div class="input-group">
-        <label for="keyword">검색 키워드</label>
-        <input type="text" id="keyword" placeholder="예: 나이키" disabled />
-        <div class="hint">접속 완료 후 입력 가능합니다</div>
+    <div class="musinsa-search-mode" id="musinsaSearchMode" style="display:none;">
+      <h3>📊 무신사 검색 모드</h3>
+    
+      <!-- 검색 모드 선택 카드 -->
+      <div class="search-mode-grid">
+        <div class="search-mode-card active" id="musinsaKeywordCard" onclick="selectMusinsaSearchMode('keyword')">
+          <div class="search-mode-icon">🔍</div>
+          <div class="search-mode-title">키워드 검색</div>
+        </div>
+        
+        <div class="search-mode-card" id="musinsaRankingCard" onclick="selectMusinsaSearchMode('ranking')">
+          <div class="search-mode-icon">📈</div>
+          <div class="search-mode-title">랭킹 검색</div>
+        </div>
       </div>
-
-      <div class="input-group">
-        <label for="maxPages">검색 페이지 수 (1페이지 10건)</label>
-        <input type="number" id="maxPages" min="1" max="999" value="1" disabled />
-        <div class="hint">접속 완료 후 설정 가능합니다</div>
+      
+      <!-- 키워드 입력 영역 -->
+      <div id="keywordInputArea" style="margin-top: 20px;">
+        <label for="musinsaKeyword" style="display:block; margin-bottom:8px; color:#333; font-weight:600; font-size:14px;">
+          검색 키워드
+        </label>
+        <input 
+          type="text" 
+          id="musinsaKeyword" 
+          placeholder="예: 나이키" 
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:16px;"
+        />
+        <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
+          검색할 키워드를 입력하세요
+        </div>
+      </div>
+      
+      <!-- 수집 수량 영역 -->
+      <div id="maxItemsInputArea" style="margin-top: 20px;">
+        <label for="musinsaMaxItems" style="display:block; margin-bottom:8px; color:#333; font-weight:600; font-size:14px;">
+          검색 수량 (최대 = 전체)
+        </label>
+        <input 
+          type="text" 
+          id="musinsaMaxItems" 
+          value="max" 
+          placeholder="max" 
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:16px;"
+        />
+        <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
+          max = 검색 결과 전체, 숫자 = 해당 개수만 수집 (1페이지 = 20건)
+        </div>
       </div>
     </div>
 
+
+      
     <div class="button-group">
       <button id="startBtn" onclick="startCollection()" disabled>🚀 수집 시작</button>
       <label for="excelUpload" id="uploadLabel" class="upload-btn" style="display:none;">
@@ -1715,182 +1845,306 @@
     }
     // ✅ 모드 활성화 함수 
   function activateMode(mode) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log(`✅ activateMode 실행: ${mode}`);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      selectedMode = mode;
-      updateTableHeader(mode);
-      
-      // 모든 모드 버튼 비활성화
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // 선택한 모드 활성화
-      const modeId = 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
-      const modeBtn = document.getElementById(modeId);
-      
-      if (modeBtn) {
-        modeBtn.classList.add('active');
-      }
-      
-      const keywordInput = document.getElementById('keyword');
-      const maxPagesElement = document.getElementById('maxPages');  // ✅ 변수명 변경
-      const startBtn = document.getElementById('startBtn');
-      
-      // ✅ 시작 버튼 기존 모드 클래스 제거
-      startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`✅ activateMode 실행: ${mode}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    selectedMode = mode;
+    updateTableHeader(mode);
+    
+    // 모든 모드 버튼 비활성화
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // 선택한 모드 활성화
+    const modeId = 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
+    const modeBtn = document.getElementById(modeId);
+    
+    if (modeBtn) {
+      modeBtn.classList.add('active');
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 공통 요소
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    const keywordInput = document.getElementById('keyword');
+    const maxPagesElement = document.getElementById('maxPages');
+    const startBtn = document.getElementById('startBtn');
+    
+    // 시작 버튼 기존 모드 클래스 제거
+    startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
 
-      // ✅ 검색 옵션 초기화 (모두 숨김)
-      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
-      if (musinsaSearchOptions) {
-        musinsaSearchOptions.style.display = 'none';
+    // 검색 옵션 초기화 (모두 숨김)
+    const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
+    if (musinsaSearchOptions) {
+      musinsaSearchOptions.style.display = 'none';
+    }
+    
+    const resultSearchOptions = document.getElementById('resultSearchOptions');
+    if (resultSearchOptions) {
+      resultSearchOptions.style.display = 'none';
+    }
+    
+    // 무신사 전용 UI 요소
+    const musinsaSearchModeSection = document.getElementById('musinsaSearchMode');
+    const defaultInputGrid = document.getElementById('defaultInputGrid');
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 모드별 설정
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    let startBtnText = '🚀 수집 시작';
+    let startBtnClass = '';
+    
+    if (mode === 'poizon') {
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 포이즌 모드
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      
+      startBtnText = '🟣 포이즌 검색 시작';
+      startBtnClass = 'mode-poizon';
+      
+      // 무신사 섹션 숨김
+      if (musinsaSearchModeSection) {
+        musinsaSearchModeSection.style.display = 'none';
+      }
+      if (defaultInputGrid) {
+        defaultInputGrid.style.display = 'grid';
       }
       
-      // resultSearchOptions가 있다면 숨김 (POIZON용)
-      const resultSearchOptions = document.getElementById('resultSearchOptions');
-      if (resultSearchOptions) {
-        resultSearchOptions.style.display = 'none';
-      }
-      
-      // ✅ 모드별 시작 버튼 텍스트 및 색상 설정
-      let startBtnText = '🚀 수집 시작';
-      let startBtnClass = '';
-      
-      if (mode === 'poizon') {
-        startBtnText = '🟣 포이즌 검색 시작';
-        startBtnClass = 'mode-poizon';
-        
-        // ✅ POIZON: 기존 방식 (1페이지 10건)
+      // 포이즌 입력 설정
+      if (maxPagesElement) {
         maxPagesElement.value = '1';
         maxPagesElement.type = 'number';
-        maxPagesElement.parentElement.querySelector('label').textContent = '검색 페이지 수 (1페이지 10건)';
-        maxPagesElement.parentElement.querySelector('.hint').textContent = '접속 완료 후 설정 가능합니다';
+        
+        const label = maxPagesElement.parentElement.querySelector('label');
+        const hint = maxPagesElement.parentElement.querySelector('.hint');
+        
+        if (label) label.textContent = '검색 페이지 수 (1페이지 10건)';
+        if (hint) hint.textContent = '접속 완료 후 설정 가능합니다';
+      }
 
-      } else if (mode === 'musinsa') {
-        startBtnText = '🟤 무신사 검색 시작';
-        startBtnClass = 'mode-musinsa';
-        
-        // ✅ 무신사: max 방식 (1페이지 20건)
-        maxPagesElement.value = 'max';
-        maxPagesElement.type = 'text';
-        maxPagesElement.parentElement.querySelector('label').textContent = '검색 수량 (최대 = 전체)';
-        maxPagesElement.parentElement.querySelector('.hint').textContent = 'max = 검색 결과 전체, 숫자 = 해당 개수만 수집 (1페이지 = 20건)';
-        
-      } else if (mode === 'kream') {
-        startBtnText = '🛒 크림 검색 시작';
-        startBtnClass = 'mode-kream';
-        
-      } else if (mode === 'compare') {
-        startBtnText = '📋 리스트 비교 시작';
-        startBtnClass = 'mode-compare';
-      }
+    } else if (mode === 'musinsa') {
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 무신사 모드
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       
-      // ✅ 텍스트 설정
-      startBtn.textContent = startBtnText;
+      startBtnText = '🟤 무신사 검색 시작';
+      startBtnClass = 'mode-musinsa';
       
-      // ✅ 색상 클래스 추가
-      if (startBtnClass) {
-        startBtn.classList.add(startBtnClass);
-      }
-      
-      // 모드별 UI 설정
-      if (mode === 'compare') {
-        keywordInput.disabled = true;
-        keywordInput.parentElement.style.display = 'none';
-        startBtn.style.display = 'none';
-        document.getElementById('uploadLabel').style.display = 'block';
+      // 무신사 섹션 표시
+      if (musinsaSearchModeSection) {
+        musinsaSearchModeSection.style.display = 'block';
+        
+        // UI가 표시된 후에 selectMusinsaSearchMode 호출
+        setTimeout(() => {
+          selectMusinsaSearchMode('keyword');
+        }, 100);
         
       } else {
-        keywordInput.disabled = false;
-        keywordInput.parentElement.style.display = 'block';
-        maxPagesElement.disabled = false;
-        startBtn.style.display = 'block';
-        startBtn.disabled = false;
-        document.getElementById('uploadLabel').style.display = 'none';
+        console.error('❌ musinsaSearchMode 섹션이 없습니다!');
       }
       
-      // 로그인 상태 UI 업데이트
-      const loginStatus = document.getElementById('loginStatus');
-      const loginMessage = document.getElementById('loginMessage');
+      // 기본 input 숨김
+      if (defaultInputGrid) {
+        defaultInputGrid.style.display = 'none';
+      }
       
-      let modeName = mode;
-      if (mode === 'poizon') modeName = 'POIZON';
-      if (mode === 'musinsa') modeName = '무신사';
-      if (mode === 'kream') modeName = '크림';
-      if (mode === 'compare') modeName = '리스트 비교';
+      // ✅ 무신사 모드에서는 maxPagesElement를 건드리지 않음!
+      // (무신사는 musinsaMaxItems를 사용하므로)
       
-      loginStatus.querySelector('h3').textContent = `✅ ${modeName} 모드 활성화`;
-      loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 키워드를 입력하고 수집을 시작하세요.`;
+    } else if (mode === 'kream') {
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 크림 모드
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       
-      addLog(`✅ ${modeName} 모드 활성화 완료`, 'success');
-      addLog(`💡 키워드를 입력하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
+      startBtnText = '🛒 크림 검색 시작';
+      startBtnClass = 'mode-kream';
       
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // 무신사 섹션 숨김
+      if (musinsaSearchModeSection) {
+        musinsaSearchModeSection.style.display = 'none';
+      }
+      if (defaultInputGrid) {
+        defaultInputGrid.style.display = 'grid';
+      }
+      
+    } else if (mode === 'compare') {
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 리스트 비교 모드
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      
+      startBtnText = '📋 리스트 비교 시작';
+      startBtnClass = 'mode-compare';
+      
+      // 무신사 섹션 숨김
+      if (musinsaSearchModeSection) {
+        musinsaSearchModeSection.style.display = 'none';
+      }
     }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 시작 버튼 설정
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    startBtn.textContent = startBtnText;
+    
+    if (startBtnClass) {
+      startBtn.classList.add(startBtnClass);
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 모드별 UI 표시/숨김
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+
+    if (mode === 'compare') {
+      // 리스트 비교: 키워드 숨김, 업로드 버튼 표시
+      if (keywordInput) {
+        keywordInput.disabled = true;
+        if (keywordInput.parentElement) {
+          keywordInput.parentElement.style.display = 'none';
+        }
+      }
+      
+      if (startBtn) {
+        startBtn.style.display = 'none';
+      }
+      
+      const uploadLabel = document.getElementById('uploadLabel');
+      if (uploadLabel) {
+        uploadLabel.style.display = 'block';
+      }
+      
+    } else {
+      // 기타 모드: 키워드 표시, 업로드 버튼 숨김
+      if (keywordInput) {
+        keywordInput.disabled = false;
+        if (keywordInput.parentElement) {
+          keywordInput.parentElement.style.display = 'block';
+        }
+      }
+      
+      // ✅ 무신사 모드가 아닐 때만 maxPagesElement 활성화
+      if (mode !== 'musinsa' && maxPagesElement) {
+        maxPagesElement.disabled = false;
+      }
+      
+      if (startBtn) {
+        startBtn.style.display = 'block';
+        startBtn.disabled = false;
+      }
+      
+      const uploadLabel = document.getElementById('uploadLabel');
+      if (uploadLabel) {
+        uploadLabel.style.display = 'none';
+      }
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 로그인 상태 UI 업데이트
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    const loginStatus = document.getElementById('loginStatus');
+    const loginMessage = document.getElementById('loginMessage');
+    
+    let modeName = mode;
+    if (mode === 'poizon') modeName = 'POIZON';
+    if (mode === 'musinsa') modeName = '무신사';
+    if (mode === 'kream') modeName = '크림';
+    if (mode === 'compare') modeName = '리스트 비교';
+    
+    if (loginStatus) {
+      loginStatus.querySelector('h3').textContent = `✅ ${modeName} 모드 활성화`;
+    }
+    
+    if (loginMessage) {
+      if (mode === 'musinsa') {
+        loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 검색 모드를 선택하고 수집을 시작하세요.`;
+      } else {
+        loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 키워드를 입력하고 수집을 시작하세요.`;
+      }
+    }
+    
+    addLog(`✅ ${modeName} 모드 활성화 완료`, 'success');
+    
+    if (mode === 'musinsa') {
+      addLog(`💡 검색 모드를 선택하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
+    } else {
+      addLog(`💡 키워드를 입력하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
+    }
+    
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
 
   function startCollection() {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('🚀 startCollection 호출');
-      console.log('현재 selectedMode:', selectedMode);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
-      const keyword = document.getElementById('keyword').value.trim();
-      const maxPagesValue = document.getElementById('maxPages').value;
-      
-      console.log('키워드:', keyword);
-      console.log('maxPagesValue:', maxPagesValue);
-      console.log('maxPagesValue 타입:', typeof maxPagesValue);
-          
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🚀 startCollection 호출');
+    console.log('현재 selectedMode:', selectedMode);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    // ✅ 1. 먼저 요소 가져오기
+    const keywordElement = document.getElementById('keyword');
+    const maxPagesElement = document.getElementById('maxPages');
+    
+    // ✅ 2. 그 다음 값 추출
+    const keyword = keywordElement ? keywordElement.value.trim() : '';
+    const maxPagesValue = maxPagesElement ? maxPagesElement.value : '1';
+    
+    // ✅ 3. 이제 사용 가능
+    console.log('키워드:', keyword);
+    console.log('maxPagesValue:', maxPagesValue);
+    console.log('maxPagesValue 타입:', typeof maxPagesValue);
+  
       // 모드가 선택되지 않았으면 알림
-      if (!selectedMode) {
-        console.error('❌ 모드가 선택되지 않음!');
-        alert('⚠️ 먼저 수집 모드를 선택해주세요!');
+    if (!selectedMode) {
+      console.error('❌ 모드가 선택되지 않음!');
+      alert('⚠️ 먼저 수집 모드를 선택해주세요!');
+      return;
+    }
+    
+    console.log(`✅ 모드 확인: ${selectedMode}`);
+    
+    // ✅ 모드별 로직 분리
+    if (selectedMode === 'poizon') {
+      console.log('→ startPoizonSearch() 호출');
+      
+      const maxPages = parseInt(maxPagesValue, 10);
+      if (isNaN(maxPages) || maxPages < 1) {
+        alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
+        document.getElementById('maxPages').focus();
         return;
       }
       
-      console.log(`✅ 모드 확인: ${selectedMode}`);
+      startPoizonSearch(keyword, maxPages);
       
-      // ✅ 모드별 로직 분리
-      if (selectedMode === 'poizon') {
-        console.log('→ startPoizonSearch() 호출');
-        
-        const maxPages = parseInt(maxPagesValue, 10);
-        if (isNaN(maxPages) || maxPages < 1) {
-          alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
-          document.getElementById('maxPages').focus();
-          return;
-        }
-        
-        startPoizonSearch(keyword, maxPages);
-        
-      } else if (selectedMode === 'musinsa') {
-        console.log('→ startMusinsaSearch() 호출');
-        console.log('  maxPagesValue:', maxPagesValue);
-        
-        // ✅ 무신사는 maxPagesValue를 그대로 전달 (함수 내부에서 체크)
-        startMusinsaSearch(keyword, maxPagesValue);
-        
-      } else if (selectedMode === 'kream') {
-        console.log('→ 크림 모드 (비활성)');
-        alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
-        
-      } else if (selectedMode === 'compare') {
-        console.log('→ 리스트 비교 모드');
-        alert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
-        
-      } else {
-        console.error('❌ 알 수 없는 모드:', selectedMode);
-        alert('⚠️ 알 수 없는 모드입니다.');
-      }
+    } else if (selectedMode === 'musinsa') {
+      console.log('→ startMusinsaSearch() 호출');
       
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      // ✅ 파라미터 없이 호출 (함수 내부에서 musinsaKeyword, musinsaMaxItems 직접 사용)
+      startMusinsaSearch();
+      
+    } else if (selectedMode === 'kream') {
+      console.log('→ 크림 모드 (비활성)');
+      alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
+      
+    } else if (selectedMode === 'compare') {
+      console.log('→ 리스트 비교 모드');
+      alert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
+      
+    } else {
+      console.error('❌ 알 수 없는 모드:', selectedMode);
+      alert('⚠️ 알 수 없는 모드입니다.');
     }
+    
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
 
 
     // ✅ POIZON 검색 함수 (새로 분리)
-    function startPoizonSearch(keyword, maxPages) {
+  function startPoizonSearch(keyword, maxPages) {
       // 로그인 체크
       if (!isLoggedIn) {
         alert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
@@ -3096,12 +3350,10 @@
       console.log('✅ 데이터 로드 완료!');
   };
 
-  function startMusinsaSearch(keyword, maxPagesValue) {
+  function startMusinsaSearch() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🟤 startMusinsaSearch 호출');
-    console.log('  keyword:', keyword);
-    console.log('  maxPagesValue:', maxPagesValue);
-    console.log('  maxPagesValue 타입:', typeof maxPagesValue);
+    console.log('  검색 모드:', musinsaSearchMode);  // ✅ 수정
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
     // 로그인 체크
@@ -3109,17 +3361,29 @@
       alert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
       return;
     }
+
+    // ✅ 무신사 전용 입력값 가져오기
+    const keyword = document.getElementById('musinsaKeyword').value.trim();
+    const maxPagesValue = document.getElementById('musinsaMaxItems').value.trim();
+
+    // ✅ 이제 keyword 사용 가능
+    console.log('  keyword:', keyword);
+    console.log('  maxPagesValue:', maxPagesValue);
+    console.log('  maxPagesValue 타입:', typeof maxPagesValue);
     
-    // 키워드 체크
-    if (!keyword || keyword.trim() === '') {
-      alert('⚠️ 검색 키워드를 입력해주세요!');
-      return;
+    // ✅ 키워드 모드인 경우에만 키워드 체크
+    if (musinsaSearchMode === 'keyword') {
+      if (!keyword) {  // ✅ 수정: keyword 체크 추가
+        alert('⚠️ 검색 키워드를 입력해주세요!');
+        document.getElementById('musinsaKeyword').focus();  // ✅ 수정
+        return;
+      }
     }
     
     // ✅ 검색 수량 빈칸 체크
     if (!maxPagesValue || maxPagesValue.trim() === '') {
       alert('⚠️ 검색 수량을 입력해주세요!\n\n"max" = 전체 수집\n숫자 = 해당 개수만 수집');
-      document.getElementById('maxPages').focus();
+      document.getElementById('musinsaMaxItems').focus();  // ✅ 수정
       return;
     }
     
@@ -3137,7 +3401,7 @@
       const numPages = parseInt(maxPagesInput);
       if (isNaN(numPages) || numPages < 1) {
         alert('⚠️ 검색 수량은 "max" 또는 1 이상의 숫자여야 합니다!\n\n예시:\n- max (전체 수집)\n- 5 (100개 수집)\n- 10 (200개 수집)');
-        document.getElementById('maxPages').focus();
+        document.getElementById('musinsaMaxItems').focus();  // ✅ 수정
         return;
       }
       
@@ -3146,7 +3410,15 @@
     }
     
     console.log('  → 최종 targetCount:', targetCount);
-    
+
+    // ✅ 랭킹 모드는 최대 100개로 제한
+    if (musinsaSearchMode === 'ranking') {
+      if (targetCount === 'max' || targetCount > 100) {  // ✅ 수정: 1000 → 100
+        targetCount = 100;  // ✅ 수정
+        addLog('📊 랭킹 검색은 최대 100개까지 수집됩니다', 'info');  // ✅ 수정
+      }
+    }
+
     // 기존 이벤트 소스 닫기
     if (eventSource) eventSource.close();
     
@@ -3162,16 +3434,27 @@
     document.getElementById('startBtn').textContent = '🔄 무신사 검색 중...';
     document.getElementById('stopBtn').style.display = 'block';
     
-    addLog(`🟤 무신사 검색 시작: "${keyword}"`, 'info');
+    // ✅ 로그 메시지 추가
+    if (musinsaSearchMode === 'keyword') {
+      addLog(`🟤 무신사 키워드 검색: "${keyword}"`, 'info');  // ✅ 추가
+    } else {
+      addLog(`🟤 무신사 랭킹 검색 시작`, 'info');  // ✅ 추가
+    }
+    
     if (targetCount === 'max') {
       addLog(`📦 수집 모드: 전체 수집`, 'info');
     } else {
       addLog(`📦 수집 모드: ${targetCount}개`, 'info');
     }
-    
-    // ✅ SSE URL 생성 (디버깅 추가)
+
+    // ✅ SSE URL 생성 (검색 모드 추가)
     let url = `/start?mode=musinsa&skip_login=true`;
-    url += `&keyword=${encodeURIComponent(keyword)}`;
+    url += `&search_mode=${musinsaSearchMode}`;
+    
+    if (musinsaSearchMode === 'keyword' && keyword) {
+      url += `&keyword=${encodeURIComponent(keyword)}`;
+    }
+    
     url += `&max_items=${targetCount}`;
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -3179,12 +3462,25 @@
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     eventSource = new EventSource(url);
-    
+        
     eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
+    // ✅ 빈 메시지(heartbeat 등) 무시
+      if (!event.data || !event.data.trim()) {
+        console.log('⏭️ 빈 SSE 메시지 무시');
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch (e) {
+        console.warn('⚠️ SSE JSON 파싱 실패(무시):', event.data.slice(0, 200));
+        console.warn('파싱 오류:', e);
+        return;
+      }
+
       console.log('📩 무신사 SSE 이벤트:', data);
-      
+
       if (data.type === 'log') addLog(data.message, data.level || 'info');
       if (data.type === 'progress') updateProgress(data.current, data.total);
       if (data.type === 'data') {
@@ -3195,7 +3491,6 @@
       if (data.type === 'complete') {
         console.log('✅ complete 이벤트 수신!');
         addLog('✅ 무신사 검색 완료!', 'success');
-        // ✅ 수집 완료
         isCollecting = false;
 
         if (data.data && Array.isArray(data.data)) {
@@ -3204,7 +3499,7 @@
         }
 
         document.getElementById('musinsaSearchOptions').style.display = 'block';
-        document.getElementById('downloadBtn').style.display = 'block'; //엑셀다운버튼
+        document.getElementById('downloadBtn').style.display = 'block';
         document.getElementById('resetBtn').style.display = 'block';
         setModeButtonsEnabled(true);
         document.getElementById('stopBtn').style.display = 'none';
@@ -3215,11 +3510,10 @@
         eventSource = null;
       }
     };
-
     eventSource.onerror = (error) => {
       console.error('EventSource 오류:', error);
       addLog('❌ 연결 오류 발생', 'error');
-          // ✅ 수집 중단
+      // ✅ 수집 중단
       isCollecting = false;
 
       eventSource.close();
@@ -3497,6 +3791,71 @@
       addLog(`📋 업로드 리스트 표시 완료: ${products.length}개`, 'success');
     }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 무신사 검색 모드 관리
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  let musinsaSearchMode = 'keyword';  // 'keyword' 또는 'ranking'
+
+  function selectMusinsaSearchMode(mode) {
+    console.log('🟤 무신사 검색 모드 선택:', mode);
+    
+    musinsaSearchMode = mode;
+    
+     
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 요소 존재 여부 확인
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    const keywordCard = document.getElementById('musinsaKeywordCard');
+    const rankingCard = document.getElementById('musinsaRankingCard');
+    const keywordArea = document.getElementById('keywordInputArea');
+    const maxItemsArea = document.getElementById('maxItemsInputArea');
+    const musinsaMaxItems = document.getElementById('musinsaMaxItems');
+    
+    // ✅ 디버깅 로그
+    console.log('요소 확인:');
+    console.log('  keywordCard:', keywordCard);
+    console.log('  rankingCard:', rankingCard);
+    console.log('  keywordArea:', keywordArea);
+    console.log('  maxItemsArea:', maxItemsArea);
+    console.log('  musinsaMaxItems:', musinsaMaxItems);
+    
+    // ✅ 필수 요소 체크
+    if (!keywordCard || !rankingCard) {
+      console.error('❌ 검색 모드 카드를 찾을 수 없습니다!');
+      return;
+    }
+    
+    if (!keywordArea || !maxItemsArea || !musinsaMaxItems) {
+      console.error('❌ 입력 영역을 찾을 수 없습니다!');
+      return;
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 카드 활성화 상태 변경
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    keywordCard.classList.toggle('active', mode === 'keyword');
+    rankingCard.classList.toggle('active', mode === 'ranking');
+    
+    console.log('🔹 classList 조작 시작');
+    
+    try {
+      keywordCard.classList.toggle('active', mode === 'keyword');
+      console.log('✅ keywordCard 완료');
+      
+      rankingCard.classList.toggle('active', mode === 'ranking');
+      console.log('✅ rankingCard 완료');
+      
+    } catch (error) {
+      console.error('❌ classList 오류:', error);
+      console.error('  오류 발생 시점:', error.stack);
+      return;
+    }
+    
+    console.log('🔹 classList 조작 완료, 다음 단계 진행');
+
+  }
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // 엑셀 다운로드 함수
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

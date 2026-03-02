@@ -1744,3 +1744,4 @@ if __name__ == "__main__":
     print("  py -u app.py")
     print("=" * 60)
     # run()  # 자동 실행 금지! 26-02-17 04시 test
+    
