@@ -715,7 +715,7 @@
       <!-- ❌ 이 버튼 제거 또는 숨김 처리 -->
       <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
       <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
-      <a href="#" id="downloadBtn" class="download-btn">📥 엑셀 다운로드</a>
+      <button id="downloadBtn" class="download-btn" onclick="downloadExcel()">📥 엑셀 다운로드</button>
       <button id="resetBtn" class="reset-btn" onclick="resetAll()">🔄 리셋</button>
     </div>
 
@@ -1959,6 +1959,7 @@
           
           const resultSearchOpts = document.getElementById('resultSearchOptions');
           if (resultSearchOpts) resultSearchOpts.style.display = 'block';
+          document.getElementById('downloadBtn').style.display = 'block'; //엑셀 다운
           document.getElementById('resetBtn').style.display = 'block';
           setModeButtonsEnabled(true);
           document.getElementById('stopBtn').style.display = 'none';
@@ -3203,6 +3204,7 @@
         }
 
         document.getElementById('musinsaSearchOptions').style.display = 'block';
+        document.getElementById('downloadBtn').style.display = 'block'; //엑셀다운버튼
         document.getElementById('resetBtn').style.display = 'block';
         setModeButtonsEnabled(true);
         document.getElementById('stopBtn').style.display = 'none';
@@ -3447,7 +3449,7 @@
             
             // ✅ 리스트 비교 검색 옵션 바로 표시! (무신사처럼)
             document.getElementById('compareSearchOptions').style.display = 'block';
-            
+            document.getElementById('downloadBtn').style.display = 'block'; //엑셀 다운
             // ✅ 리셋 버튼 표시
             document.getElementById('resetBtn').style.display = 'block';
             
@@ -3495,7 +3497,60 @@
       addLog(`📋 업로드 리스트 표시 완료: ${products.length}개`, 'success');
     }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 엑셀 다운로드 함수
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  async function downloadExcel() {
+    if (collectedData.length === 0) {
+      alert('⚠️ 다운로드할 데이터가 없습니다!');
+      return;
+    }
+    
+    const keyword = document.getElementById('keyword').value.trim() || '검색결과';
+    
+    addLog('📥 엑셀 파일 생성 중...', 'info');
+    
+    try {
+      const response = await fetch('/download_excel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          mode: selectedMode,
+          keyword: keyword,
+          data: collectedData
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        addLog(`✅ 엑셀 파일 생성 완료: ${result.filename}`, 'success');
+        
+        // 다운로드 실행
+        const downloadUrl = `/download/${encodeURIComponent(result.filename)}`;
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = result.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        addLog(`📊 ${result.count}개 데이터 저장 완료`, 'success');
+        
+      } else {
+        addLog(`❌ 엑셀 생성 실패: ${result.error}`, 'error');
+        alert(`❌ 엑셀 생성 실패: ${result.error}`);
+      }
+      
+    } catch (error) {
+      console.error('엑셀 다운로드 오류:', error);
+      addLog(`❌ 다운로드 오류: ${error.message}`, 'error');
+      alert(`❌ 다운로드 오류: ${error.message}`);
+    }
+  }
 
  </script>
 </body>

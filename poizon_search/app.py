@@ -1,25 +1,36 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 표준 라이브러리
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import os
+import json
+import time
+import uuid
+import threading
+import queue
+from datetime import datetime
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Flask 관련
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 from flask import (
     Flask,
     render_template,
+    render_template_string,
     request,
     Response,
     send_file,
     jsonify,
-    render_template_string,
     stream_with_context
 )
-import json
-import os
-import threading
-import queue
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# openpyxl 관련
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import openpyxl
-import uuid
-import time
-from datetime import datetime
-import uuid
-import queue
-import threading
-from flask import stream_with_context
+from openpyxl.styles import Font, Alignment, PatternFill
+from openpyxl.utils import get_column_letter
+
+
 
 # 전역 변수
 kream_search_tasks = {}
@@ -1164,7 +1175,251 @@ def poizon_search_progress(task_id):
         }
     )
 
+@app.route('/download_excel', methods=['POST'])
+def download_excel():
+    """현재 테이블 그대로 엑셀 저장"""
+    try:
+        data = request.json
+        mode = data.get('mode', 'poizon')
+        keyword = data.get('keyword', '검색결과')
+        collected_data = data.get('data', [])
+        
+        if not collected_data:
+            return jsonify({'success': False, 'error': '데이터가 없습니다'})
+        
+        # 타임스탬프 생성
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # 모드별 파일명
+        mode_names = {
+            'poizon': 'POIZON',
+            'musinsa': '무신사',
+            'compare': '리스트비교',
+            'kream': '크림'
+        }
+        mode_name = mode_names.get(mode, 'DATA')
+        
+        # 파일명 생성
+        safe_keyword = keyword.replace('/', '_').replace('\\', '_')[:30]
+        filename = f"{mode_name}_{safe_keyword}_{timestamp}.xlsx"
+        
+        # ✅ outputs 디렉토리 절대 경로
+        output_dir = os.path.join(os.getcwd(), 'outputs')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        filepath = os.path.join(output_dir, filename)
+        
+        # 엑셀 생성
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "수집결과"
+        
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 모드별 헤더 설정 (테이블과 동일하게!)
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        if mode == 'compare':
+            headers = [
+                '#', '이미지', '상품번호', '제품명', '정가', '할인가', '재고',
+                '크림평균가', '크림비교', '크림판매량',
+                '중국노출가', '포이즌비교', '중국판매량', '현업자판매량'
+            ]
+            
+        elif mode == 'poizon':
+            headers = [
+                '#', '이미지', '상품번호', '제품명', '평균거래가',
+                '중국노출가', '중국판매량', '현업자판매량',
+                '크림평균가', '크림비교'
+            ]
+            
+        elif mode == 'musinsa':
+            headers = [
+                '#', '이미지', '상품번호', '제품명', '최대혜택가',
+                '크림평균가', '크림비교', '크림판매량',
+                '포이즌노출가', '포이즌비교', '중국판매량', '현업자판매량'
+            ]
+            
+        else:  # 기본
+            headers = [
+                '#', '이미지', '상품번호', '제품명', '평균거래가',
+                '중국노출가', '판매량'
+            ]
+        
+        # 헤더 작성
+        ws.append(headers)
+        
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 헤더 스타일
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        header_fill = PatternFill(start_color="667eea", end_color="667eea", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=11)
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        for col_num in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = header_alignment
+        
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 데이터 작성 (테이블과 동일하게!)
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        for idx, item in enumerate(collected_data, 1):
+            if mode == 'compare':
+                row = [
+                    idx,
+                    item.get('포이즌이미지URL', item.get('크림이미지URL', item.get('이미지URL', '-'))),
+                    item.get('엑셀_상품번호', item.get('상품번호', '-')),
+                    item.get('제품명', '-'),
+                    item.get('엑셀_정가', '-'),
+                    item.get('엑셀_할인가', '-'),
+                    item.get('엑셀_재고', '-'),
+                    item.get('크림평균가', '-'),
+                    item.get('크림비교', '-'),
+                    item.get('크림판매량', '-'),
+                    item.get('포이즌노출가', item.get('중국노출', '-')),
+                    item.get('포이즌비교', '-'),
+                    item.get('포이즌중국판매량', 0),
+                    item.get('포이즌현업자판매량', 0)
+                ]
+                
+            elif mode == 'poizon':
+                row = [
+                    idx,
+                    item.get('이미지URL', item.get('image_url', '-')),
+                    item.get('상품번호', '-'),
+                    item.get('제품명', '-'),
+                    item.get('최근30일평균거래가', '-'),
+                    item.get('중국노출', '-'),
+                    item.get('중국시장최근30일판매량', 0),
+                    item.get('현지판매자최근30일판매량', 0),
+                    item.get('크림평균가', '-'),
+                    item.get('크림비교', '-')
+                ]
+                
+            elif mode == 'musinsa':
+                row = [
+                    idx,
+                    item.get('이미지URL', item.get('image_url', '-')),
+                    item.get('product_code', '-'),
+                    item.get('name', '-'),
+                    item.get('price', '-'),
+                    item.get('크림평균가', '-'),
+                    item.get('크림비교', '-'),
+                    item.get('크림판매량', '-'),
+                    item.get('포이즌노출가', '-'),
+                    item.get('포이즌비교', '-'),
+                    item.get('포이즌중국판매량', 0),
+                    item.get('포이즌현업자판매량', 0)
+                ]
+                
+            else:  # 기본
+                row = [
+                    idx,
+                    item.get('이미지URL', item.get('image_url', '-')),
+                    item.get('상품번호', '-'),
+                    item.get('제품명', '-'),
+                    item.get('최근30일평균거래가', '-'),
+                    item.get('중국노출', '-'),
+                    item.get('중국시장최근30일판매량', 0)
+                ]
+            
+            ws.append(row)
+        
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # 열 너비 자동 조정
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        column_widths = {
+            '#': 8,
+            '이미지': 50,
+            '상품번호': 20,
+            '제품명': 30,
+            '정가': 15,
+            '할인가': 15,
+            '재고': 10,
+            '평균거래가': 15,
+            '최대혜택가': 15,
+            '중국노출가': 15,
+            '포이즌노출가': 15,
+            '크림평균가': 15,
+            '크림비교': 15,
+            '포이즌비교': 15,
+            '중국판매량': 15,
+            '현업자판매량': 15,
+            '크림판매량': 15,
+            '판매량': 15
+        }
+        
+        for col_num, header in enumerate(headers, 1):
+            col_letter = get_column_letter(col_num)
+            width = column_widths.get(header, 15)
+            ws.column_dimensions[col_letter].width = width
+        
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        # URL 하이퍼링크 추가 (이미지 열)
+        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        image_col = headers.index('이미지') + 1 if '이미지' in headers else None
+        
+        if image_col:
+            for row_num in range(2, len(collected_data) + 2):
+                cell = ws.cell(row=row_num, column=image_col)
+                url_value = cell.value
+                
+                if url_value and url_value != '-' and isinstance(url_value, str) and url_value.startswith('http'):
+                    cell.hyperlink = url_value
+                    cell.value = '🔗 이미지'
+                    cell.font = Font(color="0563C1", underline="single")
+        
+        # 저장
+        wb.save(filepath)
 
+        # ✅ 파일 저장 확인
+        if os.path.exists(filepath):
+            print(f"✅ 파일 저장 성공: {filepath}")
+            print(f"✅ 파일 크기: {os.path.getsize(filepath)} bytes")
+        else:
+            print(f"❌ 파일 저장 실패: {filepath}")
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'filepath': filepath,
+            'count': len(collected_data)
+        })
+        
+    except Exception as e:
+        print(f"엑셀 다운로드 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/download/<path:filename>')
+def download_file(filename):
+    """파일 다운로드"""
+    try:
+        # ✅ outputs 디렉토리에서 파일 찾기
+        filepath = os.path.join('outputs', filename)
+        
+        if not os.path.exists(filepath):
+            print(f"❌ 파일 없음: {filepath}")
+            return jsonify({'error': '파일을 찾을 수 없습니다'}), 404
+        
+        print(f"✅ 파일 전송: {filepath}")
+        return send_file(
+            filepath,
+            as_attachment=True,
+            download_name=filename
+        )
+        
+    except Exception as e:
+        print(f"❌ 다운로드 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 # 구글 시트 자동 동기화 시작
 try:
