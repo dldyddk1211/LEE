@@ -735,18 +735,23 @@
 
 <body>
   <div class="container">
-    <h1>🛍️ 브랜드유통 데이터  소싱</h1>
+    <h1>🛍️ 브랜드유통 데이터 소싱</h1>
     <p class="subtitle">먼저 검색 하고 싶은 사이트를 선택 하세요!</p>
 
-  <div class="login-status" id="loginStatus">
-    <h3>🚀 STEP 1: 수집 모드 선택</h3>
-    <p id="loginMessage">먼저 아래에서 수집 모드를 선택해주세요. 각 모드 선택 시 자동으로 로그인됩니다.</p>
-  </div>
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 로그인 상태 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="login-status" id="loginStatus">
+      <h3>🚀 STEP 1: 수집 모드 선택</h3>
+      <p id="loginMessage">먼저 아래에서 수집 모드를 선택해주세요. 각 모드 선택 시 자동으로 로그인됩니다.</p>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 모드 선택 버튼 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="mode-selector">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
       <div class="mode-buttons">
-        <!-- ✅ 모든 버튼에서 disabled 제거! -->
-        <!-- ✅ onclick 제거! -->
         <button class="mode-btn" id="modeKream">
           <span class="mode-icon">🛒</span>
           <span class="mode-text">크림 검색</span>
@@ -780,13 +785,52 @@
         <button class="mode-btn" id="modeSettings">
           <span class="mode-icon">⚙️</span>
           <span class="mode-text">설정</span>
-        </button>      
+        </button>
       </div>
     </div>
 
-    <div class="musinsa-search-mode" id="musinsaSearchMode" style="display:none;">
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 포이즌 전용 입력 영역 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div id="poizonInputSection" style="display:none; margin-top:20px;">
+      <div style="margin-bottom:20px;">
+        <label for="poizonKeyword" style="display:block; margin-bottom:8px; color:#333; font-weight:600;">
+          검색 키워드
+        </label>
+        <input 
+          type="text" 
+          id="poizonKeyword" 
+          placeholder="예: 나이키 덩크" 
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px;"
+        />
+        <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
+          검색할 키워드를 입력하세요
+        </div>
+      </div>
+      
+      <div>
+        <label for="poizonMaxPages" style="display:block; margin-bottom:8px; color:#333; font-weight:600;">
+          검색 페이지 수 (1페이지 10건)
+        </label>
+        <input 
+          type="number" 
+          id="poizonMaxPages" 
+          value="1" 
+          min="1"
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px;"
+        />
+        <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
+          수집할 페이지 수를 입력하세요
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 무신사 전용 입력 영역 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="musinsa-search-mode" id="musinsaSearchMode" style="display:none; margin-top:20px;">
       <h3>📊 무신사 검색 모드</h3>
-    
+
       <!-- 검색 모드 선택 카드 -->
       <div class="search-mode-grid">
         <div class="search-mode-card active" id="musinsaKeywordCard" onclick="selectMusinsaSearchMode('keyword')">
@@ -801,15 +845,15 @@
       </div>
       
       <!-- 키워드 입력 영역 -->
-      <div id="keywordInputArea" style="margin-top: 20px;">
-        <label for="musinsaKeyword" style="display:block; margin-bottom:8px; color:#333; font-weight:600; font-size:14px;">
+      <div id="musinsaKeywordInputArea" style="margin-top:20px;">
+        <label for="musinsaKeyword" style="display:block; margin-bottom:8px; color:#333; font-weight:600;">
           검색 키워드
         </label>
         <input 
           type="text" 
           id="musinsaKeyword" 
           placeholder="예: 나이키" 
-          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:16px;"
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px;"
         />
         <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
           검색할 키워드를 입력하세요
@@ -817,64 +861,77 @@
       </div>
       
       <!-- 수집 수량 영역 -->
-      <div id="maxItemsInputArea" style="margin-top: 20px;">
-        <label for="musinsaMaxItems" style="display:block; margin-bottom:8px; color:#333; font-weight:600; font-size:14px;">
-          검색 수량 (최대 = 전체)
+      <div id="musinsaMaxItemsInputArea" style="margin-top:20px;">
+        <label for="musinsaMaxItems" style="display:block; margin-bottom:8px; color:#333; font-weight:600;">
+          검색 수량
         </label>
         <input 
           type="text" 
           id="musinsaMaxItems" 
           value="max" 
           placeholder="max" 
-          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:16px;"
+          style="width:100%; padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px;"
         />
         <div class="hint" style="font-size:12px; color:#999; margin-top:6px;">
-          max = 검색 결과 전체, 숫자 = 해당 개수만 수집 (1페이지 = 20건)
+          max = 전체 수집, 숫자 = 1페이지 20 개 수집
         </div>
       </div>
     </div>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 크림 전용 입력 영역 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div id="kreamInputSection" style="display:none; margin-top:20px;">
+      <!-- 크림은 포이즌 결과에서 사용하므로 입력칸 불필요 -->
+    </div>
 
-      
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 버튼 그룹 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="button-group">
       <button id="startBtn" onclick="startCollection()" disabled>🚀 수집 시작</button>
       <label for="excelUpload" id="uploadLabel" class="upload-btn" style="display:none;">
         📤 엑셀 업로드
         <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelUpload(event)">
       </label>
-      <!-- ❌ 이 버튼 제거 또는 숨김 처리 -->
-      <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
       <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
       <button id="downloadBtn" class="download-btn" onclick="downloadExcel()">📥 엑셀 다운로드</button>
       <button id="resetBtn" class="reset-btn" onclick="resetAll()">🔄 리셋</button>
     </div>
 
-<div class="section" id="uploadListSection" style="display:none;">
-  <h3>📋 업로드 리스트 (<span id="uploadCount">0</span>개)</h3>
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>상품번호</th>
-          <th>제품명</th>
-          <th>정가</th>
-          <th>할인가</th>
-          <th>재고</th>
-        </tr>
-      </thead>
-      <tbody id="uploadTableBody"></tbody>  <!-- ✅ ID 유지 -->
-    </table>
-  </div>
-</div>
-<div class="section" id="resultSection">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
-    <h3 style="margin: 0;">
-      📋 수집 결과 (<span id="resultCount">0</span>개) 
-      <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
-    </h3>
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 업로드 리스트 섹션 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="section" id="uploadListSection" style="display:none;">
+      <h3>📋 업로드 리스트 (<span id="uploadCount">0</span>개)</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>상품번호</th>
+              <th>제품명</th>
+              <th>정가</th>
+              <th>할인가</th>
+              <th>재고</th>
+            </tr>
+          </thead>
+          <tbody id="uploadTableBody"></tbody>
+        </table>
+      </div>
+    </div>
 
-        <!-- ✅ 무신사 검색 옵션 (오른쪽 위로 이동) -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 수집 결과 섹션 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="section" id="resultSection">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
+        <h3 style="margin: 0;">
+          📋 수집 결과 (<span id="resultCount">0</span>개) 
+          <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
+        </h3>
+
+        <!-- 무신사 검색 옵션 -->
         <div id="musinsaSearchOptions" style="display: none;">
           <div class="search-options-container">
             <button id="musinsaSearchBtn" class="search-execute-btn">
@@ -896,39 +953,41 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- ✅ 리스트 비교 검색 옵션 (새로 추가!) -->
-      <div id="compareSearchOptions" style="display: none;">
-        <div class="search-options-container">
-          <button id="compareSearchBtn" class="search-execute-btn">
-            🔍 검색 시작
-          </button>
-          
-          <div class="search-divider"></div>
-          
-          <div class="search-checkboxes">
-            <label class="search-label">
-              <input type="checkbox" id="compareSearchKream" checked class="search-checkbox">
-              <span class="search-label-text">🛒 크림</span>
-            </label>
+        <!-- 리스트 비교 검색 옵션 -->
+        <div id="compareSearchOptions" style="display: none;">
+          <div class="search-options-container">
+            <button id="compareSearchBtn" class="search-execute-btn">
+              🔍 검색 시작
+            </button>
             
-            <label class="search-label">
-              <input type="checkbox" id="compareSearchPoizon" class="search-checkbox">
-              <span class="search-label-text">🟣 포이즌</span>
-            </label>
+            <div class="search-divider"></div>
+            
+            <div class="search-checkboxes">
+              <label class="search-label">
+                <input type="checkbox" id="compareSearchKream" checked class="search-checkbox">
+                <span class="search-label-text">🛒 크림</span>
+              </label>
+              
+              <label class="search-label">
+                <input type="checkbox" id="compareSearchPoizon" class="search-checkbox">
+                <span class="search-label-text">🟣 포이즌</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="table-container">
-      <table>
-        <thead id="tableHeader"></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-    <div class="table-controls">
+      <!-- 테이블 -->
+      <div class="table-container">
+        <table>
+          <thead id="tableHeader"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 페이지네이션 -->
+      <div class="table-controls">
         <span class="ctrl-label">표시 개수</span>
         <select id="pageSizeSelect">
           <option value="20" selected>20개</option>
@@ -940,6 +999,9 @@
       </div>
     </div>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 진행 상황 섹션 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="section" id="statusSection">
       <h3>📊 진행 상황</h3>
       <div class="progress-bar">
@@ -948,6 +1010,7 @@
       <div class="log" id="logBox"></div>
     </div>
   </div>
+
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1014,6 +1077,8 @@
   let kreamSearchEventSource = null;
   let kreamSearchStopped = false;
   let isCollecting = false;  // 수집 중인지 여부
+    // ✅ 무신사 검색 모드 (추가!)
+  let musinsaSearchMode = 'keyword';
 
   // ✅ safeFetch 함수 추가!
   async function safeFetch(url) {
@@ -1836,7 +1901,7 @@
       
       // 8. 업로드 버튼 숨김
       document.getElementById('uploadLabel').style.display = 'none';
-      document.getElementById('startCompareBtn').style.display = 'none';
+      //document.getElementById('startCompareBtn').style.display = 'none';
       
       // 9. 모든 모드 버튼 비활성 상태로
       document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -1869,14 +1934,12 @@
     // 공통 요소
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
-    const keywordInput = document.getElementById('keyword');
-    const maxPagesElement = document.getElementById('maxPages');
     const startBtn = document.getElementById('startBtn');
     
     // 시작 버튼 기존 모드 클래스 제거
     startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
 
-    // 검색 옵션 초기화 (모두 숨김)
+    // 검색 옵션 초기화
     const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
     if (musinsaSearchOptions) {
       musinsaSearchOptions.style.display = 'none';
@@ -1887,9 +1950,26 @@
       resultSearchOptions.style.display = 'none';
     }
     
-    // 무신사 전용 UI 요소
-    const musinsaSearchModeSection = document.getElementById('musinsaSearchMode');
-    const defaultInputGrid = document.getElementById('defaultInputGrid');
+    // ✅ 모든 입력 섹션 가져오기
+    const poizonInputSection = document.getElementById('poizonInputSection');
+    const musinsaSearchMode = document.getElementById('musinsaSearchMode');
+    const kreamInputSection = document.getElementById('kreamInputSection');
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ✅ 모든 입력 섹션 먼저 숨김 (초기화)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    if (poizonInputSection) {
+      poizonInputSection.style.display = 'none';
+    }
+    
+    if (musinsaSearchMode) {
+      musinsaSearchMode.style.display = 'none';
+    }
+    
+    if (kreamInputSection) {
+      kreamInputSection.style.display = 'none';
+    }
     
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 모드별 설정
@@ -1906,24 +1986,26 @@
       startBtnText = '🟣 포이즌 검색 시작';
       startBtnClass = 'mode-poizon';
       
-      // 무신사 섹션 숨김
-      if (musinsaSearchModeSection) {
-        musinsaSearchModeSection.style.display = 'none';
-      }
-      if (defaultInputGrid) {
-        defaultInputGrid.style.display = 'grid';
+      // ✅ 포이즌 입력 섹션만 표시
+      if (poizonInputSection) {
+        poizonInputSection.style.display = 'block';
+        console.log('✅ 포이즌 입력 섹션 표시');
       }
       
-      // 포이즌 입력 설정
-      if (maxPagesElement) {
-        maxPagesElement.value = '1';
-        maxPagesElement.type = 'number';
-        
-        const label = maxPagesElement.parentElement.querySelector('label');
-        const hint = maxPagesElement.parentElement.querySelector('.hint');
-        
-        if (label) label.textContent = '검색 페이지 수 (1페이지 10건)';
-        if (hint) hint.textContent = '접속 완료 후 설정 가능합니다';
+      // ✅ 포이즌 전용 변수
+      const poizonKeywordInput = document.getElementById('poizonKeyword');
+      const poizonMaxPagesInput = document.getElementById('poizonMaxPages');
+      
+      if (poizonKeywordInput) {
+        poizonKeywordInput.disabled = false;
+        poizonKeywordInput.value = '';
+        console.log('✅ poizonKeyword 활성화');
+      }
+
+      if (poizonMaxPagesInput) {
+        poizonMaxPagesInput.disabled = false;
+        poizonMaxPagesInput.value = '1';
+        console.log('✅ poizonMaxPages 설정');
       }
 
     } else if (mode === 'musinsa') {
@@ -1934,26 +2016,31 @@
       startBtnText = '🟤 무신사 검색 시작';
       startBtnClass = 'mode-musinsa';
       
-      // 무신사 섹션 표시
-      if (musinsaSearchModeSection) {
-        musinsaSearchModeSection.style.display = 'block';
+      // ✅ 무신사 섹션만 표시
+      if (musinsaSearchMode) {
+        musinsaSearchMode.style.display = 'block';
+        console.log('✅ 무신사 섹션 표시');
         
-        // UI가 표시된 후에 selectMusinsaSearchMode 호출
         setTimeout(() => {
           selectMusinsaSearchMode('keyword');
         }, 100);
-        
-      } else {
-        console.error('❌ musinsaSearchMode 섹션이 없습니다!');
       }
       
-      // 기본 input 숨김
-      if (defaultInputGrid) {
-        defaultInputGrid.style.display = 'none';
-      }
+      // ✅ 무신사 전용 변수
+      const musinsaKeywordInput = document.getElementById('musinsaKeyword');
+      const musinsaMaxItemsInput = document.getElementById('musinsaMaxItems');
       
-      // ✅ 무신사 모드에서는 maxPagesElement를 건드리지 않음!
-      // (무신사는 musinsaMaxItems를 사용하므로)
+      if (musinsaKeywordInput) {
+        musinsaKeywordInput.disabled = false;
+        musinsaKeywordInput.value = '';
+        console.log('✅ musinsaKeyword 활성화');
+      }
+
+      if (musinsaMaxItemsInput) {
+        musinsaMaxItemsInput.disabled = false;
+        musinsaMaxItemsInput.value = 'max';
+        console.log('✅ musinsaMaxItems 설정');
+      }
       
     } else if (mode === 'kream') {
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1963,13 +2050,7 @@
       startBtnText = '🛒 크림 검색 시작';
       startBtnClass = 'mode-kream';
       
-      // 무신사 섹션 숨김
-      if (musinsaSearchModeSection) {
-        musinsaSearchModeSection.style.display = 'none';
-      }
-      if (defaultInputGrid) {
-        defaultInputGrid.style.display = 'grid';
-      }
+      // 크림은 포이즌 결과에서 사용
       
     } else if (mode === 'compare') {
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1979,9 +2060,14 @@
       startBtnText = '📋 리스트 비교 시작';
       startBtnClass = 'mode-compare';
       
-      // 무신사 섹션 숨김
-      if (musinsaSearchModeSection) {
-        musinsaSearchModeSection.style.display = 'none';
+      // 업로드 UI 표시
+      if (startBtn) {
+        startBtn.style.display = 'none';
+      }
+      
+      const uploadLabel = document.getElementById('uploadLabel');
+      if (uploadLabel) {
+        uploadLabel.style.display = 'block';
       }
     }
     
@@ -1995,43 +2081,8 @@
       startBtn.classList.add(startBtnClass);
     }
     
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 모드별 UI 표시/숨김
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    
-
-    if (mode === 'compare') {
-      // 리스트 비교: 키워드 숨김, 업로드 버튼 표시
-      if (keywordInput) {
-        keywordInput.disabled = true;
-        if (keywordInput.parentElement) {
-          keywordInput.parentElement.style.display = 'none';
-        }
-      }
-      
-      if (startBtn) {
-        startBtn.style.display = 'none';
-      }
-      
-      const uploadLabel = document.getElementById('uploadLabel');
-      if (uploadLabel) {
-        uploadLabel.style.display = 'block';
-      }
-      
-    } else {
-      // 기타 모드: 키워드 표시, 업로드 버튼 숨김
-      if (keywordInput) {
-        keywordInput.disabled = false;
-        if (keywordInput.parentElement) {
-          keywordInput.parentElement.style.display = 'block';
-        }
-      }
-      
-      // ✅ 무신사 모드가 아닐 때만 maxPagesElement 활성화
-      if (mode !== 'musinsa' && maxPagesElement) {
-        maxPagesElement.disabled = false;
-      }
-      
+    // 비교 모드가 아니면 시작 버튼 표시
+    if (mode !== 'compare') {
       if (startBtn) {
         startBtn.style.display = 'block';
         startBtn.disabled = false;
@@ -2063,6 +2114,8 @@
     if (loginMessage) {
       if (mode === 'musinsa') {
         loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 검색 모드를 선택하고 수집을 시작하세요.`;
+      } else if (mode === 'compare') {
+        loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 엑셀 파일을 업로드해주세요.`;
       } else {
         loginMessage.textContent = `${modeName} 모드가 활성화되었습니다. 키워드를 입력하고 수집을 시작하세요.`;
       }
@@ -2072,75 +2125,57 @@
     
     if (mode === 'musinsa') {
       addLog(`💡 검색 모드를 선택하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
+    } else if (mode === 'compare') {
+      addLog(`💡 엑셀 파일을 업로드해주세요`, 'info');
     } else {
       addLog(`💡 키워드를 입력하고 "${startBtnText}" 버튼을 클릭하세요`, 'info');
     }
     
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   }
-
-  function startCollection() {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🚀 startCollection 호출');
-    console.log('현재 selectedMode:', selectedMode);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-    // ✅ 1. 먼저 요소 가져오기
-    const keywordElement = document.getElementById('keyword');
-    const maxPagesElement = document.getElementById('maxPages');
-    
-    // ✅ 2. 그 다음 값 추출
-    const keyword = keywordElement ? keywordElement.value.trim() : '';
-    const maxPagesValue = maxPagesElement ? maxPagesElement.value : '1';
-    
-    // ✅ 3. 이제 사용 가능
-    console.log('키워드:', keyword);
-    console.log('maxPagesValue:', maxPagesValue);
-    console.log('maxPagesValue 타입:', typeof maxPagesValue);
   
-      // 모드가 선택되지 않았으면 알림
-    if (!selectedMode) {
-      console.error('❌ 모드가 선택되지 않음!');
-      alert('⚠️ 먼저 수집 모드를 선택해주세요!');
-      return;
-    }
-    
-    console.log(`✅ 모드 확인: ${selectedMode}`);
-    
-    // ✅ 모드별 로직 분리
-    if (selectedMode === 'poizon') {
-      console.log('→ startPoizonSearch() 호출');
-      
-      const maxPages = parseInt(maxPagesValue, 10);
-      if (isNaN(maxPages) || maxPages < 1) {
-        alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
-        document.getElementById('maxPages').focus();
-        return;
-      }
-      
-      startPoizonSearch(keyword, maxPages);
-      
-    } else if (selectedMode === 'musinsa') {
-      console.log('→ startMusinsaSearch() 호출');
-      
-      // ✅ 파라미터 없이 호출 (함수 내부에서 musinsaKeyword, musinsaMaxItems 직접 사용)
-      startMusinsaSearch();
-      
-    } else if (selectedMode === 'kream') {
-      console.log('→ 크림 모드 (비활성)');
-      alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
-      
-    } else if (selectedMode === 'compare') {
-      console.log('→ 리스트 비교 모드');
-      alert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
-      
-    } else {
-      console.error('❌ 알 수 없는 모드:', selectedMode);
-      alert('⚠️ 알 수 없는 모드입니다.');
-    }
-    
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  function startCollection() {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🚀 startCollection 호출');
+  console.log('현재 selectedMode:', selectedMode);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  
+  // ✅ 모드가 선택되지 않았으면 알림
+  if (!selectedMode) {
+    console.error('❌ 모드가 선택되지 않음!');
+    alert('⚠️ 먼저 수집 모드를 선택해주세요!');
+    return;
   }
+  
+  console.log(`✅ 모드 확인: ${selectedMode}`);
+  
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 모드별 로직 분리
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  
+  if (selectedMode === 'poizon') {
+    console.log('→ startPoizonSearch() 호출');
+    startPoizonSearch();  // ✅ 파라미터 없음!
+    
+  } else if (selectedMode === 'musinsa') {
+    console.log('→ startMusinsaSearch() 호출');
+    startMusinsaSearch();  // ✅ 파라미터 없음!
+    
+  } else if (selectedMode === 'kream') {
+    console.log('→ 크림 모드 (비활성)');
+    alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
+    
+  } else if (selectedMode === 'compare') {
+    console.log('→ 리스트 비교 모드');
+    alert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
+    
+  } else {
+    console.error('❌ 알 수 없는 모드:', selectedMode);
+    alert('⚠️ 알 수 없는 모드입니다.');
+  }
+  
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+}
 
 
     // ✅ POIZON 검색 함수 (새로 분리)
@@ -2150,15 +2185,26 @@
         alert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
         return;
       }
+
+        // ✅ 포이즌 전용 변수 사용
+      const poizonKeyword = document.getElementById('poizonKeyword');
+      const poizonMaxPages = document.getElementById('poizonMaxPages');
       
+      const p_keyword = poizonKeyword ? poizonKeyword.value.trim() : '';
+      const p_maxPages = poizonMaxPages ? poizonMaxPages.value : '1';
+      
+      console.log('🟣 포이즌 검색:');
+      console.log('  keyword:', p_keyword);
+      console.log('  maxPages:', p_maxPages);
+
       // 키워드 체크
-      if (!keyword) {
+      if (!p_keyword) {
         alert('⚠️ 검색 키워드를 입력해주세요!');
         return;
       }
       
       // ✅ POIZON은 기존 방식 유지 (페이지 단위)
-      const numPages = parseInt(maxPages);
+      const numPages = parseInt(p_maxPages);
       if (isNaN(numPages) || numPages < 1) {
         alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
         return;
@@ -2178,11 +2224,11 @@
       document.getElementById('startBtn').textContent = '🔄 포이즌 검색 중...';
       document.getElementById('stopBtn').style.display = 'block';
       
-      addLog(`🟣 포이즌 검색 시작: "${keyword}"`, 'info');
+      addLog(`🟣 포이즌 검색 시작: "${p_keyword}"`, 'info');
       
       // SSE 시작
-      let url = `/start?mode=poizon&max_pages=${maxPages}&skip_login=true`;
-      if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+      let url = `/start?mode=poizon&max_pages=${p_maxPages}&skip_login=true`;
+      if (p_keyword) url += `&keyword=${encodeURIComponent(p_keyword)}`;
 
       eventSource = new EventSource(url);
 
@@ -3238,122 +3284,213 @@
 // 스케줄러에서 데이터 불러오기
 // ==========================================
 // ✅ 수정된 함수 (index.html의 기존 함수 교체)
-  window.loadHistoryData = function(data, keyword, mode) {
-      console.log('📋 스케줄러에서 데이터 로드:', keyword, data.length + '개');
-      console.log('📊 모드:', mode);
-      
-      // 데이터 설정
-      collectedData = data;
-      if (mode) {
-          // ✅ musinsa_kream → musinsa로 변환
-          if (mode === 'musinsa_kream') {
-              selectedMode = 'musinsa';
-          } else {
-              selectedMode = mode;
-          }
+  wwindow.loadHistoryData = function(data, keyword, mode) {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📋 스케줄러에서 데이터 로드');
+    console.log('  keyword:', keyword);
+    console.log('  mode:', mode);
+    console.log('  data 개수:', data ? data.length : 0);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 1. 데이터 검증
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    if (!data || !Array.isArray(data)) {
+      console.error('❌ 유효하지 않은 데이터:', data);
+      addLog('❌ 스케줄러 데이터 오류: 배열이 아님', 'error');
+      alert('❌ 데이터 형식이 올바르지 않습니다.');
+      return;
+    }
+    
+    if (data.length === 0) {
+      console.warn('⚠️ 빈 데이터 배열');
+      addLog('⚠️ 스케줄러 데이터가 비어있습니다', 'warning');
+      alert('⚠️ 데이터가 없습니다.');
+      return;
+    }
+    
+    console.log('✅ 데이터 검증 통과');
+    console.log('첫 번째 데이터 샘플:', data[0]);
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 2. 모드 설정
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    if (mode) {
+      // musinsa_kream → musinsa
+      if (mode === 'musinsa_kream') {
+        selectedMode = 'musinsa';
       } else {
-          // ✅ mode가 없으면 데이터 구조로 추측
-          if (data.length > 0) {
-              const firstItem = data[0];
-              
-              // 무신사 데이터 확인
-              if (firstItem.source === 'MUSINSA' || firstItem.product_code || firstItem.name) {
-                  selectedMode = 'musinsa';
-              }
-              // 포이즌 데이터 확인
-              else if (firstItem.상품번호 || firstItem.중국노출) {
-                  selectedMode = 'poizon';
-              }
-              // 리스트 비교 확인
-              else if (firstItem.엑셀_상품번호 || firstItem.포이즌_상품번호) {
-                  selectedMode = 'compare';
-              }
-              // 기본값
-              else {
-                  selectedMode = 'poizon';
-              }
-          } else {
-              selectedMode = 'poizon';
-          }
+        selectedMode = mode;
+      }
+    } else {
+      // mode가 없으면 데이터 구조로 추측
+      const firstItem = data[0];
+      
+      console.log('모드 자동 감지 시작...');
+      console.log('  firstItem keys:', Object.keys(firstItem));
+      
+      // 무신사 데이터 확인
+      if (firstItem.source === 'MUSINSA' || firstItem.product_code || firstItem.name) {
+        selectedMode = 'musinsa';
+        console.log('  → 무신사 데이터 감지');
+      }
+      // 포이즌 데이터 확인
+      else if (firstItem.상품번호 || firstItem.중국노출) {
+        selectedMode = 'poizon';
+        console.log('  → 포이즌 데이터 감지');
+      }
+      // 리스트 비교 확인
+      else if (firstItem.엑셀_상품번호 || firstItem.포이즌_상품번호) {
+        selectedMode = 'compare';
+        console.log('  → 리스트 비교 데이터 감지');
+      }
+      // 기본값
+      else {
+        selectedMode = 'poizon';
+        console.warn('  → 모드 감지 실패, 기본값(poizon) 사용');
+      }
+    }
+    
+    console.log('✅ 최종 모드:', selectedMode);
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 3. 데이터 정규화 (누락된 필드 보완)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    console.log('데이터 정규화 시작...');
+    
+    collectedData = data.map((item, index) => {
+      // 기본값 설정
+      const normalized = {
+        ...item,
+        이미지URL: item.이미지URL || item.image_url || item.포이즌이미지URL || item.크림이미지URL || '-',
+        상품번호: item.상품번호 || item.product_code || item.엑셀_상품번호 || '-',
+        제품명: item.제품명 || item.name || '-'
+      };
+      
+      // 모드별 필수 필드 보완
+      if (selectedMode === 'poizon') {
+        normalized.중국노출 = normalized.중국노출 || '-';
+        normalized.중국시장최근30일판매량 = normalized.중국시장최근30일판매량 || 0;
+        normalized.현지판매자최근30일판매량 = normalized.현지판매자최근30일판매량 || 0;
+        normalized.크림평균가 = normalized.크림평균가 || '-';
+        normalized.크림판매량 = normalized.크림판매량 || '-';
+        
+      } else if (selectedMode === 'musinsa') {
+        normalized.price = normalized.price || 0;
+        normalized.크림평균가 = normalized.크림평균가 || '-';
+        normalized.크림판매량 = normalized.크림판매량 || '-';
+        normalized.포이즌노출가 = normalized.포이즌노출가 || '-';
+        normalized.포이즌중국판매량 = normalized.포이즌중국판매량 || 0;
+        normalized.포이즌현업자판매량 = normalized.포이즌현업자판매량 || 0;
+        
+      } else if (selectedMode === 'compare') {
+        normalized.엑셀_정가 = normalized.엑셀_정가 || 0;
+        normalized.엑셀_할인가 = normalized.엑셀_할인가 || 0;
+        normalized.엑셀_재고 = normalized.엑셀_재고 || 0;
+        normalized.크림평균가 = normalized.크림평균가 || '-';
+        normalized.크림판매량 = normalized.크림판매량 || '-';
+        normalized.포이즌노출가 = normalized.포이즌노출가 || '-';
+        normalized.포이즌중국판매량 = normalized.포이즌중국판매량 || 0;
+        normalized.포이즌현업자판매량 = normalized.포이즌현업자판매량 || 0;
       }
       
-      console.log('✅ 최종 모드:', selectedMode);
-      
-      // 테이블 헤더 업데이트
+      return normalized;
+    });
+    
+    console.log('✅ 데이터 정규화 완료');
+    console.log('정규화된 첫 번째 데이터:', collectedData[0]);
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 4. 테이블 헤더 업데이트
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    try {
+      console.log('테이블 헤더 업데이트 시작...');
       updateTableHeader(selectedMode);
-      
-      // 테이블 렌더링
+      console.log('✅ 테이블 헤더 업데이트 완료');
+    } catch (error) {
+      console.error('❌ 테이블 헤더 업데이트 오류:', error);
+      addLog('❌ 테이블 헤더 오류: ' + error.message, 'error');
+      return;
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 5. 테이블 렌더링
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    try {
+      console.log('테이블 렌더링 시작...');
       currentPage = 1;
       renderTable();
-      
-      // 결과 섹션 표시
-      document.getElementById('resultSection').classList.add('active');
-      
-      // 로그 추가
-      addLog(`✅ 스케줄러에서 "${keyword}" 데이터 ${data.length}개 로드 완료`, 'success');
-      
-      // 모드 버튼 활성화
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      
-      let modeBtn;
-      if (selectedMode === 'musinsa') {
-          modeBtn = 'modeMusinsa';
-      } else if (selectedMode === 'compare') {
-          modeBtn = 'modeCompare';
-      } else {
-          modeBtn = 'modePoizon';
-      }
-      
-      document.getElementById(modeBtn).classList.add('active');
-      
-      // ✅ 시작 버튼 업데이트 (추가!)
-      const startBtn = document.getElementById('startBtn');
-      
-      // 기존 모드 클래스 제거
+      console.log('✅ 테이블 렌더링 완료');
+    } catch (error) {
+      console.error('❌ 테이블 렌더링 오류:', error);
+      console.error('오류 스택:', error.stack);
+      addLog('❌ 테이블 렌더링 오류: ' + error.message, 'error');
+      alert('❌ 테이블 표시 중 오류가 발생했습니다.\n\nConsole을 확인해주세요.');
+      return;
+    }
+    
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 6. UI 업데이트
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
+    // 결과 섹션 표시
+    document.getElementById('resultSection').classList.add('active');
+    
+    // 로그 추가
+    addLog(`✅ 스케줄러에서 "${keyword}" 데이터 ${data.length}개 로드 완료`, 'success');
+    
+    // 모드 버튼 활성화
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    
+    let modeBtn;
+    if (selectedMode === 'musinsa') {
+      modeBtn = 'modeMusinsa';
+    } else if (selectedMode === 'compare') {
+      modeBtn = 'modeCompare';
+    } else {
+      modeBtn = 'modePoizon';
+    }
+    
+    const modeBtnElement = document.getElementById(modeBtn);
+    if (modeBtnElement) {
+      modeBtnElement.classList.add('active');
+    }
+    
+    // 시작 버튼 업데이트
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) {
       startBtn.classList.remove('mode-poizon', 'mode-musinsa', 'mode-kream', 'mode-compare');
       
-      
-      // 모드별 시작 버튼 설정
       if (selectedMode === 'poizon') {
-          startBtn.textContent = '🟣 포이즌 검색 시작';
-          startBtn.classList.add('mode-poizon');
-          startBtn.style.display = 'block';
-          document.getElementById('keyword').disabled = false;
-          document.getElementById('maxPages').disabled = false;
-          
+        startBtn.textContent = '🟣 포이즌 검색 시작';
+        startBtn.classList.add('mode-poizon');
+        startBtn.style.display = 'block';
+        
       } else if (selectedMode === 'musinsa') {
-          startBtn.textContent = '🟤 무신사 검색 시작';
-          startBtn.classList.add('mode-musinsa');
-          startBtn.style.display = 'block';
-          document.getElementById('keyword').disabled = false;
-          document.getElementById('maxPages').disabled = false;
-          
+        startBtn.textContent = '🟤 무신사 검색 시작';
+        startBtn.classList.add('mode-musinsa');
+        startBtn.style.display = 'block';
+        
       } else if (selectedMode === 'compare') {
-          startBtn.textContent = '📋 리스트 비교 시작';
-          startBtn.classList.add('mode-compare');
-          startBtn.style.display = 'none';  // 리스트 비교는 시작 버튼 숨김
-          document.getElementById('keyword').disabled = true;
+        startBtn.textContent = '📋 리스트 비교 시작';
+        startBtn.classList.add('mode-compare');
+        startBtn.style.display = 'none';
       }
-      
-      // 검색 옵션 표시
-      if (selectedMode === 'poizon') {
-          document.getElementById('resultSearchOptions').style.display = 'block';
-          document.getElementById('musinsaSearchOptions').style.display = 'none';
-      } else if (selectedMode === 'musinsa') {
-          document.getElementById('musinsaSearchOptions').style.display = 'block';
-          document.getElementById('resultSearchOptions').style.display = 'none';
-      } else {
-          document.getElementById('resultSearchOptions').style.display = 'none';
-          document.getElementById('musinsaSearchOptions').style.display = 'none';
-      }
-      
-      console.log('✅ 데이터 로드 완료!');
+    }
+    
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('✅ loadHistoryData 완료!');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   };
-
   function startMusinsaSearch() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🟤 startMusinsaSearch 호출');
-    console.log('  검색 모드:', musinsaSearchMode);  // ✅ 수정
+    console.log('  검색 모드:', musinsaSearchMode);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
     // 로그인 체크
@@ -3362,46 +3499,49 @@
       return;
     }
 
-    // ✅ 무신사 전용 입력값 가져오기
-    const keyword = document.getElementById('musinsaKeyword').value.trim();
-    const maxPagesValue = document.getElementById('musinsaMaxItems').value.trim();
-
-    // ✅ 이제 keyword 사용 가능
-    console.log('  keyword:', keyword);
-    console.log('  maxPagesValue:', maxPagesValue);
-    console.log('  maxPagesValue 타입:', typeof maxPagesValue);
+    // ✅ 무신사 전용 input 요소 가져오기
+    const musinsaKeywordInput = document.getElementById('musinsaKeyword');
+    const musinsaMaxItemsInput = document.getElementById('musinsaMaxItems');
+    
+    // ✅ 값 추출
+    const keywordValue = musinsaKeywordInput ? musinsaKeywordInput.value.trim() : '';
+    const maxItemsValue = musinsaMaxItemsInput ? musinsaMaxItemsInput.value.trim() : 'max';
+      
+    console.log('🟤 무신사 검색:');
+    console.log('  musinsaSearchMode:', musinsaSearchMode);
+    console.log('  keywordValue:', keywordValue);
+    console.log('  maxItemsValue:', maxItemsValue);
     
     // ✅ 키워드 모드인 경우에만 키워드 체크
     if (musinsaSearchMode === 'keyword') {
-      if (!keyword) {  // ✅ 수정: keyword 체크 추가
+      if (!keywordValue) {
         alert('⚠️ 검색 키워드를 입력해주세요!');
-        document.getElementById('musinsaKeyword').focus();  // ✅ 수정
+        if (musinsaKeywordInput) musinsaKeywordInput.focus();
         return;
       }
     }
     
     // ✅ 검색 수량 빈칸 체크
-    if (!maxPagesValue || maxPagesValue.trim() === '') {
+    if (!maxItemsValue || maxItemsValue.trim() === '') {
       alert('⚠️ 검색 수량을 입력해주세요!\n\n"max" = 전체 수집\n숫자 = 해당 개수만 수집');
-      document.getElementById('musinsaMaxItems').focus();  // ✅ 수정
+      if (musinsaMaxItemsInput) musinsaMaxItemsInput.focus();
       return;
     }
     
-    const maxPagesInput = maxPagesValue.trim();
-    console.log('  → trim 후:', maxPagesInput);
+    console.log('  → maxItemsValue:', maxItemsValue);
     
-    // ✅ maxPagesInput 처리 (무신사 전용)
+    // ✅ maxItemsValue 처리
     let targetCount;
     
-    if (maxPagesInput.toLowerCase() === 'max') {
+    if (maxItemsValue.toLowerCase() === 'max') {
       targetCount = 'max';
       console.log('  ✅ 전체 수집 모드 (max)');
     } else {
       // 숫자인 경우
-      const numPages = parseInt(maxPagesInput);
+      const numPages = parseInt(maxItemsValue, 10);
       if (isNaN(numPages) || numPages < 1) {
         alert('⚠️ 검색 수량은 "max" 또는 1 이상의 숫자여야 합니다!\n\n예시:\n- max (전체 수집)\n- 5 (100개 수집)\n- 10 (200개 수집)');
-        document.getElementById('musinsaMaxItems').focus();  // ✅ 수정
+        if (musinsaMaxItemsInput) musinsaMaxItemsInput.focus();
         return;
       }
       
@@ -3413,9 +3553,9 @@
 
     // ✅ 랭킹 모드는 최대 100개로 제한
     if (musinsaSearchMode === 'ranking') {
-      if (targetCount === 'max' || targetCount > 100) {  // ✅ 수정: 1000 → 100
-        targetCount = 100;  // ✅ 수정
-        addLog('📊 랭킹 검색은 최대 100개까지 수집됩니다', 'info');  // ✅ 수정
+      if (targetCount === 'max' || targetCount > 100) {
+        targetCount = 100;
+        addLog('📊 랭킹 검색은 최대 100개까지 수집됩니다', 'info');
       }
     }
 
@@ -3434,11 +3574,11 @@
     document.getElementById('startBtn').textContent = '🔄 무신사 검색 중...';
     document.getElementById('stopBtn').style.display = 'block';
     
-    // ✅ 로그 메시지 추가
+    // ✅ 로그 메시지
     if (musinsaSearchMode === 'keyword') {
-      addLog(`🟤 무신사 키워드 검색: "${keyword}"`, 'info');  // ✅ 추가
+      addLog(`🟤 무신사 키워드 검색: "${keywordValue}"`, 'info');
     } else {
-      addLog(`🟤 무신사 랭킹 검색 시작`, 'info');  // ✅ 추가
+      addLog(`🟤 무신사 랭킹 검색 시작`, 'info');
     }
     
     if (targetCount === 'max') {
@@ -3447,12 +3587,12 @@
       addLog(`📦 수집 모드: ${targetCount}개`, 'info');
     }
 
-    // ✅ SSE URL 생성 (검색 모드 추가)
+    // ✅ SSE URL 생성
     let url = `/start?mode=musinsa&skip_login=true`;
     url += `&search_mode=${musinsaSearchMode}`;
     
-    if (musinsaSearchMode === 'keyword' && keyword) {
-      url += `&keyword=${encodeURIComponent(keyword)}`;
+    if (musinsaSearchMode === 'keyword' && keywordValue) {
+      url += `&keyword=${encodeURIComponent(keywordValue)}`;
     }
     
     url += `&max_items=${targetCount}`;
@@ -3464,7 +3604,7 @@
     eventSource = new EventSource(url);
         
     eventSource.onmessage = (event) => {
-    // ✅ 빈 메시지(heartbeat 등) 무시
+      // ✅ 빈 메시지 무시
       if (!event.data || !event.data.trim()) {
         console.log('⏭️ 빈 SSE 메시지 무시');
         return;
@@ -3510,10 +3650,10 @@
         eventSource = null;
       }
     };
+    
     eventSource.onerror = (error) => {
       console.error('EventSource 오류:', error);
       addLog('❌ 연결 오류 발생', 'error');
-      // ✅ 수집 중단
       isCollecting = false;
 
       eventSource.close();
@@ -3795,13 +3935,10 @@
   // 무신사 검색 모드 관리
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  let musinsaSearchMode = 'keyword';  // 'keyword' 또는 'ranking'
-
-  function selectMusinsaSearchMode(mode) {
+    function selectMusinsaSearchMode(mode) {
     console.log('🟤 무신사 검색 모드 선택:', mode);
     
-    musinsaSearchMode = mode;
-    
+    musinsaSearchMode = mode;   
      
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 요소 존재 여부 확인
@@ -3826,12 +3963,16 @@
       console.error('❌ 검색 모드 카드를 찾을 수 없습니다!');
       return;
     }
-    
-    if (!keywordArea || !maxItemsArea || !musinsaMaxItems) {
-      console.error('❌ 입력 영역을 찾을 수 없습니다!');
-      return;
+     // ✅ 입력 영역은 경고만 (체크하지 않음)
+    if (mode === 'keyword') {
+      if (!keywordArea) {
+        console.warn('⚠️ keywordArea를 찾을 수 없습니다 (계속 진행)');
+      }
+      if (!maxItemsArea) {
+        console.warn('⚠️ maxItemsArea를 찾을 수 없습니다 (계속 진행)');
+      }
     }
-    
+
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 카드 활성화 상태 변경
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

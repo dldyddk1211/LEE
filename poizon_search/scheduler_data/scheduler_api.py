@@ -151,17 +151,44 @@ def get_history():
 def get_task(task_id):
     """특정 작업 조회"""
     try:
+        print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print(f"📋 get_task 호출")
+        print(f"  task_id: {task_id}")
+        print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
         history = load_history()
         task = next((t for t in history if t['id'] == task_id), None)
         
         if task:
-            return jsonify({'success': True, 'task': task})
+            print(f"✅ 작업 찾음:")
+            print(f"  keyword: {task.get('keyword')}")
+            print(f"  mode: {task.get('mode')}")
+            print(f"  data 개수: {len(task.get('data', []))}")
+            
+            # ✅ 응답 구조 수정: task 객체를 바로 반환
+            return jsonify({
+                'success': True,
+                'task': task,           # ← 이건 그대로
+                'keyword': task.get('keyword'),   # ✅ 최상위에도 추가
+                'mode': task.get('mode'),         # ✅ 최상위에도 추가
+                'data': task.get('data', [])      # ✅ 최상위에도 추가
+            })
         else:
-            return jsonify({'success': False, 'error': '작업을 찾을 수 없습니다'}), 404
+            print(f"❌ 작업을 찾을 수 없음: {task_id}")
+            return jsonify({
+                'success': False, 
+                'error': '작업을 찾을 수 없습니다'
+            }), 404
             
     except Exception as e:
-        print(f"작업 조회 오류: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"❌ 작업 조회 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        return jsonify({
+            'success': False, 
+            'error': str(e)
+        }), 500
 
 
 @scheduler_bp.route('/delete/<task_id>', methods=['POST'])

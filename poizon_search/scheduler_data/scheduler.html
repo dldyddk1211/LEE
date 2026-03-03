@@ -579,47 +579,83 @@
         // ==========================================
         async function viewTaskData(taskId) {
             try {
-                console.log('📋 작업 데이터 불러오기:', taskId);
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📋 viewTaskData 호출');
+                console.log('  taskId:', taskId);
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
                 const response = await fetch(`/api/scheduler/task/${taskId}`);
+                
+                console.log('📡 서버 응답:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
                 const result = await response.json();
-
-                // ✅ 디버깅 로그 추가 (이 부분이 없었음!)
-                console.log('━━━━━━━━━━━━━━━━━━━━');
-                console.log('🔍 스케줄러 응답 데이터:');
-                console.log('  전체:', result);
+                
+                console.log('📦 결과 전체:', result);
+                console.log('  success:', result.success);
                 console.log('  task:', result.task);
-                console.log('  keyword:', result.task?.keyword);
-                console.log('  mode:', result.task?.mode);  // ⬅️ mode 값 확인!
-                console.log('  data 개수:', result.task?.data?.length);
-                console.log('━━━━━━━━━━━━━━━━━━━━');
-                        
-                if (result.success && result.task) {
-                    // opener를 통해 메인 창에 데이터 전달
-                    if (window.opener && window.opener.loadHistoryData) {
-                         // ✅ mode 전달 확인 로그 추가
-                        console.log('📤 메인 페이지로 데이터 전달:');
-                        console.log('  data:', result.task.data.length + '개');
-                        console.log('  keyword:', result.task.keyword);
-                        console.log('  mode:', result.task.mode);
-                       
-                        window.opener.loadHistoryData(
-                            result.task.data, 
-                            result.task.keyword, 
-                            result.task.mode  // ⬅️ 이 줄 추가!
-                        );
-                        alert(`✅ "${result.task.keyword}" 데이터를 메인 화면에 불러왔습니다!`);
-                        window.close();
-                    } else {
-                        alert('⚠️ 메인 창을 찾을 수 없습니다. 창을 다시 열어주세요.');
+                
+                if (result.success) {
+                    // ✅ 방법 1: 최상위에서 직접 가져오기 (백엔드 수정 후)
+                    let keyword = result.keyword;
+                    let mode = result.mode;
+                    let data = result.data;
+                    
+                    // ✅ 방법 2: task 객체에서 가져오기 (백업)
+                    if (!keyword && result.task) {
+                        keyword = result.task.keyword;
+                        mode = result.task.mode;
+                        data = result.task.data;
                     }
+                    
+                    console.log('📊 추출된 데이터:');
+                    console.log('  keyword:', keyword);
+                    console.log('  mode:', mode);
+                    console.log('  data 개수:', data ? data.length : 0);
+                    
+                    // ✅ 검증
+                    if (!data || !Array.isArray(data)) {
+                        throw new Error('데이터가 배열이 아닙니다');
+                    }
+                    
+                    if (!keyword) {
+                        throw new Error('키워드가 없습니다');
+                    }
+                    
+                    // ✅ window.opener 확인
+                    if (window.opener && window.opener.loadHistoryData) {
+                        console.log('→ window.opener.loadHistoryData 호출');
+                        
+                        window.opener.loadHistoryData(data, keyword, mode);
+                        
+                        alert(`✅ "${keyword}" 데이터를 메인 화면에 불러왔습니다!`);
+                        
+                        // ✅ 창 닫기
+                        setTimeout(() => {
+                            window.close();
+                        }, 500);
+                        
+                    } else {
+                        throw new Error('메인 창을 찾을 수 없습니다. 창을 다시 열어주세요.');
+                    }
+                    
                 } else {
                     throw new Error(result.error || '데이터를 찾을 수 없습니다');
                 }
                 
             } catch (error) {
-                console.error('❌ 데이터 로드 실패:', error);
-                alert('데이터를 불러올 수 없습니다: ' + error.message);
+                console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.error('❌ viewTaskData 오류:');
+                console.error('  taskId:', taskId);
+                console.error('  오류:', error);
+                console.error('  스택:', error.stack);
+                console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                
+                alert('데이터를 불러올 수 없습니다:\n\n' + error.message);
             }
         }
         

@@ -34,10 +34,27 @@ from openpyxl.utils import get_column_letter
 
 
 
-# 전역 변수
-kream_search_tasks = {}
-kream_search = None
-musinsa_search = None  # ✅ 전역 변수 추가
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 전역 변수 선언 ✅ 여기!
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# POIZON
+browser = None
+page = None
+context = None
+
+# 무신사 ✅
+musinsa_browser = None
+musinsa_page = None
+musinsa_context = None
+
+# 크림 ✅
+kream_browser = None
+kream_page = None
+kream_context = None
+
+# 기타
+log_queue = queue.Queue()
 
 
 # kream_search 모듈 import
@@ -577,7 +594,7 @@ def start_search():
             max_pages = 1
     except ValueError:
         max_pages = 1
-    
+
     # ✅ max_items 처리 (무신사용)
     max_items_str = request.args.get('max_items', 'max')
     if max_items_str == 'max':
@@ -592,9 +609,10 @@ def start_search():
     print(f"📡 /start 라우트 호출:")
     print(f"  mode: {mode}")
     print(f"  keyword: {keyword}")
-    print(f"  search_mode: {search_mode}")  # ✅ 추가
+    print(f"  search_mode: {search_mode}")
     print(f"  max_pages: {max_pages}")
     print(f"  max_items: {max_items} (타입: {type(max_items)})")
+    print(f"  skip_login: {skip_login}")
     print(f"{'='*60}\n")
     
     # mode 처리
@@ -605,51 +623,93 @@ def start_search():
     while not log_queue.empty():
         log_queue.get()
     
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # 모드별 처리
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
     if mode == 'poizon':
         # POIZON 검색 (max_pages 사용)
+        print(f"🟣 POIZON 스레드 시작: keyword={keyword}, max_pages={max_pages}")
         thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
         thread.daemon = True
         thread.start()
         
     elif mode == 'musinsa':
         # ✅ 무신사 검색 (search_mode 파라미터 추가!)
-        thread = threading.Thread(
-            target=run_musinsa_search, 
-            args=(keyword, max_items, search_mode)  # ✅ search_mode 추가!
-        )
-        thread.daemon = True
-        thread.start()
+        print(f"🟤 무신사 스레드 시작: search_mode={search_mode}, keyword={keyword}, max_items={max_items}")
+        
+        # ✅ 무신사 브라우저 존재 확인
+        global musinsa_browser, musinsa_page
+        
+        if not musinsa_browser or not musinsa_page:
+            print("❌ 무신사 브라우저가 없습니다!")
+            log_queue.put({
+                'type': 'error',
+                'message': '❌ 무신사 브라우저가 없습니다. 모드를 다시 선택해주세요.'
+            })
+            # ✅ 여기서 바로 generate() 호출하면 안 됨! 아래로 계속 진행
+        else:
+            # ✅ 브라우저가 있으면 스레드 시작
+            thread = threading.Thread(
+                target=run_musinsa_search, 
+                args=(keyword, max_items, search_mode)  # ✅ search_mode 추가!
+            )
+            thread.daemon = True
+            thread.start()
         
     elif mode == 'kream':
+        print("🛒 크림 모드 (준비 중)")
         log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
         
     else:
         # 기본: POIZON
+        print(f"⚠️ 알 수 없는 모드 '{mode}' → POIZON으로 처리")
         thread = threading.Thread(target=run_scraper, args=(keyword, max_pages, skip_login))
         thread.daemon = True
         thread.start()
     
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    # SSE 이벤트 생성
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    
     def generate():
         """SSE 이벤트 생성"""
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        print("📡 SSE generate 시작")
+        print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        
         try:
+            event_count = 0
+            
             while True:
                 try:
+                    # ✅ 1초 타임아웃으로 큐에서 데이터 가져오기
                     data = log_queue.get(timeout=1)
+                    event_count += 1
+                    
+                    print(f"📩 [{event_count}] SSE 이벤트: {data.get('type', 'unknown')}")
                     
                     # ✅ complete 이벤트일 때 mode 정보 추가
                     if data.get('type') == 'complete':
                         data['mode'] = mode
+                        print(f"  ✅ complete 이벤트 (mode: {mode})")
                     
-                    yield f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+                    # ✅ JSON 직렬화
+                    json_data = json.dumps(data, ensure_ascii=False)
+                    yield f"data: {json_data}\n\n"
                     
+                    # ✅ complete 또는 error면 종료
                     if data.get('type') in ['complete', 'error']:
+                        print(f"  🔚 SSE 스트림 종료 (type: {data.get('type')})")
                         break
                         
                 except queue.Empty:
-                    # ✅ heartbeat는 주석으로 (message 이벤트 발생 안 함)
-                    yield f": ping\n\n"
+                    # ✅ heartbeat (주석으로 처리)
+                    yield ": ping\n\n"
                     
+        except GeneratorExit:
+            print("⚠️ SSE 클라이언트 연결 종료 (GeneratorExit)")
+            
         except Exception as e:
             print(f"❌ SSE generate 오류: {e}")
             import traceback
@@ -659,12 +719,25 @@ def start_search():
                 'type': 'error',
                 'message': f'서버 오류: {str(e)}'
             }
-            yield f": ping\n\n"
+            
+            try:
+                json_data = json.dumps(error_msg, ensure_ascii=False)
+                yield f"data: {json_data}\n\n"
+            except:
+                # JSON 직렬화도 실패하면 최소한의 텍스트만
+                yield f"data: {{'type':'error','message':'서버 오류'}}\n\n"
+        
+        finally:
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("📡 SSE generate 종료")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     
+    # ✅ Response 생성
     response = Response(generate(), mimetype='text/event-stream')
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['X-Accel-Buffering'] = 'no'
-    response.headers['Connection'] = 'keep-alive'  # ✅ 추가
+    response.headers['Connection'] = 'keep-alive'
+    
     return response
 
 @app.route('/upload_excel', methods=['POST'])
