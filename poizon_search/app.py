@@ -368,28 +368,12 @@ def run_comparison(products):
 # 무신사 검색 실행 함수
 # ==========================================
 
-def run_musinsa_search(keyword, max_items, search_mode='keyword'):
-    """
-    무신사 검색 실행 (스레드용)
+def run_musinsa_search(keyword, max_items):
+    """무신사 검색 실행 (스레드)"""
+    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
     
-    Args:
-        keyword: 검색 키워드 (search_mode='keyword'일 때만 사용)
-        max_items: 수집 개수
-        search_mode: 'keyword' 또는 'ranking'
-    """
-    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items, musinsa_stop_flag
-    musinsa_stop_flag = False
-    
-    # ✅ 즉시 테스트 메시지 전송
-    log_queue.put({
-        'type': 'log',
-        'message': '🟤 run_musinsa_search 시작됨!',
-        'level': 'info'
-    })
-
     print(f"\n{'='*60}")
     print(f"🟤 run_musinsa_search 시작")
-    print(f"  search_mode: {search_mode}")
     print(f"  keyword: {keyword}")
     print(f"  max_items: {max_items}")
     print(f"  max_items 타입: {type(max_items)}")
@@ -400,7 +384,6 @@ def run_musinsa_search(keyword, max_items, search_mode='keyword'):
     work_start_time = time_module.time()
     work_type = 'musinsa'
     
-    # max_items 처리
     if max_items == 'max':
         estimated_items = 1000
     else:
@@ -413,28 +396,10 @@ def run_musinsa_search(keyword, max_items, search_mode='keyword'):
     stop_flag = False
     
     try:
-        # 검색 모드에 따른 로그 메시지
-        if search_mode == 'keyword':
-            log_queue.put({
-                'type': 'log',
-                'message': f'🔍 무신사 키워드 검색: "{keyword}"',
-                'level': 'info'
-            })
-        else:
-            log_queue.put({
-                'type': 'log',
-                'message': '📈 무신사 랭킹 검색 시작',
-                'level': 'info'
-            })
-        
-        # ✅ asyncio.run으로 search_musinsa 호출 (callback 추가)
-        result = asyncio.run(
-            musinsa_search.search_musinsa(
-                keyword=keyword if search_mode == 'keyword' else None,
-                max_items=max_items,
-                search_mode=search_mode,
-                callback=log_callback  # ✅ 추가!
-            )
+        result = musinsa_search.search_musinsa_keyword_detail(
+            keyword=keyword,
+            max_items=max_items,
+            callback=log_callback
         )
         
         print(f"\n{'='*60}")
@@ -443,57 +408,43 @@ def run_musinsa_search(keyword, max_items, search_mode='keyword'):
         print(f"  수집 개수: {result.get('total_items', 0)}")
         print(f"{'='*60}\n")
         
-        if not musinsa_stop_flag:
-            if result.get('success'):
-                # 스케줄러에 저장
-                try:
-                    end_time = time_module.time()
-                    duration_seconds = int(end_time - work_start_time)
-                    
-                    task_data = {
-                        'keyword': f'무신사_{"랭킹" if search_mode == "ranking" else keyword}',
-                        'mode': 'musinsa',
-                        'collected_count': result.get('total_items', 0),
-                        'kream_count': 0,
-                        'duration_seconds': duration_seconds,
-                        'data': result.get('results', [])
-                    }
-                    
-                    task_id = save_task_to_history(task_data)
-                    if task_id:
-                        print(f"💾 스케줄러 저장 완료: {task_id}")
-                    else:
-                        print(f"⚠️ 스케줄러 저장 실패")
-                        
-                except Exception as e:
-                    print(f"⚠️ 스케줄러 저장 오류: {e}")
-                    import traceback
-                    traceback.print_exc()
-                
-                # 완료 로그
-                log_queue.put({
-                    'type': 'log',
-                    'message': f'✅ 무신사 검색 완료: {result.get("total_items", 0)}개',
-                    'level': 'success'
-                })
-                
-                # 검색 완료 메시지
-                log_queue.put({
-                    'type': 'complete',
-                    'total_items': result.get('total_items', 0),
+        if result.get('success'):
+            try:
+                end_time = time_module.time()
+                duration_seconds = int(end_time - work_start_time)
+                task_data = {
+                    'keyword': f'무신사_{keyword}',
+                    'mode': 'musinsa',
+                    'collected_count': result.get('total_items', 0),
+                    'kream_count': 0,
+                    'duration_seconds': duration_seconds,
                     'data': result.get('results', [])
-                })
-            else:
-                log_queue.put({
-                    'type': 'error',
-                    'message': result.get('error', '알 수 없는 오류')
-                })
+                }
+                task_id = save_task_to_history(task_data)
+                if task_id:
+                    print(f"💾 스케줄러 저장 완료: {task_id}")
+                else:
+                    print(f"⚠️ 스케줄러 저장 실패")
+            except Exception as e:
+                print(f"⚠️ 스케줄러 저장 오류: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            log_queue.put({
+                'type': 'complete',
+                'total_items': result.get('total_items', 0),
+                'data': result.get('results', [])
+            })
+        else:
+            log_queue.put({
+                'type': 'error',
+                'message': result.get('error', '알 수 없는 오류')
+            })
             
     except Exception as e:
         print(f"\n❌ run_musinsa_search 오류: {e}")
         import traceback
         traceback.print_exc()
-        
         if not stop_flag:
             log_queue.put({
                 'type': 'error',
@@ -635,28 +586,11 @@ def start_search():
         thread.start()
         
     elif mode == 'musinsa':
-        # ✅ 무신사 검색 (search_mode 파라미터 추가!)
-        print(f"🟤 무신사 스레드 시작: search_mode={search_mode}, keyword={keyword}, max_items={max_items}")
-        
-        # ✅ 무신사 브라우저 존재 확인
-        global musinsa_browser, musinsa_page
-        
-        if not musinsa_browser or not musinsa_page:
-            print("❌ 무신사 브라우저가 없습니다!")
-            log_queue.put({
-                'type': 'error',
-                'message': '❌ 무신사 브라우저가 없습니다. 모드를 다시 선택해주세요.'
-            })
-            # ✅ 여기서 바로 generate() 호출하면 안 됨! 아래로 계속 진행
-        else:
-            # ✅ 브라우저가 있으면 스레드 시작
-            thread = threading.Thread(
-                target=run_musinsa_search, 
-                args=(keyword, max_items, search_mode)  # ✅ search_mode 추가!
-            )
-            thread.daemon = True
-            thread.start()
-        
+        # ✅ 무신사 검색 (브라우저는 musinsa_search 모듈 내부에서 관리)
+        print(f"🟤 무신사 스레드 시작: keyword={keyword}, max_items={max_items}")
+        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items))
+        thread.daemon = True
+        thread.start()
     elif mode == 'kream':
         print("🛒 크림 모드 (준비 중)")
         log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
@@ -704,7 +638,7 @@ def start_search():
                         break
                         
                 except queue.Empty:
-                    # ✅ heartbeat (주석으로 처리)
+                    # ✅ heartbeat
                     yield ": ping\n\n"
                     
         except GeneratorExit:
@@ -724,7 +658,6 @@ def start_search():
                 json_data = json.dumps(error_msg, ensure_ascii=False)
                 yield f"data: {json_data}\n\n"
             except:
-                # JSON 직렬화도 실패하면 최소한의 텍스트만
                 yield f"data: {{'type':'error','message':'서버 오류'}}\n\n"
         
         finally:
@@ -839,7 +772,7 @@ def shutdown_kream_browser():
         return jsonify({'success': True}), 200
     except Exception as e:
         print(f"⚠️ 크림 브라우저 종료 오류 (무시): {e}")
-        return jsonify({'success': True}), 200  # ⬅️ 핵심!
+        return jsonify({'success': True}), 200
 
 @app.route('/shutdown_browser')
 def shutdown_browser():
@@ -849,7 +782,7 @@ def shutdown_browser():
         return jsonify({'success': True, 'message': 'POIZON 브라우저 종료 완료'}), 200
     except Exception as e:
         print(f"⚠️ POIZON 브라우저 종료 중 오류 (무시): {e}")
-        return jsonify({'success': True, 'message': '이미 종료됨 또는 오류 무시'}), 200  # ✅ 200 반환!
+        return jsonify({'success': True, 'message': '이미 종료됨 또는 오류 무시'}), 200
 
 @app.route('/stop', methods=['POST'])
 def stop():
@@ -881,7 +814,6 @@ def kream_popup():
     """크림 검색 팝업 (자동 시작 지원)"""
     session_id = request.args.get('session_id', None)
     
-    # 세션 ID가 있으면 자동 검색
     if session_id and hasattr(app, 'kream_search_sessions'):
         if session_id in app.kream_search_sessions:
             product_codes = app.kream_search_sessions[session_id]['product_codes']
@@ -933,10 +865,8 @@ def start_kream_search():
         if not product_codes:
             return jsonify({'success': False, 'error': '상품 코드가 없습니다'})
         
-        # Task ID 생성
         task_id = str(uuid.uuid4())
         
-        # 글로벌 딕셔너리에 작업 등록
         if not hasattr(app, 'kream_tasks'):
             app.kream_tasks = {}
         
@@ -955,9 +885,6 @@ def start_kream_search():
         return jsonify({'success': False, 'error': str(e)}), 500
     
 
-
-
-# /stop_kream_search 함수 바로 아래에 추가:
 @app.route('/kream_search_progress/<task_id>')
 def kream_search_progress(task_id):
     """크림 검색 진행 상황 SSE"""
@@ -970,10 +897,8 @@ def kream_search_progress(task_id):
     task = app.kream_tasks[task_id]
     product_codes = task['product_codes']
     
-    # ✅ 진행 상황 큐 생성
     progress_queue = queue.Queue()
     
-    # ✅ 백그라운드 스레드 시작
     def run_background():
         try:
             kream_search.background_kream_search(task_id, product_codes, progress_queue)
@@ -987,29 +912,23 @@ def kream_search_progress(task_id):
     thread.daemon = True
     thread.start()
     
-    # ✅ SSE 스트림
     def generate():
         try:
             while True:
                 try:
-                    # 큐에서 메시지 가져오기 (30초 타임아웃)
                     msg = progress_queue.get(timeout=30)
                     
                     event_type = msg.get('event', 'message')
                     event_data = msg.get('data', {})
                     
-                    # SSE 형식으로 전송
                     yield f"event: {event_type}\ndata: {json.dumps(event_data, ensure_ascii=False)}\n\n"
                     
-                    # 완료 또는 에러 시 종료
                     if event_type in ['complete', 'error']:
-                        # Task 삭제
                         if task_id in app.kream_tasks:
                             del app.kream_tasks[task_id]
                         break
                     
                 except queue.Empty:
-                    # 타임아웃 시 핑 전송
                     yield f"event: ping\ndata: {json.dumps({'status': 'alive'})}\n\n"
                     
         except Exception as e:
@@ -1138,7 +1057,7 @@ def shutdown_musinsa_browser():
         return jsonify({'success': True}), 200
     except Exception as e:
         print(f"⚠️ 무신사 브라우저 종료 오류 (무시): {e}")
-        return jsonify({'success': True}), 200  # ⬅️ 핵심!
+        return jsonify({'success': True}), 200
 
 
 # ✅ 무신사 로그인 라우트 추가
@@ -1223,10 +1142,8 @@ def start_poizon_search():
         if not product_codes:
             return jsonify({'success': False, 'error': '상품번호가 없습니다'}), 400
         
-        # Task ID 생성
         task_id = str(uuid.uuid4())
         
-        # 글로벌 딕셔너리에 작업 등록
         if not hasattr(app, 'poizon_tasks'):
             app.poizon_tasks = {}
         
@@ -1262,7 +1179,6 @@ def poizon_search_progress(task_id):
     product_codes = task['product_codes']
     progress_queue = task['queue']
     
-    # 백그라운드 스레드 시작
     def run_background():
         try:
             from poizon_data import poizon_search
@@ -1277,7 +1193,6 @@ def poizon_search_progress(task_id):
     thread.daemon = True
     thread.start()
     
-    # SSE 스트림
     def generate():
         try:
             while True:
@@ -1325,10 +1240,8 @@ def download_excel():
         if not collected_data:
             return jsonify({'success': False, 'error': '데이터가 없습니다'})
         
-        # 타임스탬프 생성
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # 모드별 파일명
         mode_names = {
             'poizon': 'POIZON',
             'musinsa': '무신사',
@@ -1337,24 +1250,17 @@ def download_excel():
         }
         mode_name = mode_names.get(mode, 'DATA')
         
-        # 파일명 생성
         safe_keyword = keyword.replace('/', '_').replace('\\', '_')[:30]
         filename = f"{mode_name}_{safe_keyword}_{timestamp}.xlsx"
         
-        # ✅ outputs 디렉토리 절대 경로
         output_dir = os.path.join(os.getcwd(), 'outputs')
         os.makedirs(output_dir, exist_ok=True)
         
         filepath = os.path.join(output_dir, filename)
         
-        # 엑셀 생성
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "수집결과"
-        
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        # 모드별 헤더 설정 (테이블과 동일하게!)
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         if mode == 'compare':
             headers = [
@@ -1362,33 +1268,25 @@ def download_excel():
                 '크림평균가', '크림비교', '크림판매량',
                 '중국노출가', '포이즌비교', '중국판매량', '현업자판매량'
             ]
-            
         elif mode == 'poizon':
             headers = [
                 '#', '이미지', '상품번호', '제품명', '평균거래가',
                 '중국노출가', '중국판매량', '현업자판매량',
                 '크림평균가', '크림비교'
             ]
-            
         elif mode == 'musinsa':
             headers = [
                 '#', '이미지', '상품번호', '제품명', '최대혜택가',
                 '크림평균가', '크림비교', '크림판매량',
                 '포이즌노출가', '포이즌비교', '중국판매량', '현업자판매량'
             ]
-            
-        else:  # 기본
+        else:
             headers = [
                 '#', '이미지', '상품번호', '제품명', '평균거래가',
                 '중국노출가', '판매량'
             ]
         
-        # 헤더 작성
         ws.append(headers)
-        
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        # 헤더 스타일
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         header_fill = PatternFill(start_color="667eea", end_color="667eea", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF", size=11)
@@ -1399,10 +1297,6 @@ def download_excel():
             cell.fill = header_fill
             cell.font = header_font
             cell.alignment = header_alignment
-        
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        # 데이터 작성 (테이블과 동일하게!)
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         for idx, item in enumerate(collected_data, 1):
             if mode == 'compare':
@@ -1422,7 +1316,6 @@ def download_excel():
                     item.get('포이즌중국판매량', 0),
                     item.get('포이즌현업자판매량', 0)
                 ]
-                
             elif mode == 'poizon':
                 row = [
                     idx,
@@ -1436,7 +1329,6 @@ def download_excel():
                     item.get('크림평균가', '-'),
                     item.get('크림비교', '-')
                 ]
-                
             elif mode == 'musinsa':
                 row = [
                     idx,
@@ -1452,8 +1344,7 @@ def download_excel():
                     item.get('포이즌중국판매량', 0),
                     item.get('포이즌현업자판매량', 0)
                 ]
-                
-            else:  # 기본
+            else:
                 row = [
                     idx,
                     item.get('이미지URL', item.get('image_url', '-')),
@@ -1466,39 +1357,19 @@ def download_excel():
             
             ws.append(row)
         
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        # 열 너비 자동 조정
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        
         column_widths = {
-            '#': 8,
-            '이미지': 50,
-            '상품번호': 20,
-            '제품명': 30,
-            '정가': 15,
-            '할인가': 15,
-            '재고': 10,
-            '평균거래가': 15,
-            '최대혜택가': 15,
-            '중국노출가': 15,
-            '포이즌노출가': 15,
-            '크림평균가': 15,
-            '크림비교': 15,
-            '포이즌비교': 15,
-            '중국판매량': 15,
-            '현업자판매량': 15,
-            '크림판매량': 15,
-            '판매량': 15
+            '#': 8, '이미지': 50, '상품번호': 20, '제품명': 30,
+            '정가': 15, '할인가': 15, '재고': 10,
+            '평균거래가': 15, '최대혜택가': 15,
+            '중국노출가': 15, '포이즌노출가': 15,
+            '크림평균가': 15, '크림비교': 15, '포이즌비교': 15,
+            '중국판매량': 15, '현업자판매량': 15, '크림판매량': 15, '판매량': 15
         }
         
         for col_num, header in enumerate(headers, 1):
             col_letter = get_column_letter(col_num)
             width = column_widths.get(header, 15)
             ws.column_dimensions[col_letter].width = width
-        
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        # URL 하이퍼링크 추가 (이미지 열)
-        # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         
         image_col = headers.index('이미지') + 1 if '이미지' in headers else None
         
@@ -1512,13 +1383,10 @@ def download_excel():
                     cell.value = '🔗 이미지'
                     cell.font = Font(color="0563C1", underline="single")
         
-        # 저장
         wb.save(filepath)
 
-        # ✅ 파일 저장 확인
         if os.path.exists(filepath):
             print(f"✅ 파일 저장 성공: {filepath}")
-            print(f"✅ 파일 크기: {os.path.getsize(filepath)} bytes")
         else:
             print(f"❌ 파일 저장 실패: {filepath}")
         
@@ -1535,12 +1403,11 @@ def download_excel():
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/download/<path:filename>')
+@app.route('/download/<filename>')
 def download_file(filename):
     """파일 다운로드"""
     try:
-        # ✅ outputs 디렉토리에서 파일 찾기
-        filepath = os.path.join('outputs', filename)
+        filepath = os.path.join(os.getcwd(), 'outputs', filename)
         
         if not os.path.exists(filepath):
             print(f"❌ 파일 없음: {filepath}")
@@ -1560,9 +1427,6 @@ def download_file(filename):
         return jsonify({'error': str(e)}), 500
 
 
-
-
-
 # 구글 시트 자동 동기화 시작
 try:
     from inventory_data.sheets_sync import sync_once, start_sync_background
@@ -1580,5 +1444,5 @@ if __name__ == '__main__':
         debug=True, 
         host='0.0.0.0', 
         port=3001,
-        use_reloader=False  # ← 이게 핵심! 재시작 시 포트 충돌 방지
+        use_reloader=False  # ← 재시작 시 포트 충돌 방지
     )
