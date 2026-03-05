@@ -5,6 +5,7 @@
 import os
 import json
 import uuid
+import sqlite3
 from datetime import datetime
 from flask import Blueprint, request, jsonify, send_file
 
@@ -14,12 +15,78 @@ FORMS_DATA_DIR     = os.path.dirname(os.path.abspath(__file__))
 FORMS_HTML         = os.path.join(FORMS_DATA_DIR, 'forms.html')
 CUSTOMERS_FILE     = os.path.join(FORMS_DATA_DIR, 'customers.json')
 INVOICE_OUTPUT_DIR = os.path.join(FORMS_DATA_DIR, 'invoices')
+DB_PATH            = os.path.join(FORMS_DATA_DIR, 'invoices.db')
 
 def _ensure_dirs():
     os.makedirs(FORMS_DATA_DIR, exist_ok=True)
     os.makedirs(INVOICE_OUTPUT_DIR, exist_ok=True)
 
+def _get_db():
+    """SQLite 연결 반환 (없으면 테이블 자동 생성)"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS invoices (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            trade_date  TEXT NOT NULL,
+            memo        TEXT,
+            buyer_company TEXT,
+            buyer_name  TEXT,
+            buyer_bizno TEXT,
+            buyer_tel   TEXT,
+            buyer_addr  TEXT,
+            buyer_biztype TEXT,
+            buyer_bizitem TEXT,
+            total_amount INTEGER DEFAULT 0,
+            deposit      INTEGER DEFAULT 0,
+            balance      INTEGER DEFAULT 0,
+            receiver     TEXT,
+            filename     TEXT,
+            products_json TEXT,
+            created_at  TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    return conn
+
+def _save_invoice_to_db(d, filename):
+    """거래명세서 데이터를 DB에 저장"""
+    try:
+        buyer    = d.get('buyer', {})
+        products = d.get('products', [])
+        conn = _get_db()
+        conn.execute("""
+            INSERT INTO invoices
+              (trade_date, memo, buyer_company, buyer_name, buyer_bizno,
+               buyer_tel, buyer_addr, buyer_biztype, buyer_bizitem,
+               total_amount, deposit, balance, receiver, filename,
+               products_json, created_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (
+            d.get('date',''),
+            d.get('memo',''),
+            buyer.get('company',''),
+            buyer.get('name',''),
+            buyer.get('bizno',''),
+            buyer.get('tel',''),
+            buyer.get('addr',''),
+            buyer.get('biztype',''),
+            buyer.get('bizitem',''),
+            d.get('totalAmount', 0),
+            d.get('deposit', 0),
+            d.get('balance', 0),
+            d.get('receiver',''),
+            filename,
+            json.dumps(products, ensure_ascii=False),
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f'DB 저장 오류: {e}')
+
 _ensure_dirs()
+_get_db().close()  # DB 및 테이블 초기화
 
 def _load_customers():
     if not os.path.exists(CUSTOMERS_FILE):
@@ -248,10 +315,81 @@ def generate_invoice():
             filename = f"{date_str}_{safe_buyer}.pdf"
         filepath   = os.path.join(INVOICE_OUTPUT_DIR, filename)
         _make_invoice_pdf(d, filepath)
+        _save_invoice_to_db(d, filename)   # ← DB에 주문 내역 저장
         return jsonify({'success': True, 'filename': filename})
     except Exception as e:
         import traceback; traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})
+
+@forms_bp.route('/forms/orders/save', methods=['POST'])
+def save_order_only():
+    """PDF 없이 DB에만 저장"""
+    try:
+        d = request.json
+        if not d.get('products'):
+            return jsonify({'success': False, 'error': '상품 없음'})
+        _save_invoice_to_db(d, filename='')
+        return jsonify({'success': True})
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@forms_bp.route('/forms/orders', methods=['GET'])
+def get_orders():
+    """거래처별 주문 내역 조회 (buyer_company 또는 buyer_name으로 검색)"""
+    try:
+        company = request.args.get('company', '').strip()
+        name    = request.args.get('name', '').strip()
+        limit   = int(request.args.get('limit', 50))
+
+        conn = _get_db()
+        if company:
+            rows = conn.execute("""
+                SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       total_amount, deposit, balance, receiver, filename,
+                       products_json, created_at
+                FROM invoices
+                WHERE buyer_company = ?
+                ORDER BY trade_date DESC, created_at DESC
+                LIMIT ?
+            """, (company, limit)).fetchall()
+        elif name:
+            rows = conn.execute("""
+                SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       total_amount, deposit, balance, receiver, filename,
+                       products_json, created_at
+                FROM invoices
+                WHERE buyer_name = ?
+                ORDER BY trade_date DESC, created_at DESC
+                LIMIT ?
+            """, (name, limit)).fetchall()
+        else:
+            # 전체 최신 50건
+            rows = conn.execute("""
+                SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       total_amount, deposit, balance, receiver, filename,
+                       products_json, created_at
+                FROM invoices
+                ORDER BY trade_date DESC, created_at DESC
+                LIMIT ?
+            """, (limit,)).fetchall()
+        conn.close()
+
+        result = []
+        for r in rows:
+            item = dict(r)
+            try:
+                item['products'] = json.loads(item.pop('products_json') or '[]')
+            except:
+                item['products'] = []
+            result.append(item)
+
+        return jsonify(result)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 
 @forms_bp.route('/download_invoice/<filename>')
 def download_invoice(filename):

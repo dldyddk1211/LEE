@@ -121,6 +121,23 @@
   /* 빨간 취소 버튼 */
   .btn-danger { padding: 9px 18px; background: #fff; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .btn-danger:hover { background: #fff5f5; }
+  .btn-save { padding: 11px 28px; background: linear-gradient(135deg, #1a6b3c, #145c33); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn-save:hover { opacity: 0.85; }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-history { padding: 8px 16px; background: #fff; color: #0f3460; border: 2px solid #0f3460; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+  .btn-history:hover:not(:disabled) { background: #f0f4ff; }
+  .btn-history:disabled { color: #aaa; border-color: #ddd; cursor: not-allowed; }
+  /* 주문내역 모달 */
+  .order-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+  .order-table th { background: linear-gradient(135deg, #1a1a2e, #0f3460); color:#fff; padding:7px 8px; text-align:center; white-space:nowrap; }
+  .order-table td { border:1px solid #eee; padding:6px 8px; text-align:center; vertical-align:middle; }
+  .order-table tr:hover td { background:#f8f9ff; }
+  .order-row-expand { cursor:pointer; }
+  .order-products { background:#fafafa; }
+  .order-products td { text-align:left; padding:8px 12px; }
+  .badge-paid { background:#d4edda; color:#155724; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
+  .badge-unpaid { background:#fff3cd; color:#856404; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
+  .order-empty { text-align:center; padding:30px; color:#aaa; font-size:13px; }
 
   @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr 1fr; } }
 </style>
@@ -178,6 +195,12 @@
         <div class="form-grid">
           <div class="form-group"><label>거래일자</label><input type="date" id="tradeDate"></div>
           <div class="form-group span2"><label>메모 (선택)</label><input type="text" id="tradeMemo" placeholder="예: 2월 정기 거래"></div>
+        </div>
+        <div style="margin-top:10px;">
+          <button class="btn-history" id="historyBtn" onclick="openOrderHistory()" disabled>
+            📋 이 거래처 주문 내역 보기
+          </button>
+          <span id="historyHint" style="font-size:11px;color:#999;margin-left:8px;">수요자 정보 입력 후 활성화</span>
         </div>
       </div>
     </div>
@@ -240,6 +263,7 @@
     <div class="action-bar">
       <button class="btn-outline" onclick="openPreview()">👁 미리보기</button>
       <button class="btn-primary" id="downloadBtn" onclick="downloadExcel()">📥 PDF 다운로드</button>
+      <button class="btn-save" id="saveBtn" onclick="saveOrder()">💾 저장</button>
     </div>
   </div>
 </div>
@@ -326,6 +350,26 @@
   </div>
 </div>
 
+
+<!-- ═══════════════════════════════════
+     모달 4: 주문 내역
+════════════════════════════════════ -->
+<div class="modal-overlay" id="orderHistoryModal">
+  <div class="modal-lg">
+    <div class="modal-header">
+      <h3>📋 주문 내역 - <span id="orderHistoryTitle"></span></h3>
+      <button class="modal-close" onclick="closeOrderHistory()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="orderHistoryContent">
+        <div class="order-empty">⏳ 불러오는 중...</div>
+      </div>
+      <div class="modal-actions" style="margin-top:12px;">
+        <button class="btn-outline" onclick="closeOrderHistory()">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════
@@ -459,6 +503,235 @@ function selectCustomer(id) {
   document.getElementById('buyerBizType').value = c.biztype || '';
   document.getElementById('buyerBizItem').value = c.bizitem || '';
   renderCustomers(customers);
+  updateHistoryBtn();  // ← 주문내역 버튼 활성화
+}
+
+// 주문내역 버튼 활성화 여부 업데이트
+function updateHistoryBtn() {
+  const company = document.getElementById('buyerCompany').value.trim();
+  const name    = document.getElementById('buyerName').value.trim();
+  const btn  = document.getElementById('historyBtn');
+  const hint = document.getElementById('historyHint');
+  if (company || name) {
+    btn.disabled = false;
+    hint.textContent = company || name;
+    hint.style.color = '#0f3460';
+    hint.style.fontWeight = '600';
+  } else {
+    btn.disabled = true;
+    hint.textContent = '수요자 정보 입력 후 활성화';
+    hint.style.color = '#999';
+    hint.style.fontWeight = 'normal';
+  }
+}
+
+// ══════════════════════════════════════
+// 주문 내역 모달
+// ══════════════════════════════════════
+async function openOrderHistory() {
+  const company = document.getElementById('buyerCompany').value.trim();
+  const name    = document.getElementById('buyerName').value.trim();
+  if (!company && !name) { alert('수요자 상호 또는 성명을 입력해주세요'); return; }
+
+  const title = company || name;
+  document.getElementById('orderHistoryTitle').textContent = title;
+  document.getElementById('orderHistoryContent').innerHTML = '<div class="order-empty">⏳ 불러오는 중...</div>';
+  document.getElementById('orderHistoryModal').classList.add('show');
+
+  try {
+    const params = company ? `company=${encodeURIComponent(company)}` : `name=${encodeURIComponent(name)}`;
+    const res    = await fetch('/forms/orders?' + params);
+    const orders = await res.json();
+
+    if (orders.error) throw new Error(orders.error);
+    renderOrderHistory(orders, title);
+  } catch(e) {
+    document.getElementById('orderHistoryContent').innerHTML =
+      `<div class="order-empty">❌ 오류: ${e.message}</div>`;
+  }
+}
+
+function renderOrderHistory(orders, title) {
+  ordersCache = orders;   // ← 불러오기에서 사용
+  if (!orders.length) {
+    document.getElementById('orderHistoryContent').innerHTML =
+      `<div class="order-empty">📭 <strong>${title}</strong>의 주문 내역이 없습니다</div>`;
+    return;
+  }
+
+  // 합계 통계
+  const totalAmt  = orders.reduce((s, o) => s + (o.total_amount || 0), 0);
+  const totalDepo = orders.reduce((s, o) => s + (o.deposit || 0), 0);
+  const totalBal  = orders.reduce((s, o) => s + (o.balance || 0), 0);
+
+  let html = `
+    <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <div style="background:#f0f4ff;border-radius:8px;padding:10px 16px;text-align:center;min-width:100px;">
+        <div style="font-size:11px;color:#666;">총 거래 건수</div>
+        <div style="font-size:18px;font-weight:700;color:#0f3460;">${orders.length}건</div>
+      </div>
+      <div style="background:#f0fff4;border-radius:8px;padding:10px 16px;text-align:center;min-width:120px;">
+        <div style="font-size:11px;color:#666;">총 거래 금액</div>
+        <div style="font-size:18px;font-weight:700;color:#155724;">₩${totalAmt.toLocaleString()}</div>
+      </div>
+      <div style="background:#fff8e1;border-radius:8px;padding:10px 16px;text-align:center;min-width:120px;">
+        <div style="font-size:11px;color:#666;">미수금 합계</div>
+        <div style="font-size:18px;font-weight:700;color:#856404;">₩${totalBal.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="max-height:440px;overflow-y:auto;">
+    <table class="order-table">
+      <thead><tr>
+        <th>#</th><th>거래일자</th><th>품번 / 품명</th>
+        <th>합계금액</th><th>입금</th><th>잔금</th>
+        <th>상태</th><th style="min-width:90px;">PDF / 불러오기</th>
+      </tr></thead>
+      <tbody id="orderTableBody">`;
+
+  orders.forEach((o, i) => {
+    const paid = o.balance <= 0;
+    const badge = paid
+      ? '<span class="badge-paid">완납</span>'
+      : `<span class="badge-unpaid">미수 ₩${(o.balance||0).toLocaleString()}</span>`;
+    const pdfLink = o.filename
+      ? `<a href="/download_invoice/${encodeURIComponent(o.filename)}" target="_blank" style="color:#0f3460;font-weight:700;text-decoration:none;" title="PDF 다운로드">📥</a>`
+      : '';
+
+    // 품번/품명 - 첫 번째 행만 표시, 2개 이상이면 "외 N개" 추가
+    const prods = o.products || [];
+    const first = prods[0] ? [prods[0].code, prods[0].name].filter(Boolean).join(' ') : '';
+    const prodSummary = first + (prods.length > 1 ? ` 외 ${prods.length - 1}개` : '');
+
+    // 불러오기 클릭 시 전달할 데이터를 JSON으로 인코딩
+    const orderDataAttr = encodeURIComponent(JSON.stringify(o));
+
+    html += `
+      <tr class="order-row-expand" onclick="toggleOrderDetail(${o.id})" title="클릭하면 상품 내역 펼치기">
+        <td>${orders.length - i}</td>
+        <td style="white-space:nowrap;">${o.trade_date || '-'}</td>
+        <td style="text-align:left;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+            title="${prods.map(p=>[p.code,p.name].filter(Boolean).join(' ')).join(', ')}">
+          ${prodSummary || (o.memo || '-')}
+        </td>
+        <td style="font-weight:700;white-space:nowrap;">₩${(o.total_amount||0).toLocaleString()}</td>
+        <td style="white-space:nowrap;">₩${(o.deposit||0).toLocaleString()}</td>
+        <td style="color:${paid?'#28a745':'#dc3545'};white-space:nowrap;">₩${(o.balance||0).toLocaleString()}</td>
+        <td>${badge}</td>
+        <td onclick="event.stopPropagation();" style="white-space:nowrap;">
+          ${pdfLink}
+          <button onclick="loadOrderToForm(${o.id})"
+            style="margin-left:4px;padding:3px 8px;background:#0f3460;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">
+            📂 불러오기
+          </button>
+        </td>
+      </tr>
+      <tr id="detail_${o.id}" style="display:none;" class="order-products">
+        <td colspan="8">
+          <div style="padding:4px 0;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#e8f0fe;">
+              <th style="padding:4px 8px;text-align:left;">품번</th>
+              <th style="padding:4px 8px;text-align:left;">품명</th>
+              <th style="padding:4px 8px;">수량</th>
+              <th style="padding:4px 8px;">소비자가</th>
+              <th style="padding:4px 8px;">할인율</th>
+              <th style="padding:4px 8px;">공급가</th>
+              <th style="padding:4px 8px;">합계</th>
+            </tr></thead>
+            <tbody>
+              ${(o.products||[]).map(p=>`
+                <tr>
+                  <td style="padding:4px 8px;">${p.code||''}</td>
+                  <td style="padding:4px 8px;">${p.name||''}</td>
+                  <td style="padding:4px 8px;text-align:center;">${(p.qty||0).toLocaleString()}</td>
+                  <td style="padding:4px 8px;text-align:right;">${(p.price||0).toLocaleString()}</td>
+                  <td style="padding:4px 8px;text-align:center;">${p.disc?p.disc+'%':'-'}</td>
+                  <td style="padding:4px 8px;text-align:right;">${(p.supply||0).toLocaleString()}</td>
+                  <td style="padding:4px 8px;text-align:right;font-weight:700;">${(p.total||0).toLocaleString()}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          </div>
+        </td>
+      </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  document.getElementById('orderHistoryContent').innerHTML = html;
+}
+
+function toggleOrderDetail(id) {
+  const row = document.getElementById('detail_' + id);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+// 주문내역 → 메인 화면으로 불러오기
+// ordersCache: renderOrderHistory 시 저장해둔 전체 데이터
+let ordersCache = [];
+
+function loadOrderToForm(orderId) {
+  const o = ordersCache.find(x => x.id === orderId);
+  if (!o) { alert('데이터를 찾을 수 없습니다'); return; }
+
+  if (!confirm(`📂 [${o.trade_date}] 주문을 메인 화면으로 불러올까요?\n현재 입력 중인 내용은 사라집니다.`)) return;
+
+  // 거래 기본 정보
+  document.getElementById('tradeDate').value = o.trade_date || '';
+  document.getElementById('tradeMemo').value  = o.memo || '';
+
+  // 수요자 정보
+  document.getElementById('buyerBizNo').value   = o.buyer_bizno   || '';
+  document.getElementById('buyerCompany').value = o.buyer_company || '';
+  document.getElementById('buyerName').value    = o.buyer_name    || '';
+  document.getElementById('buyerTel').value     = o.buyer_tel     || '';
+  document.getElementById('buyerAddr').value    = o.buyer_addr    || '';
+  document.getElementById('buyerBizType').value = o.buyer_biztype || '';
+  document.getElementById('buyerBizItem').value = o.buyer_bizitem || '';
+
+  // 상품 목록 초기화 후 재구성
+  document.getElementById('productBody').innerHTML = '';
+  rowIdx = 0;
+  (o.products || []).forEach(p => addProductRow(p));
+  if (!o.products || !o.products.length) {
+    addProductRow(); addProductRow(); addProductRow();
+  }
+
+  // 입금/잔금/인수자
+  document.getElementById('payDeposit').value  = o.deposit  || '';
+  document.getElementById('payReceiver').value = o.receiver || '';
+  calcBalance();
+  updateHistoryBtn();
+
+  closeOrderHistory();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  alert('✅ 불러오기 완료!');
+}
+
+function closeOrderHistory() {
+  document.getElementById('orderHistoryModal').classList.remove('show');
+}
+
+// ── 저장 (PDF 생성 없이 DB에만 저장) ──
+async function saveOrder() {
+  const d = buildData();
+  if (!d.products.length)                { alert('❌ 상품을 1개 이상 입력해주세요'); return; }
+  if (!d.buyer.company && !d.buyer.name) { alert('❌ 수요자 정보를 입력해주세요'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '⏳ 저장 중...';
+  try {
+    const res    = await fetch('/forms/orders/save', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(d)
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert('✅ 저장 완료!');
+    } else {
+      alert('❌ 저장 실패: ' + result.error);
+    }
+  } catch(e) { alert('❌ 오류: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '💾 저장'; }
 }
 
 async function delCustomer(id) {
@@ -715,6 +988,11 @@ window.addEventListener('DOMContentLoaded', () => {
   addProductRow();
   addProductRow();
   loadCustomers();
+
+  // 수요자 직접 입력 시에도 historyBtn 업데이트
+  ['buyerCompany', 'buyerName'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateHistoryBtn);
+  });
 });
 </script>
 </body>
