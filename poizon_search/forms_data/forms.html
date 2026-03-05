@@ -41,9 +41,12 @@
   input[type="text"], input[type="date"], input[type="number"] { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 13px; outline: none; font-family: inherit; width: 100%; }
   input:focus { border-color: #0f3460; }
   input[readonly] { background: #f8f9fa; color: #666; }
-  .product-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .product-table th { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff; padding: 8px 6px; text-align: center; font-size: 12px; }
-  .product-table td { border: 1px solid #eee; padding: 4px; }
+  .product-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  .product-table th { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff; padding: 8px 6px; text-align: center; font-size: 12px; position: relative; overflow: hidden; white-space: nowrap; }
+  .product-table td { border: 1px solid #eee; padding: 4px; overflow: hidden; }
+  /* 컬럼 리사이즈 핸들 */
+  .col-resizer { position: absolute; right: 0; top: 0; width: 5px; height: 100%; cursor: col-resize; background: transparent; user-select: none; z-index: 1; }
+  .col-resizer:hover, .col-resizer.dragging { background: rgba(255,255,255,0.5); }
   .product-table td input { width: 100%; border: none; padding: 6px 4px; font-size: 12px; text-align: center; outline: none; background: transparent; font-family: inherit; }
   .product-table td input:focus { background: #f0f4ff; }
   .calc-cell { background: #f8f9fa; color: #333; text-align: center; padding: 6px 4px !important; font-size: 12px; }
@@ -226,12 +229,16 @@
     <div class="card">
       <div class="card-body">
         <div class="section-title">📦 주문 상품 목록</div>
-        <table class="product-table">
+        <table class="product-table" id="productTable">
           <thead><tr>
-            <th style="width:110px;">품번</th><th>품명</th>
-            <th style="width:60px;">수량</th><th style="width:90px;">소비자가</th>
-            <th style="width:70px;">할인율(%)</th><th style="width:90px;">공급가</th>
-            <th style="width:90px;">합계</th><th style="width:36px;"></th>
+            <th style="width:110px;">품번<span class="col-resizer"></span></th>
+            <th>품명<span class="col-resizer"></span></th>
+            <th style="width:60px;">수량<span class="col-resizer"></span></th>
+            <th style="width:90px;">소비자가<span class="col-resizer"></span></th>
+            <th style="width:70px;">할인율(%)<span class="col-resizer"></span></th>
+            <th style="width:90px;">공급가<span class="col-resizer"></span></th>
+            <th style="width:90px;">합계<span class="col-resizer"></span></th>
+            <th style="width:36px;"></th>
           </tr></thead>
           <tbody id="productBody"></tbody>
         </table>
@@ -979,6 +986,48 @@ async function downloadExcel() {
 }
 
 // ══════════════════════════════════════
+// 컬럼 리사이즈 (마우스 드래그)
+// ══════════════════════════════════════
+function initTableResize() {
+  const table = document.getElementById('productTable');
+  if (!table) return;
+  const ths = table.querySelectorAll('thead th');
+
+  ths.forEach((th, idx) => {
+    const resizer = th.querySelector('.col-resizer');
+    if (!resizer) return;
+
+    let startX, startW;
+
+    resizer.addEventListener('mousedown', e => {
+      startX = e.clientX;
+      startW = th.offsetWidth;
+      resizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+
+      function onMove(e) {
+        const diff = e.clientX - startX;
+        const newW = Math.max(30, startW + diff);
+        th.style.width = newW + 'px';
+      }
+
+      function onUp() {
+        resizer.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+  });
+}
+
+// ══════════════════════════════════════
 // 초기화
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
@@ -988,6 +1037,7 @@ window.addEventListener('DOMContentLoaded', () => {
   addProductRow();
   addProductRow();
   loadCustomers();
+  initTableResize();  // ← 컬럼 리사이즈 초기화
 
   // 수요자 직접 입력 시에도 historyBtn 업데이트
   ['buyerCompany', 'buyerName'].forEach(id => {
