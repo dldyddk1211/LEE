@@ -184,6 +184,13 @@
       color:#fff;
     }
 
+    /* 서식/양식 모드 (청록) */
+    #modeForms.active{
+      border-color:#0097a7;
+      background:linear-gradient(135deg, #0097a7 0%, #00695c 100%);
+      color:#fff;
+    }
+
 
     .mode-icon{
       font-size:24px;
@@ -688,11 +695,16 @@
         <button class="mode-btn" id="modeSettings">
           <span class="mode-icon">⚙️</span>
           <span class="mode-text">설정</span>
+        </button>
+
+        <button class="mode-btn" id="modeForms">
+          <span class="mode-icon">📝</span>
+          <span class="mode-text">서식/양식</span>
         </button>      
       </div>
     </div>
 
-    <div class="input-grid">
+    <div class="input-grid" id="inputSection" style="display:none;">
       <div class="input-group">
         <label for="keyword">검색 키워드</label>
         <input type="text" id="keyword" placeholder="예: 나이키" disabled />
@@ -706,7 +718,7 @@
       </div>
     </div>
 
-    <div class="button-group">
+    <div class="button-group" id="buttonSection" style="display:none;">
       <button id="startBtn" onclick="startCollection()" disabled>🚀 수집 시작</button>
       <label for="excelUpload" id="uploadLabel" class="upload-btn" style="display:none;">
         📤 엑셀 업로드
@@ -737,7 +749,7 @@
     </table>
   </div>
 </div>
-<div class="section" id="resultSection">
+<div class="section" id="resultSection" style="display:none;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
     <h3 style="margin: 0;">
       📋 수집 결과 (<span id="resultCount">0</span>개) 
@@ -798,7 +810,7 @@
         <tbody id="tableBody"></tbody>
       </table>
     </div>
-    <div class="table-controls">
+    <div class="table-controls" id="tableControls" style="display:none;">
         <span class="ctrl-label">표시 개수</span>
         <select id="pageSizeSelect">
           <option value="20" selected>20개</option>
@@ -810,7 +822,7 @@
       </div>
     </div>
 
-    <div class="section" id="statusSection">
+    <div class="section" id="statusSection" style="display:none;">
       <h3>📊 진행 상황</h3>
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar">0%</div>
@@ -1079,7 +1091,7 @@
       tableHeader.innerHTML = headerHTML;
     }
 
-  updateTableHeader(selectedMode);
+  // updateTableHeader는 activateMode()에서 호출
 
   function setModeButtonsEnabled(enabled) {
       document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -1419,6 +1431,8 @@
       
     document.getElementById('resultCount').textContent = totalItems;
     document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
+    if (totalItems > 0) { document.getElementById('resultSection').style.display = 'block'; document.getElementById('tableControls').style.display = 'flex'; }
+    else { document.getElementById('tableControls').style.display = 'none'; }
     document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
     document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
     document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
@@ -1506,6 +1520,11 @@
         return;
       }
       
+      if (mode === 'forms') {
+        window.open('/forms', '_blank');
+        return;
+      }
+
       if (mode === 'settings') {
         alert('⚙️ 설정 기능은 곧 출시됩니다!');
         return;
@@ -1643,6 +1662,11 @@
       
       document.getElementById('uploadListSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('inputSection').style.display = 'none';
+      document.getElementById('buttonSection').style.display = 'none';
+      document.getElementById('statusSection').style.display = 'none';
+      document.getElementById('tableControls').style.display = 'none';
       
       // 7. 시작 버튼 복원
       const startBtn = document.getElementById('startBtn');
@@ -1668,6 +1692,9 @@
       
       selectedMode = mode;
       updateTableHeader(mode);
+      document.getElementById('inputSection').style.display = 'grid';
+      document.getElementById('buttonSection').style.display = 'grid';
+      document.getElementById('statusSection').style.display = 'block';
       
       // 모든 모드 버튼 비활성화
       document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -2104,7 +2131,13 @@
       document.getElementById('startBtn').disabled = true;
       document.getElementById('keyword').disabled = true;
       document.getElementById('maxPages').disabled = true;
-      
+      document.getElementById('inputSection').style.display = 'none';
+      document.getElementById('buttonSection').style.display = 'none';
+      document.getElementById('statusSection').style.display = 'none';
+      document.getElementById('resultSection').classList.remove('active');
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('tableControls').style.display = 'none';
+      document.getElementById('uploadListSection').style.display = 'none';
       addLog('  ✓ 모드 버튼 비활성화', 'info');
       
       // ===== 8. 현재 모드 유지 (UI만 초기화) =====
@@ -2215,6 +2248,7 @@
       document.getElementById('modeScheduler').addEventListener('click', () => selectMode('scheduler'));
       document.getElementById('modeInventory').addEventListener('click', () => selectMode('inventory'));
       document.getElementById('modeSettings').addEventListener('click', () => selectMode('settings'));
+      document.getElementById('modeForms').addEventListener('click', () => selectMode('forms'));
      
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2892,6 +2926,10 @@
   window.loadHistoryData = function(data, keyword, mode) {
       console.log('📋 스케줄러에서 데이터 로드:', keyword, data.length + '개');
       console.log('📊 모드:', mode);
+      document.getElementById('inputSection').style.display = 'grid';
+      document.getElementById('buttonSection').style.display = 'grid';
+      document.getElementById('statusSection').style.display = 'block';
+      document.getElementById('resultSection').style.display = 'block';
       
       // 데이터 설정
       collectedData = data;

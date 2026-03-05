@@ -1427,6 +1427,18 @@ def download_file(filename):
         return jsonify({'error': str(e)}), 500
 
 
+# ✅ 서식 Blueprint 등록 (forms_data/forms_api.py)
+try:
+    import sys
+    _forms_data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'forms_data')
+    if _forms_data_path not in sys.path:
+        sys.path.insert(0, _forms_data_path)
+    from forms_api import forms_bp
+    app.register_blueprint(forms_bp)
+    print("✅ 서식/양식 등록 성공")
+except Exception as e:
+    print(f"⚠️ 서식/양식 로드 실패: {e}")
+
 # 구글 시트 자동 동기화 시작
 try:
     from inventory_data.sheets_sync import sync_once, start_sync_background
