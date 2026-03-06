@@ -1,5 +1,217 @@
 [
   {
+    "id": "task_1772756578597",
+    "timestamp": "2026-03-06T09:22:58.597037",
+    "keyword": "무신사_나이키",
+    "mode": "musinsa",
+    "collected_count": 20,
+    "kream_count": 0,
+    "duration_seconds": 172,
+    "data": [
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260106/5870697/5870697_17690717355132_500.jpg",
+        "name": "에어 조던 1 레트로 로우 미디엄 올리브 앤드 서밋 화이트 M - 미디엄 올리브:서밋 화이트:세일:블랙 / HQ6998-200",
+        "price": 179000,
+        "product_code": "HQ6998-200",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5870697",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240923/4454243/4454243_17280182796756_500.jpg",
+        "name": "에어 포스 1 07 W - 카카오 와우:샌드드리프트 / FQ8901-259",
+        "price": 139440,
+        "product_code": "FQ8901-259",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4454243",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240321/3976350/3976350_17115804993997_500.jpg",
+        "name": "에어 포스 1 07 M - 화이트 / CW2288-111",
+        "price": 114790,
+        "product_code": "CW2288-111",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3976350",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251209/5816828/5816828_17654400654833_500.jpg",
+        "name": "에어 포스 1 07 M - 화이트:라이트 스모크 그레이 / FD9763-101",
+        "price": 139440,
+        "product_code": "FD9763-101",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5816828",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240321/3976349/3976349_17115804555461_500.jpg",
+        "name": "에어 포스 1 07 M - 블랙 / CW2288-001",
+        "price": 114790,
+        "product_code": "CW2288-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/3976349",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240918/4442080/4442080_17271359077800_500.jpg",
+        "name": "에어 조던 1 로우 W - 울프 그레이:화이트 / DC0774-105",
+        "price": 122940,
+        "product_code": "DC0774-105",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4442080",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251229/5858881/5858881_17676779016601_500.jpg",
+        "name": "에어 포스 1 07 W - 세일:라이트 아머리 블루:실트 레드 / IQ4937-161",
+        "price": 139440,
+        "product_code": "IQ4937-161",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5858881",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260123/5932932/5932932_17697500757171_500.jpg",
+        "name": "와플 레이서 M - 올리브 플랙:코코넛 밀크:블랙:세일 / IM8658-300",
+        "price": 98190,
+        "product_code": "IM8658-300",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5932932",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251017/5609641/5609641_17610262089179_500.jpg",
+        "name": "아스트로그래버 레더 W - 블랙:세일:모슬린 / II1259-001",
+        "price": 122940,
+        "product_code": "II1259-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5609641",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251202/5797223/5797223_17648342660228_500.jpg",
+        "name": "샥스 Z W - 블랙 / HQ7540-003",
+        "price": 122500,
+        "product_code": "HQ7540-003",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5797223",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260202/5968139/5968139_17706814550916_500.jpg",
+        "name": "와플 레이서 M - 블랙:코코넛 밀크:검 다크 브라운:세일 / IM8658-001",
+        "price": 98190,
+        "product_code": "IM8658-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5968139",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251202/5797224/5797224_17648342988498_500.jpg",
+        "name": "샥스 Z W - 라이트 본:블랙:팬텀:라이트 본 / HQ7540-004",
+        "price": 131200,
+        "product_code": "HQ7540-004",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5797224",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250909/5424761/5424761_17575763144343_500.jpg",
+        "name": "샥스 Z W - 블랙:유니버시티 레드:블랙 / HQ7540-002",
+        "price": 131200,
+        "product_code": "HQ7540-002",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5424761",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260107/5873323/5873323_17681805539511_500.jpg",
+        "name": "에어 포스 1 07 M - 화이트:코코넛 밀크:블랙:라이트 실버 / FQ6848-101",
+        "price": 131200,
+        "product_code": "FQ6848-101",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5873323",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20240701/4226785/4226785_17207613153878_500.jpg",
+        "name": "에어 포스 1 07 W - 화이트 / DD8959-100",
+        "price": 114790,
+        "product_code": "DD8959-100",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/4226785",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260114/5894703/5894703_17684554749319_500.jpg",
+        "name": "ACG 판타즈마 스톰 핏 ADV 재킷 M - 블랙:서밋 화이트 / IF1144-010",
+        "price": 182163,
+        "product_code": "IF1144-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5894703",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251230/5861158/5861158_17715555328338_500.jpg",
+        "name": "에어 리프트 브리드 W - 블랙 / IB8881-001",
+        "price": 131200,
+        "product_code": "IB8881-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5861158",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20260204/5980953/5980953_17706813653468_500.jpg",
+        "name": "리액트X 리주버네이트 M - 스프루스 아우라:라이트 실버 / HV5060-005",
+        "price": 73440,
+        "product_code": "HV5060-005",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5980953",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20251013/5584482/5584482_17606685004160_500.jpg",
+        "name": "킬샷 2 PRM M - 블랙:앤트러사이트 / HV6116-001",
+        "price": 85530,
+        "product_code": "HV6116-001",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5584482",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      },
+      {
+        "image_url": "https://image.msscdn.net/images/goods_img/20250826/5365336/5365336_17618951961047_500.jpg",
+        "name": "에어 포스 1 07 LV8 W - 블랙:화이트:메탈릭 실버:블랙 / IM7809-010",
+        "price": 98780,
+        "product_code": "IM7809-010",
+        "brand": "-",
+        "url": "https://www.musinsa.com/products/5365336",
+        "source": "MUSINSA",
+        "keyword": "나이키"
+      }
+    ],
+    "status": "completed"
+  },
+  {
     "id": "task_1772645233216",
     "timestamp": "2026-03-05T02:27:13.216826",
     "keyword": "리스트비교→크림검색_10개",
@@ -7735,38 +7947,6 @@
         "포이즌현업자판매량": 6,
         "크림평균가": "121,000원",
         "크림판매량": 88
-      }
-    ],
-    "status": "completed"
-  },
-  {
-    "id": "task_1772213588201",
-    "timestamp": "2026-02-28T02:33:08.201325",
-    "keyword": "무신사_조던패딩",
-    "mode": "musinsa",
-    "collected_count": 2,
-    "kream_count": 0,
-    "duration_seconds": 19,
-    "data": [
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20250924/5520301/5520301_17591033409195_500.jpg",
-        "name": "조던 브루클린 써마 핏 패딩 재킷 M - 블랙:화이트 / HV0532-010",
-        "price": 192903,
-        "product_code": "HV0532-010",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/5520301",
-        "source": "MUSINSA",
-        "keyword": "조던패딩"
-      },
-      {
-        "image_url": "https://image.msscdn.net/images/goods_img/20240927/4470896/4470896_17274035007362_500.jpg",
-        "name": "조던 아웃포켓다운베스트 (주니어) 혼합",
-        "price": 91230,
-        "product_code": "N244VE345P",
-        "brand": "-",
-        "url": "https://www.musinsa.com/products/4470896",
-        "source": "MUSINSA",
-        "keyword": "조던패딩"
       }
     ],
     "status": "completed"

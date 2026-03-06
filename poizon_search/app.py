@@ -179,14 +179,21 @@ def log_callback(message, level='info'):
                 log_data['total_pages'] = int(total_pages)
             
             log_queue.put(log_data)
-            
+
+    elif message.startswith("TOTAL_COUNT:"):
+        try:
+            total = int(message.split(":")[1])
+            log_queue.put({'type': 'progress', 'current': 0, 'total': total})
+        except:
+            pass
+
     elif message.startswith("PRODUCT_START:"):
         product_code = message.split(":", 1)[1]
         log_queue.put({
             'type': 'product_start',
             'product_code': product_code
         })
-        
+
     elif message.startswith("PRODUCT_RESULT:"):
         try:
             json_str = message.split(":", 1)[1]
@@ -198,17 +205,14 @@ def log_callback(message, level='info'):
             })
         except Exception as e:
             print(f"PRODUCT_RESULT 처리 오류: {e}")
-            
+
     elif message.startswith("DATA:"):
         try:
-            data_str = message[5:]
-            item_data = json.loads(data_str)
-            log_queue.put({
-                'type': 'data',
-                'item': item_data
-            })
-        except:
-            pass
+            item = json.loads(message.split(":", 1)[1])
+            log_queue.put({'type': 'data', 'item': item})
+        except Exception as e:
+            print(f"DATA 처리 오류: {e}")
+
     else:
         log_queue.put({
             'type': 'log',
@@ -396,12 +400,12 @@ def run_musinsa_search(keyword, max_items):
     stop_flag = False
     
     try:
-        result = musinsa_search.search_musinsa_keyword_detail(
+        result = musinsa_search.search_musinsa(   # ← keyword_detail → search_musinsa
             keyword=keyword,
             max_items=max_items,
             callback=log_callback
         )
-        
+                
         print(f"\n{'='*60}")
         print(f"✅ run_musinsa_search 완료")
         print(f"  성공: {result.get('success')}")
