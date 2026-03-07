@@ -37,6 +37,9 @@ def _get_db():
             buyer_addr  TEXT,
             buyer_biztype TEXT,
             buyer_bizitem TEXT,
+            shipping_name TEXT,
+            shipping_tel  TEXT,
+            shipping_addr TEXT,
             total_amount INTEGER DEFAULT 0,
             deposit      INTEGER DEFAULT 0,
             balance      INTEGER DEFAULT 0,
@@ -46,6 +49,14 @@ def _get_db():
             created_at  TEXT NOT NULL
         )
     """)
+    # 기존 테이블에 배송지 컬럼 추가 (이미 있으면 무시)
+    try:
+        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_name TEXT')
+        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_tel TEXT')
+        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_addr TEXT')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # 이미 컬럼이 존재함
     conn.commit()
     return conn
 
@@ -53,15 +64,17 @@ def _save_invoice_to_db(d, filename):
     """거래명세서 데이터를 DB에 저장"""
     try:
         buyer    = d.get('buyer', {})
+        shipping = d.get('shipping', {})
         products = d.get('products', [])
         conn = _get_db()
         conn.execute("""
             INSERT INTO invoices
               (trade_date, memo, buyer_company, buyer_name, buyer_bizno,
                buyer_tel, buyer_addr, buyer_biztype, buyer_bizitem,
+               shipping_name, shipping_tel, shipping_addr,
                total_amount, deposit, balance, receiver, filename,
                products_json, created_at)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, (
             d.get('date',''),
             d.get('memo',''),
@@ -72,6 +85,9 @@ def _save_invoice_to_db(d, filename):
             buyer.get('addr',''),
             buyer.get('biztype',''),
             buyer.get('bizitem',''),
+            shipping.get('name',''),
+            shipping.get('tel',''),
+            shipping.get('addr',''),
             d.get('totalAmount', 0),
             d.get('deposit', 0),
             d.get('balance', 0),
@@ -347,6 +363,7 @@ def get_orders():
         if company:
             rows = conn.execute("""
                 SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       shipping_name, shipping_tel, shipping_addr,
                        total_amount, deposit, balance, receiver, filename,
                        products_json, created_at
                 FROM invoices
@@ -357,6 +374,7 @@ def get_orders():
         elif name:
             rows = conn.execute("""
                 SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       shipping_name, shipping_tel, shipping_addr,
                        total_amount, deposit, balance, receiver, filename,
                        products_json, created_at
                 FROM invoices
@@ -368,6 +386,7 @@ def get_orders():
             # 전체 최신 50건
             rows = conn.execute("""
                 SELECT id, trade_date, memo, buyer_company, buyer_name,
+                       shipping_name, shipping_tel, shipping_addr,
                        total_amount, deposit, balance, receiver, filename,
                        products_json, created_at
                 FROM invoices

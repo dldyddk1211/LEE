@@ -140,7 +140,21 @@
   .order-products td { text-align:left; padding:8px 12px; }
   .badge-paid { background:#d4edda; color:#155724; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
   .badge-unpaid { background:#fff3cd; color:#856404; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
-  .order-empty { text-align:center; padding:30px; color:#aaa; font-size:13px; }
+    .order-empty { text-align:center; padding:30px; color:#aaa; font-size:13px; }
+
+  /* 메뉴 버튼 스타일 */
+  .menu-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .menu-btn { width: 100%; padding: 14px 18px; background: #fff; color: #1a1a2e; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+  .menu-btn:hover { background: #f8f9fa; border-color: #0f3460; transform: translateX(4px); }
+  .menu-btn.active { background: linear-gradient(135deg, #0f3460, #1a1a2e); color: #fff; border-color: #0f3460; box-shadow: 0 4px 12px rgba(15, 52, 96, 0.3); }
+  .menu-btn .icon { font-size: 20px; }
+  .menu-btn .label { flex: 1; }
+
+  /* 도매 리스트 페이지 스타일 */
+  .wholesale-container { display: none; }
+  .wholesale-container.active { display: block; }
+  .invoice-container { display: block; }
+  .invoice-container.hidden { display: none; }
 
   @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr 1fr; } }
 </style>
@@ -158,38 +172,65 @@
   <!-- ── 왼쪽 사이드바 ── -->
   <div style="display:flex;flex-direction:column;gap:14px;">
 
-    <!-- 고객 목록 -->
+    <!-- 메뉴 버튼 -->
     <div class="card">
       <div class="card-header">
-        <span>👥 고객 목록</span>
+        <span>📁 메뉴</span>
       </div>
       <div class="card-body">
-        <div class="search-box">
-          <input type="text" id="customerSearch" placeholder="업체명 / 이름 검색..." oninput="searchCustomers()">
-          <span class="search-icon">🔍</span>
+        <div class="menu-buttons">
+          <button class="menu-btn active" id="btnInvoice" onclick="showMenu('invoice')">
+            <span class="icon">📋</span>
+            <span class="label">거래명세서</span>
+          </button>
+          <button class="menu-btn" id="btnWholesale" onclick="showMenu('wholesale')">
+            <span class="icon">📦</span>
+            <span class="label">도매 리스트</span>
+          </button>
         </div>
-        <div class="customer-list" id="customerList">
-          <div class="empty-state">고객을 추가해주세요</div>
-        </div>
-        <button class="btn-full" onclick="openAddCustomer()">➕ 새 고객 추가</button>
       </div>
     </div>
 
-    <!-- 공급자 정보 -->
-    <div class="card">
-      <div class="card-header">
-        <span>🏢 공급자 정보</span>
-        <button class="btn-header-edit" onclick="openEditSupplier()">✏️ 수정</button>
-      </div>
-      <div class="card-body">
-        <div id="supplierDisplay"></div>
-      </div>
-    </div>
+    
 
   </div>
 
-  <!-- ── 오른쪽 메인 ── -->
+    <!-- ── 오른쪽 메인 ── -->
   <div class="main-area">
+
+        <!-- 거래명세서 컨테이너 -->
+    <div class="invoice-container" id="invoiceContainer">
+
+    <!-- 고객 목록 / 공급자 정보 -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+      <!-- 고객 목록 -->
+      <div class="card">
+        <div class="card-header">
+          <span>👥 고객 목록</span>
+        </div>
+        <div class="card-body">
+          <div class="search-box">
+            <input type="text" id="customerSearch" placeholder="업체명 / 이름 검색..." oninput="searchCustomers()">
+            <span class="search-icon">🔍</span>
+          </div>
+          <div class="customer-list" id="customerList">
+            <div class="empty-state">고객을 추가해주세요</div>
+          </div>
+          <button class="btn-full" onclick="openAddCustomer()">➕ 새 고객 추가</button>
+        </div>
+      </div>
+
+      <!-- 공급자 정보 -->
+      <div class="card">
+        <div class="card-header">
+          <span>🏢 공급자 정보</span>
+          <button class="btn-header-edit" onclick="openEditSupplier()">✏️ 수정</button>
+        </div>
+        <div class="card-body">
+          <div id="supplierDisplay"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- 거래 기본 정보 -->
     <div class="card">
@@ -208,7 +249,7 @@
       </div>
     </div>
 
-    <!-- 수요자 정보 -->
+        <!-- 수요자 정보 -->
     <div class="card">
       <div class="card-body">
         <div class="section-title">🏪 수요자 정보 <span style="font-size:11px;color:#999;font-weight:400;">← 고객 목록에서 선택하거나 직접 입력</span></div>
@@ -222,6 +263,23 @@
           <div class="form-group span3"><label>소재지</label><input type="text" id="buyerAddr" placeholder="주소를 입력하세요"></div>
         </div>
         <button class="btn-full" style="width:auto;padding:7px 16px;font-size:12px;margin-top:10px;" onclick="saveCurrentCustomer()">💾 이 고객 저장</button>
+      </div>
+    </div>
+
+    <!-- 배송지 정보 -->
+    <div class="card">
+      <div class="card-body">
+        <div class="section-title">🚚 배송지 정보
+          <label style="float:right;font-size:12px;font-weight:600;color:#0f3460;cursor:pointer;">
+            <input type="checkbox" id="sameAsBuyer" onchange="copyBuyerToShipping()" style="margin-right:6px;cursor:pointer;">
+            기존정보 동일
+          </label>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>성명</label><input type="text" id="shippingName" placeholder="수취인 성명"></div>
+          <div class="form-group"><label>연락처</label><input type="text" id="shippingTel" placeholder="010-0000-0000"></div>
+          <div class="form-group span3"><label>배송지 주소</label><input type="text" id="shippingAddr" placeholder="배송 받을 주소를 입력하세요"></div>
+        </div>
       </div>
     </div>
 
@@ -267,11 +325,30 @@
       </div>
     </div>
 
-    <div class="action-bar">
+        <div class="action-bar">
       <button class="btn-outline" onclick="openPreview()">👁 미리보기</button>
       <button class="btn-primary" id="downloadBtn" onclick="downloadExcel()">📥 PDF 다운로드</button>
       <button class="btn-save" id="saveBtn" onclick="saveOrder()">💾 저장</button>
     </div>
+
+    </div>
+    <!-- // 거래명세서 컨테이너 끝 -->
+
+    <!-- 도매 리스트 컨테이너 -->
+    <div class="wholesale-container" id="wholesaleContainer">
+      <div class="card">
+        <div class="card-body">
+          <div class="section-title">📦 도매 리스트</div>
+          <div style="text-align: center; padding: 60px 20px; color: #999;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🚧</div>
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">도매 리스트 기능</div>
+            <div style="font-size: 14px;">준비 중입니다...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- // 도매 리스트 컨테이너 끝 -->
+
   </div>
 </div>
 
@@ -696,6 +773,12 @@ function loadOrderToForm(orderId) {
   document.getElementById('buyerBizType').value = o.buyer_biztype || '';
   document.getElementById('buyerBizItem').value = o.buyer_bizitem || '';
 
+  // 배송지 정보
+  document.getElementById('shippingName').value = o.shipping_name || '';
+  document.getElementById('shippingTel').value  = o.shipping_tel  || '';
+  document.getElementById('shippingAddr').value = o.shipping_addr || '';
+  document.getElementById('sameAsBuyer').checked = false;
+
   // 상품 목록 초기화 후 재구성
   document.getElementById('productBody').innerHTML = '';
   rowIdx = 0;
@@ -886,6 +969,11 @@ function buildData() {
       biztype: document.getElementById('buyerBizType').value,
       bizitem: document.getElementById('buyerBizItem').value,
     },
+    shipping: {
+      name: document.getElementById('shippingName').value,
+      tel:  document.getElementById('shippingTel').value,
+      addr: document.getElementById('shippingAddr').value,
+    },
     supplier: SUPPLIER,   // ← 현재 세션 공급자 사용
     products, totalAmount,
     deposit, balance: Math.max(0, totalAmount - deposit),
@@ -1025,6 +1113,42 @@ function initTableResize() {
       e.preventDefault();
     });
   });
+}
+
+// ══════════════════════════════════════
+// 배송지 정보 자동 복사
+// ══════════════════════════════════════
+function copyBuyerToShipping() {
+  const checked = document.getElementById('sameAsBuyer').checked;
+  if (checked) {
+    // 기본 정보 → 배송지로 복사
+    document.getElementById('shippingName').value = document.getElementById('buyerName').value;
+    document.getElementById('shippingTel').value  = document.getElementById('buyerTel').value;
+    document.getElementById('shippingAddr').value = document.getElementById('buyerAddr').value;
+  } else {
+    // 체크 해제 시 배송지 정보 초기화
+    document.getElementById('shippingName').value = '';
+    document.getElementById('shippingTel').value  = '';
+    document.getElementById('shippingAddr').value = '';
+  }
+}
+
+// ══════════════════════════════════════
+// 메뉴 전환
+// ══════════════════════════════════════
+function showMenu(menuName) {
+  // 버튼 활성화 상태 변경
+  document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+  
+  if (menuName === 'invoice') {
+    document.getElementById('btnInvoice').classList.add('active');
+    document.getElementById('invoiceContainer').classList.remove('hidden');
+    document.getElementById('wholesaleContainer').classList.remove('active');
+  } else if (menuName === 'wholesale') {
+    document.getElementById('btnWholesale').classList.add('active');
+    document.getElementById('invoiceContainer').classList.add('hidden');
+    document.getElementById('wholesaleContainer').classList.add('active');
+  }
 }
 
 // ══════════════════════════════════════
