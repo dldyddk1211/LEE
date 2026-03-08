@@ -510,7 +510,7 @@ def run_musinsa_search(keyword, max_items, search_mode='keyword'):
 # 무신사 → 크림 → 포이즌 통합 검색
 # ==========================================
 
-def run_full_search(keyword, max_items):
+def run_full_search(keyword, max_items, search_mode='keyword'):
     """무신사 검색 후 자동으로 크림 → 포이즌 순서로 연속 검색"""
     global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
 
@@ -537,8 +537,9 @@ def run_full_search(keyword, max_items):
         estimated_items = int(max_items) if str(max_items).isdigit() else 100
         current_items = 0
 
-        log_queue.put({'type': 'log', 'message': f'🟤 [1/3] 무신사 검색 시작: {keyword} ({max_items}개)'})
-        result = musinsa_search.search_musinsa(keyword=keyword, max_items=max_items, callback=log_callback)
+        label = f'랭킹 TOP {max_items}' if search_mode == 'ranking' else f'{keyword} ({max_items}개)'
+        log_queue.put({'type': 'log', 'message': f'🟤 [1/3] 무신사 검색 시작: {label}'})
+        result = musinsa_search.search_musinsa(keyword=keyword, max_items=max_items, search_mode=search_mode, callback=log_callback)
 
         if result.get('success'):
             items = result.get('results', [])
@@ -1748,16 +1749,28 @@ try:
         return '🔄 구글 시트 동기화를 시작합니다...'
 
     def _cmd_deploy(args):
-        """GitHub에서 최신 코드 pull 후 서버 재시작. /deploy force 시 강제 덮어쓰기"""
+        """배포 확인 후 실행. /deploy ok → pull+재시작, /deploy force ok → 강제"""
         import subprocess
-        force = len(args) > 0 and args[0].lower() == 'force'
 
+        force = len(args) > 0 and args[0].lower() == 'force'
+        confirmed = args[-1].lower() == 'ok' if args else False
+
+        # 확인 없이 /deploy 또는 /deploy force → 안내만
+        if not confirmed:
+            if force:
+                return ('⚠️ <b>강제 배포 확인 필요</b>\n'
+                        '로컬 변경사항이 모두 삭제됩니다.\n\n'
+                        '실행하려면: /deploy force ok')
+            return ('🚀 <b>배포 확인 필요</b>\n'
+                    'GitHub 최신 코드를 받아 서버를 재시작합니다.\n\n'
+                    '실행하려면: /deploy ok\n'
+                    '강제 실행: /deploy force ok')
+
+        # /deploy ok 또는 /deploy force ok → 실제 실행
         def _do():
             try:
                 repo_dir = os.path.dirname(os.path.abspath(__file__))
-
                 if force:
-                    # 강제: 로컬 변경사항 무시하고 원격 최신으로 덮어쓰기
                     cmds = [
                         ['git', 'fetch', 'origin'],
                         ['git', 'reset', '--hard', 'origin/main'],
@@ -1770,7 +1783,6 @@ try:
                     output = '\n'.join(o for o in outputs if o)
                     send_telegram_async(f'⚠️ <b>강제 업데이트 완료</b>\n<code>{output}</code>\n\n🔄 서버 재시작 중...')
                 else:
-                    # 일반 pull
                     result = subprocess.run(
                         ['git', 'pull', 'origin', 'main'],
                         cwd=repo_dir, capture_output=True, text=True, timeout=60
@@ -1779,39 +1791,54 @@ try:
                     if result.returncode != 0:
                         send_telegram_async(
                             f'❌ pull 실패:\n<code>{output}</code>\n\n'
-                            f'강제 업데이트: /deploy force'
+                            f'강제 실행: /deploy force ok'
                         )
                         return
                     send_telegram_async(f'📦 <b>Git Pull 완료</b>\n<code>{output}</code>\n\n🔄 서버 재시작 중...')
-
                 _time.sleep(2)
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             except Exception as e:
                 send_telegram_async(f'❌ 배포 실패: {e}')
 
         threading.Thread(target=_do, daemon=True).start()
-        mode = '⚠️ 강제 업데이트' if force else '🚀 일반 업데이트'
-        return f'{mode} 시작... GitHub에서 최신 코드를 받아옵니다.'
+        return '✅ 배포 시작합니다...'
+
+    def _cmd_rank(args):
+        """무신사 랭킹 → 크림 → 포이즌 통합 검색"""
+        if is_working:
+            return '⚠️ 이미 작업 중입니다. /stop 으로 먼저 중지하세요'
+        max_items = int(args[0]) if args and args[0].isdigit() else 100
+        t = threading.Thread(target=run_full_search, args=('', max_items, 'ranking'), daemon=True)
+        t.start()
+        return (f'📊 <b>랭킹 통합 검색 시작</b>\n'
+                f'• 최대: {max_items}개\n'
+                f'• 순서: 무신사 랭킹 → 크림 → 포이즌\n'
+                f'각 단계 완료 시 알림을 보내드립니다')
 
     def _cmd_help(_):
         return ('📋 <b>사용 가능한 명령어</b>\n\n'
                 '/status — 현재 작업 상태 확인\n'
                 '/stop — 진행 중인 작업 중지\n'
                 '/musinsa [키워드] [개수]\n'
-                '  → 무신사 → 크림 → 포이즌 순서로 자동 검색\n'
+                '  → 무신사 → 크림 → 포이즌 통합 검색\n'
                 '  예) /musinsa 나이키 100\n'
                 '/ranking [개수]\n'
-                '  → 무신사 랭킹 TOP N 수집\n'
+                '  → 무신사 랭킹 TOP N 수집만\n'
                 '  예) /ranking 100\n'
+                '/rank [개수]\n'
+                '  → 무신사 랭킹 → 크림 → 포이즌 통합 검색\n'
+                '  예) /rank 100\n'
                 '/sync — 구글 시트 강제 동기화\n'
-                '/deploy — GitHub 최신 코드 받아서 서버 재시작\n'
-                '/deploy force — 충돌 무시하고 강제 업데이트\n'
+                '/deploy — 배포 안내 (확인 필요)\n'
+                '/deploy ok — GitHub pull 후 서버 재시작\n'
+                '/deploy force ok — 강제 덮어쓰기 후 재시작\n'
                 '/help — 도움말')
 
     register_handler('/status',  _cmd_status)
     register_handler('/stop',    _cmd_stop)
     register_handler('/musinsa', _cmd_musinsa)
     register_handler('/ranking', _cmd_ranking)
+    register_handler('/rank',    _cmd_rank)
     register_handler('/sync',    _cmd_sync)
     register_handler('/deploy',  _cmd_deploy)
     register_handler('/help',    _cmd_help)
