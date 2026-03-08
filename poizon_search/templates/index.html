@@ -413,7 +413,7 @@
     }
 
     .table-container{
-      max-height: 720px;
+      max-height: 420px;
       overflow:auto;
       border:1px solid #e0e0e0;
       border-radius:12px;
@@ -640,7 +640,7 @@
       border:1px solid #e0e0e0;
       border-radius:12px;
       padding:14px;
-      height:260px;
+      height:360px;
       overflow-y:auto;
       font-family:'Courier New', monospace;
       font-size:13px;
@@ -654,6 +654,25 @@
 
     #resultSection{ display:none; }
     #resultSection.active{ display:block; }
+
+    /* 결과 + 진행상황 나란히 배치 */
+    .result-status-wrapper {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .result-status-wrapper #resultSection {
+      flex: 1;
+      min-width: 0;
+    }
+    .result-status-wrapper #statusSection {
+      width: 340px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 900px) {
+      .result-status-wrapper { flex-direction: column; }
+      .result-status-wrapper #statusSection { width: 100%; }
+    }
     #modeInventory.active {
       border-color: #28a745;
       background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -773,6 +792,7 @@
     </table>
   </div>
 </div>
+<div class="result-status-wrapper">
 <div class="section" id="resultSection" style="display:none;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
     <h3 style="margin: 0;">
@@ -853,6 +873,7 @@
       </div>
       <div class="log" id="logBox"></div>
     </div>
+</div><!-- /.result-status-wrapper -->
   </div>
 
 <script>
