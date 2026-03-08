@@ -229,6 +229,79 @@ def extract_number(text):
     return 0
 
 
+def search_single_product(page, code):
+    """도매 오더폼용 단건 상품 검색 - 품번으로 이미지 URL + 품명 반환"""
+    try:
+        # 검색창 찾아서 품번 입력
+        search_selectors = [
+            "input[placeholder*='상품번호']",
+            "input[placeholder*='품번']",
+            "input[placeholder*='货号']",
+            ".ant-input",
+            "input[type='text']",
+        ]
+        filled = False
+        for sel in search_selectors:
+            try:
+                els = page.locator(sel)
+                if els.count() > 0:
+                    els.first.fill(code)
+                    filled = True
+                    break
+            except Exception:
+                continue
+
+        if not filled:
+            return None
+
+        # Enter 키로 검색
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(2000)
+
+        # 첫 번째 행에서 이미지 + 품명 추출
+        try:
+            page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=6000)
+        except Exception:
+            return None
+
+        rows = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)")
+        if rows.count() == 0:
+            return None
+
+        row = rows.first
+        img_url = ""
+        name = ""
+
+        # 이미지
+        try:
+            imgs = row.locator("img")
+            if imgs.count() > 0:
+                img_url = imgs.first.get_attribute("src") or ""
+        except Exception:
+            pass
+
+        # 품명 (3번째 셀에서 추출)
+        try:
+            cells = row.locator("td")
+            if cells.count() > 2:
+                text = cells.nth(2).inner_text(timeout=5000)
+                lines = [l.strip() for l in text.split("\n") if l.strip()]
+                for line in lines:
+                    if line and "번호" not in line and "SPU" not in line.upper():
+                        name = line
+                        break
+        except Exception:
+            pass
+
+        if img_url:
+            return {'img_url': img_url, 'name': name}
+        return None
+
+    except Exception as e:
+        log(f"search_single_product 오류: {e}", 'error')
+        return None
+
+
 def scrape_current_page(page):
     rows_data = []
     try:

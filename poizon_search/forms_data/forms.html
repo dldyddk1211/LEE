@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>서식 / 양식</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -157,6 +158,38 @@
   .invoice-container.hidden { display: none; }
 
   @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── 도매 오더폼 ── */
+  .ws-table-wrap { overflow-x: auto; }
+  .ws-table { border-collapse: collapse; font-size: 11px; min-width: 100%; }
+  .ws-table th { background: #1a1a2e; color: #fff; padding: 5px 4px; text-align: center; border: 1px solid #333; white-space: nowrap; font-size: 10px; }
+  .ws-table td { border: 1px solid #ddd; padding: 2px; vertical-align: middle; }
+  .ws-table td input { width: 100%; border: none; padding: 4px 3px; font-size: 11px; text-align: center; outline: none; background: transparent; font-family: inherit; }
+  .ws-table td input:focus { background: #f0f4ff; border-radius: 3px; }
+  .ws-calc { background: #f5f5f5; text-align: center; font-size: 11px; padding: 4px 3px !important; color: #333; font-weight: 600; }
+  .ws-num { background: #f0f0f0; text-align: center; font-size: 11px; color: #888; width: 28px; padding: 4px 3px !important; }
+  .ws-img-cell { width: 60px; text-align: center; padding: 4px !important; }
+  .ws-img-thumb { width: 50px; height: 50px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; display: block; margin: 0 auto 3px; background: #fafafa; }
+  .ws-img-empty { width: 50px; height: 50px; border: 1.5px dashed #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ccc; margin: 0 auto 3px; }
+  .ws-search-btn { width: 52px; padding: 3px 0; font-size: 9px; background: #0f3460; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-family: inherit; line-height: 1.3; }
+  .ws-search-btn:hover { background: #1a5276; }
+  .ws-search-btn:disabled { opacity: 0.5; }
+  .ws-del-btn { color: #e74c3c; background: none; border: none; font-size: 16px; cursor: pointer; padding: 4px 6px; display: block; margin: 0 auto; }
+  .ws-summary { display: flex; justify-content: flex-end; gap: 24px; padding: 10px 14px; background: linear-gradient(135deg, #f8f9fa, #f0f4ff); border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: 600; }
+  .ws-summary span { color: #666; }
+  .ws-summary strong { color: #0f3460; font-size: 15px; }
+  /* 이미지 캡처용 div */
+  #wsCapture { background: #fff; padding: 20px 24px; font-family: 'Malgun Gothic', sans-serif; min-width: 900px; }
+  .wsc-header { font-size: 14px; font-weight: 900; text-align: center; padding: 10px 12px; border: 2px solid #000; margin-bottom: 6px; }
+  .wsc-remark { font-size: 10px; padding: 7px 12px; border: 1px solid #999; margin-bottom: 8px; white-space: pre-wrap; line-height: 1.7; }
+  .wsc-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .wsc-table th { background: #1a1a2e; color: #fff; padding: 5px 3px; text-align: center; border: 1px solid #555; white-space: nowrap; font-size: 9px; }
+  .wsc-table .th-size { background: #d9d9d9; color: #000; font-weight: 700; }
+  .wsc-table td { border: 1px solid #999; padding: 4px 2px; text-align: center; vertical-align: middle; font-size: 10px; }
+  .wsc-table .td-sub { font-size: 9px; color: #555; }
+  .wsc-total td { background: #f0f0f0; font-weight: 700; }
+  /* 미리보기 모달 */
+  .modal-xl { background: #fff; border-radius: 14px; width: 98vw; max-width: 1300px; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
 </style>
 </head>
 <body>
@@ -336,18 +369,76 @@
 
     <!-- 도매 리스트 컨테이너 -->
     <div class="wholesale-container" id="wholesaleContainer">
-      <div class="card">
+
+      <!-- 오더폼 설정 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><span>⚙️ 오더폼 설정</span></div>
         <div class="card-body">
-          <div class="section-title">📦 도매 리스트</div>
-          <div style="text-align: center; padding: 60px 20px; color: #999;">
-            <div style="font-size: 48px; margin-bottom: 16px;">🚧</div>
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">도매 리스트 기능</div>
-            <div style="font-size: 14px;">준비 중입니다...</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 200px;gap:10px;margin-bottom:10px;">
+            <div class="form-group" style="grid-column:span 2;">
+              <label>업체명</label>
+              <input type="text" id="ws_company" placeholder="더원 컴퍼니 ( 부가세 포함 / 택배비 착불 )">
+            </div>
+            <div class="form-group">
+              <label>사이즈 타입</label>
+              <select id="ws_size_type" onchange="wsChangeSizeType()" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;font-family:inherit;width:100%;">
+                <option value="CM">CM_SIZE (220~285)</option>
+                <option value="ONE">ONE SIZE</option>
+                <option value="CAP">CAP_SIZE</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:span 3;">
+              <label>REMARK</label>
+              <textarea id="ws_remark" rows="4" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:12px;outline:none;font-family:inherit;width:100%;resize:vertical;" placeholder="1. 브랜드 : &#10;2. MOQ : &#10;3. 출고 : &#10;4. 문의 : "></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상품 목록 -->
+      <div class="card">
+        <div class="card-header">
+          <span>📦 상품 목록</span>
+          <button class="btn-header-edit" onclick="wsAddProduct()">+ 상품 추가</button>
+        </div>
+        <div class="card-body" style="padding:12px 8px;">
+          <div class="ws-table-wrap">
+            <table class="ws-table">
+              <thead id="wsHead"></thead>
+              <tbody id="wsBody"></tbody>
+            </table>
+          </div>
+          <div class="ws-summary">
+            <span>총 수량 &nbsp;<strong id="wsTotalQty">0</strong></span>
+            <span>합계 금액 &nbsp;<strong id="wsTotalAmt">₩0</strong></span>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+            <button class="btn-outline" onclick="wsPreview()">👁 미리보기</button>
+            <button class="btn-primary" onclick="wsDownload()">📷 이미지 다운로드</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- // 도매 리스트 컨테이너 끝 -->
+
+    <!-- 도매 미리보기 모달 -->
+    <div class="modal-overlay" id="wsPreviewModal">
+      <div class="modal-xl">
+        <div class="modal-header">
+          <h3>📦 도매 오더폼 미리보기</h3>
+          <button class="modal-close" onclick="wsClosePreview()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="wsCapture"></div>
+          <div class="modal-actions">
+            <button class="btn-outline" onclick="wsClosePreview()">닫기</button>
+            <button class="btn-primary" onclick="wsDownload()">📷 이미지 다운로드</button>
           </div>
         </div>
       </div>
     </div>
-    <!-- // 도매 리스트 컨테이너 끝 -->
+    <!-- // 도매 미리보기 모달 끝 -->
 
   </div>
 </div>
@@ -1152,6 +1243,242 @@ function showMenu(menuName) {
 }
 
 // ══════════════════════════════════════
+// 도매 오더폼
+// ══════════════════════════════════════
+const WS_SIZES = {
+  CM:  [220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285],
+  ONE: ['ONE SIZE'],
+  CAP: ['M-L(58)', 'L-XL(60)'],
+};
+
+let wsProducts = [];
+
+function wsGetSizes() {
+  return WS_SIZES[document.getElementById('ws_size_type').value] || WS_SIZES.CM;
+}
+
+function wsChangeSizeType() {
+  const sizes = wsGetSizes();
+  wsProducts.forEach(p => {
+    const newSizes = {};
+    sizes.forEach(s => newSizes[s] = p.sizes[s] || 0);
+    p.sizes = newSizes;
+  });
+  wsRender();
+}
+
+function wsAddProduct() {
+  const sizes = wsGetSizes();
+  const sizeObj = {};
+  sizes.forEach(s => sizeObj[s] = 0);
+  wsProducts.push({ imgSrc: '', imgUrl: '', code: '', name: '', price: 0, disc: 0, sizes: sizeObj });
+  wsRender();
+}
+
+function wsDeleteProduct(idx) {
+  wsProducts.splice(idx, 1);
+  wsRender();
+}
+
+function wsRender() {
+  const sizes = wsGetSizes();
+  const sizeType = document.getElementById('ws_size_type').value;
+
+  // 헤더
+  document.getElementById('wsHead').innerHTML = `<tr>
+    <th style="width:28px;">번호</th>
+    <th style="width:60px;">이미지</th>
+    <th style="min-width:100px;">품번</th>
+    <th style="min-width:170px;">품명</th>
+    <th style="width:72px;">소비자가</th>
+    <th style="width:50px;">할인율<br>(%)</th>
+    <th style="width:72px;">공급가</th>
+    ${sizes.map(s => `<th style="width:34px;">${s}</th>`).join('')}
+    <th style="width:44px;">합계<br>수량</th>
+    <th style="width:72px;">합계<br>금액</th>
+    <th style="width:30px;"></th>
+  </tr>`;
+
+  // 바디
+  document.getElementById('wsBody').innerHTML = wsProducts.map((p, i) => {
+    const supply = p.price > 0 ? Math.round(p.price * (1 - p.disc / 100)) : 0;
+    const totalQty = sizes.reduce((a, s) => a + (parseInt(p.sizes[s]) || 0), 0);
+    const totalAmt = supply * totalQty;
+    const imgHtml = p.imgSrc
+      ? `<img src="${p.imgSrc}" class="ws-img-thumb" onerror="this.outerHTML='<div class=ws-img-empty>📷</div>'">`
+      : `<div class="ws-img-empty">📷</div>`;
+    return `<tr id="wsRow${i}">
+      <td class="ws-num">${i + 1}</td>
+      <td class="ws-img-cell">
+        ${imgHtml}
+        <button class="ws-search-btn" id="wsBtn${i}" onclick="wsSearchImg(${i})">포이즌<br>검색</button>
+      </td>
+      <td><input type="text" value="${p.code}" placeholder="품번" oninput="wsProducts[${i}].code=this.value"></td>
+      <td><input type="text" value="${p.name}" placeholder="품명" oninput="wsProducts[${i}].name=this.value"></td>
+      <td><input type="number" value="${p.price || ''}" placeholder="0" oninput="wsProducts[${i}].price=parseInt(this.value)||0;wsCalcRow(${i})"></td>
+      <td><input type="number" value="${p.disc || ''}" placeholder="0" min="0" max="100" oninput="wsProducts[${i}].disc=parseFloat(this.value)||0;wsCalcRow(${i})"></td>
+      <td class="ws-calc" id="wsSupply${i}">${supply > 0 ? supply.toLocaleString() : ''}</td>
+      ${sizes.map(s => `<td><input type="number" value="${p.sizes[s] || ''}" placeholder="" min="0" oninput="wsProducts[${i}].sizes[${JSON.stringify(s)}]=parseInt(this.value)||0;wsCalcRow(${i})"></td>`).join('')}
+      <td class="ws-calc" id="wsQty${i}">${totalQty > 0 ? totalQty : ''}</td>
+      <td class="ws-calc" id="wsAmt${i}">${totalAmt > 0 ? totalAmt.toLocaleString() : ''}</td>
+      <td><button class="ws-del-btn" onclick="wsDeleteProduct(${i})">🗑</button></td>
+    </tr>`;
+  }).join('');
+
+  wsCalcTotals();
+}
+
+function wsCalcRow(i) {
+  const p = wsProducts[i];
+  const sizes = wsGetSizes();
+  const supply = p.price > 0 ? Math.round(p.price * (1 - p.disc / 100)) : 0;
+  const totalQty = sizes.reduce((a, s) => a + (parseInt(p.sizes[s]) || 0), 0);
+  const totalAmt = supply * totalQty;
+  const s = document.getElementById('wsSupply' + i);
+  const q = document.getElementById('wsQty' + i);
+  const a = document.getElementById('wsAmt' + i);
+  if (s) s.textContent = supply > 0 ? supply.toLocaleString() : '';
+  if (q) q.textContent = totalQty > 0 ? totalQty : '';
+  if (a) a.textContent = totalAmt > 0 ? totalAmt.toLocaleString() : '';
+  wsCalcTotals();
+}
+
+function wsCalcTotals() {
+  const sizes = wsGetSizes();
+  let totalQty = 0, totalAmt = 0;
+  wsProducts.forEach(p => {
+    const supply = p.price > 0 ? Math.round(p.price * (1 - p.disc / 100)) : 0;
+    const qty = sizes.reduce((a, s) => a + (parseInt(p.sizes[s]) || 0), 0);
+    totalQty += qty;
+    totalAmt += supply * qty;
+  });
+  document.getElementById('wsTotalQty').textContent = totalQty.toLocaleString();
+  document.getElementById('wsTotalAmt').textContent = '₩' + totalAmt.toLocaleString();
+}
+
+async function wsSearchImg(idx) {
+  const code = wsProducts[idx].code.trim();
+  if (!code) { alert('품번을 먼저 입력해주세요'); return; }
+  const btn = document.getElementById('wsBtn' + idx);
+  if (btn) { btn.textContent = '검색중...'; btn.disabled = true; }
+  try {
+    const res = await fetch('/search_wholesale_product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    if (data.success) {
+      wsProducts[idx].imgSrc = '/proxy_image?url=' + encodeURIComponent(data.img_url);
+      wsProducts[idx].imgUrl = data.img_url;
+      if (data.name && !wsProducts[idx].name) wsProducts[idx].name = data.name;
+      wsRender();
+    } else {
+      alert('❌ 검색 실패: ' + (data.error || '결과 없음'));
+    }
+  } catch (e) {
+    alert('❌ 오류: ' + e.message);
+  } finally {
+    const btn2 = document.getElementById('wsBtn' + idx);
+    if (btn2) { btn2.innerHTML = '포이즌<br>검색'; btn2.disabled = false; }
+  }
+}
+
+function wsBuildCapture() {
+  const company = document.getElementById('ws_company').value || '업체명';
+  const remark = document.getElementById('ws_remark').value;
+  const sizes = wsGetSizes();
+  const sizeType = document.getElementById('ws_size_type').value;
+  let totalQty = 0, totalAmt = 0;
+  wsProducts.forEach(p => {
+    const supply = p.price > 0 ? Math.round(p.price * (1 - p.disc / 100)) : 0;
+    const qty = sizes.reduce((a, s) => a + (parseInt(p.sizes[s]) || 0), 0);
+    totalQty += qty; totalAmt += supply * qty;
+  });
+  const rows = wsProducts.map((p, i) => {
+    const supply = p.price > 0 ? Math.round(p.price * (1 - p.disc / 100)) : 0;
+    const qty = sizes.reduce((a, s) => a + (parseInt(p.sizes[s]) || 0), 0);
+    const amt = supply * qty;
+    return `<tr>
+      <td>${i + 1}</td>
+      <td style="width:54px;padding:2px;">${p.imgSrc ? `<img src="${p.imgSrc}" style="width:50px;height:50px;object-fit:contain;display:block;margin:0 auto;">` : ''}</td>
+      <td>${p.code}</td>
+      <td style="text-align:left;padding-left:5px;">${p.name}</td>
+      <td>${p.price > 0 ? p.price.toLocaleString() : ''}</td>
+      <td>${p.disc > 0 ? p.disc + '%' : ''}</td>
+      <td style="font-weight:700;">${supply > 0 ? supply.toLocaleString() : ''}</td>
+      ${sizes.map(s => `<td style="${(p.sizes[s] || 0) > 0 ? 'font-weight:700;color:#0f3460;' : ''}">${p.sizes[s] || ''}</td>`).join('')}
+      <td style="font-weight:700;">${qty > 0 ? qty : ''}</td>
+      <td style="font-weight:700;">${amt > 0 ? amt.toLocaleString() : ''}</td>
+    </tr>`;
+  }).join('');
+
+  const sizeLabel = sizeType === 'CM' ? 'CM_SIZE' : sizeType === 'ONE' ? 'ONE SIZE' : 'CAP_SIZE';
+
+  return `
+    <div class="wsc-header">${company}</div>
+    ${remark ? `<div class="wsc-remark"><strong>REMARK</strong>\n${remark}</div>` : ''}
+    <table class="wsc-table">
+      <thead>
+        <tr>
+          <th rowspan="2" style="width:24px;">번호</th>
+          <th rowspan="2" style="width:54px;">이미지</th>
+          <th rowspan="2" style="min-width:90px;">품번</th>
+          <th rowspan="2" style="min-width:150px;">품명</th>
+          <th rowspan="2" style="width:66px;">소비자가</th>
+          <th rowspan="2" style="width:44px;">할인율</th>
+          <th rowspan="2" style="width:66px;">공급가</th>
+          <th colspan="${sizes.length}" class="th-size">${sizeLabel}</th>
+          <th rowspan="2" style="width:40px;">합계<br>수량</th>
+          <th rowspan="2" style="width:70px;">합계<br>금액</th>
+        </tr>
+        <tr>${sizes.map(s => `<th class="th-size" style="width:32px;">${s}</th>`).join('')}</tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr class="wsc-total">
+          <td colspan="7" style="text-align:right;padding-right:8px;">합 계</td>
+          ${sizes.map(() => '<td></td>').join('')}
+          <td>${totalQty.toLocaleString()}</td>
+          <td>${totalAmt.toLocaleString()}</td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+function wsPreview() {
+  document.getElementById('wsCapture').innerHTML = wsBuildCapture();
+  document.getElementById('wsPreviewModal').classList.add('show');
+}
+
+function wsClosePreview() {
+  document.getElementById('wsPreviewModal').classList.remove('show');
+}
+
+async function wsDownload() {
+  if (wsProducts.length === 0) { alert('상품을 먼저 추가해주세요'); return; }
+  document.getElementById('wsCapture').innerHTML = wsBuildCapture();
+  const el = document.getElementById('wsCapture');
+  try {
+    const canvas = await html2canvas(el, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+    const company = (document.getElementById('ws_company').value || '도매오더폼').replace(/\s+/g, '_');
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `${company}_${date}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } catch (e) {
+    alert('❌ 이미지 다운로드 실패: ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════
 // 초기화
 // ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
@@ -1162,6 +1489,8 @@ window.addEventListener('DOMContentLoaded', () => {
   addProductRow();
   loadCustomers();
   initTableResize();  // ← 컬럼 리사이즈 초기화
+  // 도매 오더폼 초기 상품 3개
+  wsAddProduct(); wsAddProduct(); wsAddProduct();
 
   // 수요자 직접 입력 시에도 historyBtn 업데이트
   ['buyerCompany', 'buyerName'].forEach(id => {

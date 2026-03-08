@@ -1431,6 +1431,39 @@ def download_file(filename):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/search_wholesale_product', methods=['POST'])
+def search_wholesale_product():
+    """도매 오더폼 - 포이즌에서 단건 상품 검색 (이미지 + 품명)"""
+    try:
+        code = request.json.get('code', '').strip()
+        if not code:
+            return jsonify({'success': False, 'error': '품번 없음'})
+        if page is None:
+            return jsonify({'success': False, 'error': '포이즌 브라우저가 실행 중이 아닙니다. 먼저 포이즌 브라우저를 시작해주세요.'})
+        from poizon_data import poizon_search as ps
+        result = ps.search_single_product(page, code)
+        if result:
+            return jsonify({'success': True, 'img_url': result.get('img_url', ''), 'name': result.get('name', '')})
+        return jsonify({'success': False, 'error': '검색 결과 없음'})
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/proxy_image')
+def proxy_image():
+    """외부 이미지 프록시 (CORS 우회용)"""
+    import requests as req
+    url = request.args.get('url', '')
+    if not url:
+        return '', 404
+    try:
+        r = req.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+        return Response(r.content, content_type=r.headers.get('Content-Type', 'image/jpeg'))
+    except Exception:
+        return '', 404
+
+
 # ✅ 서식 Blueprint 등록 (forms_data/forms_api.py)
 try:
     import sys
