@@ -8,15 +8,16 @@
 """
 
 import base64
+import os
 import time
 import requests
 import threading
 
 # ──────────────────────────────────────
-# ★ 여기에 실제 값을 입력하세요 ★
-BOT_TOKEN        = '8771610716:AAEVKdw6GU97fNzir18rbWrVeA_ItD2be0E'
-CHAT_ID          = '6382036414'
-ANTHROPIC_API_KEY = ''   # ← 직접 입력하거나 환경변수 ANTHROPIC_API_KEY 설정
+# 환경변수 우선 → 없으면 아래 직접 입력값 사용
+BOT_TOKEN         = os.environ.get('TELEGRAM_BOT_TOKEN',  '8771610716:AAEVKdw6GU97fNzir18rbWrVeA_ItD2be0E')
+CHAT_ID           = os.environ.get('TELEGRAM_CHAT_ID',    '6382036414')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 # ──────────────────────────────────────
 
 BASE_URL = f'https://api.telegram.org/bot{BOT_TOKEN}'
