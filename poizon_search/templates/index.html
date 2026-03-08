@@ -105,23 +105,25 @@
     }
     .mode-buttons{
       display:grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap:12px;
     }
     .mode-btn{
-      padding:16px 12px;
+      padding:18px 16px;
       border:2px solid #e0e0e0;
       background:#fff;
       border-radius:10px;
       cursor:pointer;
       transition: all 0.3s;
       display:flex;
-      flex-direction:column;
+      flex-direction:row;
       align-items:center;
-      gap:8px;
-      font-size:14px;
+      justify-content:center;
+      gap:10px;
+      font-size:15px;
       font-weight:600;
       color:#333;
+      white-space:nowrap;
     }
     .mode-btn:hover:not(:disabled){
       border-color:#667eea;
@@ -193,10 +195,11 @@
 
 
     .mode-icon{
-      font-size:24px;
+      font-size:22px;
+      flex-shrink:0;
     }
     .mode-text{
-      font-size:13px;
+      font-size:15px;
       line-height:1.2;
     }
 
@@ -589,6 +592,27 @@
       gap: 10px;
     }
   }
+
+    /* 모바일 모드 버튼: 4열 유지, 크기 축소 */
+    @media (max-width: 768px) {
+      .mode-buttons {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .mode-btn {
+        padding: 12px 6px;
+        font-size: 13px;
+        gap: 6px;
+        flex-direction: column;
+      }
+      .mode-icon { font-size: 20px; }
+      .mode-text { font-size: 12px; }
+      .button-group {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .container { padding: 20px 16px; }
+    }
 
     .progress-bar{
       width:100%;
