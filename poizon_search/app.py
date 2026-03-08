@@ -341,6 +341,19 @@ def run_comparison(products):
                 import traceback
                 traceback.print_exc()
             
+            # 텔레그램 알림
+            try:
+                from utils.telegram import send_telegram_async
+                elapsed_min = int((time_module.time() - work_start_time) // 60)
+                elapsed_sec = int((time_module.time() - work_start_time) % 60)
+                send_telegram_async(
+                    f"✅ <b>리스트 비교 완료</b>\n"
+                    f"• 상품 수: {result.get('total_items', 0)}개\n"
+                    f"• 소요 시간: {elapsed_min}분 {elapsed_sec}초"
+                )
+            except Exception:
+                pass
+
             # 기존 complete 메시지
             log_queue.put({
                 'type': 'complete',
@@ -434,6 +447,20 @@ def run_musinsa_search(keyword, max_items):
                 import traceback
                 traceback.print_exc()
             
+            # 텔레그램 알림
+            try:
+                from utils.telegram import send_telegram_async
+                elapsed_min = int((time_module.time() - work_start_time) // 60)
+                elapsed_sec = int((time_module.time() - work_start_time) % 60)
+                send_telegram_async(
+                    f"✅ <b>무신사 검색 완료</b>\n"
+                    f"• 키워드: {keyword}\n"
+                    f"• 수집 수: {result.get('total_items', 0)}개\n"
+                    f"• 소요 시간: {elapsed_min}분 {elapsed_sec}초"
+                )
+            except Exception:
+                pass
+
             log_queue.put({
                 'type': 'complete',
                 'total_items': result.get('total_items', 0),
@@ -444,7 +471,7 @@ def run_musinsa_search(keyword, max_items):
                 'type': 'error',
                 'message': result.get('error', '알 수 없는 오류')
             })
-            
+
     except Exception as e:
         print(f"\n❌ run_musinsa_search 오류: {e}")
         import traceback
