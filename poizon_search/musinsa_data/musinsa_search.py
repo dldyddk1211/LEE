@@ -91,8 +91,8 @@ def get_browser():
             headless=HEADLESS,
             channel='chrome',
             args=[
-                '--window-size=960,540',
-                '--window-position=960,0',
+                '--window-size=960,648',
+                '--window-position=0,0',
                 '--disable-blink-features=AutomationControlled',
                 '--disable-dev-shm-usage',
                 '--no-sandbox'
@@ -227,8 +227,8 @@ def login_musinsa():
             headless=False,
             channel='chrome',
             args=[
-                '--window-size=960,540',
-                '--window-position=960,0',
+                '--window-size=960,648',
+                '--window-position=0,0',
                 '--disable-blink-features=AutomationControlled'
             ]
         )

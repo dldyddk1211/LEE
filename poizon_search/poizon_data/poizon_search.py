@@ -238,13 +238,13 @@ def search_single_product(code):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
 
             context = browser.new_context(viewport=None, no_viewport=True)
@@ -600,7 +600,7 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
             headless=HEADLESS,
             channel='chrome',  # 설치된 Chrome 사용 (더 안정적)
             args=[
-                '--start-maximized',  # 최대화 모드
+                '--window-size=960,648', '--window-position=0,0',  # 최대화 모드
                 '--disable-blink-features=AutomationControlled',  # 자동화 감지 우회
             ]
         )
@@ -840,7 +840,7 @@ def perform_login():
                     browser = p.chromium.launch(
                         headless=HEADLESS,
                         args=[
-                            '--start-maximized',
+                            '--window-size=960,648', '--window-position=0,0',
                             '--disable-blink-features=AutomationControlled',
                         ]
                     )
@@ -849,7 +849,7 @@ def perform_login():
                         headless=HEADLESS,
                         channel='chrome',
                         args=[
-                            '--start-maximized',
+                            '--window-size=960,648', '--window-position=0,0',
                             '--disable-blink-features=AutomationControlled',
                         ]
                     )
@@ -934,7 +934,7 @@ def compare_product_price(product_code, product_name, callback=None):
             browser = p.chromium.launch(
                 headless=HEADLESS,
                 channel='chrome',
-                args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
             )
             context = browser.new_context(viewport=None, no_viewport=True)
             
@@ -1256,13 +1256,13 @@ def run_excel_comparison(products, callback=None):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
             
             context = browser.new_context(viewport=None, no_viewport=True)
@@ -1595,13 +1595,13 @@ def search_multiple_products(product_codes, progress_queue):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
                 )
             
             context = browser.new_context(viewport=None, no_viewport=True)

@@ -245,8 +245,8 @@ def login_kream():
                 headless=False,
                 channel='chrome',
                 args=[
-                    '--window-size=960,540',
-                    '--window-position=960,0',
+                    '--window-size=960,648',
+                    '--window-position=0,0',
                     '--disable-blink-features=AutomationControlled'
                 ]
             )
@@ -544,8 +544,8 @@ def background_kream_search(task_id, product_codes, progress_queue):
             headless=False,
             channel='chrome',
             args=[
-                '--window-size=960,540',
-                '--window-position=960,0',
+                '--window-size=960,648',
+                '--window-position=0,0',
                 '--disable-blink-features=AutomationControlled'
             ]
         )
