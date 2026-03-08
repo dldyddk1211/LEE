@@ -1720,6 +1720,52 @@ try:
         threading.Thread(target=_do, daemon=True).start()
         return '🔄 구글 시트 동기화를 시작합니다...'
 
+    def _cmd_deploy(args):
+        """GitHub에서 최신 코드 pull 후 서버 재시작. /deploy force 시 강제 덮어쓰기"""
+        import subprocess
+        force = len(args) > 0 and args[0].lower() == 'force'
+
+        def _do():
+            try:
+                repo_dir = os.path.dirname(os.path.abspath(__file__))
+
+                if force:
+                    # 강제: 로컬 변경사항 무시하고 원격 최신으로 덮어쓰기
+                    cmds = [
+                        ['git', 'fetch', 'origin'],
+                        ['git', 'reset', '--hard', 'origin/main'],
+                        ['git', 'clean', '-fd'],
+                    ]
+                    outputs = []
+                    for cmd in cmds:
+                        r = subprocess.run(cmd, cwd=repo_dir, capture_output=True, text=True, timeout=60)
+                        outputs.append((r.stdout + r.stderr).strip())
+                    output = '\n'.join(o for o in outputs if o)
+                    send_telegram_async(f'⚠️ <b>강제 업데이트 완료</b>\n<code>{output}</code>\n\n🔄 서버 재시작 중...')
+                else:
+                    # 일반 pull
+                    result = subprocess.run(
+                        ['git', 'pull', 'origin', 'main'],
+                        cwd=repo_dir, capture_output=True, text=True, timeout=60
+                    )
+                    output = result.stdout.strip() or result.stderr.strip()
+                    if result.returncode != 0:
+                        send_telegram_async(
+                            f'❌ pull 실패:\n<code>{output}</code>\n\n'
+                            f'강제 업데이트: /deploy force'
+                        )
+                        return
+                    send_telegram_async(f'📦 <b>Git Pull 완료</b>\n<code>{output}</code>\n\n🔄 서버 재시작 중...')
+
+                _time.sleep(2)
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+            except Exception as e:
+                send_telegram_async(f'❌ 배포 실패: {e}')
+
+        threading.Thread(target=_do, daemon=True).start()
+        mode = '⚠️ 강제 업데이트' if force else '🚀 일반 업데이트'
+        return f'{mode} 시작... GitHub에서 최신 코드를 받아옵니다.'
+
     def _cmd_help(_):
         return ('📋 <b>사용 가능한 명령어</b>\n\n'
                 '/status — 현재 작업 상태 확인\n'
@@ -1728,12 +1774,15 @@ try:
                 '  → 무신사 → 크림 → 포이즌 순서로 자동 검색\n'
                 '  예) /musinsa 나이키 100\n'
                 '/sync — 구글 시트 강제 동기화\n'
+                '/deploy — GitHub 최신 코드 받아서 서버 재시작\n'
+                '/deploy force — 충돌 무시하고 강제 업데이트\n'
                 '/help — 도움말')
 
     register_handler('/status',  _cmd_status)
     register_handler('/stop',    _cmd_stop)
     register_handler('/musinsa', _cmd_musinsa)
     register_handler('/sync',    _cmd_sync)
+    register_handler('/deploy',  _cmd_deploy)
     register_handler('/help',    _cmd_help)
     register_handler('/start',   _cmd_help)
 
