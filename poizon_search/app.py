@@ -490,6 +490,171 @@ def run_musinsa_search(keyword, max_items):
 
 
 # ==========================================
+# 무신사 → 크림 → 포이즌 통합 검색
+# ==========================================
+
+def run_full_search(keyword, max_items):
+    """무신사 검색 후 자동으로 크림 → 포이즌 순서로 연속 검색"""
+    global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
+
+    import time as time_module
+    from utils.telegram import send_telegram_async
+
+    is_working = True
+    work_start_time = time_module.time()
+    stop_flag = False
+    while not log_queue.empty():
+        log_queue.get()
+
+    total_start = time_module.time()
+    musinsa_count = 0
+    kream_count   = 0
+    poizon_count  = 0
+    product_codes = []
+
+    # ────────────────────────────────────
+    # 1단계: 무신사 검색
+    # ────────────────────────────────────
+    try:
+        work_type = 'musinsa'
+        estimated_items = int(max_items) if str(max_items).isdigit() else 100
+        current_items = 0
+
+        log_queue.put({'type': 'log', 'message': f'🟤 [1/3] 무신사 검색 시작: {keyword} ({max_items}개)'})
+        result = musinsa_search.search_musinsa(keyword=keyword, max_items=max_items, callback=log_callback)
+
+        if result.get('success'):
+            items = result.get('results', [])
+            musinsa_count = len(items)
+            # 유효한 품번만 추출
+            product_codes = [
+                it.get('product_code', '').strip()
+                for it in items
+                if it.get('product_code', '').strip() not in ('', '-')
+            ]
+            elapsed = int(time_module.time() - total_start)
+            send_telegram_async(
+                f"✅ <b>[1/3] 무신사 검색 완료</b>\n"
+                f"• 키워드: {keyword}\n"
+                f"• 수집: {musinsa_count}개 (품번 {len(product_codes)}개)\n"
+                f"• 경과: {elapsed//60}분 {elapsed%60}초\n"
+                f"→ 크림 검색 시작..."
+            )
+            log_queue.put({'type': 'log', 'message': f'✅ 무신사 완료 {musinsa_count}개 → 크림 검색 시작'})
+        else:
+            err = result.get('error', '알 수 없는 오류')
+            send_telegram_async(f"❌ <b>무신사 오류</b>\n{err}")
+            log_queue.put({'type': 'error', 'message': f'무신사 오류: {err}'})
+            return
+
+    except Exception as e:
+        send_telegram_async(f"❌ <b>무신사 오류</b>\n{e}")
+        log_queue.put({'type': 'error', 'message': f'무신사 오류: {e}'})
+        return
+
+    if stop_flag or not product_codes:
+        if not product_codes:
+            send_telegram_async('⚠️ 품번이 없어 크림/포이즌 검색을 건너뜁니다')
+        is_working = False
+        return
+
+    # ────────────────────────────────────
+    # 2단계: 크림 검색
+    # ────────────────────────────────────
+    try:
+        work_type = 'kream'
+        estimated_items = len(product_codes)
+        current_items = 0
+
+        log_queue.put({'type': 'log', 'message': f'🛒 [2/3] 크림 검색 시작: {len(product_codes)}개 품번'})
+        kream_result = kream_search.search_kream_products_batch(product_codes, callback=log_callback)
+
+        if kream_result.get('success'):
+            kream_data = kream_result.get('results', {})
+            kream_count = len(kream_data)
+            elapsed = int(time_module.time() - total_start)
+            send_telegram_async(
+                f"✅ <b>[2/3] 크림 검색 완료</b>\n"
+                f"• 결과: {kream_count}개\n"
+                f"• 경과: {elapsed//60}분 {elapsed%60}초\n"
+                f"→ 포이즌 검색 시작..."
+            )
+            log_queue.put({'type': 'log', 'message': f'✅ 크림 완료 {kream_count}개 → 포이즌 검색 시작'})
+        else:
+            err = kream_result.get('error', '알 수 없는 오류')
+            send_telegram_async(f"❌ <b>크림 오류</b>\n{err}\n→ 포이즌 검색은 계속 진행합니다")
+            log_queue.put({'type': 'log', 'message': f'⚠️ 크림 오류: {err}'})
+
+    except Exception as e:
+        send_telegram_async(f"❌ <b>크림 오류</b>\n{e}\n→ 포이즌 검색은 계속 진행합니다")
+        log_queue.put({'type': 'log', 'message': f'⚠️ 크림 오류: {e}'})
+
+    if stop_flag:
+        is_working = False
+        return
+
+    # ────────────────────────────────────
+    # 3단계: 포이즌 검색
+    # ────────────────────────────────────
+    try:
+        from poizon_data.poizon_search import search_single_product
+        work_type = 'poizon'
+        estimated_items = len(product_codes)
+        current_items = 0
+
+        log_queue.put({'type': 'log', 'message': f'🔴 [3/3] 포이즌 검색 시작: {len(product_codes)}개 품번'})
+        poizon_data = {}
+
+        for idx, code in enumerate(product_codes):
+            if stop_flag:
+                break
+            current_items = idx + 1
+            log_queue.put({'type': 'log', 'message': f'  포이즌 [{idx+1}/{len(product_codes)}] {code}'})
+            try:
+                pr = search_single_product(code)
+                if pr:
+                    poizon_data[code] = pr
+                    poizon_count += 1
+            except Exception as e:
+                log_queue.put({'type': 'log', 'message': f'  ⚠️ 포이즌 {code} 오류: {e}'})
+
+        elapsed = int(time_module.time() - total_start)
+        send_telegram_async(
+            f"✅ <b>[3/3] 포이즌 검색 완료</b>\n"
+            f"• 결과: {poizon_count}개\n"
+            f"• 경과: {elapsed//60}분 {elapsed%60}초"
+        )
+        log_queue.put({'type': 'log', 'message': f'✅ 포이즌 완료 {poizon_count}개'})
+
+    except Exception as e:
+        send_telegram_async(f"❌ <b>포이즌 오류</b>\n{e}")
+        log_queue.put({'type': 'log', 'message': f'⚠️ 포이즌 오류: {e}'})
+
+    # ────────────────────────────────────
+    # 최종 요약
+    # ────────────────────────────────────
+    total_elapsed = int(time_module.time() - total_start)
+    send_telegram_async(
+        f"🎉 <b>전체 검색 완료</b>\n"
+        f"• 키워드: {keyword}\n"
+        f"• 무신사: {musinsa_count}개\n"
+        f"• 크림: {kream_count}개\n"
+        f"• 포이즌: {poizon_count}개\n"
+        f"• 총 소요: {total_elapsed//60}분 {total_elapsed%60}초"
+    )
+    log_queue.put({
+        'type': 'complete',
+        'total_items': musinsa_count,
+        'message': f'전체 완료 - 무신사 {musinsa_count} / 크림 {kream_count} / 포이즌 {poizon_count}'
+    })
+
+    is_working = False
+    work_type = None
+    estimated_items = 0
+    current_items = 0
+
+
+# ==========================================
 # 라우트
 # ==========================================
 
@@ -1508,6 +1673,74 @@ try:
     print("✅ 구글 시트 자동 동기화 시작")
 except Exception as e:
     print(f"⚠️ 시트 동기화 시작 실패: {e}")
+
+# 텔레그램 명령어 폴링 시작
+try:
+    from utils.telegram import register_handler, start_polling, send_telegram_async
+    import time as _time
+
+    def _cmd_status(_):
+        if is_working:
+            elapsed = int(_time.time() - (work_start_time or _time.time()))
+            m, s = elapsed // 60, elapsed % 60
+            wt = {'scraping': '포이즌 검색', 'comparison': '리스트 비교', 'musinsa': '무신사 검색'}.get(work_type, work_type)
+            return (f'🔄 <b>작업 중</b>: {wt}\n'
+                    f'• 진행: {current_items} / {estimated_items}개\n'
+                    f'• 경과: {m}분 {s}초')
+        return '✅ 현재 대기 중 (작업 없음)'
+
+    def _cmd_stop(_):
+        global stop_flag
+        if not is_working:
+            return '⚠️ 현재 실행 중인 작업이 없습니다'
+        stop_flag = True
+        return '🛑 중지 신호를 보냈습니다'
+
+    def _cmd_musinsa(args):
+        global stop_flag
+        if is_working:
+            return '⚠️ 이미 작업 중입니다. /stop 으로 먼저 중지하세요'
+        if not args:
+            return '사용법: /musinsa [키워드] [개수]\n예) /musinsa 나이키 100\n\n무신사 → 크림 → 포이즌 순서로 자동 검색합니다'
+        keyword = args[0]
+        max_items = int(args[1]) if len(args) > 1 and args[1].isdigit() else 100
+        t = threading.Thread(target=run_full_search, args=(keyword, max_items), daemon=True)
+        t.start()
+        return (f'🔍 <b>통합 검색 시작</b>\n'
+                f'• 키워드: {keyword}\n'
+                f'• 최대: {max_items}개\n'
+                f'• 순서: 무신사 → 크림 → 포이즌\n'
+                f'각 단계 완료 시 알림을 보내드립니다')
+
+    def _cmd_sync(_):
+        def _do():
+            from inventory_data.sheets_sync import sync_once
+            count = sync_once()
+            send_telegram_async(f'✅ 구글 시트 동기화 완료: {count}건')
+        threading.Thread(target=_do, daemon=True).start()
+        return '🔄 구글 시트 동기화를 시작합니다...'
+
+    def _cmd_help(_):
+        return ('📋 <b>사용 가능한 명령어</b>\n\n'
+                '/status — 현재 작업 상태 확인\n'
+                '/stop — 진행 중인 작업 중지\n'
+                '/musinsa [키워드] [개수]\n'
+                '  → 무신사 → 크림 → 포이즌 순서로 자동 검색\n'
+                '  예) /musinsa 나이키 100\n'
+                '/sync — 구글 시트 강제 동기화\n'
+                '/help — 도움말')
+
+    register_handler('/status',  _cmd_status)
+    register_handler('/stop',    _cmd_stop)
+    register_handler('/musinsa', _cmd_musinsa)
+    register_handler('/sync',    _cmd_sync)
+    register_handler('/help',    _cmd_help)
+    register_handler('/start',   _cmd_help)
+
+    start_polling()
+    print('✅ 텔레그램 명령어 폴링 시작')
+except Exception as e:
+    print(f'⚠️ 텔레그램 폴링 시작 실패: {e}')
 
 # ==========================================
 # 서버 시작
