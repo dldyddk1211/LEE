@@ -1442,6 +1442,50 @@ def poizon_search_progress(task_id):
         }
     )
 
+@app.route('/api/send_best', methods=['POST'])
+def api_send_best():
+    """필터 결과 베스트 10을 텔레그램으로 전송"""
+    try:
+        from utils.telegram import send_telegram_async
+        from datetime import datetime as _dt
+        data = request.get_json()
+        mode  = data.get('mode', '')
+        items = data.get('items', [])[:10]
+
+        now = _dt.now().strftime('%m/%d %H:%M')
+        mode_label = {'poizon': '포이즌', 'musinsa': '무신사', 'compare': '리스트 비교'}.get(mode, mode)
+
+        lines = [f'🏆 <b>베스트 {len(items)}위 ({mode_label}) — {now}</b>\n']
+
+        for i, d in enumerate(items, 1):
+            code = d.get('상품번호') or d.get('엑셀_상품번호') or d.get('product_code') or '-'
+            name = d.get('제품명') or d.get('name') or '-'
+            name = name[:20] + '…' if len(str(name)) > 20 else name
+
+            if mode == 'poizon':
+                diff  = d.get('크림비교', 0) or 0
+                ksale = d.get('크림판매량', 0) or 0
+                lines.append(
+                    f'{i}. <code>{code}</code> {name}\n'
+                    f'   포이즌-크림: <b>+{int(diff):,}원</b> | 크림판매량: {int(ksale):,}개'
+                )
+            else:
+                kd   = d.get('크림비교', 0)  or 0
+                pd   = d.get('포이즌비교', 0) or 0
+                ks   = d.get('크림판매량', 0) or 0
+                ps   = (d.get('포이즌중국판매량', 0) or 0) + (d.get('포이즌현업자판매량', 0) or 0)
+                lines.append(
+                    f'{i}. <code>{code}</code> {name}\n'
+                    f'   크림차: <b>{int(kd):+,}원</b> ({int(ks):,}개) | '
+                    f'포이즌차: <b>{int(pd):+,}원</b> ({int(ps):,}개)'
+                )
+
+        send_telegram_async('\n'.join(lines))
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.route('/download_excel', methods=['POST'])
 def download_excel():
     """현재 테이블 그대로 엑셀 저장"""

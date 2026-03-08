@@ -655,6 +655,58 @@
     #resultSection{ display:none; }
     #resultSection.active{ display:block; }
 
+    /* 필터 패널 */
+    .filter-panel {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+    }
+    .filter-panel h4 { margin: 0 0 10px; font-size: 14px; color: #444; }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #555;
+    }
+    .filter-group input {
+      width: 90px;
+      padding: 5px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .filter-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .btn-filter-apply {
+      background: #4285f4; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 7px 16px; font-size: 13px; cursor: pointer;
+    }
+    .btn-filter-apply:hover { background: #3367d6; }
+    .btn-filter-reset {
+      background: #6c757d; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 7px 14px; font-size: 13px; cursor: pointer;
+    }
+    .btn-filter-reset:hover { background: #5a6268; }
+    .btn-tg-best {
+      background: #28a745; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 7px 16px; font-size: 13px; cursor: pointer;
+    }
+    .btn-tg-best:hover { background: #218838; }
+    .filter-info { font-size: 12px; color: #888; margin-top: 6px; }
+
     /* 결과 + 진행상황 나란히 배치 */
     .result-status-wrapper {
       display: flex;
@@ -848,6 +900,68 @@
       </div>
     </div>
 
+    <!-- ===== 필터 패널 ===== -->
+    <div id="filterPanel" style="display:none;">
+
+      <!-- 무신사 / 리스트 비교 모드 -->
+      <div class="filter-panel" id="filterCompare" style="display:none;">
+        <h4>🔍 조건 필터</h4>
+        <div class="filter-row">
+          <div class="filter-group">
+            <span>크림 판매량 ≥</span>
+            <input type="number" id="f_kream_sales" placeholder="0" min="0">
+            <span>개</span>
+          </div>
+          <div class="filter-group">
+            <span>크림 가격차이 ≥</span>
+            <input type="number" id="f_kream_diff" placeholder="0" min="0">
+            <span>원</span>
+          </div>
+          <div class="filter-group">
+            <span>포이즌 판매량 ≥</span>
+            <input type="number" id="f_poizon_sales" placeholder="0" min="0">
+            <span>개</span>
+          </div>
+          <div class="filter-group">
+            <span>포이즌 가격차이 ≥</span>
+            <input type="number" id="f_poizon_diff" placeholder="0" min="0">
+            <span>원</span>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-filter-apply" onclick="applyFilters()">✅ 필터 적용</button>
+          <button class="btn-filter-reset" onclick="resetFilters()">↺ 초기화</button>
+          <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
+        </div>
+        <div class="filter-info" id="filterInfo"></div>
+      </div>
+
+      <!-- 포이즌 모드 -->
+      <div class="filter-panel" id="filterPoizon" style="display:none;">
+        <h4>🔍 조건 필터 (포이즌 → 크림 구매 기회)</h4>
+        <div class="filter-row">
+          <div class="filter-group">
+            <span>크림 판매량 ≥</span>
+            <input type="number" id="fp_kream_sales" placeholder="0" min="0">
+            <span>개</span>
+          </div>
+          <div class="filter-group">
+            <span>포이즌가 - 크림가 ≥</span>
+            <input type="number" id="fp_price_diff" placeholder="0" min="0">
+            <span>원</span>
+          </div>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-filter-apply" onclick="applyFilters()">✅ 필터 적용</button>
+          <button class="btn-filter-reset" onclick="resetFilters()">↺ 초기화</button>
+          <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
+        </div>
+        <div class="filter-info" id="filterInfoPoizon"></div>
+      </div>
+
+    </div>
+    <!-- ===== /필터 패널 ===== -->
+
     <div class="table-container">
       <table>
         <thead id="tableHeader"></thead>
@@ -928,6 +1042,7 @@
   }
   let eventSource = null;
   let collectedData = [];
+  let originalData = [];   // 필터 적용 전 원본 보관
   let isLoggedIn = false;  // POIZON 로그인 상태
   let isMusinsaLoggedIn = false;  // 무신사 로그인 상태
   let isKreamLoggedIn = false;  // ✅ 크림 로그인 상태 추가
@@ -1476,11 +1591,135 @@
       
     document.getElementById('resultCount').textContent = totalItems;
     document.getElementById('resultSection').classList.toggle('active', totalItems > 0);
-    if (totalItems > 0) { document.getElementById('resultSection').style.display = 'block'; document.getElementById('tableControls').style.display = 'flex'; }
-    else { document.getElementById('tableControls').style.display = 'none'; }
+    if (totalItems > 0) {
+      document.getElementById('resultSection').style.display = 'block';
+      document.getElementById('tableControls').style.display = 'flex';
+      showFilterPanel(selectedMode);
+    } else {
+      document.getElementById('tableControls').style.display = 'none';
+    }
     document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
     document.getElementById('prevPageBtn').disabled = (currentPage <= 1);
     document.getElementById('nextPageBtn').disabled = (currentPage >= totalPages);
+  }
+
+  // ===== 필터 패널 표시 제어 =====
+  function showFilterPanel(mode) {
+    const panel = document.getElementById('filterPanel');
+    const fc = document.getElementById('filterCompare');
+    const fp = document.getElementById('filterPoizon');
+    if (mode === 'musinsa' || mode === 'compare') {
+      panel.style.display = 'block';
+      fc.style.display = 'block';
+      fp.style.display = 'none';
+    } else if (mode === 'poizon') {
+      panel.style.display = 'block';
+      fc.style.display = 'none';
+      fp.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  }
+
+  // ===== 필터 적용 =====
+  function applyFilters() {
+    if (originalData.length === 0 && collectedData.length > 0) {
+      originalData = [...collectedData];
+    }
+    const base = originalData.length > 0 ? originalData : collectedData;
+
+    let filtered;
+
+    if (selectedMode === 'poizon') {
+      const minKreamSales = parseInt(document.getElementById('fp_kream_sales').value) || 0;
+      const minDiff       = parseInt(document.getElementById('fp_price_diff').value)  || 0;
+      filtered = base.filter(d => {
+        const kreamSales = parseInt(d.크림판매량) || 0;
+        // 크림비교 = 포이즌중국가 - 크림평균가 (양수 = 포이즌이 더 비쌈 = 구매 기회)
+        const diff = typeof d.크림비교 === 'number' ? d.크림비교
+                   : (extractPrice(d.중국노출 || d.포이즌노출가) || 0) - (extractPrice(d.크림평균가) || 0);
+        return kreamSales >= minKreamSales && diff >= minDiff;
+      });
+      const infoEl = document.getElementById('filterInfoPoizon');
+      if (infoEl) infoEl.textContent = `결과: ${base.length}개 → ${filtered.length}개 (크림 판매량 ≥${minKreamSales}, 가격차 ≥${minDiff.toLocaleString()}원)`;
+    } else {
+      const minKreamSales  = parseInt(document.getElementById('f_kream_sales').value)  || 0;
+      const minKreamDiff   = parseInt(document.getElementById('f_kream_diff').value)   || 0;
+      const minPoizonSales = parseInt(document.getElementById('f_poizon_sales').value) || 0;
+      const minPoizonDiff  = parseInt(document.getElementById('f_poizon_diff').value)  || 0;
+
+      filtered = base.filter(d => {
+        const kreamSales  = parseInt(d.크림판매량) || 0;
+        const poizonSales = (parseInt(d.포이즌중국판매량) || 0) + (parseInt(d.포이즌현업자판매량) || 0);
+        const kreamDiff   = typeof d.크림비교  === 'number' ? d.크림비교  : 0;
+        const poizonDiff  = typeof d.포이즌비교 === 'number' ? d.포이즌비교 : 0;
+
+        const okKream  = (minKreamSales  === 0 || kreamSales  >= minKreamSales)  && (minKreamDiff  === 0 || kreamDiff  >= minKreamDiff);
+        const okPoizon = (minPoizonSales === 0 || poizonSales >= minPoizonSales) && (minPoizonDiff === 0 || poizonDiff >= minPoizonDiff);
+        // 조건 중 입력된 것만 적용 (OR 조건: 크림 OR 포이즌 중 하나라도 만족)
+        const hasKreamFilter  = minKreamSales > 0 || minKreamDiff > 0;
+        const hasPoizonFilter = minPoizonSales > 0 || minPoizonDiff > 0;
+        if (!hasKreamFilter && !hasPoizonFilter) return true;
+        if (hasKreamFilter  && hasPoizonFilter)  return okKream && okPoizon;
+        if (hasKreamFilter)  return okKream;
+        return okPoizon;
+      });
+      const infoEl = document.getElementById('filterInfo');
+      if (infoEl) infoEl.textContent = `결과: ${base.length}개 → ${filtered.length}개`;
+    }
+
+    collectedData = filtered;
+    renderTable();
+    document.getElementById('resultCount').textContent = filtered.length;
+  }
+
+  // ===== 필터 초기화 =====
+  function resetFilters() {
+    if (originalData.length > 0) {
+      collectedData = [...originalData];
+      originalData = [];
+    }
+    // input 초기화
+    ['f_kream_sales','f_kream_diff','f_poizon_sales','f_poizon_diff','fp_kream_sales','fp_price_diff'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const i1 = document.getElementById('filterInfo');
+    const i2 = document.getElementById('filterInfoPoizon');
+    if (i1) i1.textContent = '';
+    if (i2) i2.textContent = '';
+    renderTable();
+    document.getElementById('resultCount').textContent = collectedData.length;
+  }
+
+  // ===== 베스트 10 텔레그램 전송 =====
+  function sendBestToTelegram() {
+    const source = collectedData;
+    if (!source || source.length === 0) {
+      alert('전송할 데이터가 없습니다.');
+      return;
+    }
+    // 정렬: 가격차이 내림차순
+    const sorted = [...source].sort((a, b) => {
+      if (selectedMode === 'poizon') return (b.크림비교 || 0) - (a.크림비교 || 0);
+      // musinsa/compare: 포이즌비교 우선, 없으면 크림비교
+      const va = (b.포이즌비교 || 0) + (b.크림비교 || 0);
+      const vb = (a.포이즌비교 || 0) + (a.크림비교 || 0);
+      return va - vb;
+    });
+    const top10 = sorted.slice(0, 10);
+
+    fetch('/api/send_best', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ mode: selectedMode, items: top10 })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) alert('✅ 텔레그램으로 베스트 10 전송 완료!');
+      else alert('❌ 전송 실패: ' + (d.error || '알 수 없는 오류'));
+    })
+    .catch(e => alert('❌ 오류: ' + e));
   }
 
   // ===== 정렬 함수 (poizon / musinsa / compare 지원) =====
@@ -1682,7 +1921,7 @@
         }
       
       // 3. 데이터 초기화
-      collectedData = [];
+      collectedData = []; originalData = [];
       uploadedProducts = [];
       currentPage = 1;
       
@@ -1935,7 +2174,7 @@
       isCollecting = true;
 
       // 데이터 초기화
-      collectedData = [];
+      collectedData = []; originalData = [];
       
       // UI 상태 변경
       setModeButtonsEnabled(false);
@@ -2058,7 +2297,7 @@
       fetch('/stop', { method: 'POST' }).catch(() => {});
 
       // ===== 2. 데이터 초기화 =====
-      collectedData = [];
+      collectedData = []; originalData = [];
       uploadedProducts = [];
       currentPage = 1;
       sortColumn = null;
@@ -2080,6 +2319,7 @@
       document.getElementById('resultSection').style.display = 'none';
       document.getElementById('tableControls').style.display = 'none';
       document.getElementById('uploadListSection').style.display = 'none';
+      document.getElementById('filterPanel').style.display = 'none';
 
       // 버튼 초기화
       document.getElementById('stopBtn').style.display = 'none';
@@ -3061,7 +3301,7 @@
     isCollecting = true;
 
     // 데이터 초기화
-    collectedData = [];
+    collectedData = []; originalData = [];
     
     // UI 상태 변경
     setModeButtonsEnabled(false);
