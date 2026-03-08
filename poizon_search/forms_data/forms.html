@@ -13,7 +13,7 @@
   .header a:hover { color: #fff; }
   .header h1 { color: #fff; font-size: 20px; font-weight: 700; }
   .header-sep { color: #555; }
-  .container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+  .container { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
   .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
   .card-header { background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff; padding: 14px 18px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
   .card-body { padding: 16px; }
@@ -143,13 +143,12 @@
   .badge-unpaid { background:#fff3cd; color:#856404; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; }
     .order-empty { text-align:center; padding:30px; color:#aaa; font-size:13px; }
 
-  /* 메뉴 버튼 스타일 */
-  .menu-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-  .menu-btn { width: 100%; padding: 14px 18px; background: #fff; color: #1a1a2e; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
-  .menu-btn:hover { background: #f8f9fa; border-color: #0f3460; transform: translateX(4px); }
-  .menu-btn.active { background: linear-gradient(135deg, #0f3460, #1a1a2e); color: #fff; border-color: #0f3460; box-shadow: 0 4px 12px rgba(15, 52, 96, 0.3); }
-  .menu-btn .icon { font-size: 20px; }
-  .menu-btn .label { flex: 1; }
+  /* 상단 탭 메뉴 */
+  .top-menu-bar { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .top-menu-inner { display: flex; max-width: 1400px; margin: 0 auto; }
+  .top-menu-btn { padding: 13px 28px; background: none; border: none; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-bottom: -2px; display: flex; align-items: center; gap: 8px; }
+  .top-menu-btn:hover { color: #0f3460; background: #f0f4ff; }
+  .top-menu-btn.active { color: #0f3460; border-bottom-color: #0f3460; }
 
   /* 2칸 그리드 공통 */
   .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -164,10 +163,8 @@
   @media (max-width: 900px) {
     .container { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
 
-    /* 사이드바 메뉴 → 가로 스크롤 행 */
-    .menu-buttons { flex-direction: row; overflow-x: auto; gap: 8px; margin-bottom: 0; padding-bottom: 4px; }
-    .menu-btn { min-width: 130px; padding: 10px 14px; font-size: 13px; white-space: nowrap; }
-    .menu-btn:hover { transform: none; }
+    /* 상단 탭 메뉴 */
+    .top-menu-btn { padding: 10px 16px; font-size: 13px; }
 
     /* 고객목록 + 공급자 → 세로 */
     .grid-2col { grid-template-columns: 1fr; }
@@ -237,7 +234,7 @@
   /* ── 도매 오더폼 ── */
   .ws-table-wrap { overflow-x: auto; }
   .ws-table { border-collapse: collapse; font-size: 11px; min-width: 100%; }
-  .ws-table th { background: #1a1a2e; color: #fff; padding: 5px 4px; text-align: center; border: 1px solid #333; white-space: nowrap; font-size: 10px; }
+  .ws-table th { background: #1a1a2e; color: #fff; padding: 5px 4px; text-align: center; border: 1px solid #333; white-space: nowrap; font-size: 10px; position: relative; }
   .ws-table td { border: 1px solid #ddd; padding: 2px; vertical-align: middle; }
   .ws-table td input { width: 100%; border: none; padding: 4px 3px; font-size: 11px; text-align: center; outline: none; background: transparent; font-family: inherit; }
   .ws-table td input:focus { background: #f0f4ff; border-radius: 3px; }
@@ -280,35 +277,19 @@
   <h1>📋 서식 / 양식</h1>
 </div>
 
+<div class="top-menu-bar">
+  <div class="top-menu-inner">
+    <button class="top-menu-btn active" id="btnInvoice" onclick="showMenu('invoice')">
+      📋 거래명세서
+    </button>
+    <button class="top-menu-btn" id="btnWholesale" onclick="showMenu('wholesale')">
+      📦 도매 리스트
+    </button>
+  </div>
+</div>
+
 <div class="container">
 
-  <!-- ── 왼쪽 사이드바 ── -->
-  <div style="display:flex;flex-direction:column;gap:14px;">
-
-    <!-- 메뉴 버튼 -->
-    <div class="card">
-      <div class="card-header">
-        <span>📁 메뉴</span>
-      </div>
-      <div class="card-body">
-        <div class="menu-buttons">
-          <button class="menu-btn active" id="btnInvoice" onclick="showMenu('invoice')">
-            <span class="icon">📋</span>
-            <span class="label">거래명세서</span>
-          </button>
-          <button class="menu-btn" id="btnWholesale" onclick="showMenu('wholesale')">
-            <span class="icon">📦</span>
-            <span class="label">도매 리스트</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    
-
-  </div>
-
-    <!-- ── 오른쪽 메인 ── -->
   <div class="main-area">
 
         <!-- 거래명세서 컨테이너 -->
@@ -488,7 +469,10 @@
       <div class="card">
         <div class="card-header">
           <span>📦 상품 목록</span>
-          <button class="btn-header-edit" onclick="wsAddProduct()">+ 상품 추가</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn-header-edit" onclick="wsAddProduct()">+ 상품 추가</button>
+            <button class="btn-header-edit" id="wsBulkSearchBtn" onclick="wsSearchAllImages()" style="background:rgba(39,174,96,0.3);border-color:rgba(255,255,255,0.7);">🔍 이미지 일괄검색</button>
+          </div>
         </div>
         <div class="card-body" style="padding:12px 8px;">
           <div class="ws-table-wrap">
@@ -1318,7 +1302,7 @@ function copyBuyerToShipping() {
 // ══════════════════════════════════════
 function showMenu(menuName) {
   // 버튼 활성화 상태 변경
-  document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.top-menu-btn').forEach(btn => btn.classList.remove('active'));
   
   if (menuName === 'invoice') {
     document.getElementById('btnInvoice').classList.add('active');
@@ -1418,12 +1402,12 @@ function wsRender() {
   document.getElementById('wsHead').innerHTML = `<tr>
     <th style="width:28px;">번호</th>
     <th style="width:60px;">이미지</th>
-    <th style="min-width:100px;">품번</th>
-    <th style="min-width:170px;">품명</th>
+    <th style="min-width:100px;">품번<div class="col-resizer"></div></th>
+    <th style="min-width:170px;">품명<div class="col-resizer"></div></th>
     <th style="width:72px;">소비자가</th>
     <th style="width:50px;">할인율<br>(%)</th>
     <th style="width:72px;">공급가</th>
-    ${sizes.map(s => `<th style="width:34px;">${s}</th>`).join('')}
+    ${sizes.map(s => `<th style="width:48px;">${s}</th>`).join('')}
     <th style="width:44px;">합계<br>수량</th>
     <th style="width:72px;">합계<br>금액</th>
     <th style="width:30px;"></th>
@@ -1456,6 +1440,38 @@ function wsRender() {
   }).join('');
 
   wsCalcTotals();
+  initWsTableResize();
+}
+
+function initWsTableResize() {
+  const ths = document.querySelectorAll('#wsHead th');
+  ths.forEach(th => {
+    const resizer = th.querySelector('.col-resizer');
+    if (!resizer || resizer._bound) return;
+    resizer._bound = true;
+    let startX, startW;
+    resizer.addEventListener('mousedown', e => {
+      startX = e.clientX;
+      startW = th.offsetWidth;
+      resizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      function onMove(e) {
+        th.style.width = Math.max(60, startW + e.clientX - startX) + 'px';
+        th.style.minWidth = th.style.width;
+      }
+      function onUp() {
+        resizer.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+  });
 }
 
 function wsCalcRow(i) {
@@ -1490,13 +1506,25 @@ async function wsSearchImg(idx) {
   const code = wsProducts[idx].code.trim();
   if (!code) { alert('품번을 먼저 입력해주세요'); return; }
   const btn = document.getElementById('wsBtn' + idx);
-  if (btn) { btn.textContent = '검색중...'; btn.disabled = true; }
+
+  // 타이머로 경과 시간 표시
+  let sec = 0;
+  if (btn) { btn.innerHTML = '⏳ 0초'; btn.disabled = true; btn.style.background = '#e67e22'; }
+  const timer = setInterval(() => {
+    sec++;
+    if (btn) btn.innerHTML = `⏳ ${sec}초`;
+  }, 1000);
+
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000); // 90초 타임아웃
     const res = await fetch('/search_wholesale_product', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const data = await res.json();
     if (data.success) {
       wsProducts[idx].imgSrc = '/proxy_image?url=' + encodeURIComponent(data.img_url);
@@ -1507,11 +1535,70 @@ async function wsSearchImg(idx) {
       alert('❌ 검색 실패: ' + (data.error || '결과 없음'));
     }
   } catch (e) {
-    alert('❌ 오류: ' + e.message);
+    if (e.name === 'AbortError') {
+      alert('❌ 검색 시간 초과 (90초). 포이즌 로그인 상태를 확인해주세요.');
+    } else {
+      alert('❌ 오류: ' + e.message);
+    }
   } finally {
+    clearInterval(timer);
     const btn2 = document.getElementById('wsBtn' + idx);
-    if (btn2) { btn2.innerHTML = '포이즌<br>검색'; btn2.disabled = false; }
+    if (btn2) { btn2.innerHTML = '포이즌<br>검색'; btn2.disabled = false; btn2.style.background = ''; }
   }
+}
+
+async function wsSearchAllImages() {
+  // 품번이 있고 이미지가 없는 상품만 대상
+  const targets = wsProducts
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.code.trim() && !p.imgSrc);
+
+  if (targets.length === 0) {
+    alert('검색할 상품이 없습니다.\n(품번 입력 후 이미지가 없는 상품만 검색합니다)');
+    return;
+  }
+
+  const btn = document.getElementById('wsBulkSearchBtn');
+  btn.disabled = true;
+  let success = 0, fail = 0;
+
+  for (let j = 0; j < targets.length; j++) {
+    const { p, i } = targets[j];
+    const code = p.code.trim();
+
+    // 진행 상황 표시
+    const b = document.getElementById('wsBulkSearchBtn');
+    if (b) b.innerHTML = `⏳ ${j + 1}/${targets.length} 검색중`;
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90000);
+      const res = await fetch('/search_wholesale_product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      const data = await res.json();
+      if (data.success) {
+        wsProducts[i].imgSrc = '/proxy_image?url=' + encodeURIComponent(data.img_url);
+        wsProducts[i].imgUrl = data.img_url;
+        if (data.name && !wsProducts[i].name) wsProducts[i].name = data.name;
+        success++;
+      } else {
+        fail++;
+      }
+    } catch (e) {
+      fail++;
+      console.warn(`[일괄검색] 품번 ${code} 실패:`, e.message);
+    }
+    wsRender(); // 각 결과를 즉시 화면에 반영
+  }
+
+  const b2 = document.getElementById('wsBulkSearchBtn');
+  if (b2) { b2.disabled = false; b2.innerHTML = '🔍 이미지 일괄검색'; }
+  alert(`✅ 일괄검색 완료\n성공: ${success}건 / 실패: ${fail}건`);
 }
 
 function wsBuildCapture() {
@@ -1562,7 +1649,7 @@ function wsBuildCapture() {
           <th rowspan="2" style="width:40px;">합계<br>수량</th>
           <th rowspan="2" style="width:70px;">합계<br>금액</th>
         </tr>
-        <tr>${sizes.map(s => `<th class="th-size" style="width:32px;">${s}</th>`).join('')}</tr>
+        <tr>${sizes.map(s => `<th class="th-size" style="width:46px;">${s}</th>`).join('')}</tr>
       </thead>
       <tbody>
         ${rows}

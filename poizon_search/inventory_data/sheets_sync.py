@@ -22,8 +22,8 @@ SHEET_NAME = '재고' #← 실제 탭 이름으로 변경하세요
 # DB 파일 경로
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'inventory.db')
 
-# 동기화 주기 (초) - 기본 5분
-SYNC_INTERVAL = 300
+# 동기화 주기 (초) - 8시간
+SYNC_INTERVAL = 28800  # 8 * 60 * 60
 
 # ==========================================
 # 컬럼 매핑
@@ -252,28 +252,60 @@ def sync_once():
         return count
     return 0
 
+_sync_lock = threading.Lock()
+_syncing = False
+
+def sync_if_needed():
+    """마지막 동기화로부터 8시간이 지난 경우에만 동기화"""
+    global _syncing
+    with _sync_lock:
+        if _syncing:
+            print("⏭️ 동기화 이미 진행 중 - 스킵")
+            return
+        last = get_last_synced()
+        if last:
+            from datetime import timedelta
+            try:
+                last_dt = datetime.fromisoformat(last)
+                elapsed = datetime.now() - last_dt
+                if elapsed.total_seconds() < SYNC_INTERVAL:
+                    remaining_h = int((SYNC_INTERVAL - elapsed.total_seconds()) // 3600)
+                    remaining_m = int((SYNC_INTERVAL - elapsed.total_seconds()) % 3600 // 60)
+                    print(f"⏭️ 동기화 스킵 (다음 동기화까지 {remaining_h}시간 {remaining_m}분 남음)")
+                    return
+            except Exception:
+                pass
+        _syncing = True
+
+    try:
+        sync_once()
+    except Exception as e:
+        print(f"❌ 동기화 오류: {e}")
+    finally:
+        with _sync_lock:
+            _syncing = False
+
 def sync_loop():
-    """주기적 동기화 루프 (백그라운드 스레드)"""
+    """주기적 동기화 루프 (백그라운드 스레드) - 8시간마다"""
     while True:
+        print(f"⏰ 다음 동기화까지 {SYNC_INTERVAL//3600}시간 대기...")
+        time.sleep(SYNC_INTERVAL)
         try:
             sync_once()
         except Exception as e:
             print(f"❌ 동기화 오류: {e}")
-        
-        print(f"⏰ 다음 동기화까지 {SYNC_INTERVAL//60}분 대기...")
-        time.sleep(SYNC_INTERVAL)
 
 def start_sync_background():
     """백그라운드에서 자동 동기화 시작"""
     init_sales_db()
-    
-    # 시작 시 즉시 한 번 동기화
-    sync_once()
-    
-    # 백그라운드 스레드로 주기적 동기화
+
+    # 서버 시작 시 - 8시간이 지났을 때만 동기화
+    threading.Thread(target=sync_if_needed, daemon=True).start()
+
+    # 8시간마다 주기적 동기화 (첫 실행은 8시간 후)
     thread = threading.Thread(target=sync_loop, daemon=True)
     thread.start()
-    print(f"✅ 자동 동기화 시작 (매 {SYNC_INTERVAL//60}분마다)")
+    print(f"✅ 자동 동기화 설정 완료 (매 {SYNC_INTERVAL//3600}시간마다)")
 
 # ==========================================
 # 데이터 조회 함수 (API에서 사용)

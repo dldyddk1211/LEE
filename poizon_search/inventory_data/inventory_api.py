@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import threading
 from datetime import datetime
 from flask import Blueprint, jsonify, request, send_file, session
 
@@ -83,6 +84,13 @@ def check_auth():
 @inventory_bp.route('/page')
 def serve_inventory_page():
     try:
+        # 접속 시 8시간이 지났으면 백그라운드에서 최신 동기화 트리거
+        try:
+            from inventory_data.sheets_sync import sync_if_needed
+            threading.Thread(target=sync_if_needed, daemon=True).start()
+        except Exception:
+            pass
+
         html_path = os.path.join(INVENTORY_DIR, 'inventory.html')
         if os.path.exists(html_path):
             return send_file(html_path)
