@@ -2017,178 +2017,94 @@
     }
 
   function resetAll() {
-      addLog('🔄 리셋 시작...', 'info');
-    
-      // ✅ selectedMode를 null로 바꾸기 **전**에 currentMode 저장!
-      const currentMode = selectedMode;  
+      // 현재 모드 기억 (모드는 유지)
+      const currentMode = selectedMode;
 
-      // 진행 중인 작업 중단
+      // ===== 1. 백그라운드 검색 중단 =====
       isCollecting = false;
-      isLoggedIn = false;
-      isMusinsaLoggedIn = false;
-      isKreamLoggedIn = false;
-      selectedMode = null;  // ✅ 모드 초기화
-      
-    
+      kreamSearchStopped = false;
+
       if (eventSource) {
-        try {
-          eventSource.close();
-          addLog('  ✓ POIZON 검색 중단', 'info');
-        } catch (e) {
-          console.error('EventSource 종료 오류:', e);
-        }
+        try { eventSource.close(); } catch(e) {}
         eventSource = null;
       }
-      
-      // 크림 검색 중단
       if (kreamSearchEventSource) {
-        try {
-          kreamSearchStopped = true;
-          kreamSearchEventSource.close();
-          addLog('  ✓ 크림 검색 중단', 'info');
-        } catch (e) {
-          console.error('크림 EventSource 종료 오류:', e);
-        }
+        try { kreamSearchEventSource.close(); } catch(e) {}
         kreamSearchEventSource = null;
       }
-      
-      // 서버 측 작업 중단
-      fetch('/stop', { method: 'POST' })
-        .then(() => {
-          addLog('  ✓ 서버 작업 중단', 'info');
-        })
-        .catch(err => {
-          console.error('서버 중단 오류:', err);
-        });
-      
-      // ===== 2. 백그라운드 브라우저 종료 =====
-      Promise.all([
-        fetch('/shutdown_browser'),           // ✅ await 제거, 쉼표 사용
-        fetch('/shutdown_kream_browser'),     // ✅ 크림 브라우저 종료
-        fetch('/shutdown_musinsa_browser')    // ✅ 무신사 브라우저 종료
-      ])
-        .then(() => {
-          addLog('  ✓ 모든 브라우저 종료', 'info');
-      
-          // 로그인 상태 초기화
-          isLoggedIn = false;
-          
-          const loginStatus = document.getElementById('loginStatus');
-          const loginMessage = document.getElementById('loginMessage');
-          const loginCheckBtn = document.getElementById('loginCheckBtn');
-          
-          loginStatus.classList.remove('logged-in');
-          loginMessage.textContent = '브라우저가 종료되었습니다. 다시 접속해주세요.';
-          loginCheckBtn.textContent = '🚀 POIZON 접속하기';
-          loginCheckBtn.disabled = false;
-          loginCheckBtn.style.background = '#ffc107';
-          
-          addLog('  ✓ 로그인 상태 초기화', 'info');
-          })
-          .catch(err => {
-            console.error('브라우저 종료 오류:', err);
-            addLog('  ⚠️ 브라우저 종료 중 일부 오류 발생', 'warning');
-          });
 
-      // ===== 3. 전역 변수 완전 초기화 =====
-      
+      // 서버 작업 중단
+      fetch('/stop', { method: 'POST' }).catch(() => {});
+
+      // ===== 2. 데이터 초기화 =====
       collectedData = [];
       uploadedProducts = [];
       currentPage = 1;
       sortColumn = null;
       sortDirection = 'desc';
-      kreamSearchStopped = false;
-      
-      addLog('  ✓ 데이터 초기화', 'info');
-      
-      // ===== 4. UI 완전 초기화 =====
-      
-      // 로그 및 테이블
-      setTimeout(() => {
-        document.getElementById('logBox').innerHTML = '';
-      }, 100);
-      
+
+      // ===== 3. UI 초기화 (모드·로그인 유지) =====
+
+      // 로그·테이블 지우기
+      document.getElementById('logBox').innerHTML = '';
       document.getElementById('tableBody').innerHTML = '';
       document.getElementById('uploadTableBody').innerHTML = '';
       document.getElementById('resultCount').textContent = '0';
       document.getElementById('uploadCount').textContent = '0';
-      
-      // 프로그레스 바
       updateProgress(0, 100);
-      
-      // ===== 5. 버튼 상태 완전 초기화 =====
-      
-      document.getElementById('stopBtn').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'none';
-      document.getElementById('downloadBtn').style.display = 'none';
-      
-      // ✅ 존재하는 요소만 제어
-      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
-      if (musinsaSearchOptions) {
-        musinsaSearchOptions.style.display = 'none';
-      }
-      const resultBtn = document.getElementById('resultKreamSearchBtn');
-      if (resultBtn) {
-        resultBtn.disabled = false;
-        resultBtn.textContent = '🔍 검색';
-      }
-      
-      addLog('  ✓ UI 초기화', 'info');
-      
-      // ===== 6. 입력 필드 초기화 =====
-      
-      document.getElementById('keyword').value = '';
-      document.getElementById('maxPages').value = '1';
-      
-      const uploadInput = document.getElementById('excelUpload');
-      if (uploadInput) {
-        uploadInput.value = '';
-      }
-      
-      addLog('  ✓ 입력 필드 초기화', 'info');
-      
-      // ===== 7. 모드 버튼 비활성화 (로그인 필요) =====
-      
-      setModeButtonsEnabled(false);
-      
-      // 시작 버튼도 비활성화
-      document.getElementById('startBtn').disabled = true;
-      document.getElementById('keyword').disabled = true;
-      document.getElementById('maxPages').disabled = true;
-      document.getElementById('inputSection').style.display = 'none';
-      document.getElementById('buttonSection').style.display = 'none';
+
+      // 결과/상태 섹션 숨기기
       document.getElementById('statusSection').style.display = 'none';
       document.getElementById('resultSection').classList.remove('active');
       document.getElementById('resultSection').style.display = 'none';
       document.getElementById('tableControls').style.display = 'none';
       document.getElementById('uploadListSection').style.display = 'none';
-      addLog('  ✓ 모드 버튼 비활성화', 'info');
-      
-      // ===== 8. 현재 모드 유지 (UI만 초기화) =====
-            
+
+      // 버튼 초기화
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'none';
+      document.getElementById('downloadBtn').style.display = 'none';
+
+      const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
+      if (musinsaSearchOptions) musinsaSearchOptions.style.display = 'none';
+
+      const resultBtn = document.getElementById('resultKreamSearchBtn');
+      if (resultBtn) { resultBtn.disabled = false; resultBtn.textContent = '🔍 검색'; }
+
+      // ===== 4. 입력 섹션 복원 (같은 모드 첫 화면) =====
+      document.getElementById('inputSection').style.display = 'block';
+      document.getElementById('buttonSection').style.display = 'flex';
+
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = false;
+      startBtn.textContent = '🚀 수집 시작';
+
+      document.getElementById('keyword').value = '';
+      document.getElementById('keyword').disabled = false;
+      document.getElementById('maxPages').value = '1';
+      document.getElementById('maxPages').disabled = false;
+
+      const uploadInput = document.getElementById('excelUpload');
+      if (uploadInput) uploadInput.value = '';
+
       if (currentMode === 'compare') {
         document.getElementById('keyword').parentElement.style.display = 'none';
-        document.getElementById('startBtn').style.display = 'none';
+        startBtn.style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
       } else {
         document.getElementById('keyword').parentElement.style.display = 'block';
-        document.getElementById('startBtn').style.display = 'block';
+        startBtn.style.display = 'block';
         document.getElementById('uploadLabel').style.display = 'none';
       }
-      
-      // 테이블 헤더 업데이트
+
+      // 모드 버튼 활성화 유지
+      setModeButtonsEnabled(true);
+
+      // 테이블 헤더·렌더링
       updateTableHeader(currentMode);
-      
-      // ===== 9. 테이블 렌더링 =====
-      
       renderTable();
-      
-      // ===== 10. 완료 메시지 =====
-      
-      setTimeout(() => {
-        addLog('✅ 리셋 완료!', 'success');
-        addLog('💡 다시 시작하려면 "POIZON 접속하기" 버튼을 눌러주세요', 'info');
-      }, 200);
+
+      addLog('✅ 초기화 완료. 새 검색을 시작하세요.', 'success');
     }
 
   function performLogin() {

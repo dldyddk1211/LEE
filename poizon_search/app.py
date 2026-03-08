@@ -401,7 +401,7 @@ def run_comparison(products):
 # 무신사 검색 실행 함수
 # ==========================================
 
-def run_musinsa_search(keyword, max_items):
+def run_musinsa_search(keyword, max_items, search_mode='keyword'):
     """무신사 검색 실행 (스레드)"""
     global stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
     
@@ -432,6 +432,7 @@ def run_musinsa_search(keyword, max_items):
         result = musinsa_search.search_musinsa(   # ← keyword_detail → search_musinsa
             keyword=keyword,
             max_items=max_items,
+            search_mode=search_mode,
             callback=log_callback
         )
                 
@@ -1728,6 +1729,16 @@ try:
                 f'• 순서: 무신사 → 크림 → 포이즌\n'
                 f'각 단계 완료 시 알림을 보내드립니다')
 
+    def _cmd_ranking(args):
+        if is_working:
+            return '⚠️ 이미 작업 중입니다. /stop 으로 먼저 중지하세요'
+        max_items = int(args[0]) if args and args[0].isdigit() else 100
+        t = threading.Thread(target=run_musinsa_search, args=('', max_items, 'ranking'), daemon=True)
+        t.start()
+        return (f'📊 <b>무신사 랭킹 검색 시작</b>\n'
+                f'• 최대: {max_items}개\n'
+                f'• 완료 시 알림을 보내드립니다')
+
     def _cmd_sync(_):
         def _do():
             from inventory_data.sheets_sync import sync_once
@@ -1789,6 +1800,9 @@ try:
                 '/musinsa [키워드] [개수]\n'
                 '  → 무신사 → 크림 → 포이즌 순서로 자동 검색\n'
                 '  예) /musinsa 나이키 100\n'
+                '/ranking [개수]\n'
+                '  → 무신사 랭킹 TOP N 수집\n'
+                '  예) /ranking 100\n'
                 '/sync — 구글 시트 강제 동기화\n'
                 '/deploy — GitHub 최신 코드 받아서 서버 재시작\n'
                 '/deploy force — 충돌 무시하고 강제 업데이트\n'
@@ -1797,6 +1811,7 @@ try:
     register_handler('/status',  _cmd_status)
     register_handler('/stop',    _cmd_stop)
     register_handler('/musinsa', _cmd_musinsa)
+    register_handler('/ranking', _cmd_ranking)
     register_handler('/sync',    _cmd_sync)
     register_handler('/deploy',  _cmd_deploy)
     register_handler('/help',    _cmd_help)
