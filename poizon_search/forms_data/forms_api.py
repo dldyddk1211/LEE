@@ -117,31 +117,48 @@ def _save_customers(customers):
 def _register_korean_font():
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
+
     font_paths = [
         r'C:\Windows\Fonts\malgun.ttf',
+        r'C:\Windows\Fonts\NanumGothic.ttf',
         r'C:\Windows\Fonts\gulim.ttc',
         '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
     ]
     bold_paths = [
         r'C:\Windows\Fonts\malgunbd.ttf',
+        r'C:\Windows\Fonts\NanumGothicBold.ttf',
         r'C:\Windows\Fonts\gulim.ttc',
         '/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf',
     ]
     fn, fb = 'Helvetica', 'Helvetica-Bold'
-    for fp in font_paths:
-        if os.path.exists(fp):
-            try:
-                pdfmetrics.registerFont(TTFont('Korean', fp))
-                fn = 'Korean'
-                break
-            except: pass
-    for fp in bold_paths:
-        if os.path.exists(fp):
-            try:
-                pdfmetrics.registerFont(TTFont('KoreanBold', fp))
-                fb = 'KoreanBold'
-                break
-            except: pass
+
+    # 이미 등록된 폰트는 재등록 생략
+    registered = pdfmetrics.getRegisteredFontNames()
+
+    if 'Korean' not in registered:
+        for fp in font_paths:
+            if os.path.exists(fp):
+                try:
+                    pdfmetrics.registerFont(TTFont('Korean', fp))
+                    fn = 'Korean'
+                    break
+                except Exception:
+                    continue
+    else:
+        fn = 'Korean'
+
+    if 'KoreanBold' not in registered:
+        for fp in bold_paths:
+            if os.path.exists(fp):
+                try:
+                    pdfmetrics.registerFont(TTFont('KoreanBold', fp))
+                    fb = 'KoreanBold'
+                    break
+                except Exception:
+                    continue
+    else:
+        fb = 'KoreanBold'
+
     return fn, fb
 
 def _make_invoice_pdf(d, filepath):
