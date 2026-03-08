@@ -229,73 +229,150 @@ def extract_number(text):
     return 0
 
 
-def search_single_product(page, code):
-    """도매 오더폼용 단건 상품 검색 - 품번으로 이미지 URL + 품명 반환"""
+def search_single_product(code):
+    """도매 오더폼용 단건 상품 검색 - search_multiple_products 로직 참고"""
+    import platform as _platform
     try:
-        # 검색창 찾아서 품번 입력
-        search_selectors = [
-            "input[placeholder*='상품번호']",
-            "input[placeholder*='품번']",
-            "input[placeholder*='货号']",
-            ".ant-input",
-            "input[type='text']",
-        ]
-        filled = False
-        for sel in search_selectors:
-            try:
-                els = page.locator(sel)
-                if els.count() > 0:
-                    els.first.fill(code)
-                    filled = True
-                    break
-            except Exception:
-                continue
+        with sync_playwright() as p:
+            current_os = _platform.system()
+            if current_os == 'Darwin':
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
+            else:
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    channel='chrome',
+                    args=['--start-maximized', '--disable-blink-features=AutomationControlled']
+                )
 
-        if not filled:
-            return None
+            context = browser.new_context(viewport=None, no_viewport=True)
 
-        # Enter 키로 검색
-        page.keyboard.press("Enter")
-        page.wait_for_timeout(2000)
+            # 쿠키 로드
+            if os.path.exists(COOKIE_FILE):
+                try:
+                    with open(COOKIE_FILE, 'r') as f:
+                        cookies = json.load(f)
+                    context.add_cookies(cookies)
+                except Exception:
+                    pass
 
-        # 첫 번째 행에서 이미지 + 품명 추출
-        try:
-            page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=6000)
-        except Exception:
-            return None
+            page = context.new_page()
+            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+            wait_stable(page, 2000)
 
-        rows = page.locator(".ant-table-tbody tr:not(.ant-table-measure-row)")
-        if rows.count() == 0:
-            return None
+            # 로그인 감지 및 자동 로그인
+            current_url = page.url
+            if 'login' in current_url.lower() or page.locator("input[type='password']").count() > 0:
+                set_language_korean(page)
+                wait_stable(page, 500)
+                wait_for_inputs(page)
+                try:
+                    page.locator("input").nth(0).fill(POIZON_ID)
+                    page.locator("input").nth(1).fill(POIZON_PW)
+                    try:
+                        page.click("button:has-text('로그인')", timeout=3000)
+                    except Exception:
+                        page.locator("input").nth(1).press("Enter")
+                    wait_stable(page, 1500)
+                    try:
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                    except Exception:
+                        pass
+                    page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+                    wait_stable(page, 2000)
+                except Exception as e:
+                    browser.close()
+                    return None
+            else:
+                set_language_korean(page)
+                wait_stable(page, 1000)
 
-        row = rows.first
-        img_url = ""
-        name = ""
-
-        # 이미지
-        try:
-            imgs = row.locator("img")
-            if imgs.count() > 0:
-                img_url = imgs.first.get_attribute("src") or ""
-        except Exception:
-            pass
-
-        # 품명 (3번째 셀에서 추출)
-        try:
-            cells = row.locator("td")
-            if cells.count() > 2:
-                text = cells.nth(2).inner_text(timeout=5000)
-                lines = [l.strip() for l in text.split("\n") if l.strip()]
-                for line in lines:
-                    if line and "번호" not in line and "SPU" not in line.upper():
-                        name = line
+            # 상품명 탭 활성화
+            for selector in ["text='상품명'", "span:has-text('상품명')", ".ant-tabs-tab:has-text('상품명')"]:
+                try:
+                    tab = page.locator(selector).first
+                    if tab.count() > 0:
+                        tab.click()
+                        wait_stable(page, 500)
                         break
-        except Exception:
-            pass
+                except Exception:
+                    continue
 
-        if img_url:
-            return {'img_url': img_url, 'name': name}
-        return None
+            # 검색창 클리어 및 품번 입력
+            search_input = page.locator("input[placeholder*='상품명']").first
+            search_input.evaluate("el => el.value = ''")
+            wait_stable(page, 200)
+            search_input.click()
+            wait_stable(page, 200)
+            page.keyboard.press("Control+A")
+            wait_stable(page, 100)
+            page.keyboard.press("Backspace")
+            wait_stable(page, 200)
+            search_input.type(code, delay=50)
+            wait_stable(page, 3000)
+            page.keyboard.press("Enter")
+            wait_stable(page, 2000)
+
+            # 테이블 대기
+            try:
+                page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=5000)
+            except Exception:
+                browser.close()
+                return None
+
+            # 스크롤로 이미지 로드
+            try:
+                page.evaluate("window.scrollTo(0, 300)")
+                wait_stable(page, 2000)
+                page.evaluate("window.scrollTo(0, 0)")
+                wait_stable(page, 2000)
+            except Exception:
+                pass
+
+            # JS로 이미지 URL + 품명 추출
+            data = page.evaluate("""
+                () => {
+                    const rows = document.querySelectorAll('.ant-table-tbody tr:not(.ant-table-measure-row)');
+                    if (rows.length === 0) return null;
+                    const row = rows[0];
+                    const cells = row.querySelectorAll('td');
+
+                    let img_url = '';
+                    const img1 = cells[1]?.querySelector('img');
+                    if (img1) {
+                        img_url = img1.src || img1.getAttribute('data-src') || img1.getAttribute('data-lazy') || '';
+                    }
+                    if (!img_url || img_url.startsWith('data:')) {
+                        for (const img of row.querySelectorAll('img')) {
+                            const src = img.src || img.getAttribute('data-src') || '';
+                            if (src && !src.startsWith('data:') && src.startsWith('http')) {
+                                img_url = src; break;
+                            }
+                        }
+                    }
+
+                    const nameCell = cells[2]?.innerText || '';
+                    const lines = nameCell.split('\\n').map(l => l.trim()).filter(l => l);
+                    let name = '';
+                    for (const line of lines) {
+                        if (line && !line.includes('번호') && !line.toUpperCase().includes('SPU')) {
+                            name = line; break;
+                        }
+                    }
+
+                    return { img_url, name };
+                }
+            """)
+
+            browser.close()
+
+            if data and data.get('img_url'):
+                return {'img_url': data['img_url'], 'name': data.get('name', '')}
+            return None
 
     except Exception as e:
         log(f"search_single_product 오류: {e}", 'error')

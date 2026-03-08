@@ -1438,13 +1438,11 @@ def search_wholesale_product():
         code = request.json.get('code', '').strip()
         if not code:
             return jsonify({'success': False, 'error': '품번 없음'})
-        if page is None:
-            return jsonify({'success': False, 'error': '포이즌 브라우저가 실행 중이 아닙니다. 먼저 포이즌 브라우저를 시작해주세요.'})
         from poizon_data import poizon_search as ps
-        result = ps.search_single_product(page, code)
+        result = ps.search_single_product(code)
         if result:
             return jsonify({'success': True, 'img_url': result.get('img_url', ''), 'name': result.get('name', '')})
-        return jsonify({'success': False, 'error': '검색 결과 없음'})
+        return jsonify({'success': False, 'error': '검색 결과 없음 (포이즌 쿠키 확인 필요)'})
     except Exception as e:
         import traceback; traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)})

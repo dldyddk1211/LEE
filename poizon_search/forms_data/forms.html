@@ -151,13 +151,88 @@
   .menu-btn .icon { font-size: 20px; }
   .menu-btn .label { flex: 1; }
 
+  /* 2칸 그리드 공통 */
+  .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
   /* 도매 리스트 페이지 스타일 */
   .wholesale-container { display: none; }
   .wholesale-container.active { display: block; }
   .invoice-container { display: block; }
   .invoice-container.hidden { display: none; }
 
-  @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr 1fr; } }
+  /* ── 반응형 ── */
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
+
+    /* 사이드바 메뉴 → 가로 스크롤 행 */
+    .menu-buttons { flex-direction: row; overflow-x: auto; gap: 8px; margin-bottom: 0; padding-bottom: 4px; }
+    .menu-btn { min-width: 130px; padding: 10px 14px; font-size: 13px; white-space: nowrap; }
+    .menu-btn:hover { transform: none; }
+
+    /* 고객목록 + 공급자 → 세로 */
+    .grid-2col { grid-template-columns: 1fr; }
+
+    /* form-grid 2칸 */
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-group.span3 { grid-column: span 2; }
+
+    /* 결제 그리드 2칸 */
+    .payment-grid { grid-template-columns: 1fr 1fr; }
+
+    /* 액션바 */
+    .action-bar { flex-wrap: wrap; }
+    .action-bar button { flex: 1; min-width: 120px; }
+
+    /* 도매 설정 그리드 */
+    #wholesaleContainer .card-body > div:first-child { grid-template-columns: 1fr 1fr !important; }
+    #wholesaleContainer .card-body > div:first-child .form-group:first-child { grid-column: span 2; }
+    #wholesaleContainer .card-body > div:first-child .form-group:last-child { grid-column: span 2; }
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 12px 16px; }
+    .header h1 { font-size: 17px; }
+    .container { padding: 8px; gap: 8px; }
+
+    /* form-grid 1칸 */
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.span2, .form-group.span3 { grid-column: span 1; }
+
+    /* 결제 그리드 1칸 */
+    .payment-grid { grid-template-columns: 1fr; }
+
+    /* 요약 박스 */
+    .summary-box { flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .summary-divider { display: none; }
+
+    /* 버튼들 */
+    .btn-outline, .btn-primary, .btn-save, .btn-danger { padding: 10px 16px; font-size: 13px; }
+    .action-bar { justify-content: stretch; }
+    .action-bar button { flex: 1; }
+    .modal-actions { flex-direction: column; }
+    .modal-actions button { width: 100%; }
+
+    /* form-grid2 1칸 */
+    .form-grid2 { grid-template-columns: 1fr; }
+    .form-grid2 .span2 { grid-column: span 1; }
+
+    /* 도매 설정 전부 1칸 */
+    #wholesaleContainer .card-body > div:first-child { grid-template-columns: 1fr !important; }
+    #wholesaleContainer .card-body > div:first-child .form-group { grid-column: span 1 !important; }
+
+    /* 도매 하단 버튼 */
+    #wholesaleContainer .card-body > div:last-child { flex-direction: column; }
+    #wholesaleContainer .card-body > div:last-child button { width: 100%; }
+
+    /* ws-summary */
+    .ws-summary { flex-direction: column; gap: 6px; align-items: flex-end; }
+
+    /* 카드 바디 패딩 축소 */
+    .card-body { padding: 12px; }
+
+    /* 거래처 버튼 히스토리 */
+    #historyHint { display: none; }
+  }
 
   /* ── 도매 오더폼 ── */
   .ws-table-wrap { overflow-x: auto; }
@@ -188,6 +263,11 @@
   .wsc-table td { border: 1px solid #999; padding: 4px 2px; text-align: center; vertical-align: middle; font-size: 10px; }
   .wsc-table .td-sub { font-size: 9px; color: #555; }
   .wsc-total td { background: #f0f0f0; font-weight: 700; }
+  /* 클릭 편집 필드 */
+  .ws-editable-display { padding: 9px 12px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 13px; cursor: pointer; min-height: 38px; background: #fafafa; color: #1a1a2e; transition: border-color 0.2s, background 0.2s; white-space: pre-wrap; line-height: 1.6; }
+  .ws-editable-display:hover { border-color: #0f3460; background: #f0f4ff; }
+  .ws-editable-display.ws-remark-display { font-size: 12px; min-height: 90px; }
+  .ws-editable-display.placeholder { color: #aaa; font-style: italic; }
   /* 미리보기 모달 */
   .modal-xl { background: #fff; border-radius: 14px; width: 98vw; max-width: 1300px; max-height: 95vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
 </style>
@@ -235,7 +315,7 @@
     <div class="invoice-container" id="invoiceContainer">
 
     <!-- 고객 목록 / 공급자 정보 -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+    <div class="grid-2col" style="margin-bottom: 16px;">
       <!-- 고객 목록 -->
       <div class="card">
         <div class="card-header">
@@ -375,10 +455,15 @@
         <div class="card-header"><span>⚙️ 오더폼 설정</span></div>
         <div class="card-body">
           <div style="display:grid;grid-template-columns:1fr 1fr 200px;gap:10px;margin-bottom:10px;">
+
+            <!-- 업체명: 클릭하면 편집 -->
             <div class="form-group" style="grid-column:span 2;">
-              <label>업체명</label>
-              <input type="text" id="ws_company" placeholder="더원 컴퍼니 ( 부가세 포함 / 택배비 착불 )">
+              <label>업체명 <span style="font-size:10px;color:#aaa;font-weight:400;">✏️ 클릭하여 수정</span></label>
+              <div id="ws_company_display" class="ws-editable-display" onclick="wsEditStart('company')" title="클릭하여 수정"></div>
+              <input type="text" id="ws_company" style="display:none;" onblur="wsEditEnd('company')" onkeydown="if(event.key==='Enter')this.blur()">
             </div>
+
+            <!-- 사이즈 타입 -->
             <div class="form-group">
               <label>사이즈 타입</label>
               <select id="ws_size_type" onchange="wsChangeSizeType()" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;outline:none;font-family:inherit;width:100%;">
@@ -387,10 +472,14 @@
                 <option value="CAP">CAP_SIZE</option>
               </select>
             </div>
+
+            <!-- REMARK: 클릭하면 편집 -->
             <div class="form-group" style="grid-column:span 3;">
-              <label>REMARK</label>
-              <textarea id="ws_remark" rows="4" style="padding:8px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:12px;outline:none;font-family:inherit;width:100%;resize:vertical;" placeholder="1. 브랜드 : &#10;2. MOQ : &#10;3. 출고 : &#10;4. 문의 : "></textarea>
+              <label>REMARK <span style="font-size:10px;color:#aaa;font-weight:400;">✏️ 클릭하여 수정</span></label>
+              <div id="ws_remark_display" class="ws-editable-display ws-remark-display" onclick="wsEditStart('remark')" title="클릭하여 수정"></div>
+              <textarea id="ws_remark" rows="5" style="display:none;padding:8px 10px;border:1.5px solid #0f3460;border-radius:6px;font-size:12px;outline:none;font-family:inherit;width:100%;resize:vertical;" onblur="wsEditEnd('remark')"></textarea>
             </div>
+
           </div>
         </div>
       </div>
@@ -1245,6 +1334,47 @@ function showMenu(menuName) {
 // ══════════════════════════════════════
 // 도매 오더폼
 // ══════════════════════════════════════
+// 기본값
+const WS_DEFAULTS = {
+  company: '더원 컴퍼니 ( 부가세 포함 / 택배비 착불/컨펌 후 1-2일 후 즉출 )',
+  remark: '1. 브랜드 : 나이키코리아\n2. MOQ : (세트별 완사)\n3. 출고 : 컨펌 후 1-2일 후 즉출\n4. 주문/구매 : 1:1 채팅 (오픈채팅 링크 클릭)\n5. 결제방법 : 컨펌 시 100% 결제\n6. 세금계산서 가능 (부가세 포함 금액) 택배비 착불\n7. 문의 : 카톡 \n8. 수량변동에 의한 캔슬은 불가하오니 신중한 오더 부탁드립니다.',
+};
+
+function wsInitEditable() {
+  // 기본값 세팅
+  document.getElementById('ws_company').value = WS_DEFAULTS.company;
+  document.getElementById('ws_remark').value  = WS_DEFAULTS.remark;
+  wsEditEnd('company');
+  wsEditEnd('remark');
+}
+
+function wsEditStart(field) {
+  const display = document.getElementById('ws_' + field + '_display');
+  const input   = document.getElementById('ws_' + field);
+  display.style.display = 'none';
+  input.style.display   = '';
+  input.focus();
+  // textarea면 커서 끝으로
+  if (input.tagName === 'TEXTAREA') {
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+}
+
+function wsEditEnd(field) {
+  const display = document.getElementById('ws_' + field + '_display');
+  const input   = document.getElementById('ws_' + field);
+  input.style.display   = 'none';
+  display.style.display = '';
+  const val = input.value.trim();
+  if (val) {
+    display.textContent = val;
+    display.classList.remove('placeholder');
+  } else {
+    display.textContent = field === 'company' ? '업체명을 입력하세요' : 'REMARK를 입력하세요';
+    display.classList.add('placeholder');
+  }
+}
+
 const WS_SIZES = {
   CM:  [220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285],
   ONE: ['ONE SIZE'],
@@ -1489,7 +1619,8 @@ window.addEventListener('DOMContentLoaded', () => {
   addProductRow();
   loadCustomers();
   initTableResize();  // ← 컬럼 리사이즈 초기화
-  // 도매 오더폼 초기 상품 3개
+  // 도매 오더폼 초기화
+  wsInitEditable();
   wsAddProduct(); wsAddProduct(); wsAddProduct();
 
   // 수요자 직접 입력 시에도 historyBtn 업데이트
