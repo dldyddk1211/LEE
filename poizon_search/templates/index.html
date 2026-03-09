@@ -370,7 +370,7 @@
       align-items:center;
       justify-content:flex-end;
       gap:12px;
-      margin: 12px 0 0;
+      margin: 0 0 8px;
       padding: 10px 12px;
       background:#fff;
       border:1px solid #e0e0e0;
@@ -413,7 +413,8 @@
     }
 
     .table-container{
-      max-height: 420px;
+      max-height: calc(100vh - 300px);
+      min-height: 400px;
       overflow:auto;
       border:1px solid #e0e0e0;
       border-radius:12px;
@@ -846,59 +847,46 @@
 </div>
 <div class="result-status-wrapper">
 <div class="section" id="resultSection" style="display:none;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px;">
-    <h3 style="margin: 0;">
-      📋 수집 결과 (<span id="resultCount">0</span>개) 
-      <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
-    </h3>
+  <!-- 1행: 결과 제목 -->
+  <h3 style="margin: 0 0 10px;">
+    📋 수집 결과 (<span id="resultCount">0</span>개)
+    <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
+  </h3>
 
-        <!-- ✅ 무신사 검색 옵션 (오른쪽 위로 이동) -->
-        <div id="musinsaSearchOptions" style="display: none;">
-          <div class="search-options-container">
-            <button id="musinsaSearchBtn" class="search-execute-btn">
-              🔍 크림 검색
-            </button>
-            
-            <div class="search-divider"></div>
-            
-            <div class="search-checkboxes">
-              <label class="search-label">
-                <input type="checkbox" id="musinsaSearchKream" checked class="search-checkbox">
-                <span class="search-label-text">🛒 크림</span>
-              </label>
-              
-              <label class="search-label">
-                <input type="checkbox" id="musinsaSearchPoizon" class="search-checkbox">
-                <span class="search-label-text">🟣 포이즌</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ✅ 리스트 비교 검색 옵션 (새로 추가!) -->
-      <div id="compareSearchOptions" style="display: none;">
-        <div class="search-options-container">
-          <button id="compareSearchBtn" class="search-execute-btn">
-            🔍 검색 시작
-          </button>
-          
-          <div class="search-divider"></div>
-          
-          <div class="search-checkboxes">
-            <label class="search-label">
-              <input type="checkbox" id="compareSearchKream" checked class="search-checkbox">
-              <span class="search-label-text">🛒 크림</span>
-            </label>
-            
-            <label class="search-label">
-              <input type="checkbox" id="compareSearchPoizon" class="search-checkbox">
-              <span class="search-label-text">🟣 포이즌</span>
-            </label>
-          </div>
-        </div>
+  <!-- 2행: 크림/포이즌 검색 옵션 -->
+  <div id="musinsaSearchOptions" style="display: none; margin-bottom: 10px;">
+    <div class="search-options-container">
+      <button id="musinsaSearchBtn" class="search-execute-btn">🔍 크림 검색</button>
+      <div class="search-divider"></div>
+      <div class="search-checkboxes">
+        <label class="search-label">
+          <input type="checkbox" id="musinsaSearchKream" checked class="search-checkbox">
+          <span class="search-label-text">🛒 크림</span>
+        </label>
+        <label class="search-label">
+          <input type="checkbox" id="musinsaSearchPoizon" class="search-checkbox">
+          <span class="search-label-text">🟣 포이즌</span>
+        </label>
       </div>
     </div>
+  </div>
+
+  <div id="compareSearchOptions" style="display: none; margin-bottom: 10px;">
+    <div class="search-options-container">
+      <button id="compareSearchBtn" class="search-execute-btn">🔍 검색 시작</button>
+      <div class="search-divider"></div>
+      <div class="search-checkboxes">
+        <label class="search-label">
+          <input type="checkbox" id="compareSearchKream" checked class="search-checkbox">
+          <span class="search-label-text">🛒 크림</span>
+        </label>
+        <label class="search-label">
+          <input type="checkbox" id="compareSearchPoizon" class="search-checkbox">
+          <span class="search-label-text">🟣 포이즌</span>
+        </label>
+      </div>
+    </div>
+  </div>
 
     <!-- ===== 필터 패널 ===== -->
     <div id="filterPanel" style="display:none;">
@@ -962,12 +950,7 @@
     </div>
     <!-- ===== /필터 패널 ===== -->
 
-    <div class="table-container">
-      <table>
-        <thead id="tableHeader"></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
+    <!-- 테이블 위 컨트롤 바: 표시개수 + 페이징 -->
     <div class="table-controls" id="tableControls" style="display:none;">
         <span class="ctrl-label">표시 개수</span>
         <select id="pageSizeSelect">
@@ -977,7 +960,14 @@
         <button id="prevPageBtn" class="page-btn">← 이전</button>
         <span id="pageInfo" class="page-info">1 / 1</span>
         <button id="nextPageBtn" class="page-btn">다음 →</button>
-      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead id="tableHeader"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
     </div>
 
     <div class="section" id="statusSection" style="display:none;">
