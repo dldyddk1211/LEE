@@ -1454,35 +1454,75 @@ def api_send_best():
         from utils.telegram import send_telegram_async
         from datetime import datetime as _dt
         data = request.get_json()
-        mode  = data.get('mode', '')
-        items = data.get('items', [])[:10]
+        mode      = data.get('mode', '')
+        auto_type = data.get('auto_type', '')   # 'kream' | 'poizon' | 'jordan' | ''
+        items     = data.get('items', [])[:10]
 
         now = _dt.now().strftime('%m/%d %H:%M')
-        mode_label = {'poizon': '포이즌', 'musinsa': '무신사', 'compare': '리스트 비교'}.get(mode, mode)
+        mode_label = {
+            'poizon': '포이즌', 'musinsa': '무신사', 'compare': '리스트비교',
+            'musinsa_kream': '무신사', 'compare_kream': '리스트비교',
+            'musinsa_poizon': '무신사', 'compare_poizon': '리스트비교',
+        }.get(mode, mode)
 
-        lines = [f'🏆 <b>베스트 {len(items)}위 ({mode_label}) — {now}</b>\n']
+        # 조건 만족 상품 없음 메시지
+        if auto_type in ('kream_empty', 'poizon_empty'):
+            label = '🛒 크림' if auto_type == 'kream_empty' else '🟣 포이즌'
+            send_telegram_async(
+                f'{label} <b>베스트 ({mode_label}) — {now}</b>\n'
+                f'⚠️ 조건 만족 상품 없음 (판매량 50개+, 마진 5,000원+)'
+            )
+            return jsonify({'ok': True})
+
+        # 헤더 (auto_type에 따라 구분)
+        if auto_type == 'kream':
+            header = f'🛒 <b>크림 자동 베스트 TOP{len(items)} ({mode_label}) — {now}</b>\n<i>판매량 100개+, 마진 10,000원+</i>\n'
+        elif auto_type == 'poizon':
+            header = f'🟣 <b>포이즌 자동 베스트 TOP{len(items)} ({mode_label}) — {now}</b>\n<i>판매량 100개+, 마진 10,000원+</i>\n'
+        elif auto_type == 'jordan':
+            header = f'👟 <b>조던 베스트 TOP{len(items)} ({mode_label}) — {now}</b>\n'
+        else:
+            header = f'🏆 <b>베스트 {len(items)}위 ({mode_label}) — {now}</b>\n'
+
+        lines = [header]
 
         for i, d in enumerate(items, 1):
             code = d.get('상품번호') or d.get('엑셀_상품번호') or d.get('product_code') or '-'
             name = d.get('제품명') or d.get('name') or '-'
             name = name[:20] + '…' if len(str(name)) > 20 else name
 
-            if mode == 'poizon':
-                diff  = d.get('크림비교', 0) or 0
-                ksale = d.get('크림판매량', 0) or 0
+            if auto_type == 'kream':
+                kd = int(d.get('크림비교', 0) or 0)
+                ks = int(d.get('크림판매량', 0) or 0)
                 lines.append(
                     f'{i}. <code>{code}</code> {name}\n'
-                    f'   포이즌-크림: <b>+{int(diff):,}원</b> | 크림판매량: {int(ksale):,}개'
+                    f'   크림마진: <b>+{kd:,}원</b> | 판매량: <b>{ks:,}개</b>'
+                )
+            elif auto_type == 'poizon':
+                pd_ = int(d.get('포이즌비교', 0) or 0)
+                ps  = (int(d.get('포이즌중국판매량', 0) or 0) +
+                       int(d.get('포이즌현업자판매량', 0) or 0))
+                lines.append(
+                    f'{i}. <code>{code}</code> {name}\n'
+                    f'   포이즌마진: <b>+{pd_:,}원</b> | 판매량: <b>{ps:,}개</b>'
+                )
+            elif mode == 'poizon':
+                diff  = int(d.get('크림비교', 0) or 0)
+                ksale = int(d.get('크림판매량', 0) or 0)
+                lines.append(
+                    f'{i}. <code>{code}</code> {name}\n'
+                    f'   포이즌-크림: <b>+{diff:,}원</b> | 크림판매량: {ksale:,}개'
                 )
             else:
-                kd   = d.get('크림비교', 0)  or 0
-                pd   = d.get('포이즌비교', 0) or 0
-                ks   = d.get('크림판매량', 0) or 0
-                ps   = (d.get('포이즌중국판매량', 0) or 0) + (d.get('포이즌현업자판매량', 0) or 0)
+                kd  = int(d.get('크림비교', 0)  or 0)
+                pd_ = int(d.get('포이즌비교', 0) or 0)
+                ks  = int(d.get('크림판매량', 0) or 0)
+                ps  = (int(d.get('포이즌중국판매량', 0) or 0) +
+                       int(d.get('포이즌현업자판매량', 0) or 0))
                 lines.append(
                     f'{i}. <code>{code}</code> {name}\n'
-                    f'   크림차: <b>{int(kd):+,}원</b> ({int(ks):,}개) | '
-                    f'포이즌차: <b>{int(pd):+,}원</b> ({int(ps):,}개)'
+                    f'   크림차: <b>{kd:+,}원</b> ({ks:,}개) | '
+                    f'포이즌차: <b>{pd_:+,}원</b> ({ps:,}개)'
                 )
 
         send_telegram_async('\n'.join(lines))

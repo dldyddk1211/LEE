@@ -768,6 +768,17 @@
       padding: 7px 16px; font-size: 13px; cursor: pointer;
     }
     .btn-filter-excel:hover { background: #185c37; }
+    .btn-jordan {
+      background: linear-gradient(135deg, #e63946 0%, #c1121f 100%); color: #fff;
+      border: none; border-radius: 6px;
+      padding: 7px 16px; font-size: 13px; cursor: pointer; font-weight: 600;
+    }
+    .btn-jordan:hover { background: linear-gradient(135deg, #c1121f 0%, #9d0208 100%); }
+    .btn-jordan.active { background: linear-gradient(135deg, #6a0dad 0%, #4a0080 100%); }
+    .jordan-filter-row {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-top: 8px; padding-top: 8px; border-top: 1px dashed #ddd;
+    }
     .filter-info { font-size: 12px; color: #888; margin-top: 6px; }
 
     /* 필터 액션 버튼 소형화 (전역 button 스타일 override) */
@@ -998,6 +1009,12 @@
           <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
           <button class="btn-filter-excel" onclick="downloadExcel()">📊 엑셀 다운로드</button>
         </div>
+        <div style="margin-top:8px;">
+          <label class="search-label">
+            <input type="checkbox" id="tgAutoSend" class="search-checkbox">
+            <span class="search-label-text">📤 텔레그램 자동 발송 <small style="color:#888;">(검색 완료 시 판매량100+ 마진1만+ 베스트10 자동 전송)</small></span>
+          </label>
+        </div>
         <div class="filter-info" id="filterInfo"></div>
       </div>
 
@@ -1021,6 +1038,12 @@
           <button class="btn-filter-reset" onclick="resetFilters()">↺ 필터 초기화</button>
           <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
           <button class="btn-filter-excel" onclick="downloadExcel()">📊 엑셀 다운로드</button>
+        </div>
+        <div style="margin-top:8px;">
+          <label class="search-label">
+            <input type="checkbox" id="tgAutoSendP" class="search-checkbox">
+            <span class="search-label-text">📤 텔레그램 자동 발송 <small style="color:#888;">(검색 완료 시 판매량100+ 마진1만+ 베스트10 자동 전송)</small></span>
+          </label>
         </div>
         <div class="filter-info" id="filterInfoPoizon"></div>
       </div>
@@ -1794,6 +1817,88 @@
       else alert('❌ 전송 실패: ' + (d.error || '알 수 없는 오류'));
     })
     .catch(e => alert('❌ 오류: ' + e));
+  }
+
+  // ===== 크림 자동 텔레그램 (판매량 100+, 마진 10000+, 베스트 10) =====
+  async function autoSendKreamBest() {
+    // 체크박스 미체크 시 발송 안 함
+    const checked = document.getElementById('tgAutoSend')?.checked
+                 || document.getElementById('tgAutoSendP')?.checked;
+    if (!checked) return;
+
+    const items = collectedData
+      .filter(d => {
+        const sales = parseInt(d.크림판매량) || 0;
+        const margin = typeof d.크림비교 === 'number' ? d.크림비교 : 0;
+        return sales >= 50 && margin >= 5000;
+      })
+      .sort((a, b) => (b.크림비교 || 0) - (a.크림비교 || 0))
+      .slice(0, 10);
+
+    if (items.length === 0) {
+      addLog('📤 크림 베스트: 조건 만족 상품 없음 (판매량 50+, 마진 5,000원+)', 'info');
+      try {
+        await fetch('/api/send_best', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ mode: selectedMode, items: [], auto_type: 'kream_empty' })
+        });
+      } catch (e) {}
+      return;
+    }
+    try {
+      const r = await fetch('/api/send_best', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ mode: selectedMode, items, auto_type: 'kream' })
+      });
+      const d = await r.json();
+      if (d.ok) addLog(`📤 크림 베스트 ${items.length}개 텔레그램 자동 발송 완료`, 'success');
+      else addLog(`⚠️ 텔레그램 전송 실패: ${d.error || ''}`, 'warning');
+    } catch (e) {
+      addLog(`⚠️ 텔레그램 전송 오류: ${e.message}`, 'warning');
+    }
+  }
+
+  // ===== 포이즌 자동 텔레그램 (판매량 50+, 마진 5000+, 베스트 10) =====
+  async function autoSendPoizonBest() {
+    // 체크박스 미체크 시 발송 안 함
+    const checked = document.getElementById('tgAutoSend')?.checked
+                 || document.getElementById('tgAutoSendP')?.checked;
+    if (!checked) return;
+
+    const items = collectedData
+      .filter(d => {
+        const sales = (parseInt(d.포이즌중국판매량) || 0) + (parseInt(d.포이즌현업자판매량) || 0);
+        const margin = typeof d.포이즌비교 === 'number' ? d.포이즌비교 : 0;
+        return sales >= 50 && margin >= 5000;
+      })
+      .sort((a, b) => (b.포이즌비교 || 0) - (a.포이즌비교 || 0))
+      .slice(0, 10);
+
+    if (items.length === 0) {
+      addLog('📤 포이즌 베스트: 조건 만족 상품 없음 (판매량 50+, 마진 5,000원+)', 'info');
+      try {
+        await fetch('/api/send_best', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ mode: selectedMode, items: [], auto_type: 'poizon_empty' })
+        });
+      } catch (e) {}
+      return;
+    }
+    try {
+      const r = await fetch('/api/send_best', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ mode: selectedMode, items, auto_type: 'poizon' })
+      });
+      const d = await r.json();
+      if (d.ok) addLog(`📤 포이즌 베스트 ${items.length}개 텔레그램 자동 발송 완료`, 'success');
+      else addLog(`⚠️ 텔레그램 전송 실패: ${d.error || ''}`, 'warning');
+    } catch (e) {
+      addLog(`⚠️ 텔레그램 전송 오류: ${e.message}`, 'warning');
+    }
   }
 
   // ===== 정렬 함수 (poizon / musinsa / compare 지원) =====
@@ -2771,7 +2876,10 @@
                 console.error('❌ 스케줄러 저장 오류:', error);
                 addLog(`⚠️ 스케줄러 저장 오류: ${error.message}`, 'warning');
               }
-              
+
+              // 크림 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
+              await autoSendKreamBest();
+
             } catch (parseError) {
               console.error('❌ 완료 이벤트 파싱 오류:', parseError);
               addLog('❌ 완료 데이터 처리 오류', 'error');
@@ -3047,6 +3155,9 @@
                 console.error('스케줄러 저장 오류:', e);
               }
             }
+
+            // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
+            await autoSendPoizonBest();
           });
 
           poizonEventSource.addEventListener('ping', (event) => {
@@ -3235,6 +3346,9 @@
                 console.error('스케줄러 저장 오류:', e);
               }
             }
+
+            // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
+            await autoSendPoizonBest();
           });
 
           poizonEventSource.onerror = (error) => {

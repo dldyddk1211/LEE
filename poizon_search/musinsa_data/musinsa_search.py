@@ -65,7 +65,7 @@ def wait_stable(page, ms=600):
 def dismiss_popup(page):
     """무신사 상세 페이지 팝업/공지 자동 닫기 (브랜드 공지, 이벤트 등)"""
     try:
-        # 1순위: "오늘 그만보기" 클릭 (오늘 하루 안 뜨게)
+        # 1순위: "오늘 그만보기" 클릭 (브랜드 공지 전용)
         btn = page.locator("button:has-text('오늘 그만보기')")
         if btn.count() > 0 and btn.first.is_visible():
             btn.first.click()
@@ -74,25 +74,15 @@ def dismiss_popup(page):
     except:
         pass
     try:
-        # 2순위: 모달 내 "확인" 버튼
-        # 단, 장바구니/결제 등 주요 버튼이 아닌 모달 안 확인 버튼만 타깃
-        modal = page.locator("[class*='modal'], [class*='Modal'], [class*='popup'], [class*='Popup'], [role='dialog']")
-        if modal.count() > 0 and modal.first.is_visible():
-            confirm_btn = modal.first.locator("button:has-text('확인')")
-            if confirm_btn.count() > 0:
-                confirm_btn.first.click()
-                page.wait_for_timeout(300)
-                return
-    except:
-        pass
-    try:
-        # 3순위: 닫기(×) 버튼
-        close_btn = page.locator("button[class*='close']:visible, button[aria-label*='닫기']:visible, button[aria-label*='close']:visible")
-        if close_btn.count() > 0:
-            close_btn.first.click()
+        # 2순위: "이 상품 그만보기" / "공지 닫기" 등 공지 전용 텍스트 버튼
+        close_notice = page.locator("button:has-text('이 상품 그만보기'), button:has-text('공지 닫기'), button:has-text('다시 보지 않기')")
+        if close_notice.count() > 0 and close_notice.first.is_visible():
+            close_notice.first.click()
             page.wait_for_timeout(300)
+            return
     except:
         pass
+    # ⚠️ 광범위한 modal/popup 셀렉터는 리뷰 모달 등 의도치 않은 클릭 유발 → 제거
 
 
 def save_cookies():
