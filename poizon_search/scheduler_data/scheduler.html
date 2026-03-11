@@ -196,6 +196,11 @@
             background: #f3e5f5;
             color: #7b1fa2;
         }
+
+        .mode-musinsa {
+            background: #fff3e0;
+            color: #e65100;
+        }
         
         .task-keyword {
             font-size: 18px;
@@ -500,8 +505,20 @@
                 minute: '2-digit'
             });
             
-            const modeText = task.mode === 'keyword' ? '키워드 검색' : '리스트 비교';
-            const modeClass = task.mode === 'keyword' ? 'mode-keyword' : 'mode-compare';
+            const modeLabels = {
+                'keyword': '키워드 검색',
+                'compare': '리스트비교',
+                'compare_kream': '리스트비교',
+                'compare_poizon': '리스트비교',
+                'musinsa': '무신사',
+                'musinsa_kream': '무신사',
+                'musinsa_poizon': '무신사',
+                'kream': '크림'
+            };
+            const modeText = modeLabels[task.mode] || task.mode || '검색';
+            const modeClass = (task.mode === 'musinsa' || task.mode === 'musinsa_kream' || task.mode === 'musinsa_poizon') ? 'mode-musinsa'
+                            : (task.mode === 'keyword') ? 'mode-keyword'
+                            : 'mode-compare';
             
             const duration = formatDuration(task.duration_seconds || 0);
             

@@ -282,6 +282,50 @@
       background:#218838;
       transform: translateY(-2px);
     }
+    /* 포이즌 → 크림 검색 레이아웃 */
+    .filter-poizon-layout {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+    }
+    .filter-poizon-left {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 20px;
+      margin-right: 20px;
+      border-right: 2px solid #dee2e6;
+    }
+    .btn-kream-big {
+      background: #4285f4;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px !important;
+      font-size: 14px !important;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1.4;
+      width: auto !important;
+      min-height: auto !important;
+      display: inline-flex !important;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-kream-big:hover:not(:disabled) {
+      background: #2d6fd9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(66,133,244,0.3);
+    }
+    .btn-kream-big:disabled {
+      background: #90b8f8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .filter-poizon-right {
+      flex: 1;
+    }
     
    #startBtn{
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -325,6 +369,18 @@
       box-shadow: 0 10px 20px rgba(255,107,107,0.3);
     }
     
+    #musinsaRankBtn {
+      background: linear-gradient(135deg, #f09819 0%, #e67e00 100%);
+    }
+    #musinsaRankBtn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(240,152,25,0.3);
+    }
+    #musinsaRankBtn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
     .stop-btn{
       background:#dc3545;
       display:none;
@@ -706,25 +762,39 @@
       padding: 7px 16px; font-size: 13px; cursor: pointer;
     }
     .btn-tg-best:hover { background: #218838; }
+    .btn-filter-excel {
+      background: #217346; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 7px 16px; font-size: 13px; cursor: pointer;
+    }
+    .btn-filter-excel:hover { background: #185c37; }
     .filter-info { font-size: 12px; color: #888; margin-top: 6px; }
 
-    /* 결과 + 진행상황 나란히 배치 */
+    /* 필터 액션 버튼 소형화 (전역 button 스타일 override) */
+    .filter-actions button {
+      width: auto !important;
+      min-height: auto !important;
+      padding: 5px 12px !important;
+      font-size: 12px !important;
+      font-weight: 500;
+      border-radius: 6px;
+      display: inline-flex !important;
+      white-space: nowrap;
+    }
+    .filter-actions { flex-wrap: nowrap; overflow-x: auto; }
+
+    /* 결과 + 진행상황 세로 배치 */
     .result-status-wrapper {
       display: flex;
+      flex-direction: column;
       gap: 16px;
-      align-items: flex-start;
     }
     .result-status-wrapper #resultSection {
-      flex: 1;
+      width: 100%;
       min-width: 0;
     }
     .result-status-wrapper #statusSection {
-      width: 340px;
-      flex-shrink: 0;
-    }
-    @media (max-width: 900px) {
-      .result-status-wrapper { flex-direction: column; }
-      .result-status-wrapper #statusSection { width: 100%; }
+      width: 100%;
     }
     #modeInventory.active {
       border-color: #28a745;
@@ -816,6 +886,7 @@
 
     <div class="button-group" id="buttonSection" style="display:none;">
       <button id="startBtn" onclick="startCollection()" disabled>🚀 수집 시작</button>
+      <button id="musinsaRankBtn" onclick="startMusinsaRankSearch()" style="display:none;">📊 무신사 랭크</button>
       <label for="excelUpload" id="uploadLabel" class="upload-btn" style="display:none;">
         📤 엑셀 업로드
         <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelUpload(event)">
@@ -847,11 +918,16 @@
 </div>
 <div class="result-status-wrapper">
 <div class="section" id="resultSection" style="display:none;">
-  <!-- 1행: 결과 제목 -->
-  <h3 style="margin: 0 0 10px;">
-    📋 수집 결과 (<span id="resultCount">0</span>개)
-    <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
-  </h3>
+  <!-- 1행: 결과 제목 + 크림 검색 버튼 -->
+  <div style="display:flex; align-items:center; justify-content:space-between; margin:0 0 10px;">
+    <h3 style="margin:0;">
+      📋 수집 결과 (<span id="resultCount">0</span>개)
+      <span id="searchTime" style="color:#666; font-size:14px; font-weight:normal;"></span>
+    </h3>
+    <div id="filterPoizonLeft" style="display:none;">
+      <button id="poizonKreamSearchBtn" class="btn-kream-big" onclick="window.startKreamSearch('poizonKreamSearchBtn', '상품번호', null, '포이즌')">🔵 크림 검색</button>
+    </div>
+  </div>
 
   <!-- 2행: 크림/포이즌 검색 옵션 -->
   <div id="musinsaSearchOptions" style="display: none; margin-bottom: 10px;">
@@ -918,8 +994,9 @@
         </div>
         <div class="filter-actions">
           <button class="btn-filter-apply" onclick="applyFilters()">✅ 필터 적용</button>
-          <button class="btn-filter-reset" onclick="resetFilters()">↺ 초기화</button>
+          <button class="btn-filter-reset" onclick="resetFilters()">↺ 필터 초기화</button>
           <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
+          <button class="btn-filter-excel" onclick="downloadExcel()">📊 엑셀 다운로드</button>
         </div>
         <div class="filter-info" id="filterInfo"></div>
       </div>
@@ -941,8 +1018,9 @@
         </div>
         <div class="filter-actions">
           <button class="btn-filter-apply" onclick="applyFilters()">✅ 필터 적용</button>
-          <button class="btn-filter-reset" onclick="resetFilters()">↺ 초기화</button>
+          <button class="btn-filter-reset" onclick="resetFilters()">↺ 필터 초기화</button>
           <button class="btn-tg-best" onclick="sendBestToTelegram()">📤 베스트 10 텔레그램</button>
+          <button class="btn-filter-excel" onclick="downloadExcel()">📊 엑셀 다운로드</button>
         </div>
         <div class="filter-info" id="filterInfoPoizon"></div>
       </div>
@@ -1004,23 +1082,18 @@
       return price.toLocaleString() + '원';
     }
     
-    // 문자열 처리
-    let priceStr = String(price)
-      .replace(/₩/g, '')       // 원화 기호 제거
-      .replace(/원/g, '')       // "원" 제거
-      .replace(/,/g, '')        // 쉼표 제거
-      .replace(/\s+/g, '')      // 공백 제거
-      .trim();
-    
+    // 문자열 처리 - 통화기호 종류(₩/￦/¥ 등) 무관하게 숫자만 추출
+    const numStr = String(price).replace(/[^0-9-]/g, '');
+
     // 빈 문자열 체크
-    if (!priceStr) return '-';
-    
+    if (!numStr) return '-';
+
     // 숫자 변환
-    let numPrice = parseInt(priceStr, 10);
-    
+    let numPrice = parseInt(numStr, 10);
+
     // 변환 실패 시
     if (isNaN(numPrice)) {
-      console.warn('formatPrice 변환 실패:', price, '→', priceStr);
+      console.warn('formatPrice 변환 실패:', price, '→', numStr);
       return '-';
     }
     
@@ -1196,6 +1269,9 @@
             <th onclick="sortBy('크림비교')">
               크림비교 <span id="sort크림비교">⇅</span>
             </th>
+            <th onclick="sortBy('크림판매량')">
+              크림판매량 <span id="sort크림판매량">⇅</span>
+            </th>
           </tr>
         `;
       } else if (mode === 'musinsa') {
@@ -1280,20 +1356,15 @@
       const tbody = document.getElementById('tableBody');
       tbody.innerHTML = '';
 
-      // ✅ 가격 포맷 함수 추가!
+      // ✅ 가격 포맷 함수 - 통화기호(₩/￦/¥) 무관하게 숫자만 추출
       const formatPrice = (price) => {
-        if (!price || price === '-' || price === 'N/A') return '-';
-        
-        // 이미 "원"이 붙어있으면 제거
-        let priceStr = String(price).replace(/원/g, '').replace(/,/g, '').trim();
-        
-        // 숫자로 변환
-        let numPrice = parseInt(priceStr);
-        
+        if (price === null || price === undefined || price === '' || price === '-' || price === 'N/A') return '-';
+        if (typeof price === 'number') return price === 0 ? '0원' : price.toLocaleString() + '원';
+        const numStr = String(price).replace(/[^0-9-]/g, '');
+        if (!numStr) return '-';
+        const numPrice = parseInt(numStr, 10);
         if (isNaN(numPrice)) return '-';
-        
-        // 천 단위 구분자 + "원"
-        return numPrice.toLocaleString() + '원';
+        return numPrice === 0 ? '0원' : numPrice.toLocaleString() + '원';
       };
 
       const totalItems = collectedData.length;
@@ -1304,10 +1375,19 @@
       const startIdx = (currentPage - 1) * pageSize;
       const pageItems = collectedData.slice(startIdx, startIdx + pageSize);
 
+      // ✅ 디버그: 첫 번째 아이템 콘솔 출력
+      if (pageItems.length > 0 && selectedMode === 'poizon') {
+        const d0 = pageItems[0];
+        console.log('[DEBUG] 첫 아이템 전체:', JSON.stringify(d0));
+        console.log('[DEBUG] 최근30일평균거래가:', d0['최근30일평균거래가'], '/ type:', typeof d0['최근30일평균거래가']);
+        console.log('[DEBUG] 중국노출:', d0['중국노출'], '/ type:', typeof d0['중국노출']);
+        console.log('[DEBUG] formatPrice 결과:', formatPrice(d0['최근30일평균거래가']));
+      }
+
       pageItems.forEach((data, idx) => {
         const row = tbody.insertRow();
         row.insertCell().textContent = startIdx + idx + 1;
- 
+
         if (selectedMode === 'poizon') {
           // ✅ 포이즌 모드: 이미지 셀 추가
           const imgCell = row.insertCell();
@@ -1323,8 +1403,12 @@
           
           row.insertCell().textContent = data.상품번호 || '-';
           row.insertCell().textContent = data.제품명 || '-';
-          row.insertCell().textContent = formatPrice(data.최근30일평균거래가);  // ✅ 변경
-          row.insertCell().textContent = formatPrice(data.중국노출);  // ✅ 변경
+          const _avgRaw = data['최근30일평균거래가'];
+          const _avgFmt = formatPrice(_avgRaw);
+          row.insertCell().textContent = (_avgFmt !== '-') ? _avgFmt : (_avgRaw || '-');
+          const _cnRaw = data['중국노출'];
+          const _cnFmt = formatPrice(_cnRaw);
+          row.insertCell().textContent = (_cnFmt !== '-') ? _cnFmt : (_cnRaw || '-');
           row.insertCell().textContent = (data.중국시장최근30일판매량 || 0).toLocaleString() + '개';
           row.insertCell().textContent = (data.현지판매자최근30일판매량 || 0).toLocaleString() + '개';
           // 크림평균가 (링크 추가)
@@ -1966,6 +2050,14 @@
       
       selectedMode = mode;
       updateTableHeader(mode);
+      // 포이즌 모드 전환 시 크림 검색 버튼 숨김
+      if (mode !== 'poizon') {
+        const poizonLeft = document.getElementById('filterPoizonLeft');
+        if (poizonLeft) poizonLeft.style.display = 'none';
+      }
+      // 무신사 모드일 때만 랭크 버튼 표시
+      const rankBtn = document.getElementById('musinsaRankBtn');
+      if (rankBtn) rankBtn.style.display = (mode === 'musinsa') ? 'block' : 'none';
       document.getElementById('inputSection').style.display = 'grid';
       document.getElementById('buttonSection').style.display = 'grid';
       document.getElementById('statusSection').style.display = 'block';
@@ -2186,7 +2278,11 @@
         if (data.type === 'log') addLog(data.message, data.level || 'info');
         if (data.type === 'progress') updateProgress(data.current, data.total);
         if (data.type === 'data') {
-          collectedData.push(data.item);
+          const item = data.item;
+          if (collectedData.length < 3) {
+            addLog(`💰 수신[${collectedData.length+1}]: 평균거래가="${item['최근30일평균거래가']}" 중국노출="${item['중국노출']}"`, 'info');
+          }
+          collectedData.push(item);
           renderTable();
         }
 
@@ -2194,17 +2290,17 @@
           addLog('✅ 포이즌 검색 완료!', 'success');
            // ✅ 수집 완료
           isCollecting = false;
-          
+
           if (data.data && Array.isArray(data.data)) {
             collectedData = data.data;
             renderTable();
           }
-          
+
           if (data.file_path) {
             document.getElementById('downloadBtn').href = `/download/${encodeURIComponent(data.file_path)}`;
             document.getElementById('downloadBtn').style.display = 'block';
           }
-          
+
           const resultSearchOpts = document.getElementById('resultSearchOptions');
           if (resultSearchOpts) resultSearchOpts.style.display = 'block';
           document.getElementById('resetBtn').style.display = 'block';
@@ -2212,7 +2308,18 @@
           document.getElementById('stopBtn').style.display = 'none';
           document.getElementById('startBtn').disabled = false;
           document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
-          
+
+          // ✅ 크림 검색 버튼 표시 (필터 패널 왼쪽)
+          if (collectedData.length > 0) {
+            const poizonLeft = document.getElementById('filterPoizonLeft');
+            if (poizonLeft) poizonLeft.style.display = 'flex';
+            const poizonKreamBtn = document.getElementById('poizonKreamSearchBtn');
+            if (poizonKreamBtn) {
+              poizonKreamBtn.disabled = false;
+              poizonKreamBtn.textContent = '🔵 크림 검색';
+            }
+          }
+
           eventSource.close();
           eventSource = null;
         }
@@ -2315,12 +2422,22 @@
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
       document.getElementById('downloadBtn').style.display = 'none';
+      const rankBtnReset = document.getElementById('musinsaRankBtn');
+      if (rankBtnReset) { rankBtnReset.disabled = false; rankBtnReset.textContent = '📊 무신사 랭크'; rankBtnReset.style.display = 'none'; }
 
       const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
       if (musinsaSearchOptions) musinsaSearchOptions.style.display = 'none';
 
       const resultBtn = document.getElementById('resultKreamSearchBtn');
       if (resultBtn) { resultBtn.disabled = false; resultBtn.textContent = '🔍 검색'; }
+
+      const filterPoizonLeft = document.getElementById('filterPoizonLeft');
+      if (filterPoizonLeft) filterPoizonLeft.style.display = 'none';
+      const poizonKreamBtn = document.getElementById('poizonKreamSearchBtn');
+      if (poizonKreamBtn) {
+        poizonKreamBtn.disabled = false;
+        poizonKreamBtn.textContent = '🔵 크림 검색';
+      }
 
       // ===== 4. 입력 섹션 복원 (같은 모드 첫 화면) =====
       document.getElementById('inputSection').style.display = 'block';
@@ -2448,27 +2565,31 @@
       
       async function startKreamSearch(buttonId, codeFieldName, checkboxId, sourceName) {
         const btn = document.getElementById(buttonId);
-        
+        const originalBtnText = btn.textContent;
+
         if (collectedData.length === 0) {
           alert('❌ 수집된 데이터가 없습니다.');
           return;
         }
-        
+
         const productCodes = collectedData
           .map(item => item[codeFieldName])
           .filter(code => code && code !== '-');
-        
+
         if (productCodes.length === 0) {
           alert('❌ 검색 가능한 품번이 없습니다.');
           return;
         }
-        
-        const searchKream = document.getElementById(checkboxId).checked;
-        if (!searchKream) {
-          alert('⚠️ 크림 검색을 선택해주세요!');
-          return;
+
+        // checkboxId가 null이면 체크박스 확인 생략 (포이즌 모드 등)
+        if (checkboxId !== null) {
+          const searchKream = document.getElementById(checkboxId).checked;
+          if (!searchKream) {
+            alert('⚠️ 크림 검색을 선택해주세요!');
+            return;
+          }
         }
-        
+
         btn.disabled = true;
         btn.textContent = '🔄 검색 중...';
         document.getElementById('stopBtn').style.display = 'block';
@@ -2582,7 +2703,7 @@
               kreamSearchEventSource = null;
               
               btn.disabled = false;
-              btn.textContent = '🔍 검색 시작';
+              btn.textContent = originalBtnText;
               document.getElementById('stopBtn').style.display = 'none';
               document.getElementById('resetBtn').style.display = 'block';
               document.getElementById('downloadBtn').style.display = 'block'; // ✅ 추가
@@ -2611,8 +2732,12 @@
                   mode = 'compare_kream';
                 }
                 
+                const poizonCheckboxId = checkboxId.replace('Kream', 'Poizon');
+                const alsoSearchedPoizon = document.getElementById(poizonCheckboxId)?.checked || false;
+                const searchLabel = alsoSearchedPoizon ? '크림/포이즌검색' : '크림검색';
+
                 const savePayload = {
-                  keyword: `${sourceName}→크림검색_${productCodes.length}개`,
+                  keyword: `${sourceName}→${searchLabel}_${productCodes.length}개`,
                   mode: mode,
                   collected_count: kreamData.length,
                   kream_count: kreamData.length,
@@ -2677,7 +2802,10 @@
           document.getElementById('resetBtn').style.display = 'block';
         }
       }  // ⬅️ startKreamSearch 함수 끝!
-      
+
+      // ✅ HTML onclick에서 접근 가능하도록 전역 노출
+      window.startKreamSearch = startKreamSearch;
+
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 5. 무신사 검색 버튼 이벤트 리스너 (독립!)
@@ -2885,21 +3013,42 @@
             }
           });
           
-          poizonEventSource.addEventListener('complete', (event) => {
+          poizonEventSource.addEventListener('complete', async (event) => {
             console.log('🎉 COMPLETE:', event.data);
-            
+
             addLog(`✅ 포이즌 검색 완료! ${updatedCount}개 업데이트`, 'success');
-            
+
             poizonEventSource.close();
-            
+
             btn.disabled = false;
             btn.textContent = '🔍 검색 시작';
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('resetBtn').style.display = 'block';
-            
+
             updateProgress(0, 100);
+
+            // 포이즌만 검색한 경우 스케줄러 저장 (크림이 체크되지 않은 경우)
+            const kreamAlsoChecked = document.getElementById('musinsaSearchKream')?.checked || false;
+            if (!kreamAlsoChecked && updatedCount > 0) {
+              try {
+                await fetch('/api/scheduler/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                  body: JSON.stringify({
+                    keyword: `무신사→포이즌검색_${productCodes.length}개`,
+                    mode: 'musinsa_poizon',
+                    collected_count: updatedCount,
+                    duration_seconds: 0,
+                    data: []
+                  })
+                });
+                addLog(`✅ 포이즌 검색 스케줄러 저장 완료`, 'success');
+              } catch (e) {
+                console.error('스케줄러 저장 오류:', e);
+              }
+            }
           });
-          
+
           poizonEventSource.addEventListener('ping', (event) => {
             console.log('🏓 PING:', event.data);
           });
@@ -3051,38 +3200,59 @@
             }
           });
           
-          poizonEventSource.addEventListener('complete', (event) => {
+          poizonEventSource.addEventListener('complete', async (event) => {
             console.log('🎉 COMPLETE:', event.data);
-            
+
             addLog(`✅ 포이즌 검색 완료! ${updatedCount}개 업데이트`, 'success');
-            
+
             poizonEventSource.close();
-            
+
             btn.disabled = false;
             btn.textContent = '🔍 검색 시작';
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('resetBtn').style.display = 'block';
             document.getElementById('downloadBtn').style.display = 'block'; // ✅ 추가
-            
+
             updateProgress(0, 100);
+
+            // 포이즌만 검색한 경우 스케줄러 저장 (크림이 체크되지 않은 경우)
+            const kreamAlsoChecked = document.getElementById('compareSearchKream')?.checked || false;
+            if (!kreamAlsoChecked && updatedCount > 0) {
+              try {
+                await fetch('/api/scheduler/save', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                  body: JSON.stringify({
+                    keyword: `리스트비교→포이즌검색_${productCodes.length}개`,
+                    mode: 'compare_poizon',
+                    collected_count: updatedCount,
+                    duration_seconds: 0,
+                    data: []
+                  })
+                });
+                addLog(`✅ 포이즌 검색 스케줄러 저장 완료`, 'success');
+              } catch (e) {
+                console.error('스케줄러 저장 오류:', e);
+              }
+            }
           });
-          
+
           poizonEventSource.onerror = (error) => {
             console.error('❌ SSE 에러:', error);
             addLog('❌ 연결 오류', 'error');
-            
+
             poizonEventSource.close();
-            
+
             btn.disabled = false;
             btn.textContent = '🔍 검색 시작';
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('resetBtn').style.display = 'block';
           };
-          
+
         } catch (error) {
           console.error('❌ 포이즌 검색 시작 오류:', error);
           addLog('❌ 오류: ' + error.message, 'error');
-          
+
           btn.disabled = false;
           btn.textContent = '🔍 검색 시작';
           document.getElementById('stopBtn').style.display = 'none';
@@ -3369,6 +3539,95 @@
     };
     
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+  function startMusinsaRankSearch() {
+    if (!isMusinsaLoggedIn) {
+      alert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
+      return;
+    }
+
+    const maxPagesValue = document.getElementById('maxPages').value.trim();
+    if (!maxPagesValue) {
+      alert('⚠️ 수집 수량을 입력해주세요!\n\n"max" = 전체 / 숫자 = 해당 개수');
+      document.getElementById('maxPages').focus();
+      return;
+    }
+
+    let targetCount;
+    if (maxPagesValue.toLowerCase() === 'max') {
+      targetCount = 'max';
+    } else {
+      const num = parseInt(maxPagesValue);
+      if (isNaN(num) || num < 1) {
+        alert('⚠️ "max" 또는 1 이상의 숫자를 입력하세요');
+        return;
+      }
+      targetCount = num * 20;
+    }
+
+    if (eventSource) eventSource.close();
+    isCollecting = true;
+    collectedData = []; originalData = [];
+
+    const rankBtn = document.getElementById('musinsaRankBtn');
+    setModeButtonsEnabled(false);
+    document.getElementById('startBtn').disabled = true;
+    rankBtn.disabled = true;
+    rankBtn.textContent = '📊 랭크 수집 중...';
+    document.getElementById('stopBtn').style.display = 'block';
+
+    addLog('📊 무신사 랭크 검색 시작', 'info');
+    if (targetCount === 'max') {
+      addLog('📦 수집 모드: 전체 수집', 'info');
+    } else {
+      addLog(`📦 수집 모드: ${targetCount}개`, 'info');
+    }
+
+    const url = `/start?mode=musinsa&search_mode=ranking&skip_login=true&max_items=${targetCount}`;
+    eventSource = new EventSource(url);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'log') addLog(data.message, data.level || 'info');
+      if (data.type === 'progress') updateProgress(data.current, data.total);
+      if (data.type === 'data') {
+        collectedData.push(data.item);
+        renderTable();
+      }
+      if (data.type === 'complete') {
+        addLog('✅ 랭크 수집 완료!', 'success');
+        isCollecting = false;
+        if (data.data && Array.isArray(data.data)) {
+          collectedData = data.data;
+          renderTable();
+        }
+        document.getElementById('musinsaSearchOptions').style.display = 'block';
+        document.getElementById('resetBtn').style.display = 'block';
+        setModeButtonsEnabled(true);
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('startBtn').textContent = '🟤 무신사 검색 시작';
+        rankBtn.disabled = false;
+        rankBtn.textContent = '📊 무신사 랭크';
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+
+    eventSource.onerror = () => {
+      addLog('❌ 랭크 검색 오류 발생', 'error');
+      isCollecting = false;
+      eventSource.close();
+      eventSource = null;
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'block';
+      setModeButtonsEnabled(true);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = '🟤 무신사 검색 시작';
+      rankBtn.disabled = false;
+      rankBtn.textContent = '📊 무신사 랭크';
+    };
   }
 
   async function performPoizonLogin(mode) {

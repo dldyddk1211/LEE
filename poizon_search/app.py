@@ -801,8 +801,8 @@ def start_search():
         
     elif mode == 'musinsa':
         # ✅ 무신사 검색 (브라우저는 musinsa_search 모듈 내부에서 관리)
-        print(f"🟤 무신사 스레드 시작: keyword={keyword}, max_items={max_items}")
-        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items))
+        print(f"🟤 무신사 스레드 시작: keyword={keyword}, max_items={max_items}, search_mode={search_mode}")
+        thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items, search_mode))
         thread.daemon = True
         thread.start()
     elif mode == 'kream':
@@ -969,12 +969,17 @@ def compare_prices():
 @app.route('/download/<path:filename>')
 def download(filename):
     try:
+        # outputs/ 폴더 우선 확인 (download_excel로 저장된 파일)
+        file_path_outputs = os.path.join(os.getcwd(), 'outputs', filename)
+        if os.path.exists(file_path_outputs):
+            return send_file(file_path_outputs, as_attachment=True, download_name=filename)
+
+        # poizon_data/output_data/ 폴더 확인 (포이즌 스크래퍼 파일)
         file_path = os.path.join(os.path.dirname(__file__), 'poizon_data', 'output_data', filename)
-        
         if os.path.exists(file_path):
             return send_file(file_path, as_attachment=True, download_name=filename)
-        else:
-            return jsonify({'error': '파일을 찾을 수 없습니다'}), 404
+
+        return jsonify({'error': '파일을 찾을 수 없습니다'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

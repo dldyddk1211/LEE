@@ -62,6 +62,39 @@ def wait_stable(page, ms=600):
     page.wait_for_timeout(ms)
 
 
+def dismiss_popup(page):
+    """무신사 상세 페이지 팝업/공지 자동 닫기 (브랜드 공지, 이벤트 등)"""
+    try:
+        # 1순위: "오늘 그만보기" 클릭 (오늘 하루 안 뜨게)
+        btn = page.locator("button:has-text('오늘 그만보기')")
+        if btn.count() > 0 and btn.first.is_visible():
+            btn.first.click()
+            page.wait_for_timeout(300)
+            return
+    except:
+        pass
+    try:
+        # 2순위: 모달 내 "확인" 버튼
+        # 단, 장바구니/결제 등 주요 버튼이 아닌 모달 안 확인 버튼만 타깃
+        modal = page.locator("[class*='modal'], [class*='Modal'], [class*='popup'], [class*='Popup'], [role='dialog']")
+        if modal.count() > 0 and modal.first.is_visible():
+            confirm_btn = modal.first.locator("button:has-text('확인')")
+            if confirm_btn.count() > 0:
+                confirm_btn.first.click()
+                page.wait_for_timeout(300)
+                return
+    except:
+        pass
+    try:
+        # 3순위: 닫기(×) 버튼
+        close_btn = page.locator("button[class*='close']:visible, button[aria-label*='닫기']:visible, button[aria-label*='close']:visible")
+        if close_btn.count() > 0:
+            close_btn.first.click()
+            page.wait_for_timeout(300)
+    except:
+        pass
+
+
 def save_cookies():
     """쿠키 저장"""
     global _context
@@ -416,7 +449,8 @@ def extract_product_detail(page):
         
         # ✅ 페이지가 완전히 로드될 때까지 대기
         time.sleep(5.0)
-                
+        dismiss_popup(page)  # 5초 대기 후 팝업 한 번 더 체크 (늦게 뜨는 팝업 대응)
+
         # ===== 이미지 URL 추출 ===== ✅ 수정
         try:
             log("🖼️ 이미지 URL 추출 중...", 'info')
@@ -1095,7 +1129,8 @@ def search_musinsa(keyword=None, max_items='max', search_mode='keyword', callbac
             try:
                 page.goto(product_url, wait_until='domcontentloaded', timeout=30000)
                 wait_stable(page, 1500)
-                
+                dismiss_popup(page)  # 브랜드 공지 등 팝업 닫기
+
                 product_info = extract_product_detail(page)
                 
                 if product_info:

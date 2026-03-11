@@ -151,8 +151,8 @@ def set_language_korean(page):
                 return False
         
         log("  → English 버튼 클릭 완료")
-        wait_stable(page, 500)
-        
+        wait_stable(page, 1500)
+
         try:
             page.click("text=한국어", timeout=5000)
         except:
@@ -168,20 +168,46 @@ def set_language_korean(page):
                 except:
                     log("  ⚠️ 한국어 버튼 클릭 실패", 'warning')
                     return False
-        
+
         log("  → 한국어 선택 완료")
-        wait_stable(page, 800)
-        
-        try:
-            if page.locator("text=한국어").count() > 0:
-                log("  ✅ 한국어 변경 완료", 'success')
-                return True
-        except:
-            pass
-        
-        log("  ✅ 언어 변경 완료 (확인 불가)", 'success')
+        wait_stable(page, 2000)
+
+        # ✅ 실제 언어 변경 확인 (최대 3회 재시도)
+        for attempt in range(3):
+            try:
+                # 검색창 placeholder가 한국어인지 확인
+                if page.locator("input[placeholder*='상품명']").count() > 0:
+                    log("  ✅ 한국어 변경 완료 (검색창 확인)", 'success')
+                    return True
+            except:
+                pass
+            try:
+                # English 버튼이 사라졌는지 확인 (언어 변경 완료 신호)
+                english_still = (
+                    page.locator("text=English").count() > 0 or
+                    page.locator("button:has-text('English')").count() > 0
+                )
+                if not english_still:
+                    log("  ✅ 언어 변경 완료", 'success')
+                    return True
+                else:
+                    log(f"  ⚠️ 아직 영문 상태 ({attempt+1}/3) - 재클릭 시도", 'warning')
+                    try:
+                        page.click("text=English", timeout=3000)
+                        wait_stable(page, 1000)
+                        try:
+                            page.click("text=한국어", timeout=3000)
+                        except:
+                            page.click("button:has-text('한국어')", timeout=3000)
+                        wait_stable(page, 2000)
+                    except Exception as re:
+                        log(f"  ⚠️ 재클릭 실패: {re}", 'warning')
+            except:
+                pass
+
+        log("  ⚠️ 언어 변경 확인 불가 (계속 진행)", 'warning')
         return True
-        
+
     except Exception as e:
         log(f"  ⚠️ 언어 변경 실패: {e}", 'error')
         return False
@@ -238,13 +264,13 @@ def search_single_product(code):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
 
             context = browser.new_context(viewport=None, no_viewport=True)
@@ -289,10 +315,11 @@ def search_single_product(code):
                     return None
             else:
                 set_language_korean(page)
-                wait_stable(page, 1000)
+                wait_stable(page, 2500)
 
-            # 상품명 탭 활성화
-            for selector in ["text='상품명'", "span:has-text('상품명')", ".ant-tabs-tab:has-text('상품명')"]:
+            # 상품명 탭 활성화 (한국어/영문 모두 시도)
+            for selector in ["text='상품명'", "span:has-text('상품명')", ".ant-tabs-tab:has-text('상품명')",
+                             "text='Product name'", "span:has-text('Product name')", ".ant-tabs-tab:has-text('Product name')"]:
                 try:
                     tab = page.locator(selector).first
                     if tab.count() > 0:
@@ -303,7 +330,15 @@ def search_single_product(code):
                     continue
 
             # 검색창 클리어 및 품번 입력
-            search_input = page.locator("input[placeholder*='상품명']").first
+            search_input = find_search_input(page)
+            if not search_input:
+                log("  ⚠️ 검색창 없음 - 언어 재설정 후 재시도")
+                set_language_korean(page)
+                wait_stable(page, 3000)
+                search_input = find_search_input(page)
+            if not search_input:
+                browser.close()
+                return None
             search_input.evaluate("el => el.value = ''")
             wait_stable(page, 200)
             search_input.click()
@@ -387,16 +422,59 @@ def scrape_current_page(page):
         count = rows.count()
         log(f"  → 현재 페이지 행 수: {count}")
 
+        # ✅ 첫 번째 행의 셀 개수와 내용 모두 로드될 때까지 대기
+        try:
+            page.wait_for_function(
+                """() => {
+                    const rows = document.querySelectorAll('.ant-table-tbody tr:not(.ant-table-measure-row)');
+                    if (rows.length === 0) return false;
+                    const cells = rows[0].querySelectorAll('td');
+                    // 최소 7개 셀이 있고, 어딘가에 숫자/원화가 있어야 함
+                    if (cells.length < 7) return false;
+                    for (let i = 3; i < Math.min(cells.length, 10); i++) {
+                        const txt = cells[i].textContent.trim();
+                        if (txt && txt !== '-') return true;
+                    }
+                    return false;
+                }""",
+                timeout=10000
+            )
+            log("  → 셀 데이터 로드 확인", 'info')
+        except Exception:
+            log("  ⚠️ 셀 로드 대기 타임아웃 - 그대로 진행", 'warning')
+            page.wait_for_timeout(3000)
+
+        # ✅ 진단: 첫 번째 행 전체 셀 구조 출력 (컬럼 인덱스 확인용)
+        try:
+            cell_debug = page.evaluate("""
+                () => {
+                    const rows = document.querySelectorAll('.ant-table-tbody tr:not(.ant-table-measure-row)');
+                    if (rows.length === 0) return [];
+                    const cells = rows[0].querySelectorAll('td');
+                    return Array.from(cells).map((c, i) => `[${i}]${c.textContent.trim().slice(0,30)}`);
+                }
+            """)
+            log(f"  🔍 셀 구조: {' | '.join(cell_debug)}", 'info')
+        except Exception as e:
+            log(f"  ⚠️ 진단 실패: {e}", 'warning')
+
         for i in range(count):
             try:
                 row = rows.nth(i)
-                
+
+                # ✅ 스크롤하여 행을 뷰포트에 노출 (lazy load 트리거)
+                try:
+                    row.scroll_into_view_if_needed(timeout=2000)
+                    page.wait_for_timeout(300)
+                except:
+                    pass
+
                 # 행이 로드될 때까지 대기
                 try:
                     row.wait_for(state="visible", timeout=5000)
                 except:
                     pass
-                
+
                 cells = row.locator("td")
                 
                 # 셀이 로드될 때까지 대기
@@ -474,12 +552,46 @@ def scrape_current_page(page):
                     item_name = ""
                     spu_id = ""
 
-                brand_category = cells.nth(3).inner_text().replace("\n", " / ")
-                status = cells.nth(4).inner_text()
-                avg_price = cells.nth(5).inner_text()
-                cn_exposure = cells.nth(6).inner_text()
-                cn_sales_raw = cells.nth(7).inner_text()
-                local_sales_raw = cells.nth(8).inner_text()
+                def safe_cell(idx, default='-'):
+                    try:
+                        txt = cells.nth(idx).inner_text(timeout=5000).strip()
+                        return txt if txt else default
+                    except:
+                        return default
+
+                # ✅ JS로 직접 전체 셀 텍스트 추출 (렌더링 문제 대응)
+                try:
+                    all_cells_js = row.evaluate("""el => {
+                        return Array.from(el.querySelectorAll('td')).map(c => c.textContent.trim());
+                    }""")
+                except Exception:
+                    all_cells_js = []
+
+                def js_cell(idx, default='-'):
+                    try:
+                        val = all_cells_js[idx] if idx < len(all_cells_js) else ''
+                        return val if val else default
+                    except:
+                        return default
+
+                cell_count = len(all_cells_js)
+                log(f"    → 셀 개수: {cell_count}, raw: {all_cells_js[:9]}", 'info')
+
+                brand_category = js_cell(3).replace("\n", " / ")
+                status = js_cell(4)
+                avg_price = js_cell(5)
+                cn_exposure = js_cell(6)
+                cn_sales_raw = js_cell(7)
+                local_sales_raw = js_cell(8)
+
+                # ✅ JS 추출도 '-'이면 Playwright locator로 재시도
+                if avg_price == '-' and cn_exposure == '-':
+                    log("  ⚠️ JS 추출 실패 - Playwright로 재시도", 'warning')
+                    page.wait_for_timeout(2000)
+                    avg_price = safe_cell(5)
+                    cn_exposure = safe_cell(6)
+                    cn_sales_raw = safe_cell(7)
+                    local_sales_raw = safe_cell(8)
                 
                 cn_sales_num = extract_number(cn_sales_raw)
                 local_sales_num = extract_number(local_sales_raw)
@@ -504,7 +616,7 @@ def scrape_current_page(page):
                     except:
                         pass
                 
-                log(f"    [{i+1}/{count}] ✓ {style_id} | {item_name[:30]}... | 판매량:{cn_sales_num}")
+                log(f"    [{i+1}/{count}] ✓ {style_id} | 평균거래가:{avg_price} | 중국노출:{cn_exposure} | 판매량:{cn_sales_num}")
 
             except Exception as e:
                 log(f"    [{i+1}/{count}] ✗ 파싱 실패: {e}", 'error')
@@ -600,7 +712,7 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
             headless=HEADLESS,
             channel='chrome',  # 설치된 Chrome 사용 (더 안정적)
             args=[
-                '--window-size=960,648', '--window-position=0,0',  # 최대화 모드
+                '--window-size=960,648', '--window-position=0,432',  # 최대화 모드
                 '--disable-blink-features=AutomationControlled',  # 자동화 감지 우회
             ]
         )
@@ -645,9 +757,9 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
                 except Exception:
                     page.locator("input").nth(1).press("Enter")
 
-                wait_stable(page, 400)
+                wait_stable(page, 3000)
                 log("  ✅ 로그인 완료", 'success')
-                
+
                 try:
                     cookies = context.cookies()
                     with open(COOKIE_FILE, 'w') as f:
@@ -656,27 +768,71 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
                 except Exception as e:
                     log(f"  ⚠️ 쿠키 저장 실패: {e}", 'error')
             else:
-                log("\n[2] 쿠키로 로그인 건너뛰기")
-                page.goto(LOGIN_URL, wait_until="domcontentloaded")
-                wait_stable(page, 500)
-                
-                lang_success = set_language_korean(page)
-                if not lang_success:
-                    log("  ⚠️ 언어 변경 실패, 계속 진행", 'error')
+                log("\n[2] 쿠키로 로그인 건너뛰기 - 검색 페이지로 바로 이동")
+                page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+                wait_stable(page, 2000)
 
-            log("\n[3] 상품 검색 페이지 이동")
-            page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
-            wait_stable(page, 1000)
-            
+                # 쿠키 만료로 로그인 페이지로 리다이렉트됐는지 확인
+                current_url = page.url
+                if 'login' in current_url.lower() or page.locator("input[type='password']").count() > 0:
+                    log("  ⚠️ 쿠키 만료 → 재로그인 진행", 'warning')
+                    set_language_korean(page)
+                    wait_stable(page, 1500)
+                    wait_for_inputs(page)
+                    page.locator("input").nth(0).fill(POIZON_ID)
+                    log("  → ID 입력 완료")
+                    page.locator("input").nth(1).fill(POIZON_PW)
+                    log("  → PW 입력 완료")
+                    try:
+                        click_first(page, ["button:has-text('로그인')"], "로그인")
+                    except Exception:
+                        page.locator("input").nth(1).press("Enter")
+                    wait_stable(page, 3000)
+                    try:
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                        log("  💾 새 쿠키 저장", 'success')
+                    except Exception:
+                        pass
+                    page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+                    wait_stable(page, 2000)
+                else:
+                    set_language_korean(page)
+                    wait_stable(page, 2000)
+                    # ✅ 언어 실제 확인 - 아직 영문이면 재시도
+                    for _retry in range(2):
+                        try:
+                            if page.locator("input[placeholder*='상품명']").count() > 0:
+                                log("  ✅ 한국어 검색창 확인됨", 'success')
+                                break
+                            english_visible = (
+                                page.locator("text=English").count() > 0 or
+                                page.locator("button:has-text('English')").count() > 0
+                            )
+                            if english_visible:
+                                log(f"  ⚠️ 아직 영문 상태 - 언어 재설정 ({_retry+1}/2)", 'warning')
+                                set_language_korean(page)
+                                wait_stable(page, 2500)
+                            else:
+                                break
+                        except:
+                            break
+
+            log("\n[3] 검색 준비 완료")
+
             # 키워드 검색 탭 클릭 (기본 선택되도록)
             try:
                 log("  → 키워드 검색 탭 활성화 중...")
-                # 여러 선택자 시도
+                # 한국어 + 영문 선택자 모두 시도
                 keyword_tab_selectors = [
                     "text='상품명'",
                     "span:has-text('상품명')",
                     ".ant-tabs-tab:has-text('상품명')",
                     "[role='tab']:has-text('상품명')",
+                    "text='Product name'",
+                    "span:has-text('Product name')",
+                    ".ant-tabs-tab:has-text('Product name')",
                 ]
                 for selector in keyword_tab_selectors:
                     try:
@@ -696,29 +852,30 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
                         
             # ✅ 검색창 클리어 및 입력
             try:
-                search_input = page.locator("input[placeholder*='상품명']").first
-                
-                # JavaScript로 값 비우기
-                search_input.evaluate("el => el.value = ''")
-                wait_stable(page, 200)
-                
-                # 클릭하여 포커스
-                search_input.click()
-                wait_stable(page, 200)
-                
-                # 전체 선택 후 삭제 (잔여 데이터 제거)
-                page.keyboard.press("Control+A")
-                wait_stable(page, 100)
-                page.keyboard.press("Backspace")
-                wait_stable(page, 200)
-                
-                # 새 키워드 입력
-                search_input.type(SEARCH_KEYWORD, delay=50)
-                log(f"  ✅ 키워드 입력 완료: {SEARCH_KEYWORD}")
-                
+                search_input = find_search_input(page)
+                if not search_input:
+                    log("  ⚠️ 검색창 없음 - 언어 재설정 후 재시도", 'warning')
+                    set_language_korean(page)
+                    wait_stable(page, 3000)
+                    search_input = find_search_input(page)
+
+                if search_input:
+                    search_input.evaluate("el => el.value = ''")
+                    wait_stable(page, 200)
+                    search_input.click()
+                    wait_stable(page, 200)
+                    page.keyboard.press("Control+A")
+                    wait_stable(page, 100)
+                    page.keyboard.press("Backspace")
+                    wait_stable(page, 200)
+                    search_input.type(SEARCH_KEYWORD, delay=50)
+                    log(f"  ✅ 키워드 입력 완료: {SEARCH_KEYWORD}")
+                else:
+                    raise Exception("검색창을 찾을 수 없음")
+
             except Exception as e:
                 log(f"  ❌ 키워드 입력 실패: {e}", 'error')
-                fill_first(page, ["input[placeholder*='상품명']"], SEARCH_KEYWORD, "키워드")
+                fill_first(page, ["input[placeholder*='상품명']", "input[placeholder*='Product']", "input[type='text']"], SEARCH_KEYWORD, "키워드")
                 
           
             try:
@@ -726,8 +883,19 @@ def run(keyword=None, max_pages=None, callback=None, skip_login=False):
             except Exception:
                 page.keyboard.press("Enter")
 
-            wait_stable(page, 1600)
+            wait_stable(page, 3000)  # 검색 결과 로드 대기 (기존 1600ms → 3000ms)
             try_sort_descending(page)
+            wait_stable(page, 1500)  # 정렬 후 추가 대기
+
+            # ✅ 스크롤로 이미지/가격 lazy loading 트리거
+            try:
+                page.evaluate("window.scrollTo(0, 500)")
+                wait_stable(page, 2000)
+                page.evaluate("window.scrollTo(0, 0)")
+                wait_stable(page, 1000)
+                log("  → 스크롤 로드 완료", 'info')
+            except Exception:
+                pass
 
             max_pages = REAL_MAX_PAGES
             log(f"\n[5] 수집 시작 (최대 {max_pages}페이지)")
@@ -822,6 +990,7 @@ def perform_login():
     global LOG_CALLBACK
     
     try:
+        # 쿠키 파일이 있고 24시간 이내면 로그인 스킵
         if os.path.exists(COOKIE_FILE):
             import time
             file_age = time.time() - os.path.getmtime(COOKIE_FILE)
@@ -831,74 +1000,74 @@ def perform_login():
                     'success': True,
                     'message': '✅ 이미 접속되어 있습니다 (쿠키 사용)'
                 }
-        
-            with sync_playwright() as p:
-                # ✅ OS 감지 후 브라우저 실행
-                current_os = platform.system()
-                
-                if current_os == 'Darwin':  # macOS
-                    browser = p.chromium.launch(
-                        headless=HEADLESS,
-                        args=[
-                            '--window-size=960,648', '--window-position=0,0',
-                            '--disable-blink-features=AutomationControlled',
-                        ]
-                    )
-                else:  # Windows/Linux
-                    browser = p.chromium.launch(
-                        headless=HEADLESS,
-                        channel='chrome',
-                        args=[
-                            '--window-size=960,648', '--window-position=0,0',
-                            '--disable-blink-features=AutomationControlled',
-                        ]
-                    )
-                
-                context = browser.new_context(
-                    viewport=None,
-                    no_viewport=True
+
+        # 쿠키 없거나 만료 → 실제 로그인 진행
+        with sync_playwright() as p:
+            current_os = platform.system()
+
+            if current_os == 'Darwin':  # macOS
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    args=[
+                        '--window-size=960,648', '--window-position=0,432',
+                        '--disable-blink-features=AutomationControlled',
+                    ]
                 )
-    
-                page = context.new_page()
-                
-                log("\n[1] POIZON 접속 중...", 'info')
-                page.goto(LOGIN_URL, wait_until="domcontentloaded")
-                wait_stable(page, 500)
-                
-                lang_success = set_language_korean(page)
-                if not lang_success:
-                    raise Exception("언어 변경 실패")
-                
-                log("\n[2] 로그인 진행 중...", 'info')
-                wait_for_inputs(page)
-                page.locator("input").nth(0).fill(POIZON_ID)
-                log("  → ID 입력 완료")
-                page.locator("input").nth(1).fill(POIZON_PW)
-                log("  → PW 입력 완료")
+            else:  # Windows/Linux
+                browser = p.chromium.launch(
+                    headless=HEADLESS,
+                    channel='chrome',
+                    args=[
+                        '--window-size=960,648', '--window-position=0,432',
+                        '--disable-blink-features=AutomationControlled',
+                    ]
+                )
 
-                try:
-                    click_first(page, ["button:has-text('로그인')"], "로그인")
-                except Exception:
-                    page.locator("input").nth(1).press("Enter")
+            context = browser.new_context(
+                viewport=None,
+                no_viewport=True
+            )
 
-                wait_stable(page, 400)
-                log("  ✅ 로그인 완료", 'success')
-                
-                cookies = context.cookies()
-                with open(COOKIE_FILE, 'w') as f:
-                    json.dump(cookies, f)
-                log("  💾 쿠키 저장 완료", 'success')
-                
-                page.wait_for_timeout(1000)
-                browser.close()
-                
-                log("\n✅ POIZON 접속 완료! 이제 데이터 수집을 시작할 수 있습니다", 'success')
-            
-            return {
-                'success': True,
-                'message': '✅ POIZON 접속 성공'
-            }
-            
+            page = context.new_page()
+
+            log("\n[1] POIZON 접속 중...", 'info')
+            page.goto(LOGIN_URL, wait_until="domcontentloaded")
+            wait_stable(page, 500)
+
+            lang_success = set_language_korean(page)
+            if not lang_success:
+                raise Exception("언어 변경 실패")
+
+            log("\n[2] 로그인 진행 중...", 'info')
+            wait_for_inputs(page)
+            page.locator("input").nth(0).fill(POIZON_ID)
+            log("  → ID 입력 완료")
+            page.locator("input").nth(1).fill(POIZON_PW)
+            log("  → PW 입력 완료")
+
+            try:
+                click_first(page, ["button:has-text('로그인')"], "로그인")
+            except Exception:
+                page.locator("input").nth(1).press("Enter")
+
+            wait_stable(page, 3000)
+            log("  ✅ 로그인 완료", 'success')
+
+            cookies = context.cookies()
+            with open(COOKIE_FILE, 'w') as f:
+                json.dump(cookies, f)
+            log("  💾 쿠키 저장 완료", 'success')
+
+            page.wait_for_timeout(500)
+            browser.close()
+
+            log("\n✅ POIZON 접속 완료! 이제 데이터 수집을 시작할 수 있습니다", 'success')
+
+        return {
+            'success': True,
+            'message': '✅ POIZON 접속 성공'
+        }
+
     except Exception as e:
         log(f"⛔ 접속 오류: {e}", 'error')
         return {
@@ -934,7 +1103,7 @@ def compare_product_price(product_code, product_name, callback=None):
             browser = p.chromium.launch(
                 headless=HEADLESS,
                 channel='chrome',
-                args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
             )
             context = browser.new_context(viewport=None, no_viewport=True)
             
@@ -1227,10 +1396,91 @@ def save_sourcing_results_to_excel(results, reason="정상종료"):
     log(f"{'='*60}\n")
     
     return filepath
+
+
+def find_search_input(page):
+    """검색창 찾기 - 한국어/영문 placeholder 모두 시도"""
+    selectors = [
+        "input[placeholder*='상품명']",
+        "input[placeholder*='Product name']",
+        "input[placeholder*='product name']",
+        "input[placeholder*='Product']",
+        "input[placeholder*='Search']",
+        "input[placeholder*='search']",
+        "input[placeholder*='Item']",
+        "input[type='search']",
+        "input[type='text']",
+    ]
+    for sel in selectors:
+        try:
+            el = page.locator(sel).first
+            if el.count() > 0:
+                return el
+        except Exception:
+            continue
+    return None
+
+
+def do_relogin(page, context):
+    """쿠키 삭제 후 포이즌 첫 화면에서 재로그인"""
+    log("🔄 쿠키 초기화 후 재로그인 시도...", 'warning')
+    try:
+        # 쿠키 파일 삭제
+        if os.path.exists(COOKIE_FILE):
+            os.remove(COOKIE_FILE)
+            log("  🗑️ 쿠키 파일 삭제", 'info')
+        # 컨텍스트 쿠키 초기화
+        try:
+            context.clear_cookies()
+        except Exception:
+            pass
+
+        # 포이즌 첫 화면으로 이동
+        page.goto(LOGIN_URL, wait_until="domcontentloaded")
+        wait_stable(page, 2000)
+
+        # 언어 한국어 설정
+        set_language_korean(page)
+        wait_stable(page, 2000)
+
+        # 로그인
+        wait_for_inputs(page)
+        page.locator("input").nth(0).fill(POIZON_ID)
+        page.locator("input").nth(1).fill(POIZON_PW)
+        try:
+            page.click("button:has-text('로그인')", timeout=3000)
+        except Exception:
+            page.locator("input").nth(1).press("Enter")
+        wait_stable(page, 2500)
+
+        # 새 쿠키 저장
+        try:
+            cookies = context.cookies()
+            with open(COOKIE_FILE, 'w') as f:
+                json.dump(cookies, f)
+            log("  💾 새 쿠키 저장", 'success')
+        except Exception:
+            pass
+
+        # 검색 페이지로 이동
+        page.goto(GOODS_SEARCH_URL, wait_until="domcontentloaded")
+        wait_stable(page, 3000)
+
+        # 언어 다시 한국어 설정
+        set_language_korean(page)
+        wait_stable(page, 3000)
+
+        log("  ✅ 재로그인 완료", 'success')
+        return True
+    except Exception as e:
+        log(f"  ❌ 재로그인 실패: {e}", 'error')
+        return False
+
+
 def run_excel_comparison(products, callback=None):
     """
     엑셀 리스트의 여러 상품을 포이즌에서 검색하여 비교
-    
+
     inner_text() 대신 evaluate()와 textContent 사용 (안정적!)
     """
     global LOG_CALLBACK, stop_flag
@@ -1256,13 +1506,13 @@ def run_excel_comparison(products, callback=None):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
             
             context = browser.new_context(viewport=None, no_viewport=True)
@@ -1286,8 +1536,8 @@ def run_excel_comparison(products, callback=None):
             
             # 한국어 설정
             set_language_korean(page)
-            wait_stable(page, 2000)
-            
+            wait_stable(page, 3000)
+
             # 각 상품 검색
             log("\n[2] 상품 검색 시작", 'info')
             
@@ -1310,60 +1560,85 @@ def run_excel_comparison(products, callback=None):
                 search_query = product_code if product_code else product_name
                                 
                 try:
-                    # ✅ 검색창 찾기
-                    search_input = None
-                    for selector in ["input[placeholder*='상품명']", "input[type='text']"]:
-                        try:
-                            search_input = page.locator(selector).first
-                            if search_input.count() > 0:
-                                break
-                        except:
-                            continue
-                    
+                    # ✅ 검색창 찾기 (한국어/영문 모두 시도)
+                    search_input = find_search_input(page)
+
+                    if not search_input:
+                        log(f"  ❌ 검색창 없음 - 언어 재설정 시도")
+                        set_language_korean(page)
+                        wait_stable(page, 3000)
+                        search_input = find_search_input(page)
+
                     if not search_input:
                         log(f"  ❌ 검색창 없음")
                         fail_data = create_fail_data(product, '검색창 없음')
                         results.append(fail_data)
                         send_result(callback, product_code, fail_data)
                         continue
-                    
+
                     # ✅ 검색창 완전 클리어
                     try:
-                        # JavaScript로 값 비우기
                         search_input.evaluate("el => el.value = ''")
                         wait_stable(page, 200)
-                        
-                        # 클릭 + 포커스
                         search_input.click()
                         wait_stable(page, 200)
-                        
-                        # 키보드로 완전 삭제
                         page.keyboard.press("Control+A")
                         wait_stable(page, 100)
                         page.keyboard.press("Backspace")
                         wait_stable(page, 300)
-                        
                         log(f"  → 검색창 클리어 완료")
-                        
                     except Exception as e:
                         log(f"  ⚠️ 클리어 실패: {e}")
-                    
+
                     # ✅ 검색어 입력
                     search_input.type(search_query, delay=50)
                     log(f"  ✅ 검색어 입력: {search_query}")
                     wait_stable(page, 200)
-                    
+
                     # Enter로 검색
                     page.keyboard.press("Enter")
                     log(f"  ✓ 검색 실행")
-                    
-                    # 키워드 검색처럼 충분히 대기!
-                    wait_stable(page, 2000)  # ← 2초!
-                    
-                    # 테이블 대기
+                    wait_stable(page, 2000)
+
+                    # ✅ 첫 상품: 3초 내 결과 없으면 쿠키 삭제 후 재로그인
+                    table_found = False
                     try:
-                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=10000)
-                    except:
+                        page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=3000)
+                        table_found = True
+                    except Exception:
+                        pass
+
+                    if not table_found and idx == 1:
+                        log("  ⚠️ 첫 상품 3초 내 결과 없음 → 재로그인 후 재시도", 'warning')
+                        if do_relogin(page, context):
+                            # 재시도
+                            search_input = find_search_input(page)
+                            if search_input:
+                                search_input.evaluate("el => el.value = ''")
+                                search_input.click()
+                                wait_stable(page, 200)
+                                page.keyboard.press("Control+A")
+                                page.keyboard.press("Backspace")
+                                wait_stable(page, 300)
+                                search_input.type(search_query, delay=50)
+                                wait_stable(page, 200)
+                                page.keyboard.press("Enter")
+                                wait_stable(page, 2000)
+                                try:
+                                    page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=10000)
+                                    table_found = True
+                                except Exception:
+                                    pass
+
+                    if not table_found:
+                        # 아직 안 나왔으면 나머지 대기 시간 사용
+                        try:
+                            page.wait_for_selector(".ant-table-tbody tr:not(.ant-table-measure-row)", timeout=7000)
+                            table_found = True
+                        except Exception:
+                            pass
+
+                    if not table_found:
                         log(f"  ⚠️ 검색 결과 없음")
                         fail_data = create_fail_data(product, '검색 결과 없음')
                         results.append(fail_data)
@@ -1595,13 +1870,13 @@ def search_multiple_products(product_codes, progress_queue):
             if current_os == 'Darwin':
                 browser = p.chromium.launch(
                     headless=HEADLESS,
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
             else:
                 browser = p.chromium.launch(
                     headless=HEADLESS,
                     channel='chrome',
-                    args=['--window-size=960,648', '--window-position=0,0', '--disable-blink-features=AutomationControlled']
+                    args=['--window-size=960,648', '--window-position=0,432', '--disable-blink-features=AutomationControlled']
                 )
             
             context = browser.new_context(viewport=None, no_viewport=True)
@@ -1709,9 +1984,16 @@ def search_multiple_products(product_codes, progress_queue):
                 })
                 
                 try:
-                    # 검색창 찾기
-                    search_input = page.locator("input[placeholder*='상품명']").first
-                    
+                    # 검색창 찾기 (한국어/영문 모두 시도)
+                    search_input = find_search_input(page)
+                    if not search_input:
+                        log("  ⚠️ 검색창 없음 - 언어 재설정 후 재시도", 'warning')
+                        set_language_korean(page)
+                        wait_stable(page, 3000)
+                        search_input = find_search_input(page)
+                    if not search_input:
+                        raise Exception("검색창을 찾을 수 없음")
+
                     # 검색창 완전 클리어
                     search_input.evaluate("el => el.value = ''")
                     wait_stable(page, 200)
@@ -1721,11 +2003,11 @@ def search_multiple_products(product_codes, progress_queue):
                     wait_stable(page, 100)
                     page.keyboard.press("Backspace")
                     wait_stable(page, 200)
-                    
+
                     # 검색어 입력
                     search_input.type(product_code, delay=50)
                     wait_stable(page, 3000)
-                    
+
                     # Enter로 검색
                     page.keyboard.press("Enter")
                     wait_stable(page, 2000)
