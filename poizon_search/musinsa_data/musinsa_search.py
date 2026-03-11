@@ -1055,49 +1055,67 @@ def search_musinsa(keyword=None, max_items='max', search_mode='keyword', callbac
         
         product_links = []
         scroll_count = 0
-        max_scrolls = 50
+        max_scrolls = 200
         no_new_items_count = 0
-        
+
+        # 초기 로딩 대기
+        time.sleep(2.0)
+
         while len(product_links) < target_count and scroll_count < max_scrolls:
             scroll_count += 1
-            
+
             # 현재 페이지의 상품 링크 추출
             current_links = page.evaluate("""
                 () => {
                     const links = [];
                     const productCards = document.querySelectorAll('a[href*="/products/"]');
-                    
                     productCards.forEach(card => {
                         if (card.href && !links.includes(card.href)) {
                             links.push(card.href);
                         }
                     });
-                    
                     return links;
                 }
             """)
-            
+
             # 새로운 링크만 추가
             new_links = [link for link in current_links if link not in product_links]
-            
+
             if new_links:
                 product_links.extend(new_links)
                 no_new_items_count = 0
-                log(f"  [{scroll_count}회 스크롤] 수집: {len(product_links):,}/{target_count:,}개", 'info')
+                log(f"  [{scroll_count}회 스크롤] 수집: {len(product_links):,}/{target_count:,}개 (+{len(new_links)})", 'info')
             else:
                 no_new_items_count += 1
-                
-                if no_new_items_count >= 3:
+                log(f"  [{scroll_count}회 스크롤] 새 항목 없음 ({no_new_items_count}/5)", 'info')
+
+                if no_new_items_count >= 5:
                     log("  ⚠️ 더 이상 새로운 상품이 없습니다.", 'warning')
                     break
-            
+
             if len(product_links) >= target_count:
                 log(f"  ✅ 목표 개수 달성: {len(product_links):,}개", 'success')
                 break
-            
-            # 페이지 끝까지 스크롤
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            time.sleep(random.uniform(3.0, 4.0))
+
+            # ✅ 단계적 스크롤 (한번에 맨 아래 점프 대신 viewport 단위로 내려가며 지연로딩 유발)
+            try:
+                scroll_height = page.evaluate("document.body.scrollHeight")
+                current_y = page.evaluate("window.pageYOffset")
+                viewport_h = page.evaluate("window.innerHeight")
+
+                # 현재 위치 ~ 맨 아래까지 viewport 크기씩 이동
+                step_y = current_y
+                while step_y < scroll_height:
+                    step_y = min(step_y + viewport_h, scroll_height)
+                    page.evaluate(f"window.scrollTo(0, {step_y})")
+                    time.sleep(0.6)   # 각 단계마다 0.6초 대기 (지연로딩 트리거)
+
+            except Exception as e:
+                log(f"  ⚠️ 스크롤 오류: {e}", 'warning')
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+
+            # 스크롤 완료 후 콘텐츠 로딩 대기
+            time.sleep(random.uniform(2.5, 3.5))
         
         # 실제 수집할 링크
         product_links = product_links[:target_count]

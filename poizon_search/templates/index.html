@@ -1491,7 +1491,18 @@
           
           const priceCell = row.insertCell();
           const musinsaPrice = data.price;
-          priceCell.textContent = formatPrice(musinsaPrice);  
+          if (musinsaPrice && data.url) {
+            const link = document.createElement('a');
+            link.href = data.url;
+            link.target = '_blank';
+            link.textContent = formatPrice(musinsaPrice);
+            link.style.color = '#4285f4';
+            link.style.textDecoration = 'underline';
+            link.style.cursor = 'pointer';
+            priceCell.appendChild(link);
+          } else {
+            priceCell.textContent = formatPrice(musinsaPrice);
+          }
           
           const kreamPriceCell = row.insertCell();
           if (data.크림평균가 && data.크림평균가 !== '-' && data.크림URL) {
@@ -2771,16 +2782,25 @@
                   collectedData[itemIndex].크림판매량 = kreamData.sales || '-';
                   collectedData[itemIndex].크림URL = kreamData.url || '';
                   
-                  // ✅ 가격 비교 계산 (extractPrice 사용)
+                  // ✅ 가격 비교 계산 (renderTable 페이지네이션과 무관하게 즉시 계산)
                   if (codeFieldName === '상품번호') {
+                    // 포이즌 모드: 포이즌중국가 - 크림가
                     const chinaPrice = extractPrice(collectedData[itemIndex].중국노출);
                     const kreamPrice = extractPrice(kreamData.avg_price);
-                    
-                    if (chinaPrice !== null && kreamPrice !== null) {
-                      collectedData[itemIndex].크림비교 = chinaPrice - kreamPrice;
-                    } else {
-                      collectedData[itemIndex].크림비교 = 0;
-                    }
+                    collectedData[itemIndex].크림비교 = (chinaPrice !== null && kreamPrice !== null)
+                      ? chinaPrice - kreamPrice : 0;
+                  } else if (codeFieldName === 'product_code') {
+                    // 무신사 모드: 크림가 - 무신사가
+                    const musinsaPrice = collectedData[itemIndex].price;
+                    const kreamPrice = extractPrice(kreamData.avg_price);
+                    collectedData[itemIndex].크림비교 = (musinsaPrice != null && kreamPrice !== null)
+                      ? kreamPrice - musinsaPrice : 0;
+                  } else {
+                    // 리스트비교 모드: 크림가 - 엑셀할인가
+                    const excelPrice = collectedData[itemIndex].엑셀_할인가 || 0;
+                    const kreamPrice = extractPrice(kreamData.avg_price);
+                    collectedData[itemIndex].크림비교 = (excelPrice && kreamPrice !== null)
+                      ? kreamPrice - excelPrice : 0;
                   }
                   
                   updatedCount++;
@@ -3106,7 +3126,13 @@
                   collectedData[itemIndex].포이즌노출가 = poizonData.중국노출 || '-';
                   collectedData[itemIndex].포이즌중국판매량 = poizonData.중국시장최근30일판매량 || 0;
                   collectedData[itemIndex].포이즌현업자판매량 = poizonData.현지판매자최근30일판매량 || 0;
-                  
+
+                  // ✅ 무신사 포이즌비교 즉시 계산 (페이지네이션 무관)
+                  // 무신사 모드: 포이즌가 - 무신사가
+                  const musinsaPrice = collectedData[itemIndex].price;
+                  const poizonPriceVal = parseInt(String(poizonData.중국노출 || 0).replace(/[^0-9]/g, '')) || 0;
+                  collectedData[itemIndex].포이즌비교 = (musinsaPrice && poizonPriceVal) ? poizonPriceVal - musinsaPrice : 0;
+
                   updatedCount++;
                   renderTable();
                   
@@ -3295,8 +3321,10 @@
                   
                   if (excelPrice && poizonPrice) {
                     collectedData[itemIndex].포이즌비교 = poizonPrice - excelPrice;
+                  } else {
+                    collectedData[itemIndex].포이즌비교 = 0;
                   }
-                  
+
                   updatedCount++;
                   renderTable();
                   
