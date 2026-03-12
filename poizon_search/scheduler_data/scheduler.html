@@ -688,7 +688,7 @@
                 
                 if (result.success && result.task) {
                     // 엑셀 생성 요청
-                    const excelResponse = await fetch('/export_to_excel', {
+                    const excelResponse = await fetch('/export_kream_to_excel', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
