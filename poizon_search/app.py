@@ -1293,13 +1293,13 @@ def export_kream_to_excel():
             cell.alignment = header_align
         
         for row_idx, item in enumerate(data, start=2):
-            ws.cell(row=row_idx, column=1, value=str(item.get('순번', '')))
+            ws.cell(row=row_idx, column=1, value=str(item.get('순번', row_idx - 1)))
             ws.cell(row=row_idx, column=2, value=str(item.get('상품번호', '')))
             ws.cell(row=row_idx, column=3, value=str(item.get('제품명', '')))
-            ws.cell(row=row_idx, column=4, value=str(item.get('평균거래가', '')))
-            ws.cell(row=row_idx, column=5, value=str(item.get('중국노출가', '')))
-            ws.cell(row=row_idx, column=6, value=str(item.get('중국판매량', '')))
-            ws.cell(row=row_idx, column=7, value=str(item.get('현업자판매량', '')))
+            ws.cell(row=row_idx, column=4, value=str(item.get('평균거래가', '') or item.get('최근30일평균거래가', '')))
+            ws.cell(row=row_idx, column=5, value=str(item.get('중국노출가', '') or item.get('중국노출', '')))
+            ws.cell(row=row_idx, column=6, value=str(item.get('중국판매량', '') or item.get('중국시장최근30일판매량', '')))
+            ws.cell(row=row_idx, column=7, value=str(item.get('현업자판매량', '') or item.get('현지판매자최근30일판매량', '')))
             ws.cell(row=row_idx, column=8, value=str(item.get('크림평균가', '')))
             ws.cell(row=row_idx, column=9, value=str(item.get('크림판매량', '')))
             ws.cell(row=row_idx, column=10, value=str(item.get('비교', '')))
