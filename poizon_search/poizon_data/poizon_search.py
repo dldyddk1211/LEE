@@ -1777,16 +1777,29 @@ def run_excel_comparison(products, callback=None):
                     send_result(callback, product_code, combined)
                     
                 except Exception as e:
-                    log(f"  ❌ 오류: {e}", 'error')
-                    fail_data = create_fail_data(product, f'오류: {str(e)}')
+                    err_msg = str(e)
+                    log(f"  ❌ 오류: {err_msg}", 'error')
+                    fail_data = create_fail_data(product, f'오류: {err_msg}')
                     results.append(fail_data)
                     send_result(callback, product_code, fail_data)
-                
+
+                    # 브라우저가 닫혔으면 루프 중단
+                    if 'has been closed' in err_msg or 'browser' in err_msg.lower():
+                        log("  ⛔ 브라우저가 닫혔습니다. 검색 중단.", 'warning')
+                        break
+
+                if stop_flag:
+                    log("\n⏹️ 사용자가 검색을 중단했습니다", 'warning')
+                    break
+
                 # 다음 상품 대기
                 time_module.sleep(random.uniform(1.0, 2.0))
-            
+
             # 브라우저 종료
-            browser.close()
+            try:
+                browser.close()
+            except:
+                pass
         
         # 엑셀 저장
         if results:
@@ -2150,20 +2163,33 @@ def search_multiple_products(product_codes, progress_queue):
                         })
                     
                 except Exception as e:
-                    print(f"  ❌ 상품 {product_code} 검색 오류: {e}")
+                    err_msg = str(e)
+                    print(f"  ❌ 상품 {product_code} 검색 오류: {err_msg}")
                     progress_queue.put({
                         'event': 'result',
                         'data': {
                             'product_code': product_code,
                             'success': False,
-                            'error': str(e)
+                            'error': err_msg
                         }
                     })
-                
+
+                    # 브라우저가 닫혔으면 루프 중단
+                    if 'has been closed' in err_msg or 'browser' in err_msg.lower():
+                        print("  ⛔ 브라우저가 닫혔습니다. 검색 중단.")
+                        break
+
+                if stop_flag:
+                    print("\n⏹️ 사용자가 검색을 중단했습니다")
+                    break
+
                 # 다음 상품 대기
                 time_module.sleep(random.uniform(1.0, 2.0))
-            
-            browser.close()
+
+            try:
+                browser.close()
+            except:
+                pass
         
         # 완료
         progress_queue.put({

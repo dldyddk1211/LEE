@@ -282,6 +282,9 @@
     <button class="top-menu-btn active" id="btnInvoice" onclick="showMenu('invoice')">
       📋 거래명세서
     </button>
+    <button class="top-menu-btn" id="btnRecent" onclick="showMenu('recent')">
+      📑 최근 거래내역
+    </button>
     <button class="top-menu-btn" id="btnWholesale" onclick="showMenu('wholesale')">
       📦 도매 리스트
     </button>
@@ -494,6 +497,44 @@
 
     </div>
     <!-- // 도매 리스트 컨테이너 끝 -->
+
+    <!-- 최근 거래내역 컨테이너 -->
+    <div class="wholesale-container" id="recentContainer" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <span>📑 최근 거래내역</span>
+          <button onclick="loadRecentOrders()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🔄 새로고침</button>
+        </div>
+        <div class="card-body" style="padding:12px;">
+          <!-- 통계 -->
+          <div id="recentSummary" style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;"></div>
+          <!-- 테이블 -->
+          <div style="overflow-x:auto;">
+            <table class="order-table" id="recentTable" style="font-size:11px;">
+              <thead>
+                <tr>
+                  <th style="width:30px;">#</th>
+                  <th style="width:80px;">거래일자</th>
+                  <th style="width:100px;">거래처</th>
+                  <th style="min-width:140px;">품번 / 품명</th>
+                  <th style="width:85px;">합계금액</th>
+                  <th style="width:70px;">입금</th>
+                  <th style="width:70px;">잔금</th>
+                  <th style="width:55px;font-size:9px;line-height:1.2;">거래<br>명세서</th>
+                  <th style="width:55px;font-size:9px;line-height:1.2;">입금<br>확인</th>
+                  <th style="width:55px;font-size:9px;line-height:1.2;">배송</th>
+                  <th style="width:55px;font-size:9px;line-height:1.2;">세금<br>계산서</th>
+                  <th style="min-width:180px;">송장번호 / 메모</th>
+                  <th style="width:40px;">PDF</th>
+                </tr>
+              </thead>
+              <tbody id="recentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- // 최근 거래내역 컨테이너 끝 -->
 
     <!-- 도매 미리보기 모달 -->
     <div class="modal-overlay" id="wsPreviewModal">
@@ -1055,8 +1096,8 @@ function addProductRow(data = {}) {
     <td><input type="text" placeholder="품명" style="text-align:left;" value="${data.name||''}"></td>
     <td><input type="number" placeholder="0" value="${data.qty||''}" min="0" oninput="calcRow(${id})"></td>
     <td><input type="number" placeholder="0" value="${data.price||''}" min="0" oninput="calcRow(${id})"></td>
-    <td><input type="number" placeholder="0" value="${data.disc||''}" min="0" max="100" oninput="calcRow(${id})"></td>
-    <td class="calc-cell" id="supply_${id}">-</td>
+    <td><input type="number" placeholder="0" value="${data.disc||''}" min="0" max="100" oninput="calcRow(${id})" id="disc_${id}"></td>
+    <td><input type="number" placeholder="0" value="${data.supply||''}" min="0" oninput="calcRowFromSupply(${id})" id="supply_${id}"></td>
     <td class="calc-cell" id="total_${id}">-</td>
     <td><button onclick="removeRow(${id})" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:15px;padding:4px;">✕</button></td>
   `;
@@ -1070,8 +1111,23 @@ function calcRow(id) {
   const inp = tr.querySelectorAll('input');
   const qty = parseFloat(inp[2].value)||0, price = parseFloat(inp[3].value)||0, disc = parseFloat(inp[4].value)||0;
   const supply = price * (1 - disc/100), total = supply * qty;
-  document.getElementById('supply_'+id).textContent = supply ? Math.round(supply).toLocaleString() : '-';
+  document.getElementById('supply_'+id).value = supply ? Math.round(supply) : '';
   document.getElementById('total_' +id).textContent = total  ? Math.round(total).toLocaleString()  : '-';
+  calcSummary();
+}
+function calcRowFromSupply(id) {
+  const tr = document.getElementById('row_' + id);
+  if (!tr) return;
+  const inp = tr.querySelectorAll('input');
+  const qty = parseFloat(inp[2].value)||0, price = parseFloat(inp[3].value)||0;
+  const supply = parseFloat(document.getElementById('supply_'+id).value)||0;
+  // 할인율 역산: disc = (1 - supply/price) * 100
+  if (price > 0) {
+    const disc = Math.round((1 - supply / price) * 10000) / 100;
+    document.getElementById('disc_'+id).value = disc >= 0 ? disc : 0;
+  }
+  const total = supply * qty;
+  document.getElementById('total_'+id).textContent = total ? Math.round(total).toLocaleString() : '-';
   calcSummary();
 }
 function removeRow(id) { document.getElementById('row_'+id)?.remove(); calcSummary(); }
@@ -1080,8 +1136,9 @@ function calcSummary() {
   let qty=0, amt=0;
   document.querySelectorAll('#productBody tr').forEach(tr => {
     const inp = tr.querySelectorAll('input');
-    const q = parseFloat(inp[2].value)||0, p = parseFloat(inp[3].value)||0, d = parseFloat(inp[4].value)||0;
-    qty += q; amt += q * p * (1 - d/100);
+    const q = parseFloat(inp[2].value)||0;
+    const s = parseFloat(inp[5].value)||0;
+    qty += q; amt += q * s;
   });
   document.getElementById('totalQty').textContent    = qty.toLocaleString();
   document.getElementById('totalSupply').textContent = '₩' + Math.round(amt).toLocaleString();
@@ -1099,7 +1156,9 @@ function getTotalAmt() {
   let t = 0;
   document.querySelectorAll('#productBody tr').forEach(tr => {
     const inp = tr.querySelectorAll('input');
-    t += (parseFloat(inp[2].value)||0) * (parseFloat(inp[3].value)||0) * (1 - (parseFloat(inp[4].value)||0)/100);
+    const q = parseFloat(inp[2].value)||0;
+    const s = parseFloat(inp[5].value)||0;
+    t += q * s;
   });
   return Math.round(t);
 }
@@ -1110,9 +1169,10 @@ function getProducts() {
     const inp = tr.querySelectorAll('input');
     const code=inp[0].value.trim(), name=inp[1].value.trim();
     const qty=parseFloat(inp[2].value)||0, price=parseFloat(inp[3].value)||0, disc=parseFloat(inp[4].value)||0;
+    const supply = parseFloat(inp[5].value)||0;
     if (code || name || qty) rows.push({ code, name, qty, price, disc,
-      supply: Math.round(price*(1-disc/100)),
-      total:  Math.round(price*(1-disc/100)*qty)
+      supply: Math.round(supply),
+      total:  Math.round(supply * qty)
     });
   });
   return rows;
@@ -1280,6 +1340,157 @@ function initTableResize() {
 }
 
 // ══════════════════════════════════════
+// 최근 거래내역
+// ══════════════════════════════════════
+let recentOrders = [];
+
+async function loadRecentOrders() {
+  const tbody = document.getElementById('recentTableBody');
+  tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#888;">불러오는 중...</td></tr>';
+
+  try {
+    const res = await fetch('/forms/orders/all?limit=100');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    recentOrders = data.orders;
+    renderRecentOrders();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:20px;color:#dc3545;">오류: ${e.message}</td></tr>`;
+  }
+}
+
+function renderRecentOrders() {
+  // 통계
+  const totalAmt = recentOrders.reduce((s,o) => s + (o.total_amount||0), 0);
+  const totalBal = recentOrders.reduce((s,o) => s + (o.balance||0), 0);
+  const unpaid = recentOrders.filter(o => (o.balance||0) > 0).length;
+
+  document.getElementById('recentSummary').innerHTML = `
+    <div style="background:#f0f4ff;border-radius:8px;padding:8px 14px;text-align:center;">
+      <div style="font-size:10px;color:#666;">총 거래</div>
+      <div style="font-size:16px;font-weight:700;color:#0f3460;">${recentOrders.length}건</div>
+    </div>
+    <div style="background:#f0fff4;border-radius:8px;padding:8px 14px;text-align:center;">
+      <div style="font-size:10px;color:#666;">총 금액</div>
+      <div style="font-size:16px;font-weight:700;color:#155724;">${totalAmt.toLocaleString()}</div>
+    </div>
+    <div style="background:#fff3cd;border-radius:8px;padding:8px 14px;text-align:center;">
+      <div style="font-size:10px;color:#666;">미수금</div>
+      <div style="font-size:16px;font-weight:700;color:#856404;">${totalBal.toLocaleString()}</div>
+    </div>
+    <div style="background:#f8d7da;border-radius:8px;padding:8px 14px;text-align:center;">
+      <div style="font-size:10px;color:#666;">미수 거래</div>
+      <div style="font-size:16px;font-weight:700;color:#721c24;">${unpaid}건</div>
+    </div>`;
+
+  const tbody = document.getElementById('recentTableBody');
+  if (!recentOrders.length) {
+    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#888;">거래 내역이 없습니다</td></tr>';
+    return;
+  }
+
+  let html = '';
+  recentOrders.forEach((o, i) => {
+    const prods = o.products || [];
+    const first = prods[0] ? [prods[0].code, prods[0].name].filter(Boolean).join(' ') : '';
+    const prodSummary = first + (prods.length > 1 ? ` 외 ${prods.length-1}개` : '');
+    const paid = (o.balance||0) <= 0;
+    const pdfLink = o.filename
+      ? `<a href="/download_invoice/${encodeURIComponent(o.filename)}" target="_blank" style="color:#0f3460;font-weight:700;text-decoration:none;">📥</a>`
+      : '-';
+
+    const chkInv = o.chk_invoice ? 'checked' : '';
+    const chkDep = o.chk_deposit ? 'checked' : '';
+    const chkShp = o.chk_shipping ? 'checked' : '';
+    const chkTax = o.chk_tax ? 'checked' : '';
+    const tracking = o.tracking_numbers || '';
+    const memo = o.order_memo || '';
+
+    html += `
+    <tr style="border-bottom:1px solid #eee;">
+      <td>${recentOrders.length - i}</td>
+      <td style="white-space:nowrap;font-size:11px;">${o.trade_date || '-'}</td>
+      <td style="text-align:left;font-size:11px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+          title="${o.buyer_company||''} ${o.buyer_name||''}">${o.buyer_company || o.buyer_name || '-'}</td>
+      <td style="text-align:left;font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+          title="${prods.map(p=>[p.code,p.name].filter(Boolean).join(' ')).join(', ')}">${prodSummary || (o.memo||'-')}</td>
+      <td style="font-weight:700;white-space:nowrap;font-size:11px;">${(o.total_amount||0).toLocaleString()}</td>
+      <td style="white-space:nowrap;font-size:11px;">${(o.deposit||0).toLocaleString()}</td>
+      <td style="color:${paid?'#28a745':'#dc3545'};font-weight:600;white-space:nowrap;font-size:11px;">${(o.balance||0).toLocaleString()}</td>
+      <td style="text-align:center;"><input type="checkbox" ${chkInv} onchange="updateRecentOrder(${o.id},'chk_invoice',this.checked)"></td>
+      <td style="text-align:center;"><input type="checkbox" ${chkDep} onchange="updateRecentOrder(${o.id},'chk_deposit',this.checked)"></td>
+      <td style="text-align:center;"><input type="checkbox" ${chkShp} onchange="updateRecentOrder(${o.id},'chk_shipping',this.checked)"></td>
+      <td style="text-align:center;"><input type="checkbox" ${chkTax} onchange="updateRecentOrder(${o.id},'chk_tax',this.checked)"></td>
+      <td style="padding:2px;">
+        <textarea rows="2" style="width:100%;font-size:10px;border:1px solid #ddd;border-radius:4px;padding:3px 5px;resize:vertical;font-family:inherit;line-height:1.4;"
+          placeholder="송장번호 (최대10개, 줄바꿈 구분)&#10;메모 입력..."
+          onblur="saveTrackingMemo(${o.id},this.value)">${tracking}${tracking && memo ? '\n---\n' : ''}${memo}</textarea>
+      </td>
+      <td style="text-align:center;">${pdfLink}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+async function updateRecentOrder(orderId, field, value) {
+  const order = recentOrders.find(o => o.id === orderId);
+  if (!order) return;
+  order[field] = value ? 1 : 0;
+
+  try {
+    await fetch(`/forms/orders/${orderId}/update`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        chk_invoice: order.chk_invoice || 0,
+        chk_deposit: order.chk_deposit || 0,
+        chk_shipping: order.chk_shipping || 0,
+        chk_tax: order.chk_tax || 0,
+        tracking_numbers: order.tracking_numbers || '',
+        order_memo: order.order_memo || ''
+      })
+    });
+  } catch(e) {
+    console.error('체크 저장 오류:', e);
+  }
+}
+
+async function saveTrackingMemo(orderId, rawText) {
+  const order = recentOrders.find(o => o.id === orderId);
+  if (!order) return;
+
+  // --- 구분자로 송장과 메모 분리
+  let tracking = '', memo = '';
+  if (rawText.includes('\n---\n')) {
+    const parts = rawText.split('\n---\n');
+    tracking = parts[0].trim();
+    memo = parts.slice(1).join('\n---\n').trim();
+  } else {
+    tracking = rawText.trim();
+  }
+
+  order.tracking_numbers = tracking;
+  order.order_memo = memo;
+
+  try {
+    await fetch(`/forms/orders/${orderId}/update`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        chk_invoice: order.chk_invoice || 0,
+        chk_deposit: order.chk_deposit || 0,
+        chk_shipping: order.chk_shipping || 0,
+        chk_tax: order.chk_tax || 0,
+        tracking_numbers: tracking,
+        order_memo: memo
+      })
+    });
+  } catch(e) {
+    console.error('송장/메모 저장 오류:', e);
+  }
+}
+
+// ══════════════════════════════════════
 // 배송지 정보 자동 복사
 // ══════════════════════════════════════
 function copyBuyerToShipping() {
@@ -1301,17 +1512,21 @@ function copyBuyerToShipping() {
 // 메뉴 전환
 // ══════════════════════════════════════
 function showMenu(menuName) {
-  // 버튼 활성화 상태 변경
   document.querySelectorAll('.top-menu-btn').forEach(btn => btn.classList.remove('active'));
-  
+  document.getElementById('invoiceContainer').style.display = 'none';
+  document.getElementById('wholesaleContainer').style.display = 'none';
+  document.getElementById('recentContainer').style.display = 'none';
+
   if (menuName === 'invoice') {
     document.getElementById('btnInvoice').classList.add('active');
-    document.getElementById('invoiceContainer').classList.remove('hidden');
-    document.getElementById('wholesaleContainer').classList.remove('active');
+    document.getElementById('invoiceContainer').style.display = '';
+  } else if (menuName === 'recent') {
+    document.getElementById('btnRecent').classList.add('active');
+    document.getElementById('recentContainer').style.display = '';
+    loadRecentOrders();
   } else if (menuName === 'wholesale') {
     document.getElementById('btnWholesale').classList.add('active');
-    document.getElementById('invoiceContainer').classList.add('hidden');
-    document.getElementById('wholesaleContainer').classList.add('active');
+    document.getElementById('wholesaleContainer').style.display = '';
   }
 }
 

@@ -954,6 +954,97 @@ def upload_excel():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/convert_product_format', methods=['POST'])
+def convert_product_format():
+    """원본 엑셀에서 품번 추출 + 중복 제거 → 비교용 엑셀 생성"""
+    try:
+        import re
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': '파일이 없습니다'})
+
+        file = request.files['file']
+        wb = openpyxl.load_workbook(file, data_only=True)
+        ws = wb.active
+
+        # 모든 셀에서 품번 패턴 추출
+        raw_codes = []
+        for row in ws.iter_rows(values_only=True):
+            for cell_val in row:
+                if cell_val is None:
+                    continue
+                text = str(cell_val).strip()
+                if not text:
+                    continue
+                # 패턴: 02-415445-102-  260 → 가운데 품번 415445-102 추출
+                m = re.match(r'^\d{2}-(\d{4,}-\d{3})', text)
+                if m:
+                    raw_codes.append(m.group(1))
+                else:
+                    # 이미 품번 형태인 경우 (예: 415445-102)
+                    m2 = re.match(r'^(\d{4,}-\d{3})$', text)
+                    if m2:
+                        raw_codes.append(m2.group(1))
+
+        if not raw_codes:
+            return jsonify({'success': False, 'error': '품번을 찾을 수 없습니다. 02-XXXXXX-XXX 형식이 필요합니다.'})
+
+        original_count = len(raw_codes)
+        # 중복 제거 (순서 유지)
+        seen = set()
+        unique_codes = []
+        for code in raw_codes:
+            if code not in seen:
+                seen.add(code)
+                unique_codes.append(code)
+
+        # 비교용 엑셀 생성
+        out_wb = openpyxl.Workbook()
+        out_ws = out_wb.active
+        out_ws.title = '품번리스트'
+        out_ws.append(['상품번호', '제품명', '정가', '할인가', '재고'])
+        for code in unique_codes:
+            out_ws.append([code, '', 0, 0, 0])
+
+        # 컬럼 너비
+        out_ws.column_dimensions['A'].width = 18
+        out_ws.column_dimensions['B'].width = 30
+
+        from datetime import datetime as _dt
+        timestamp = _dt.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'품번변환_{timestamp}.xlsx'
+
+        output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'outputs')
+        os.makedirs(output_dir, exist_ok=True)
+        filepath = os.path.join(output_dir, filename)
+        out_wb.save(filepath)
+
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'original_count': original_count,
+            'count': len(unique_codes),
+            'codes': unique_codes
+        })
+
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/download_converted/<filename>')
+def download_converted(filename):
+    """변환된 엑셀 다운로드"""
+    try:
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return jsonify({'error': '잘못된 파일명'}), 400
+        filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'outputs', filename)
+        if os.path.exists(filepath):
+            return send_file(filepath, as_attachment=True, download_name=filename)
+        return jsonify({'error': '파일 없음'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/compare_prices', methods=['POST'])
 def compare_prices():
     products = request.json.get('products', [])

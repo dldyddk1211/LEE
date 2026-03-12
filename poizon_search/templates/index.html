@@ -902,6 +902,10 @@
         📤 엑셀 업로드
         <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleExcelUpload(event)">
       </label>
+      <label for="formatUpload" id="formatLabel" class="upload-btn" style="display:none; background:linear-gradient(135deg,#e67e22,#d35400);">
+        🔄 포맷 변환
+        <input type="file" id="formatUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleFormatConvert(event)">
+      </label>
       <!-- ❌ 이 버튼 제거 또는 숨김 처리 -->
       <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
       <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
@@ -2257,7 +2261,8 @@
         keywordInput.parentElement.style.display = 'none';
         startBtn.style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
-        
+        document.getElementById('formatLabel').style.display = 'block';
+
       } else {
         keywordInput.disabled = false;
         keywordInput.parentElement.style.display = 'block';
@@ -2265,6 +2270,7 @@
         startBtn.style.display = 'block';
         startBtn.disabled = false;
         document.getElementById('uploadLabel').style.display = 'none';
+        document.getElementById('formatLabel').style.display = 'none';
       }
       
       // 로그인 상태 UI 업데이트
@@ -2571,14 +2577,19 @@
       const uploadInput = document.getElementById('excelUpload');
       if (uploadInput) uploadInput.value = '';
 
+      const formatInput = document.getElementById('formatUpload');
+      if (formatInput) formatInput.value = '';
+
       if (currentMode === 'compare') {
         document.getElementById('keyword').parentElement.style.display = 'none';
         startBtn.style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
+        document.getElementById('formatLabel').style.display = 'block';
       } else {
         document.getElementById('keyword').parentElement.style.display = 'block';
         startBtn.style.display = 'block';
         document.getElementById('uploadLabel').style.display = 'none';
+        document.getElementById('formatLabel').style.display = 'none';
       }
 
       // 모드 버튼 활성화 유지
@@ -3918,6 +3929,47 @@
     console.log('🟣 [EXIT] performPoizonLogin 함수 종료');
     console.log('  (fetch는 비동기로 계속 실행됨)');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+  async function handleFormatConvert(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    addLog(`🔄 포맷 변환 시작: ${file.name}`, 'info');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/convert_product_format', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        addLog(`✅ 품번 추출 완료: ${result.original_count}개 → 중복 제거 → ${result.count}개`, 'success');
+
+        // 변환된 파일 자동 다운로드
+        const link = document.createElement('a');
+        link.href = '/download_converted/' + encodeURIComponent(result.filename);
+        link.download = result.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        addLog(`📥 변환 파일 다운로드: ${result.filename}`, 'info');
+        addLog(`💡 다운로드된 파일을 "엑셀 업로드"로 업로드하세요`, 'info');
+      } else {
+        addLog(`❌ 변환 실패: ${result.error}`, 'error');
+        alert(`❌ 변환 실패: ${result.error}`);
+      }
+    } catch (error) {
+      addLog(`❌ 변환 오류: ${error.message}`, 'error');
+      alert(`❌ 변환 오류: ${error.message}`);
+    }
+
+    event.target.value = '';
   }
 
   async function handleExcelUpload(event) {

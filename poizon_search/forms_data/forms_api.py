@@ -61,14 +61,18 @@ def _get_db():
             created_at  TEXT NOT NULL
         )
     """)
-    # 기존 테이블에 배송지 컬럼 추가 (이미 있으면 무시)
-    try:
-        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_name TEXT')
-        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_tel TEXT')
-        conn.execute('ALTER TABLE invoices ADD COLUMN shipping_addr TEXT')
-        conn.commit()
-    except sqlite3.OperationalError:
-        pass  # 이미 컬럼이 존재함
+    # 기존 테이블에 컬럼 추가 (이미 있으면 무시)
+    new_cols = [
+        'shipping_name TEXT', 'shipping_tel TEXT', 'shipping_addr TEXT',
+        'chk_invoice INTEGER DEFAULT 0', 'chk_deposit INTEGER DEFAULT 0',
+        'chk_shipping INTEGER DEFAULT 0', 'chk_tax INTEGER DEFAULT 0',
+        'tracking_numbers TEXT', 'order_memo TEXT',
+    ]
+    for col_def in new_cols:
+        try:
+            conn.execute(f'ALTER TABLE invoices ADD COLUMN {col_def}')
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     return conn
 
@@ -477,6 +481,67 @@ def get_orders():
     except Exception as e:
         import traceback; traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+@forms_bp.route('/forms/orders/all', methods=['GET'])
+def get_all_orders():
+    """전체 최근 거래내역 조회 (체크리스트/송장/메모 포함)"""
+    try:
+        limit = int(request.args.get('limit', 100))
+        conn = _get_db()
+        rows = conn.execute("""
+            SELECT id, trade_date, memo, buyer_company, buyer_name,
+                   shipping_name, shipping_tel, shipping_addr,
+                   total_amount, deposit, balance, receiver, filename,
+                   products_json, created_at,
+                   chk_invoice, chk_deposit, chk_shipping, chk_tax,
+                   tracking_numbers, order_memo
+            FROM invoices
+            ORDER BY trade_date DESC, created_at DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+        conn.close()
+
+        result = []
+        for r in rows:
+            item = dict(r)
+            try:
+                item['products'] = json.loads(item.pop('products_json') or '[]')
+            except:
+                item['products'] = []
+            result.append(item)
+
+        return jsonify({'success': True, 'orders': result})
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@forms_bp.route('/forms/orders/<int:order_id>/update', methods=['POST'])
+def update_order(order_id):
+    """거래 내역 체크리스트/송장/메모 업데이트"""
+    try:
+        data = request.json
+        conn = _get_db()
+        conn.execute("""
+            UPDATE invoices SET
+                chk_invoice = ?, chk_deposit = ?, chk_shipping = ?, chk_tax = ?,
+                tracking_numbers = ?, order_memo = ?
+            WHERE id = ?
+        """, (
+            int(data.get('chk_invoice', 0)),
+            int(data.get('chk_deposit', 0)),
+            int(data.get('chk_shipping', 0)),
+            int(data.get('chk_tax', 0)),
+            data.get('tracking_numbers', ''),
+            data.get('order_memo', ''),
+            order_id
+        ))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @forms_bp.route('/download_invoice/<filename>')
