@@ -503,7 +503,10 @@
       <div class="card">
         <div class="card-header">
           <span>📑 최근 거래내역</span>
-          <button onclick="loadRecentOrders()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🔄 새로고침</button>
+          <div style="display:flex;gap:6px;">
+            <button onclick="deleteSelectedOrders()" style="background:#dc3545;border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🗑 선택 삭제</button>
+            <button onclick="loadRecentOrders()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">🔄 새로고침</button>
+          </div>
         </div>
         <div class="card-body" style="padding:12px;">
           <!-- 통계 -->
@@ -513,6 +516,7 @@
             <table class="order-table" id="recentTable" style="font-size:11px;">
               <thead>
                 <tr>
+                  <th style="width:30px;"><input type="checkbox" onchange="toggleAllRecent(this.checked)" title="전체 선택"></th>
                   <th style="width:30px;">#</th>
                   <th style="width:80px;">거래일자</th>
                   <th style="width:100px;">거래처</th>
@@ -525,7 +529,7 @@
                   <th style="width:55px;font-size:9px;line-height:1.2;">배송</th>
                   <th style="width:55px;font-size:9px;line-height:1.2;">세금<br>계산서</th>
                   <th style="min-width:180px;">송장번호 / 메모</th>
-                  <th style="width:40px;">PDF</th>
+                  <th style="width:70px;">파일/복사</th>
                 </tr>
               </thead>
               <tbody id="recentTableBody"></tbody>
@@ -1346,7 +1350,7 @@ let recentOrders = [];
 
 async function loadRecentOrders() {
   const tbody = document.getElementById('recentTableBody');
-  tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#888;">불러오는 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:20px;color:#888;">불러오는 중...</td></tr>';
 
   try {
     const res = await fetch('/forms/orders/all?limit=100');
@@ -1355,7 +1359,7 @@ async function loadRecentOrders() {
     recentOrders = data.orders;
     renderRecentOrders();
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:20px;color:#dc3545;">오류: ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:20px;color:#dc3545;">오류: ${e.message}</td></tr>`;
   }
 }
 
@@ -1385,7 +1389,7 @@ function renderRecentOrders() {
 
   const tbody = document.getElementById('recentTableBody');
   if (!recentOrders.length) {
-    tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#888;">거래 내역이 없습니다</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:20px;color:#888;">거래 내역이 없습니다</td></tr>';
     return;
   }
 
@@ -1408,6 +1412,7 @@ function renderRecentOrders() {
 
     html += `
     <tr style="border-bottom:1px solid #eee;">
+      <td style="text-align:center;"><input type="checkbox" class="recent-chk" value="${o.id}"></td>
       <td>${recentOrders.length - i}</td>
       <td style="white-space:nowrap;font-size:11px;">${o.trade_date || '-'}</td>
       <td style="text-align:left;font-size:11px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
@@ -1426,7 +1431,10 @@ function renderRecentOrders() {
           placeholder="송장번호 (최대10개, 줄바꿈 구분)&#10;메모 입력..."
           onblur="saveTrackingMemo(${o.id},this.value)">${tracking}${tracking && memo ? '\n---\n' : ''}${memo}</textarea>
       </td>
-      <td style="text-align:center;">${pdfLink}</td>
+      <td style="text-align:center;white-space:nowrap;">
+        ${pdfLink}
+        <button onclick="copyOrderToInvoice(${o.id})" style="background:#0f3460;color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;cursor:pointer;margin-left:2px;" title="거래명세서로 복사">📋</button>
+      </td>
     </tr>`;
   });
   tbody.innerHTML = html;
@@ -1490,6 +1498,76 @@ async function saveTrackingMemo(orderId, rawText) {
   }
 }
 
+function toggleAllRecent(checked) {
+  document.querySelectorAll('.recent-chk').forEach(cb => cb.checked = checked);
+}
+
+async function deleteSelectedOrders() {
+  const ids = [...document.querySelectorAll('.recent-chk:checked')].map(cb => parseInt(cb.value));
+  if (!ids.length) { alert('삭제할 항목을 선택해주세요'); return; }
+  if (!confirm(`${ids.length}건을 삭제하시겠습니까?`)) return;
+
+  try {
+    const res = await fetch('/forms/orders/delete', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ ids })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`${data.deleted}건 삭제 완료`);
+      loadRecentOrders();
+    } else {
+      alert('삭제 실패: ' + (data.error || ''));
+    }
+  } catch(e) {
+    alert('삭제 오류: ' + e.message);
+  }
+}
+
+function copyOrderToInvoice(orderId) {
+  const o = recentOrders.find(x => x.id === orderId);
+  if (!o) { alert('데이터를 찾을 수 없습니다'); return; }
+
+  // 거래명세서 탭으로 이동
+  showMenu('invoice');
+
+  // 거래 기본 정보
+  document.getElementById('tradeDate').value = o.trade_date || '';
+  document.getElementById('tradeMemo').value = o.memo || '';
+
+  // 수요자 정보
+  document.getElementById('buyerBizNo').value   = o.buyer_bizno   || '';
+  document.getElementById('buyerCompany').value = o.buyer_company || '';
+  document.getElementById('buyerName').value    = o.buyer_name    || '';
+  document.getElementById('buyerTel').value     = o.buyer_tel     || '';
+  document.getElementById('buyerAddr').value    = o.buyer_addr    || '';
+  document.getElementById('buyerBizType').value = o.buyer_biztype || '';
+  document.getElementById('buyerBizItem').value = o.buyer_bizitem || '';
+
+  // 배송지 정보
+  document.getElementById('shippingName').value = o.shipping_name || '';
+  document.getElementById('shippingTel').value  = o.shipping_tel  || '';
+  document.getElementById('shippingAddr').value = o.shipping_addr || '';
+  document.getElementById('sameAsBuyer').checked = false;
+
+  // 상품 목록
+  document.getElementById('productBody').innerHTML = '';
+  rowIdx = 0;
+  (o.products || []).forEach(p => addProductRow(p));
+  if (!o.products || !o.products.length) {
+    addProductRow(); addProductRow(); addProductRow();
+  }
+
+  // 입금/잔금/인수자
+  document.getElementById('payDeposit').value  = o.deposit  || '';
+  document.getElementById('payReceiver').value = o.receiver || '';
+  calcBalance();
+  updateHistoryBtn();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ══════════════════════════════════════
 // 배송지 정보 자동 복사
 // ══════════════════════════════════════
@@ -1519,14 +1597,14 @@ function showMenu(menuName) {
 
   if (menuName === 'invoice') {
     document.getElementById('btnInvoice').classList.add('active');
-    document.getElementById('invoiceContainer').style.display = '';
+    document.getElementById('invoiceContainer').style.display = 'block';
   } else if (menuName === 'recent') {
     document.getElementById('btnRecent').classList.add('active');
-    document.getElementById('recentContainer').style.display = '';
+    document.getElementById('recentContainer').style.display = 'block';
     loadRecentOrders();
   } else if (menuName === 'wholesale') {
     document.getElementById('btnWholesale').classList.add('active');
-    document.getElementById('wholesaleContainer').style.display = '';
+    document.getElementById('wholesaleContainer').style.display = 'block';
   }
 }
 

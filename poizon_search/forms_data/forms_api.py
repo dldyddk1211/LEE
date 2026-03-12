@@ -544,6 +544,24 @@ def update_order(order_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@forms_bp.route('/forms/orders/delete', methods=['POST'])
+def delete_orders():
+    """선택된 거래 내역 삭제"""
+    try:
+        data = request.json
+        ids = data.get('ids', [])
+        if not ids:
+            return jsonify({'success': False, 'error': '삭제할 항목이 없습니다'})
+        conn = _get_db()
+        placeholders = ','.join('?' * len(ids))
+        conn.execute(f'DELETE FROM invoices WHERE id IN ({placeholders})', ids)
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True, 'deleted': len(ids)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @forms_bp.route('/download_invoice/<filename>')
 def download_invoice(filename):
     try:
