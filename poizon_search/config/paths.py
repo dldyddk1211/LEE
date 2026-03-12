@@ -1,11 +1,21 @@
 """
-경로 설정 - 환경 자동 감지
-  Mac  → 운영 서버 (production)  : /theone/srv/data
-  Windows → 테스트 환경 (test)   : 프로젝트 내 data/
+경로 설정 - 공유 드라이브 기반 통합 데이터 관리
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mac (내부망):  /Volumes/LEE/theone/srv/data/poizon_search/
+Windows (외부망): Z:/VOL1/LEE/theone/srv/data/poizon_search/
+
+설정 파일(settings.json)에서 데이터 경로를 변경 가능
 """
 
 import os
+import json
 import platform
+
+# =============================================
+# 프로젝트 루트 & 설정 파일
+# =============================================
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SETTINGS_FILE = os.path.join(PROJECT_ROOT, 'config', 'settings.json')
 
 # =============================================
 # 환경 감지
@@ -13,68 +23,105 @@ import platform
 _system = platform.system()
 
 if _system == 'Darwin':
-    ENV = 'production'   # Mac = 운영 서버
+    ENV = 'production'
+    DEFAULT_DATA_ROOT = '/Volumes/LEE/theone/srv/data/poizon_search'
 elif _system == 'Windows':
-    ENV = 'test'         # Windows = 테스트
+    ENV = 'test'
+    DEFAULT_DATA_ROOT = 'Z:/VOL1/LEE/theone/srv/data/poizon_search'
 else:
-    ENV = 'production'   # Linux 서버도 운영으로 처리
+    ENV = 'production'
+    DEFAULT_DATA_ROOT = '/Volumes/LEE/theone/srv/data/poizon_search'
 
 IS_PRODUCTION = (ENV == 'production')
 IS_TEST       = (ENV == 'test')
 
-# =============================================
-# 데이터 루트 경로
-# =============================================
-if IS_PRODUCTION:
-    # Mac 서버: /theone/srv/data
-    DATA_ROOT = '/theone/srv/data'
-else:
-    # Windows 테스트: 프로젝트 루트 아래 data/
-    _project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    DATA_ROOT = os.path.join(_project_root, 'data')
 
 # =============================================
-# 전체 폴더 구조 정의
+# 설정 파일 로드/저장
 # =============================================
-PATHS = {
-    # ---------- 고객 (customers) ----------
-    'customers_raw':          os.path.join(DATA_ROOT, 'customers', 'raw'),
-    'customers_processed':    os.path.join(DATA_ROOT, 'customers', 'processed'),
-    'customers_exports':      os.path.join(DATA_ROOT, 'customers', 'exports'),
-
-    # ---------- 주문 (orders) ----------
-    'orders_raw':             os.path.join(DATA_ROOT, 'orders', 'raw'),
-    'orders_processed':       os.path.join(DATA_ROOT, 'orders', 'processed'),
-    'orders_invoices':        os.path.join(DATA_ROOT, 'orders', 'invoices'),
-
-    # ---------- 제품·빅데이터 (products) ----------
-    'products_metadata':      os.path.join(DATA_ROOT, 'products', 'metadata'),
-    'products_analytics':     os.path.join(DATA_ROOT, 'products', 'analytics'),
-    'products_images':        os.path.join(DATA_ROOT, 'products', 'images'),
-
-    # ---------- 운영 자료 (operations) ----------
-    'operations_hr':          os.path.join(DATA_ROOT, 'operations', 'hr'),
-    'operations_finance':     os.path.join(DATA_ROOT, 'operations', 'finance'),
-    'operations_legal':       os.path.join(DATA_ROOT, 'operations', 'legal'),
-    'operations_projects':    os.path.join(DATA_ROOT, 'operations', 'projects'),
-
-    # ---------- 백업 (backups) ----------
-    'backups_daily':          os.path.join(DATA_ROOT, 'backups', 'daily'),
-    'backups_weekly':         os.path.join(DATA_ROOT, 'backups', 'weekly'),
-    'backups_monthly':        os.path.join(DATA_ROOT, 'backups', 'monthly'),
-
-    # ---------- 시스템 ----------
-    'logs':                   os.path.join(DATA_ROOT, 'logs'),
-    'tmp':                    os.path.join(DATA_ROOT, 'tmp'),
-    'vault':                  os.path.join(DATA_ROOT, 'vault'),
-
-    # ---------- 포이즌 수집 결과 (products/analytics 하위) ----------
-    'poizon_output':          os.path.join(DATA_ROOT, 'products', 'analytics'),
-    'poizon_logs':            os.path.join(DATA_ROOT, 'logs'),
-    'poizon_shots':           os.path.join(DATA_ROOT, 'tmp', 'shots'),
-}
+def _load_settings():
+    """settings.json 로드 (없으면 기본값)"""
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
 
 
+def _save_settings(settings):
+    """settings.json 저장"""
+    os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(settings, f, ensure_ascii=False, indent=2)
+
+
+def get_data_root():
+    """현재 데이터 루트 경로 반환 (settings.json 우선)"""
+    settings = _load_settings()
+    custom = settings.get('data_root', '').strip()
+    if custom:
+        return custom
+    return DEFAULT_DATA_ROOT
+
+
+def set_data_root(new_root):
+    """데이터 루트 경로 변경 후 settings.json에 저장"""
+    settings = _load_settings()
+    settings['data_root'] = new_root.strip()
+    _save_settings(settings)
+    # 전역 변수 갱신
+    _rebuild_paths()
+
+
+# =============================================
+# 데이터 루트 (동적)
+# =============================================
+DATA_ROOT = get_data_root()
+
+
+# =============================================
+# 폴더 구조 정의
+# =============================================
+def _build_paths(root):
+    """데이터 루트 기반으로 전체 경로 딕셔너리 생성"""
+    return {
+        # ---------- DB ----------
+        'db':                     os.path.join(root, 'db'),
+        'invoices_db':            os.path.join(root, 'db', 'invoices.db'),
+        'inventory_db':           os.path.join(root, 'db', 'inventory.db'),
+        'bigdata_db':             os.path.join(root, 'db', 'bigdata.db'),
+
+        # ---------- 고객·주문 데이터 ----------
+        'customers_json':         os.path.join(root, 'db', 'customers.json'),
+        'task_history_json':      os.path.join(root, 'db', 'task_history.json'),
+        'invoices_pdf':           os.path.join(root, 'outputs', 'invoices'),
+
+        # ---------- 출력 (엑셀 등) ----------
+        'outputs':                os.path.join(root, 'outputs'),
+        'outputs_excel':          os.path.join(root, 'outputs', 'excel'),
+        'bigdata_backups':        os.path.join(root, 'outputs', 'bigdata_backups'),
+
+        # ---------- 로그 ----------
+        'logs':                   os.path.join(root, 'logs'),
+    }
+
+
+PATHS = _build_paths(DATA_ROOT)
+
+
+def _rebuild_paths():
+    """DATA_ROOT가 변경될 때 전역 변수 갱신"""
+    global DATA_ROOT, PATHS
+    DATA_ROOT = get_data_root()
+    PATHS.clear()
+    PATHS.update(_build_paths(DATA_ROOT))
+
+
+# =============================================
+# 유틸리티
+# =============================================
 def get(key: str) -> str:
     """경로 반환. 없으면 DATA_ROOT 반환."""
     return PATHS.get(key, DATA_ROOT)
@@ -82,28 +129,61 @@ def get(key: str) -> str:
 
 def ensure_dirs():
     """모든 데이터 폴더를 생성합니다 (없으면 자동 생성)."""
+    dirs_to_create = set()
     for path in PATHS.values():
-        os.makedirs(path, exist_ok=True)
-    print(f"✅ [{ENV}] 데이터 폴더 준비 완료")
-    print(f"   루트: {DATA_ROOT}")
+        # .db, .json 등 파일 경로는 부모 디렉토리만 생성
+        if os.path.splitext(path)[1]:
+            dirs_to_create.add(os.path.dirname(path))
+        else:
+            dirs_to_create.add(path)
+
+    for d in dirs_to_create:
+        try:
+            os.makedirs(d, exist_ok=True)
+        except OSError:
+            pass  # 드라이브 미연결 시 무시
+
+    print(f"[OK] [{ENV}] data dirs ready")
+    print(f"     root: {DATA_ROOT}")
+
+
+def is_drive_connected():
+    """공유 드라이브가 연결되어 있는지 확인"""
+    return os.path.isdir(DATA_ROOT)
+
+
+def get_settings():
+    """전체 설정 반환 (API용)"""
+    settings = _load_settings()
+    return {
+        'env': ENV,
+        'system': _system,
+        'default_data_root': DEFAULT_DATA_ROOT,
+        'data_root': DATA_ROOT,
+        'custom_data_root': settings.get('data_root', ''),
+        'drive_connected': is_drive_connected(),
+    }
 
 
 def print_info():
     """현재 환경 및 경로 정보 출력."""
+    connected = 'Connected' if is_drive_connected() else 'Not connected'
     print(f"\n{'='*50}")
-    print(f"  환경  : {ENV.upper()}  ({'Mac 운영서버' if IS_PRODUCTION else 'Windows 테스트'})")
-    print(f"  루트  : {DATA_ROOT}")
+    print(f"  ENV    : {ENV.upper()}  ({'Mac' if IS_PRODUCTION else 'Windows'})")
+    print(f"  Drive  : {connected}")
+    print(f"  Root   : {DATA_ROOT}")
     print(f"{'='*50}")
     for key, path in PATHS.items():
-        exists = '✅' if os.path.exists(path) else '❌'
+        exists = '[O]' if os.path.exists(path) else '[X]'
         print(f"  {exists}  {key:<25} {path}")
     print(f"{'='*50}\n")
 
 
+# =============================================
 # 앱 시작 시 폴더 자동 생성
+# =============================================
 if __name__ != '__main__':
     ensure_dirs()
-
 
 if __name__ == '__main__':
     print_info()

@@ -9,12 +9,18 @@ import io
 import threading
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, send_file, render_template_string
+from config import paths
 
 bigdata_bp = Blueprint('bigdata', __name__)
 
 BIGDATA_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH     = os.path.join(BIGDATA_DIR, 'bigdata.db')
-BACKUP_DIR  = os.path.join(BIGDATA_DIR, 'backups')
+
+# ✅ 공유 드라이브 경로 사용
+def _get_db_path():
+    return paths.get('bigdata_db')
+
+def _get_backup_dir():
+    return paths.get('bigdata_backups')
 
 # ── 필수 컬럼 (이 이름이 정확히 있어야 업로드 허용) ──
 REQUIRED_COLUMNS = ['상품번호', '제품명', '크림평균가', '크림판매량', '중국노출가', '중국판매량', '현업자판매량']
@@ -22,11 +28,13 @@ REQUIRED_COLUMNS = ['상품번호', '제품명', '크림평균가', '크림판�
 
 def _ensure_dirs():
     os.makedirs(BIGDATA_DIR, exist_ok=True)
-    os.makedirs(BACKUP_DIR, exist_ok=True)
+    os.makedirs(_get_backup_dir(), exist_ok=True)
 
 
 def _get_db():
-    conn = sqlite3.connect(DB_PATH)
+    db_path = _get_db_path()
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("""
@@ -69,7 +77,7 @@ def _do_backup():
         for r in rows:
             ws.append([r[c] for c in REQUIRED_COLUMNS])
         fname = datetime.now().strftime('%Y%m%d_%H%M%S') + '_backup.xlsx'
-        wb.save(os.path.join(BACKUP_DIR, fname))
+        wb.save(os.path.join(_get_backup_dir(), fname))
         print(f"✅ 빅데이터 자동 백업 완료: {fname}")
     except Exception as e:
         print(f"❌ 빅데이터 자동 백업 실패: {e}")

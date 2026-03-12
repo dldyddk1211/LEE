@@ -1,4 +1,15 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Windows cp949 인코딩 문제 방지
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import sys
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # .env 파일 로딩 (있으면 환경변수로 적용)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import os
@@ -24,8 +35,9 @@ import time
 import uuid
 import threading
 import queue
-import asyncio 
+import asyncio
 from datetime import datetime
+from config import paths
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Flask 관련
@@ -970,7 +982,7 @@ def compare_prices():
 def download(filename):
     try:
         # outputs/ 폴더 우선 확인 (download_excel로 저장된 파일)
-        file_path_outputs = os.path.join(os.getcwd(), 'outputs', filename)
+        file_path_outputs = os.path.join(paths.get('outputs'), filename)
         if os.path.exists(file_path_outputs):
             return send_file(file_path_outputs, as_attachment=True, download_name=filename)
 
@@ -1208,9 +1220,9 @@ def export_kream_to_excel():
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = f'kream_search_{timestamp}.xlsx'
         
-        output_dir = os.path.join(os.path.dirname(__file__), 'kream_data', 'output_data')
+        output_dir = paths.get('outputs')
         os.makedirs(output_dir, exist_ok=True)
-        
+
         filepath = os.path.join(output_dir, filename)
         wb.save(filepath)
         wb.close()
@@ -1556,9 +1568,9 @@ def download_excel():
         safe_keyword = keyword.replace('/', '_').replace('\\', '_')[:30]
         filename = f"{mode_name}_{safe_keyword}_{timestamp}.xlsx"
         
-        output_dir = os.path.join(os.getcwd(), 'outputs')
+        output_dir = paths.get('outputs')
         os.makedirs(output_dir, exist_ok=True)
-        
+
         filepath = os.path.join(output_dir, filename)
         
         wb = openpyxl.Workbook()
@@ -1710,7 +1722,7 @@ def download_excel():
 def download_file(filename):
     """파일 다운로드"""
     try:
-        filepath = os.path.join(os.getcwd(), 'outputs', filename)
+        filepath = os.path.join(paths.get('outputs'), filename)
         
         if not os.path.exists(filepath):
             print(f"❌ 파일 없음: {filepath}")
@@ -1869,6 +1881,113 @@ def update_settings():
         return jsonify({'status': 'ok'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 데이터 경로 설정 API
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+@app.route('/api/data_paths', methods=['GET'])
+def get_data_paths():
+    """현재 데이터 경로 정보 반환"""
+    info = paths.get_settings()
+    info['paths'] = {k: v for k, v in paths.PATHS.items()}
+    return jsonify(info)
+
+@app.route('/api/data_paths', methods=['POST'])
+def update_data_paths():
+    """데이터 루트 경로 변경"""
+    try:
+        data = request.get_json()
+        new_root = data.get('data_root', '').strip()
+        if not new_root:
+            return jsonify({'success': False, 'error': '경로를 입력해주세요'})
+
+        paths.set_data_root(new_root)
+        paths.ensure_dirs()
+        return jsonify({'success': True, 'data_root': paths.DATA_ROOT})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/data_paths/reset', methods=['POST'])
+def reset_data_paths():
+    """데이터 경로를 기본값으로 초기화"""
+    try:
+        paths.set_data_root('')
+        paths.ensure_dirs()
+        return jsonify({'success': True, 'data_root': paths.DATA_ROOT})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/data_paths/browse', methods=['POST'])
+def browse_data_path():
+    """폴더 선택 다이얼로그 열기 (Windows: 탐색기, Mac: Finder)"""
+    import threading
+
+    result = {'path': None, 'error': None}
+    initial_dir = request.get_json().get('initial_dir', '') if request.get_json() else ''
+
+    def open_dialog():
+        try:
+            import platform
+            system = platform.system()
+
+            if system == 'Windows':
+                import subprocess
+                # PowerShell의 폴더 선택 다이얼로그 사용
+                ps_script = (
+                    'Add-Type -AssemblyName System.Windows.Forms; '
+                    '$f = New-Object System.Windows.Forms.FolderBrowserDialog; '
+                    '$f.Description = "데이터 저장 경로를 선택하세요"; '
+                    '$f.ShowNewFolderButton = $true; '
+                )
+                if initial_dir:
+                    ps_script += f'$f.SelectedPath = "{initial_dir}"; '
+                ps_script += (
+                    'if ($f.ShowDialog() -eq "OK") { $f.SelectedPath } else { "" }'
+                )
+                proc = subprocess.run(
+                    ['powershell', '-Command', ps_script],
+                    capture_output=True, text=True, timeout=120
+                )
+                selected = proc.stdout.strip()
+                if selected:
+                    result['path'] = selected
+
+            elif system == 'Darwin':
+                import subprocess
+                # AppleScript로 Finder 폴더 선택
+                script = 'tell application "System Events" to activate\n'
+                if initial_dir:
+                    script += f'set defaultPath to POSIX file "{initial_dir}"\n'
+                    script += 'set selectedFolder to choose folder with prompt "데이터 저장 경로를 선택하세요" default location defaultPath\n'
+                else:
+                    script += 'set selectedFolder to choose folder with prompt "데이터 저장 경로를 선택하세요"\n'
+                script += 'return POSIX path of selectedFolder'
+                proc = subprocess.run(
+                    ['osascript', '-e', script],
+                    capture_output=True, text=True, timeout=120
+                )
+                selected = proc.stdout.strip()
+                if selected:
+                    result['path'] = selected.rstrip('/')
+
+            else:
+                result['error'] = 'Unsupported OS'
+
+        except Exception as e:
+            result['error'] = str(e)
+
+    # 메인 스레드에서 다이얼로그 열기 (별도 스레드로 실행하되 완료 대기)
+    t = threading.Thread(target=open_dialog)
+    t.start()
+    t.join(timeout=120)
+
+    if result['error']:
+        return jsonify({'success': False, 'error': result['error']})
+    if result['path']:
+        return jsonify({'success': True, 'path': result['path']})
+    return jsonify({'success': False, 'cancelled': True})
 
 
 @app.route('/proxy_image')

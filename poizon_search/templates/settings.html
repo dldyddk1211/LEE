@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>설정 - 계정 관리</title>
+  <title>설정 - 계정 및 데이터 관리</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -308,8 +308,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>&#9881; 계정 설정</h1>
-    <p class="subtitle">각 사이트별 로그인 계정을 선택하거나 수정할 수 있습니다</p>
+    <h1>&#9881; 설정</h1>
+    <p class="subtitle">계정 관리 및 데이터 저장 경로를 설정합니다</p>
 
     <!-- 네이버 -->
     <div class="site-card" data-site="naver">
@@ -415,9 +415,50 @@
       </div>
     </div>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- 데이터 저장 경로 설정 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div style="margin: 30px 0 10px; border-top: 2px solid #e0e0e0; padding-top: 24px;">
+      <h2 style="font-size: 1.3em; color: #333; margin-bottom: 6px;">&#128193; 데이터 저장 경로</h2>
+      <p style="color: #888; font-size: 13px; margin-bottom: 18px;">
+        거래명세서, 고객정보, 검색기록 등 중요 DB가 저장되는 위치입니다.<br>
+        Mac/Windows 모두 같은 외장 드라이브를 연결하면 동일한 데이터를 볼 수 있습니다.
+      </p>
+    </div>
+
+    <div class="site-card" id="data-path-card">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); font-size: 16px;">DB</div>
+          <span class="site-name">데이터 경로</span>
+        </div>
+        <span class="site-status" id="drive-status" style="background:#ffeeba; color:#856404;">확인중...</span>
+      </div>
+
+      <!-- 현재 상태 -->
+      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; font-size: 13px;">
+          <span style="font-weight: 700; color: #666;">환경</span>
+          <span id="dp-env" style="color: #333;">-</span>
+          <span style="font-weight: 700; color: #666;">기본 경로</span>
+          <span id="dp-default" style="color: #999; font-family: monospace; font-size: 12px;">-</span>
+          <span style="font-weight: 700; color: #666;">현재 경로</span>
+          <span id="dp-current" style="color: #333; font-family: monospace; font-size: 12px; font-weight: 600;">-</span>
+        </div>
+      </div>
+
+      <!-- DB 파일 목록 -->
+      <div style="padding: 10px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">저장되는 데이터</div>
+        <div id="dp-files" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;"></div>
+      </div>
+
+      <!-- 경로 변경은 추후 지원 예정 -->
+    </div>
+
     <div class="bottom-actions">
       <button class="cancel-btn" onclick="window.close()">닫기</button>
-      <button class="save-btn" onclick="saveSettings()">저장</button>
+      <button class="save-btn" onclick="saveSettings()">계정 저장</button>
     </div>
   </div>
 
@@ -600,6 +641,69 @@
       toast.className = 'toast show' + (isError ? ' error' : '');
       setTimeout(() => toast.className = 'toast', 2500);
     }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 데이터 경로 관련
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    const fileLabels = {
+      'invoices_db': '거래명세서 DB',
+      'inventory_db': '재고관리 DB',
+      'bigdata_db': '빅데이터 DB',
+      'customers_json': '고객 정보',
+      'task_history_json': '검색 기록',
+      'invoices_pdf': '명세서 PDF',
+      'outputs': '엑셀 출력',
+      'outputs_excel': '엑셀 파일',
+      'bigdata_backups': '빅데이터 백업',
+      'logs': '로그',
+      'db': 'DB 폴더'
+    };
+
+    function loadDataPaths() {
+      fetch('/api/data_paths')
+        .then(r => r.json())
+        .then(data => {
+          const envLabel = data.system === 'Darwin' ? 'Mac (내부망)' : 'Windows (외부망)';
+          document.getElementById('dp-env').textContent = `${envLabel}`;
+          document.getElementById('dp-default').textContent = data.default_data_root;
+          document.getElementById('dp-current').textContent = data.data_root;
+          document.getElementById('dp-input').value = data.custom_data_root || '';
+          document.getElementById('dp-input').placeholder = data.default_data_root;
+
+          // 드라이브 연결 상태
+          const statusEl = document.getElementById('drive-status');
+          if (data.drive_connected) {
+            statusEl.textContent = '연결됨';
+            statusEl.style.background = '#d4edda';
+            statusEl.style.color = '#155724';
+          } else {
+            statusEl.textContent = '미연결';
+            statusEl.style.background = '#f8d7da';
+            statusEl.style.color = '#721c24';
+          }
+
+          // DB 파일 목록
+          const filesEl = document.getElementById('dp-files');
+          let html = '';
+          if (data.paths) {
+            for (const [key, path] of Object.entries(data.paths)) {
+              const label = fileLabels[key] || key;
+              const shortPath = path.split('/').slice(-2).join('/');
+              html += `<div style="color:#555;"><span style="font-weight:600;">${label}</span> <span style="color:#aaa;">- ${shortPath}</span></div>`;
+            }
+          }
+          filesEl.innerHTML = html;
+        })
+        .catch(err => {
+          document.getElementById('drive-status').textContent = '오류';
+          document.getElementById('drive-status').style.background = '#f8d7da';
+          document.getElementById('drive-status').style.color = '#721c24';
+        });
+    }
+
+    // 페이지 로드 시 데이터 경로 정보 로드
+    loadDataPaths();
   </script>
 </body>
 </html>

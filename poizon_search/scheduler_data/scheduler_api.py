@@ -3,13 +3,17 @@ import json
 import uuid
 from datetime import datetime
 from flask import Blueprint, jsonify, request, send_file
+from config import paths
 
 # Blueprint 생성
 scheduler_bp = Blueprint('scheduler', __name__, url_prefix='/api/scheduler')
 
 # 경로 설정
 SCHEDULER_DIR = os.path.dirname(os.path.abspath(__file__))
-HISTORY_FILE = os.path.join(SCHEDULER_DIR, 'task_history.json')
+
+# ✅ 공유 드라이브 경로 사용
+def _get_history_file():
+    return paths.get('task_history_json')
 
 # ==========================================
 # HTML 페이지 제공 ✅ 추가!
@@ -37,9 +41,10 @@ def serve_scheduler_page():
 
 def load_history():
     """히스토리 파일 로드"""
-    if os.path.exists(HISTORY_FILE):
+    hf = _get_history_file()
+    if os.path.exists(hf):
         try:
-            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+            with open(hf, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"히스토리 로드 오류: {e}")
@@ -50,9 +55,10 @@ def load_history():
 def save_history(history):
     """히스토리 파일 저장"""
     try:
-        os.makedirs(SCHEDULER_DIR, exist_ok=True)
-        
-        with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+        hf = _get_history_file()
+        os.makedirs(os.path.dirname(hf), exist_ok=True)
+
+        with open(hf, 'w', encoding='utf-8') as f:
             json.dump(history, f, ensure_ascii=False, indent=2)
         return True
     except Exception as e:

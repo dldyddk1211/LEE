@@ -3,11 +3,15 @@ import sqlite3
 import threading
 from datetime import datetime
 from flask import Blueprint, jsonify, request, send_file, session
+from config import paths
 
 inventory_bp = Blueprint('inventory', __name__, url_prefix='/api/inventory')
 
 INVENTORY_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(INVENTORY_DIR, 'inventory.db')
+
+# ✅ 공유 드라이브 경로 사용
+def _get_db_file():
+    return paths.get('inventory_db')
 
 INVENTORY_PASSWORD = 'dhkdl4213.'
 
@@ -16,7 +20,7 @@ INVENTORY_PASSWORD = 'dhkdl4213.'
 # ==========================================
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(_get_db_file())
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -140,7 +144,7 @@ def get_sales():
         page    = int(request.args.get('page', 1))
         limit   = int(request.args.get('limit', 100))
 
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(_get_db_file())
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -198,7 +202,7 @@ def get_stock():
         page    = int(request.args.get('page', 1))
         limit   = int(request.args.get('limit', 100))
 
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(_get_db_file())
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -250,7 +254,7 @@ def get_sales_summary():
     if not is_authenticated():
         return jsonify({'success': False, 'error': '인증 필요'}), 401
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(_get_db_file())
         cursor = conn.cursor()
 
         # 판매내역 요약 (판매일자 있는 것)
@@ -286,7 +290,7 @@ def get_stock_summary():
     if not is_authenticated():
         return jsonify({'success': False, 'error': '인증 필요'}), 401
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(_get_db_file())
         cursor = conn.cursor()
         cursor.execute("""
             SELECT COUNT(*), SUM(cost_price), SUM(quantity)

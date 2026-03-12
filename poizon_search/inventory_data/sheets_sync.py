@@ -4,6 +4,7 @@ import sqlite3
 import threading
 import time
 from datetime import datetime
+from config import paths
 
 # ==========================================
 # 설정
@@ -19,8 +20,9 @@ SPREADSHEET_ID = '1iYJgdyajNLzvKzzv2XrerUqTWNnhXNuS8a8vYMdpzjU'
 # 시트 이름 (하단 탭 이름)
 SHEET_NAME = '재고' #← 실제 탭 이름으로 변경하세요
 
-# DB 파일 경로
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'inventory.db')
+# ✅ 공유 드라이브 경로 사용
+def _get_db_file():
+    return paths.get('inventory_db')
 
 # 동기화 주기 (초) - 8시간
 SYNC_INTERVAL = 28800  # 8 * 60 * 60
@@ -65,7 +67,7 @@ COLUMN_MAP = {
 
 def init_sales_db():
     """판매 데이터 테이블 생성"""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(_get_db_file())
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -174,7 +176,7 @@ def save_to_db(rows):
     if not rows:
         return 0
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(_get_db_file())
     cursor = conn.cursor()
 
     # 기존 데이터 삭제 후 새로 저장 (전체 동기화)
@@ -313,7 +315,7 @@ def start_sync_background():
 
 def get_sales_data(keyword=None, brand=None, status=None):
     """판매 데이터 조회"""
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(_get_db_file())
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -343,7 +345,7 @@ def get_sales_data(keyword=None, brand=None, status=None):
 def get_last_synced():
     """마지막 동기화 시간 조회"""
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(_get_db_file())
         cursor = conn.cursor()
         cursor.execute('SELECT synced_at FROM sales ORDER BY id DESC LIMIT 1')
         row = cursor.fetchone()

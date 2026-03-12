@@ -1,0 +1,54 @@
+{
+  "kream": {
+    "accounts": [
+      {
+        "id": "yaglobal@naver.com",
+        "pw": "dyddk1309!"
+      },
+      {
+        "id": "",
+        "pw": ""
+      }
+    ],
+    "selected": 0
+  },
+  "musinsa": {
+    "accounts": [
+      {
+        "id": "yaglobal",
+        "pw": "dyddk1309!"
+      },
+      {
+        "id": "",
+        "pw": ""
+      }
+    ],
+    "selected": 0
+  },
+  "naver": {
+    "accounts": [
+      {
+        "id": "dldyddk1211",
+        "pw": "dhkdl4213!"
+      },
+      {
+        "id": "",
+        "pw": ""
+      }
+    ],
+    "selected": 0
+  },
+  "poizon": {
+    "accounts": [
+      {
+        "id": "sionejj@naver.com",
+        "pw": "wnaoddl1!"
+      },
+      {
+        "id": "",
+        "pw": ""
+      }
+    ],
+    "selected": 0
+  }
+}
