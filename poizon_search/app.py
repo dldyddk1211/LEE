@@ -1756,6 +1756,13 @@ SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settin
 def load_settings():
     """설정 파일 로드 (없으면 기본값)"""
     default = {
+        'naver': {
+            'accounts': [
+                {'id': 'dldyddk1211', 'pw': 'dhkdl4213!'},
+                {'id': '', 'pw': ''}
+            ],
+            'selected': 0
+        },
         'poizon': {
             'accounts': [
                 {'id': 'sionejj@naver.com', 'pw': 'wnaoddl1!'},
@@ -1823,6 +1830,15 @@ def update_settings():
         save_settings(data)
 
         # 각 모듈의 전역 변수 업데이트
+        try:
+            naver_acc = get_active_account('naver')
+            if naver_acc['id']:
+                import poizon_data.poizon_search as ps
+                ps.NAVER_ID = naver_acc['id']
+                ps.NAVER_PW = naver_acc['pw']
+        except Exception as e:
+            print(f"⚠️ 네이버 계정 업데이트 실패: {e}")
+
         try:
             poizon_acc = get_active_account('poizon')
             if poizon_acc['id']:

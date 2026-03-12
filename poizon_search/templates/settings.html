@@ -71,6 +71,7 @@
       color: #fff;
       font-weight: 700;
     }
+    .site-icon.naver { background: linear-gradient(135deg, #03c75a, #00b843); }
     .site-icon.poizon { background: linear-gradient(135deg, #667eea, #764ba2); }
     .site-icon.kream { background: linear-gradient(135deg, #4285f4, #34a853); }
     .site-icon.musinsa { background: linear-gradient(135deg, #a0522d, #8b4513); }
@@ -310,6 +311,32 @@
     <h1>&#9881; 계정 설정</h1>
     <p class="subtitle">각 사이트별 로그인 계정을 선택하거나 수정할 수 있습니다</p>
 
+    <!-- 네이버 -->
+    <div class="site-card" data-site="naver">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon naver">N</div>
+          <span class="site-name">NAVER (네이버)</span>
+        </div>
+        <span class="site-status active" id="naver-status">사용중</span>
+      </div>
+      <div class="account-list" id="naver-accounts"></div>
+      <div class="edit-inputs" id="naver-edit">
+        <div class="edit-row">
+          <label>계정 1</label>
+          <input type="text" id="naver-id-0" placeholder="네이버 아이디" />
+          <input type="text" id="naver-pw-0" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('naver', 0)" title="삭제">&#10005;</button>
+        </div>
+        <div class="edit-row">
+          <label>계정 2</label>
+          <input type="text" id="naver-id-1" placeholder="네이버 아이디" />
+          <input type="text" id="naver-pw-1" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('naver', 1)" title="삭제">&#10005;</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 포이즌 -->
     <div class="site-card" data-site="poizon">
       <div class="site-header">
@@ -399,6 +426,13 @@
   <script>
     // 기본 계정 데이터
     let settings = {
+      naver: {
+        accounts: [
+          { id: 'dldyddk1211', pw: 'dhkdl4213!' },
+          { id: '', pw: '' }
+        ],
+        selected: 0
+      },
       poizon: {
         accounts: [
           { id: 'sionejj@naver.com', pw: 'wnaoddl1!' },
@@ -438,7 +472,7 @@
     }
 
     function renderAll() {
-      ['poizon', 'kream', 'musinsa'].forEach(site => renderAccounts(site));
+      ['naver', 'poizon', 'kream', 'musinsa'].forEach(site => renderAccounts(site));
     }
 
     function renderAccounts(site) {
@@ -515,7 +549,7 @@
 
     function saveSettings() {
       // 수정 인풋에서 값 업데이트
-      ['poizon', 'kream', 'musinsa'].forEach(site => {
+      ['naver', 'poizon', 'kream', 'musinsa'].forEach(site => {
         settings[site].accounts.forEach((acc, idx) => {
           const idInput = document.getElementById(`${site}-id-${idx}`);
           const pwInput = document.getElementById(`${site}-pw-${idx}`);
@@ -527,13 +561,17 @@
           }
         });
 
-        // 빈 계정 필터링 (최소 1개는 유지)
+        // 빈 계정 필터링 후 항상 2개 슬롯 유지
         const valid = settings[site].accounts.filter(a => a.id);
         if (valid.length > 0) {
           settings[site].accounts = valid;
           if (settings[site].selected >= valid.length) {
             settings[site].selected = 0;
           }
+        }
+        // 항상 2개 슬롯 보장
+        while (settings[site].accounts.length < 2) {
+          settings[site].accounts.push({ id: '', pw: '' });
         }
       });
 
