@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>설정 - 계정 관리</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 1.8em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    /* 사이트 카드 */
+    .site-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    .site-card:hover {
+      border-color: #adb5bd;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .site-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .site-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .site-icon.poizon { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .site-icon.kream { background: linear-gradient(135deg, #4285f4, #34a853); }
+    .site-icon.musinsa { background: linear-gradient(135deg, #a0522d, #8b4513); }
+
+    .site-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .site-status {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .site-status.active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* 계정 선택 라디오 */
+    .account-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .account-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .account-item:hover {
+      border-color: #adb5bd;
+      background: #f8f9fa;
+    }
+    .account-item.selected {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+
+    /* 라디오 버튼 커스텀 */
+    .radio-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .radio-circle .inner {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .account-item.selected .radio-circle {
+      border-color: #667eea;
+    }
+    .account-item.selected .radio-circle .inner {
+      background: #667eea;
+    }
+    .account-item.empty {
+      border-style: dashed;
+      opacity: 0.6;
+    }
+    .account-item.empty:hover {
+      opacity: 0.85;
+    }
+    .account-id.placeholder {
+      color: #bbb;
+      font-style: italic;
+    }
+
+    .account-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .account-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      background: #f1f3f5;
+      padding: 2px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .account-id {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      flex: 1;
+    }
+    .account-pw {
+      font-size: 13px;
+      color: #999;
+      font-family: monospace;
+    }
+
+    /* 수정 버튼 */
+    .edit-btn {
+      padding: 6px 14px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      background: #fff;
+      color: #495057;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .edit-btn:hover {
+      background: #f8f9fa;
+      border-color: #adb5bd;
+    }
+
+    /* 수정 모드 인풋 */
+    .edit-inputs {
+      display: none;
+      margin-top: 12px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 1px solid #e9ecef;
+    }
+    .edit-inputs.show {
+      display: block;
+    }
+    .edit-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .edit-row:last-child {
+      margin-bottom: 0;
+    }
+    .edit-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+    }
+    .edit-row input {
+      padding: 8px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .edit-row input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    /* 하단 버튼 */
+    .bottom-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .save-btn {
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+    }
+
+    .cancel-btn {
+      padding: 14px 30px;
+      background: #fff;
+      color: #666;
+      border: 2px solid #dee2e6;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .cancel-btn:hover {
+      background: #f8f9fa;
+      border-color: #adb5bd;
+    }
+
+    /* 토스트 메시지 */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 14px 24px;
+      background: #28a745;
+      color: #fff;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transform: translateX(120%);
+      transition: transform 0.3s;
+      z-index: 9999;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.error {
+      background: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>&#9881; 계정 설정</h1>
+    <p class="subtitle">각 사이트별 로그인 계정을 선택하거나 수정할 수 있습니다</p>
+
+    <!-- 포이즌 -->
+    <div class="site-card" data-site="poizon">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon poizon">P</div>
+          <span class="site-name">POIZON (포이즌)</span>
+        </div>
+        <span class="site-status active" id="poizon-status">사용중</span>
+      </div>
+      <div class="account-list" id="poizon-accounts"></div>
+      <div class="edit-inputs" id="poizon-edit">
+        <div class="edit-row">
+          <label>계정 1</label>
+          <input type="text" id="poizon-id-0" placeholder="아이디(이메일)" />
+          <input type="text" id="poizon-pw-0" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('poizon', 0)" title="삭제">&#10005;</button>
+        </div>
+        <div class="edit-row">
+          <label>계정 2</label>
+          <input type="text" id="poizon-id-1" placeholder="아이디(이메일)" />
+          <input type="text" id="poizon-pw-1" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('poizon', 1)" title="삭제">&#10005;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 크림 -->
+    <div class="site-card" data-site="kream">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon kream">K</div>
+          <span class="site-name">KREAM (크림)</span>
+        </div>
+        <span class="site-status active" id="kream-status">사용중</span>
+      </div>
+      <div class="account-list" id="kream-accounts"></div>
+      <div class="edit-inputs" id="kream-edit">
+        <div class="edit-row">
+          <label>계정 1</label>
+          <input type="text" id="kream-id-0" placeholder="이메일" />
+          <input type="text" id="kream-pw-0" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('kream', 0)" title="삭제">&#10005;</button>
+        </div>
+        <div class="edit-row">
+          <label>계정 2</label>
+          <input type="text" id="kream-id-1" placeholder="이메일" />
+          <input type="text" id="kream-pw-1" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('kream', 1)" title="삭제">&#10005;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 무신사 -->
+    <div class="site-card" data-site="musinsa">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon musinsa">M</div>
+          <span class="site-name">MUSINSA (무신사)</span>
+        </div>
+        <span class="site-status active" id="musinsa-status">사용중</span>
+      </div>
+      <div class="account-list" id="musinsa-accounts"></div>
+      <div class="edit-inputs" id="musinsa-edit">
+        <div class="edit-row">
+          <label>계정 1</label>
+          <input type="text" id="musinsa-id-0" placeholder="아이디" />
+          <input type="text" id="musinsa-pw-0" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('musinsa', 0)" title="삭제">&#10005;</button>
+        </div>
+        <div class="edit-row">
+          <label>계정 2</label>
+          <input type="text" id="musinsa-id-1" placeholder="아이디" />
+          <input type="text" id="musinsa-pw-1" placeholder="비밀번호" />
+          <button class="edit-btn" onclick="removeAccount('musinsa', 1)" title="삭제">&#10005;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="cancel-btn" onclick="window.close()">닫기</button>
+      <button class="save-btn" onclick="saveSettings()">저장</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // 기본 계정 데이터
+    let settings = {
+      poizon: {
+        accounts: [
+          { id: 'sionejj@naver.com', pw: 'wnaoddl1!' },
+          { id: '', pw: '' }
+        ],
+        selected: 0
+      },
+      kream: {
+        accounts: [
+          { id: 'yaglobal@naver.com', pw: 'dyddk1309!' },
+          { id: '', pw: '' }
+        ],
+        selected: 0
+      },
+      musinsa: {
+        accounts: [
+          { id: 'yaglobal', pw: 'dyddk1309!' },
+          { id: '', pw: '' }
+        ],
+        selected: 0
+      }
+    };
+
+    // 초기 로드
+    loadSettings();
+
+    function loadSettings() {
+      fetch('/api/settings')
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'ok' && data.settings) {
+            settings = data.settings;
+          }
+          renderAll();
+        })
+        .catch(() => renderAll());
+    }
+
+    function renderAll() {
+      ['poizon', 'kream', 'musinsa'].forEach(site => renderAccounts(site));
+    }
+
+    function renderAccounts(site) {
+      const container = document.getElementById(`${site}-accounts`);
+      const siteData = settings[site];
+      // 항상 2개 슬롯 보장
+      while (siteData.accounts.length < 2) {
+        siteData.accounts.push({ id: '', pw: '' });
+      }
+      let html = '';
+
+      // 항상 2개 계정 모두 표시
+      for (let idx = 0; idx < 2; idx++) {
+        const acc = siteData.accounts[idx];
+        const isSelected = idx === siteData.selected;
+        const hasAccount = !!acc.id;
+        const maskedPw = acc.pw ? '*'.repeat(Math.min(acc.pw.length, 8)) : '';
+        const displayId = hasAccount ? acc.id : '(미등록)';
+
+        html += `
+          <div class="account-item ${isSelected ? 'selected' : ''} ${!hasAccount ? 'empty' : ''}" onclick="selectAccount('${site}', ${idx})">
+            <div class="radio-circle"><div class="inner"></div></div>
+            <div class="account-info">
+              <span class="account-label">계정 ${idx + 1}</span>
+              <span class="account-id ${!hasAccount ? 'placeholder' : ''}">${displayId}</span>
+              <span class="account-pw">${maskedPw}</span>
+            </div>
+            <button class="edit-btn" onclick="event.stopPropagation(); toggleEdit('${site}')">수정</button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+
+      // 수정 인풋 값 채우기
+      siteData.accounts.forEach((acc, idx) => {
+        const idInput = document.getElementById(`${site}-id-${idx}`);
+        const pwInput = document.getElementById(`${site}-pw-${idx}`);
+        if (idInput) idInput.value = acc.id || '';
+        if (pwInput) pwInput.value = acc.pw || '';
+      });
+    }
+
+    function selectAccount(site, idx) {
+      settings[site].selected = idx;
+      renderAccounts(site);
+    }
+
+    function toggleEdit(site) {
+      const editPanel = document.getElementById(`${site}-edit`);
+      editPanel.classList.toggle('show');
+    }
+
+    function addAccount(site) {
+      settings[site].accounts.push({ id: '', pw: '' });
+      toggleEdit(site);
+      renderAccounts(site);
+    }
+
+    function removeAccount(site, idx) {
+      const acc = settings[site].accounts[idx];
+      if (acc.id && !confirm(`"${acc.id}" 계정을 삭제하시겠습니까?`)) return;
+
+      settings[site].accounts[idx] = { id: '', pw: '' };
+
+      // 선택된 계정이 삭제되면 첫번째로 변경
+      if (settings[site].selected === idx) {
+        const firstValid = settings[site].accounts.findIndex(a => a.id);
+        settings[site].selected = firstValid >= 0 ? firstValid : 0;
+      }
+
+      renderAccounts(site);
+    }
+
+    function saveSettings() {
+      // 수정 인풋에서 값 업데이트
+      ['poizon', 'kream', 'musinsa'].forEach(site => {
+        settings[site].accounts.forEach((acc, idx) => {
+          const idInput = document.getElementById(`${site}-id-${idx}`);
+          const pwInput = document.getElementById(`${site}-pw-${idx}`);
+          if (idInput && idInput.value.trim()) {
+            settings[site].accounts[idx].id = idInput.value.trim();
+          }
+          if (pwInput && pwInput.value.trim()) {
+            settings[site].accounts[idx].pw = pwInput.value.trim();
+          }
+        });
+
+        // 빈 계정 필터링 (최소 1개는 유지)
+        const valid = settings[site].accounts.filter(a => a.id);
+        if (valid.length > 0) {
+          settings[site].accounts = valid;
+          if (settings[site].selected >= valid.length) {
+            settings[site].selected = 0;
+          }
+        }
+      });
+
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          showToast('저장 완료');
+          // 수정 패널 닫기
+          document.querySelectorAll('.edit-inputs').forEach(el => el.classList.remove('show'));
+          renderAll();
+        } else {
+          showToast('저장 실패: ' + (data.message || ''), true);
+        }
+      })
+      .catch(err => showToast('저장 실패: ' + err, true));
+    }
+
+    function showToast(msg, isError) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => toast.className = 'toast', 2500);
+    }
+  </script>
+</body>
+</html>

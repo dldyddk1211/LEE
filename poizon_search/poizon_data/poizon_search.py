@@ -1540,11 +1540,25 @@ def run_excel_comparison(products, callback=None):
 
             # 각 상품 검색
             log("\n[2] 상품 검색 시작", 'info')
-            
+
+            # 봇 감지 회피: 100~130개마다 재로그인
+            relogin_interval = random.randint(100, 130)
+            relogin_counter = 0
+            log(f"  ℹ️ 재로그인 간격: {relogin_interval}개", 'info')
+
             for idx, product in enumerate(products, 1):
                 if stop_flag:
                     break
-                
+
+                # 주기적 재로그인 (그림판 캡챠 회피)
+                relogin_counter += 1
+                if relogin_counter >= relogin_interval:
+                    log(f"\n  🔄 [{idx}/{total}] {relogin_counter}개 검색 완료 → 재로그인 (캡챠 회피)", 'warning')
+                    do_relogin(page, context)
+                    relogin_counter = 0
+                    relogin_interval = random.randint(100, 130)
+                    log(f"  ℹ️ 다음 재로그인 간격: {relogin_interval}개", 'info')
+
                 # 진행상황
                 if callback:
                     callback(f"PROGRESS:{idx}/{total}", 'progress')

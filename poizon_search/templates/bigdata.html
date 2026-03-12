@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>설정 관리</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Malgun Gothic', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── 헤더 ── */
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+    .header a { color: #aaa; text-decoration: none; font-size: 14px; }
+    .header a:hover { color: #fff; }
+    .header-sep { color: #555; }
+    .header h1 { color: #fff; font-size: 20px; font-weight: 700; }
+
+    /* ── 전체 레이아웃 ── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 56px);
+    }
+
+    /* ── 왼쪽 설정 사이드바 ── */
+    .settings-sidebar {
+      width: 220px;
+      min-width: 180px;
+      background: #fff;
+      border-right: 1px solid #e0e4ef;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+    }
+    .sidebar-title {
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+      padding: 14px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .sidebar-menu { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #444;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .menu-item:hover { background: #f0f4ff; color: #0f3460; }
+    .menu-item.active {
+      background: #e8f0fe;
+      color: #0f3460;
+      font-weight: 700;
+      border-left-color: #0f3460;
+    }
+    .menu-item .menu-icon { font-size: 16px; width: 20px; text-align: center; }
+    .menu-badge {
+      margin-left: auto;
+      background: #0f3460;
+      color: #fff;
+      border-radius: 10px;
+      font-size: 10px;
+      padding: 1px 7px;
+      font-weight: 700;
+    }
+
+    /* ── 오른쪽 콘텐츠 영역 ── */
+    .content-area {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── 패널 (콘텐츠 섹션) ── */
+    .panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+    .panel.active { display: flex; }
+
+    /* ── 빅데이터 패널 ── */
+    .bigdata-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* 데이터셋 목록 패널 */
+    .dataset-panel {
+      width: 260px;
+      min-width: 200px;
+      background: #fff;
+      border-right: 1px solid #e8eaf0;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-upload-sm {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-upload-sm:hover { background: rgba(255,255,255,0.35); }
+    .dataset-list { flex: 1; overflow-y: auto; padding: 6px; }
+    .dataset-item {
+      padding: 10px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-bottom: 3px;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+    .dataset-item:hover { background: #f0f4ff; border-color: #c5d5f5; }
+    .dataset-item.active { background: #e8f0fe; border-color: #0f3460; }
+    .ds-name { font-size: 13px; font-weight: 600; color: #1a1a2e; word-break: break-all; }
+    .ds-meta { font-size: 11px; color: #999; margin-top: 3px; }
+    .ds-count { color: #0f3460; font-weight: 700; }
+    .empty-ds { text-align: center; padding: 32px 12px; color: #bbb; font-size: 12px; }
+
+    /* 테이블 패널 */
+    .table-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #f8f9fb;
+    }
+    .table-toolbar {
+      background: #fff;
+      border-bottom: 1px solid #e8eaf0;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar-name { font-size: 14px; font-weight: 700; color: #1a1a2e; flex: 1; min-width: 100px; }
+    .toolbar-name span { font-size: 12px; color: #888; font-weight: 400; margin-left: 6px; }
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid #ddd;
+      border-radius: 7px;
+      padding: 5px 10px;
+      gap: 6px;
+      background: #fff;
+    }
+    .search-input-wrap:focus-within { border-color: #0f3460; }
+    .search-input-wrap input {
+      border: none;
+      outline: none;
+      font-size: 13px;
+      color: #333;
+      width: 180px;
+      font-family: inherit;
+    }
+    .btn-action {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-dl { background: linear-gradient(135deg, #0f3460, #1a1a2e); color: #fff; }
+    .btn-dl:hover { opacity: 0.85; }
+    .btn-del { background: #fff; color: #c62828; border: 1.5px solid #c62828; }
+    .btn-del:hover { background: #ffeaea; }
+
+    .table-wrap { flex: 1; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { position: sticky; top: 0; z-index: 5; }
+    th {
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    th.idx { width: 50px; color: rgba(255,255,255,0.5); }
+    td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      white-space: nowrap;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #fff;
+    }
+    tr:hover td { background: #f5f8ff; }
+    td.idx { color: #bbb; font-size: 11px; }
+
+    .no-data {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #bbb;
+      gap: 10px;
+    }
+    .no-data .nd-icon { font-size: 44px; }
+    .no-data p { font-size: 13px; }
+
+    /* ── 페이지네이션 ── */
+    .pagination {
+      background: #fff;
+      border-top: 1px solid #e8eaf0;
+      padding: 9px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pg-info { font-size: 12px; color: #888; flex: 1; }
+    .pg-btn {
+      background: #fff;
+      border: 1px solid #ddd;
+      color: #555;
+      border-radius: 4px;
+      padding: 4px 9px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .pg-btn:hover { background: #f0f4ff; border-color: #0f3460; color: #0f3460; }
+    .pg-btn.active { background: #0f3460; border-color: #0f3460; color: #fff; }
+    .pg-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .per-page-sel {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #555;
+      font-family: inherit;
+    }
+
+    /* ── 업로드 모달 ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      width: 460px;
+      max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h2 {
+      font-size: 16px;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #0f3460;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: #666; display: block; margin-bottom: 5px; }
+    .form-group input[type=text],
+    .form-group textarea {
+      width: 100%;
+      padding: 8px 11px;
+      border: 1.5px solid #ddd;
+      border-radius: 7px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #0f3460; }
+    .form-group textarea { resize: vertical; min-height: 56px; }
+    .upload-drop {
+      border: 2px dashed #0f346055;
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #999;
+      font-size: 13px;
+    }
+    .upload-drop:hover, .upload-drop.dragover { border-color: #0f3460; background: #f0f4ff; color: #0f3460; }
+    .upload-drop .drop-icon { font-size: 30px; margin-bottom: 8px; }
+    .upload-drop input[type=file] { display: none; }
+    .progress-wrap { display: none; background: #eee; border-radius: 4px; height: 6px; margin-top: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #0f3460, #1a1a2e); width: 0%; transition: width 0.3s; border-radius: 4px; }
+    .upload-status { font-size: 12px; color: #0f3460; margin-top: 8px; text-align: center; min-height: 18px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-outline { padding: 9px 20px; background: #fff; color: #0f3460; border: 1.5px solid #0f3460; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .btn-outline:hover { background: #f0f4ff; }
+    .btn-primary { padding: 9px 20px; background: linear-gradient(135deg, #0f3460, #1a1a2e); color: #fff; border: none; border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── 로딩 ── */
+    .loading { display: flex; align-items: center; justify-content: center; height: 160px; color: #999; gap: 8px; font-size: 13px; }
+    .spinner { width: 18px; height: 18px; border: 2px solid #ddd; border-top-color: #0f3460; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <a href="/">← 메인</a>
+  <span class="header-sep">/</span>
+  <h1>⚙️ 설정 관리</h1>
+</div>
+
+<div class="layout">
+
+  <!-- 왼쪽 설정 사이드바 -->
+  <div class="settings-sidebar">
+    <div class="sidebar-title">⚙️ 설정 메뉴</div>
+    <div class="sidebar-menu">
+      <div class="menu-item active" onclick="showPanel('bigdata')">
+        <span class="menu-icon">🗄️</span>
+        빅데이터 관리
+      </div>
+      <!-- 이후 추가 항목들이 여기에 들어옵니다 -->
+    </div>
+  </div>
+
+  <!-- 오른쪽 콘텐츠 -->
+  <div class="content-area">
+
+    <!-- ── 빅데이터 패널 ── -->
+    <div class="panel active" id="panel-bigdata">
+      <div class="bigdata-layout">
+
+        <!-- 데이터셋 목록 -->
+        <div class="dataset-panel">
+          <div class="panel-header">
+            📂 데이터셋
+            <button class="btn-upload-sm" onclick="openUploadModal()">+ 업로드</button>
+          </div>
+          <div class="dataset-list" id="datasetList">
+            <div class="empty-ds">데이터셋이 없습니다<br>엑셀 파일을 업로드하세요</div>
+          </div>
+        </div>
+
+        <!-- 테이블 패널 -->
+        <div class="table-panel">
+          <!-- 툴바 -->
+          <div class="table-toolbar" id="tableToolbar" style="display:none;">
+            <div class="toolbar-name" id="toolbarName">— <span id="toolbarCount"></span></div>
+            <div class="search-input-wrap">
+              <span>🔍</span>
+              <input type="text" id="searchInput" placeholder="전체 검색..." oninput="debounceSearch()" />
+            </div>
+            <button class="btn-action btn-dl" onclick="downloadDataset()">📥 다운로드</button>
+            <button class="btn-action btn-del" onclick="deleteDataset()">🗑️ 삭제</button>
+          </div>
+
+          <!-- 테이블 -->
+          <div class="table-wrap" id="tableWrap">
+            <div class="no-data">
+              <div class="nd-icon">🗄️</div>
+              <p>데이터셋을 선택하거나 업로드하세요</p>
+            </div>
+          </div>
+
+          <!-- 페이지네이션 -->
+          <div class="pagination" id="paginationBar" style="display:none;">
+            <div class="pg-info" id="pgInfo"></div>
+            <button class="pg-btn" id="btnFirst" onclick="goPage(1)">«</button>
+            <button class="pg-btn" id="btnPrev" onclick="goPage(currentPage-1)">‹</button>
+            <div id="pageNumbers" style="display:flex;gap:3px;"></div>
+            <button class="pg-btn" id="btnNext" onclick="goPage(currentPage+1)">›</button>
+            <button class="pg-btn" id="btnLast" onclick="goPage(totalPages)">»</button>
+            <select class="per-page-sel" id="perPageSel" onchange="changePerPage()">
+              <option value="50">50개</option>
+              <option value="100" selected>100개</option>
+              <option value="200">200개</option>
+              <option value="500">500개</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- 이후 추가 패널들이 여기에 들어옵니다 -->
+
+  </div>
+</div>
+
+<!-- 업로드 모달 -->
+<div class="modal-overlay" id="uploadModal" onclick="if(event.target===this) closeUploadModal()">
+  <div class="modal">
+    <h2>📤 엑셀 / CSV 업로드</h2>
+    <div class="form-group">
+      <label>데이터셋 이름 (비워두면 파일명 사용)</label>
+      <input type="text" id="uploadName" placeholder="예: 2024년 상품 목록" />
+    </div>
+    <div class="form-group">
+      <label>설명 (선택)</label>
+      <textarea id="uploadDesc" placeholder="이 데이터셋에 대한 메모"></textarea>
+    </div>
+    <div class="form-group">
+      <div class="upload-drop" id="uploadDrop"
+        onclick="document.getElementById('fileInput').click()"
+        ondragover="onDragOver(event)"
+        ondragleave="onDragLeave(event)"
+        ondrop="onDrop(event)">
+        <div class="drop-icon">📁</div>
+        <div id="dropText">.xlsx / .xls / .csv 파일을 끌어다 놓거나 클릭하세요</div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" onchange="onFileSelected(event)" />
+      </div>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="upload-status" id="uploadStatus"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeUploadModal()">취소</button>
+      <button class="btn-primary" id="btnUpload" onclick="doUpload()" disabled>업로드 시작</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── 상태 ──
+  let currentDatasetId = null;
+  let currentPage = 1;
+  let totalPages = 1;
+  let currentSearch = '';
+  let selectedFile = null;
+  let searchTimer = null;
+
+  // ── 패널 전환 ──
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ── 초기화 ──
+  document.addEventListener('DOMContentLoaded', loadDatasets);
+
+  async function loadDatasets() {
+    const res = await fetch('/bigdata/api/datasets');
+    const list = await res.json();
+    renderDatasetList(list);
+  }
+
+  function renderDatasetList(list) {
+    const el = document.getElementById('datasetList');
+    if (!list.length) {
+      el.innerHTML = '<div class="empty-ds">데이터셋이 없습니다<br>엑셀 파일을 업로드하세요</div>';
+      return;
+    }
+    el.innerHTML = list.map(ds => `
+      <div class="dataset-item ${ds.id === currentDatasetId ? 'active' : ''}" onclick="selectDataset(${ds.id}, ${JSON.stringify(ds.name)})">
+        <div class="ds-name">${esc(ds.name)}</div>
+        <div class="ds-meta">
+          <span class="ds-count">${Number(ds.row_count).toLocaleString()}건</span>
+          &nbsp;· ${ds.updated_at.slice(0,10)}
+        </div>
+        ${ds.description ? `<div class="ds-meta">${esc(ds.description)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function selectDataset(id, name) {
+    currentDatasetId = id;
+    currentPage = 1;
+    currentSearch = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('tableToolbar').style.display = 'flex';
+    document.getElementById('toolbarName').innerHTML = esc(name) + ' <span id="toolbarCount"></span>';
+    await loadDatasets();
+    await loadRows();
+  }
+
+  async function loadRows() {
+    if (!currentDatasetId) return;
+    document.getElementById('tableWrap').innerHTML = '<div class="loading"><div class="spinner"></div> 불러오는 중...</div>';
+    document.getElementById('paginationBar').style.display = 'none';
+
+    const perPage = document.getElementById('perPageSel').value;
+    const params = new URLSearchParams({ page: currentPage, per_page: perPage, search: currentSearch });
+    const res = await fetch(`/bigdata/api/datasets/${currentDatasetId}/rows?${params}`);
+    const data = await res.json();
+    if (!data.success) {
+      document.getElementById('tableWrap').innerHTML = `<div class="loading">오류: ${data.message}</div>`;
+      return;
+    }
+    totalPages = data.total_pages;
+    document.getElementById('toolbarCount').textContent = `(전체 ${data.total.toLocaleString()}건)`;
+    renderTable(data.headers, data.rows, (currentPage - 1) * parseInt(perPage));
+    renderPagination(data.total, data.page, data.total_pages, parseInt(perPage));
+  }
+
+  function renderTable(headers, rows, offset) {
+    if (!rows.length) {
+      document.getElementById('tableWrap').innerHTML = '<div class="no-data"><div class="nd-icon">🔍</div><p>검색 결과가 없습니다</p></div>';
+      return;
+    }
+    const ths = headers.map(h => `<th>${esc(String(h))}</th>`).join('');
+    const trs = rows.map((row, i) =>
+      `<tr><td class="idx">${offset+i+1}</td>${headers.map(h => `<td title="${esc(String(row[h]??''))}">${esc(String(row[h]??''))}</td>`).join('')}</tr>`
+    ).join('');
+    document.getElementById('tableWrap').innerHTML =
+      `<table><thead><tr><th class="idx">#</th>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  }
+
+  function renderPagination(total, page, tPages, perPage) {
+    totalPages = tPages;
+    document.getElementById('paginationBar').style.display = 'flex';
+    const s = (page-1)*perPage+1, e = Math.min(page*perPage, total);
+    document.getElementById('pgInfo').textContent = `${s.toLocaleString()} – ${e.toLocaleString()} / 전체 ${total.toLocaleString()}건`;
+    document.getElementById('btnFirst').disabled = page<=1;
+    document.getElementById('btnPrev').disabled = page<=1;
+    document.getElementById('btnNext').disabled = page>=tPages;
+    document.getElementById('btnLast').disabled = page>=tPages;
+    const nums = document.getElementById('pageNumbers');
+    nums.innerHTML = '';
+    let sp = Math.max(1, page-3), ep = Math.min(tPages, sp+6);
+    sp = Math.max(1, ep-6);
+    for (let p=sp; p<=ep; p++) {
+      const b = document.createElement('button');
+      b.className = 'pg-btn' + (p===page?' active':'');
+      b.textContent = p;
+      b.onclick = () => goPage(p);
+      nums.appendChild(b);
+    }
+  }
+
+  function goPage(p) {
+    if (p<1||p>totalPages) return;
+    currentPage = p;
+    loadRows();
+  }
+  function changePerPage() { currentPage=1; loadRows(); }
+
+  function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      currentSearch = document.getElementById('searchInput').value.trim();
+      currentPage = 1;
+      loadRows();
+    }, 400);
+  }
+
+  function downloadDataset() {
+    if (!currentDatasetId) return;
+    window.location.href = `/bigdata/api/datasets/${currentDatasetId}/download`;
+  }
+
+  async function deleteDataset() {
+    if (!currentDatasetId) return;
+    const name = document.getElementById('toolbarName').innerText.split('(')[0].trim();
+    if (!confirm(`"${name}" 데이터셋을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    await fetch(`/bigdata/api/datasets/${currentDatasetId}`, { method: 'DELETE' });
+    currentDatasetId = null;
+    document.getElementById('tableToolbar').style.display = 'none';
+    document.getElementById('paginationBar').style.display = 'none';
+    document.getElementById('tableWrap').innerHTML = '<div class="no-data"><div class="nd-icon">🗄️</div><p>데이터셋을 선택하거나 업로드하세요</p></div>';
+    await loadDatasets();
+  }
+
+  // ── 업로드 모달 ──
+  function openUploadModal() {
+    selectedFile = null;
+    ['uploadName','uploadDesc'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('fileInput').value='';
+    document.getElementById('dropText').textContent='.xlsx / .xls / .csv 파일을 끌어다 놓거나 클릭하세요';
+    document.getElementById('progressWrap').style.display='none';
+    document.getElementById('progressFill').style.width='0%';
+    document.getElementById('uploadStatus').textContent='';
+    document.getElementById('btnUpload').disabled=true;
+    document.getElementById('uploadModal').classList.add('show');
+  }
+  function closeUploadModal() { document.getElementById('uploadModal').classList.remove('show'); }
+
+  function onFileSelected(e) {
+    const f = e.target.files[0]; if (!f) return;
+    selectedFile = f;
+    document.getElementById('dropText').textContent = `✅ ${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+    document.getElementById('btnUpload').disabled = false;
+    if (!document.getElementById('uploadName').value.trim())
+      document.getElementById('uploadName').value = f.name.replace(/\.[^.]+$/,'');
+  }
+  function onDragOver(e) { e.preventDefault(); document.getElementById('uploadDrop').classList.add('dragover'); }
+  function onDragLeave() { document.getElementById('uploadDrop').classList.remove('dragover'); }
+  function onDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadDrop').classList.remove('dragover');
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    selectedFile = f;
+    document.getElementById('dropText').textContent = `✅ ${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+    document.getElementById('btnUpload').disabled = false;
+    if (!document.getElementById('uploadName').value.trim())
+      document.getElementById('uploadName').value = f.name.replace(/\.[^.]+$/,'');
+  }
+
+  async function doUpload() {
+    if (!selectedFile) return;
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+    fd.append('dataset_name', document.getElementById('uploadName').value.trim());
+    fd.append('description', document.getElementById('uploadDesc').value.trim());
+
+    document.getElementById('btnUpload').disabled = true;
+    document.getElementById('progressWrap').style.display = 'block';
+    document.getElementById('uploadStatus').textContent = '⏳ 업로드 중...';
+
+    let fake = 0;
+    const timer = setInterval(() => {
+      fake = Math.min(fake + Math.random()*8, 85);
+      document.getElementById('progressFill').style.width = fake + '%';
+    }, 200);
+
+    try {
+      const res = await fetch('/bigdata/api/upload', { method:'POST', body: fd });
+      const data = await res.json();
+      clearInterval(timer);
+      document.getElementById('progressFill').style.width = '100%';
+      if (data.success) {
+        document.getElementById('uploadStatus').textContent = data.message;
+        await loadDatasets();
+        setTimeout(() => { closeUploadModal(); selectDataset(data.dataset_id, data.dataset_name); }, 700);
+      } else {
+        document.getElementById('uploadStatus').textContent = '❌ ' + data.message;
+        document.getElementById('btnUpload').disabled = false;
+      }
+    } catch(err) {
+      clearInterval(timer);
+      document.getElementById('uploadStatus').textContent = '❌ 오류: ' + err.message;
+      document.getElementById('btnUpload').disabled = false;
+    }
+  }
+
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeUploadModal(); });
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

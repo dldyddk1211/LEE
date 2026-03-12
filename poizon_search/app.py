@@ -1747,6 +1747,114 @@ def search_wholesale_product():
         return jsonify({'success': False, 'error': str(e)})
 
 
+# ==========================================
+# 설정 (계정 관리)
+# ==========================================
+
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.json')
+
+def load_settings():
+    """설정 파일 로드 (없으면 기본값)"""
+    default = {
+        'poizon': {
+            'accounts': [
+                {'id': 'sionejj@naver.com', 'pw': 'wnaoddl1!'},
+                {'id': '', 'pw': ''}
+            ],
+            'selected': 0
+        },
+        'kream': {
+            'accounts': [
+                {'id': 'yaglobal@naver.com', 'pw': 'dyddk1309!'},
+                {'id': '', 'pw': ''}
+            ],
+            'selected': 0
+        },
+        'musinsa': {
+            'accounts': [
+                {'id': 'yaglobal', 'pw': 'dyddk1309!'},
+                {'id': '', 'pw': ''}
+            ],
+            'selected': 0
+        }
+    }
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return default
+
+def save_settings(data):
+    """설정 파일 저장"""
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def get_active_account(site):
+    """특정 사이트의 현재 선택된 계정 반환"""
+    settings = load_settings()
+    site_data = settings.get(site, {})
+    accounts = site_data.get('accounts', [])
+    selected = site_data.get('selected', 0)
+    if selected < len(accounts) and accounts[selected].get('id'):
+        return accounts[selected]
+    # 선택된 계정이 없으면 첫 번째 유효 계정
+    for acc in accounts:
+        if acc.get('id'):
+            return acc
+    return {'id': '', 'pw': ''}
+
+@app.route('/settings')
+def settings_page():
+    return render_template('settings.html')
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    return jsonify({'status': 'ok', 'settings': load_settings()})
+
+@app.route('/api/settings', methods=['POST'])
+def update_settings():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'status': 'error', 'message': '데이터 없음'})
+
+        save_settings(data)
+
+        # 각 모듈의 전역 변수 업데이트
+        try:
+            poizon_acc = get_active_account('poizon')
+            if poizon_acc['id']:
+                import poizon_data.poizon_search as ps
+                ps.POIZON_ID = poizon_acc['id']
+                ps.POIZON_PW = poizon_acc['pw']
+        except Exception as e:
+            print(f"⚠️ 포이즌 계정 업데이트 실패: {e}")
+
+        try:
+            kream_acc = get_active_account('kream')
+            if kream_acc['id']:
+                import kream_data.kream_search as ks
+                ks.KREAM_EMAIL = kream_acc['id']
+                ks.KREAM_PASSWORD = kream_acc['pw']
+        except Exception as e:
+            print(f"⚠️ 크림 계정 업데이트 실패: {e}")
+
+        try:
+            musinsa_acc = get_active_account('musinsa')
+            if musinsa_acc['id']:
+                import musinsa_data.musinsa_search as ms
+                ms.MUSINSA_ID = musinsa_acc['id']
+                ms.MUSINSA_PASSWORD = musinsa_acc['pw']
+        except Exception as e:
+            print(f"⚠️ 무신사 계정 업데이트 실패: {e}")
+
+        return jsonify({'status': 'ok'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+
 @app.route('/proxy_image')
 def proxy_image():
     """외부 이미지 프록시 (CORS 우회용)"""
