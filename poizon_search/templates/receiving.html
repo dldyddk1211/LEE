@@ -248,13 +248,27 @@
   <div class="info" id="lastInfo"></div>
 </div>
 
-<!-- 카메라 스캔 -->
+<!-- 바코드 스캔 -->
 <div class="camera-section">
   <h3>📷 바코드 스캔</h3>
   <div id="reader"></div>
-  <div class="camera-controls">
-    <button id="btnStartCam" onclick="startCamera()">카메라 시작</button>
-    <button id="btnStopCam" onclick="stopCamera()">카메라 중지</button>
+
+  <!-- 방법1: 사진 촬영으로 바코드 인식 (HTTP에서도 동작) -->
+  <div class="camera-controls" style="flex-direction:column; gap:8px;">
+    <label style="flex:1; text-align:center; padding:12px; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">
+      📸 사진으로 바코드 스캔
+      <input type="file" accept="image/*" capture="environment" id="photoCapture"
+             onchange="scanFromPhoto(this)" style="display:none;">
+    </label>
+
+    <!-- 방법2: 실시간 카메라 (HTTPS 또는 localhost만 가능) -->
+    <div style="display:flex; gap:8px;">
+      <button id="btnStartCam" onclick="startCamera()" style="flex:1;">실시간 스캔 시작</button>
+      <button id="btnStopCam" onclick="stopCamera()" style="flex:1;">스캔 중지</button>
+    </div>
+    <div style="font-size:11px; color:#999; text-align:center;">
+      * 실시간 스캔은 HTTPS 또는 localhost에서만 가능합니다
+    </div>
   </div>
 </div>
 
@@ -382,7 +396,31 @@
   }
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 카메라
+  // 사진 촬영 바코드 인식 (HTTP에서도 동작)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function scanFromPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const html5QrScanner = new Html5Qrcode("reader");
+
+    html5QrScanner.scanFile(file, true)
+      .then(decodedText => {
+        addBarcode(decodedText);
+        html5QrScanner.clear();
+      })
+      .catch(err => {
+        // 바코드 인식 실패 시 파일명에서 추출 시도
+        alert('바코드를 인식하지 못했습니다.\n좀 더 가까이에서 선명하게 촬영해주세요.');
+        html5QrScanner.clear();
+      });
+
+    // input 초기화 (같은 파일 다시 선택 가능하게)
+    input.value = '';
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 실시간 카메라 (HTTPS/localhost만)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   function startCamera() {
     if (isScanning) return;
