@@ -817,10 +817,19 @@ def start_search():
         thread = threading.Thread(target=run_musinsa_search, args=(keyword, max_items, search_mode))
         thread.daemon = True
         thread.start()
+    elif mode == 'popular':
+        # ✅ 포이즌 신규 인기 상품
+        max_popular = int(request.args.get('max_items', '200'))
+        brand = request.args.get('brand', '')
+        print(f"🔥 인기상품 스레드 시작: max_items={max_popular}, brand={brand}")
+        thread = threading.Thread(target=run_popular_scraper, args=(max_popular, brand))
+        thread.daemon = True
+        thread.start()
+
     elif mode == 'kream':
         print("🛒 크림 모드 (준비 중)")
         log_queue.put({'type': 'error', 'message': '🛒 크림 검색 기능은 준비 중입니다'})
-        
+
     else:
         # 기본: POIZON
         print(f"⚠️ 알 수 없는 모드 '{mode}' → POIZON으로 처리")
@@ -898,6 +907,150 @@ def start_search():
     response.headers['Connection'] = 'keep-alive'
     
     return response
+
+# ==========================================
+# 포이즌 신규 인기 상품
+# ==========================================
+
+def run_popular_scraper(max_items=200, brand=''):
+    """백그라운드에서 인기 상품 스크래핑"""
+    global result_data, stop_flag, is_working, work_start_time, work_type, estimated_items, current_items
+
+    is_working = True
+    import time as time_module
+    work_start_time = time_module.time()
+    work_type = 'popular'
+    estimated_items = max_items
+    current_items = 0
+    stop_flag = False
+
+    try:
+        from poizon_data.poizon_search import run_popular_products
+        print(f"  [popular] run_popular_products imported OK, brand={brand}")
+
+        result = run_popular_products(
+            max_items=max_items,
+            brand=brand,
+            callback=log_callback
+        )
+        print(f"  [popular] result: success={result.get('success')}, items={result.get('total_items', 0)}")
+
+        if result.get('success'):
+            # 스케줄러에 저장
+            try:
+                end_time = time_module.time()
+                duration_seconds = int(end_time - work_start_time)
+
+                task_data = {
+                    'keyword': '신규인기상품',
+                    'mode': 'popular',
+                    'collected_count': result.get('total_items', 0),
+                    'kream_count': 0,
+                    'duration_seconds': duration_seconds,
+                    'data': result.get('data', [])
+                }
+
+                task_id = save_task_to_history(task_data)
+                if task_id:
+                    print(f"  [popular] saved: {task_id}")
+            except Exception as e:
+                print(f"  [popular] save error: {e}")
+
+            log_queue.put({
+                'type': 'complete',
+                'mode': 'popular',
+                'total_items': result.get('total_items', 0),
+                'file_path': result.get('file_path', ''),
+                'data': result.get('data', [])
+            })
+        else:
+            err_msg = result.get('error', '알 수 없는 오류')
+            print(f"  [popular] FAIL: {err_msg}")
+            log_queue.put({
+                'type': 'error',
+                'message': err_msg
+            })
+    except Exception as e:
+        import traceback
+        print(f"  [popular] EXCEPTION: {e}")
+        traceback.print_exc()
+        if not stop_flag:
+            log_queue.put({
+                'type': 'error',
+                'message': str(e)
+            })
+    finally:
+        is_working = False
+        work_start_time = None
+        work_type = None
+        estimated_items = 0
+        current_items = 0
+
+
+@app.route('/start_popular_search')
+def start_popular_search():
+    """포이즌 신규 인기 상품 검색 시작 (SSE)"""
+    global is_working
+
+    max_items_str = request.args.get('max_items', '200')
+    try:
+        max_items = int(max_items_str)
+    except ValueError:
+        max_items = 200
+
+    print(f"\n{'='*60}")
+    print(f"  [popular] start: max_items={max_items}, is_working={is_working}")
+    print(f"{'='*60}\n")
+
+    # 이미 작업 중이면 에러
+    if is_working:
+        def error_gen():
+            yield f"data: {json.dumps({'type':'error','message':'이미 다른 작업이 진행 중입니다. 완료 후 다시 시도하세요.'}, ensure_ascii=False)}\n\n"
+        return Response(error_gen(), mimetype='text/event-stream',
+                       headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
+    # 큐 비우기
+    while not log_queue.empty():
+        log_queue.get()
+
+    thread = threading.Thread(target=run_popular_scraper, args=(max_items,))
+    thread.daemon = True
+    thread.start()
+
+    def generate():
+        try:
+            event_count = 0
+            while True:
+                try:
+                    data = log_queue.get(timeout=1)
+                    event_count += 1
+
+                    if data.get('type') == 'complete':
+                        data['mode'] = 'popular'
+
+                    json_data = json.dumps(data, ensure_ascii=False)
+                    yield f"data: {json_data}\n\n"
+
+                    if data.get('type') in ['complete', 'error']:
+                        print(f"  [popular] SSE end (type={data.get('type')}, events={event_count})")
+                        break
+                except queue.Empty:
+                    yield ": ping\n\n"
+        except GeneratorExit:
+            print("  [popular] SSE client disconnected")
+        except Exception as e:
+            print(f"  [popular] SSE error: {e}")
+            yield f"data: {json.dumps({'type':'error','message':str(e)}, ensure_ascii=False)}\n\n"
+
+    response = Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream'
+    )
+    response.headers['Cache-Control'] = 'no-cache'
+    response.headers['X-Accel-Buffering'] = 'no'
+    response.headers['Connection'] = 'keep-alive'
+    return response
+
 
 @app.route('/upload_excel', methods=['POST'])
 def upload_excel():
@@ -1145,12 +1298,22 @@ def kream_popup():
     
     return render_template('kream_popup.html')
 
-@app.route('/kream_login', methods=['POST'])
+@app.route('/kream_login', methods=['GET', 'POST'])
 def kream_login():
     try:
         if kream_search is None:
             return jsonify({'success': False, 'error': 'kream_search 모듈이 없습니다'})
-        
+
+        # GET = 쿠키만 체크 (빠름), POST = 실제 로그인
+        if request.method == 'GET':
+            cookie_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'kream_data', 'kream_cookies.json')
+            if os.path.exists(cookie_file):
+                import time as _t
+                age = _t.time() - os.path.getmtime(cookie_file)
+                if age < 24 * 3600 and os.path.getsize(cookie_file) > 10:
+                    return jsonify({'success': True, 'message': '쿠키 유효 (로그인 스킵)'})
+            return jsonify({'success': False, 'message': '쿠키 없음 또는 만료'})
+
         result = kream_search.login_kream()
         return jsonify({'success': result, 'message': '로그인 성공' if result else '로그인 실패'})
     except Exception as e:
@@ -2305,6 +2468,45 @@ def save_backup_settings():
             nas_credentials=data.get('nas_credentials')
         )
         return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/telegram/settings', methods=['GET'])
+def get_telegram_settings():
+    """텔레그램 설정 조회"""
+    try:
+        cfg = paths.get_telegram_settings()
+        return jsonify({'success': True, 'telegram': cfg})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/telegram/settings', methods=['POST'])
+def save_telegram_settings():
+    """텔레그램 설정 저장"""
+    try:
+        data = request.get_json()
+        paths.save_telegram_settings({
+            'bot_token': data.get('bot_token', '').strip(),
+            'chat_id': data.get('chat_id', '').strip(),
+            'anthropic_api_key': data.get('anthropic_api_key', '').strip(),
+        })
+        # 텔레그램 모듈 설정 갱신
+        try:
+            from utils.telegram import reload_config
+            reload_config()
+        except Exception:
+            pass
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/telegram/test', methods=['POST'])
+def test_telegram():
+    """텔레그램 연결 테스트"""
+    try:
+        from utils.telegram import send_telegram
+        ok = send_telegram('[Test] 설정 페이지에서 연결 테스트', use_html=False)
+        return jsonify({'success': ok})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 

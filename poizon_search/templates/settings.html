@@ -328,6 +328,7 @@
       <button class="top-menu-btn active" onclick="switchTab('accounts')">&#128100; 계정 관리</button>
       <button class="top-menu-btn" onclick="switchTab('data')">&#128193; 데이터 경로</button>
       <button class="top-menu-btn" onclick="switchTab('backup')">&#128190; NAS 백업</button>
+      <button class="top-menu-btn" onclick="switchTab('telegram')">&#9993; 텔레그램</button>
     </div>
   </div>
 
@@ -558,6 +559,90 @@
     </div>
 
     </div><!-- /tab-backup -->
+
+    <!-- ━━ 탭4: 텔레그램 ━━ -->
+    <div class="tab-content" id="tab-telegram">
+
+    <div class="site-card">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon" style="background: linear-gradient(135deg, #0088cc, #229ED9); font-size: 16px;">T</div>
+          <span class="site-name">텔레그램 봇 설정</span>
+        </div>
+        <span class="site-status" id="tg-status" style="background:#ffeeba; color:#856404;">미확인</span>
+      </div>
+
+      <!-- 봇 토큰 -->
+      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 10px;">봇 설정</div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;">
+          <label style="font-size: 13px; font-weight: 600; color: #666;">Bot Token</label>
+          <div style="position:relative; display:flex; align-items:center;">
+            <input type="password" id="tg-bot-token" placeholder="@BotFather에서 발급받은 토큰" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px;" />
+            <span onclick="toggleTgField('tg-bot-token','tg-token-toggle')" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="tg-token-toggle" title="보기">&#128065;</span>
+          </div>
+          <label style="font-size: 13px; font-weight: 600; color: #666;">Chat ID</label>
+          <input type="text" id="tg-chat-id" placeholder="알림 받을 채팅 ID" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%;" />
+        </div>
+      </div>
+
+      <!-- Claude API Key -->
+      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 10px;">Claude AI 챗봇 (텔레그램 대화용)</div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;">
+          <label style="font-size: 13px; font-weight: 600; color: #666;">API Key</label>
+          <div style="position:relative; display:flex; align-items:center;">
+            <input type="password" id="tg-api-key" placeholder="Anthropic API Key (선택사항)" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px;" />
+            <span onclick="toggleTgField('tg-api-key','tg-key-toggle')" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="tg-key-toggle" title="보기">&#128065;</span>
+          </div>
+        </div>
+        <div style="margin-top: 8px; font-size: 11px; color: #aaa;">* API Key가 없으면 텔레그램 Claude 챗봇 기능이 비활성화됩니다</div>
+      </div>
+
+      <!-- 안내 -->
+      <div style="padding: 12px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">사용 가능한 명령어</div>
+        <div style="font-size: 12px; color: #666; line-height: 1.8;">
+          <code>/status</code> - 현재 작업 상태 확인<br>
+          <code>/stop</code> - 진행 중인 작업 중지<br>
+          <code>/musinsa [키워드] [개수]</code> - 통합 검색 시작<br>
+          <code>/ranking [개수]</code> - 무신사 랭킹 검색<br>
+          <code>/sync</code> - 구글 시트 동기화<br>
+          <code>/deploy ok</code> - Git 배포<br>
+          <code>/reset</code> - Claude 대화 초기화<br>
+          <span style="color:#aaa;">일반 텍스트/사진 → Claude AI가 자동 응답</span>
+        </div>
+      </div>
+
+      <!-- 버튼 -->
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button onclick="saveTelegramSettings()" style="
+          padding: 12px 36px;
+          background: linear-gradient(135deg, #0088cc, #229ED9);
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(0,136,204,0.3);
+        ">설정 저장</button>
+        <button onclick="testTelegram()" id="tg-test-btn" style="
+          padding: 12px 24px;
+          background: #fff;
+          color: #0088cc;
+          border: 2px solid #0088cc;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+        ">연결 테스트</button>
+      </div>
+    </div>
+
+    </div><!-- /tab-telegram -->
 
   </div><!-- /container -->
 
@@ -968,6 +1053,97 @@
     }
 
     loadBackupStatus();
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 텔레그램 관련
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function loadTelegramSettings() {
+      fetch('/api/telegram/settings')
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.telegram) {
+            document.getElementById('tg-bot-token').value = data.telegram.bot_token || '';
+            document.getElementById('tg-chat-id').value = data.telegram.chat_id || '';
+            document.getElementById('tg-api-key').value = data.telegram.anthropic_api_key || '';
+
+            const statusEl = document.getElementById('tg-status');
+            if (data.telegram.bot_token && data.telegram.chat_id) {
+              statusEl.textContent = '설정됨';
+              statusEl.style.background = '#d4edda';
+              statusEl.style.color = '#155724';
+            } else {
+              statusEl.textContent = '미설정';
+              statusEl.style.background = '#f8d7da';
+              statusEl.style.color = '#721c24';
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    function saveTelegramSettings() {
+      const data = {
+        bot_token: document.getElementById('tg-bot-token').value.trim(),
+        chat_id: document.getElementById('tg-chat-id').value.trim(),
+        anthropic_api_key: document.getElementById('tg-api-key').value.trim(),
+      };
+
+      fetch('/api/telegram/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast('텔레그램 설정 저장 완료');
+          loadTelegramSettings();
+        } else {
+          showToast('저장 실패: ' + (res.error || ''), true);
+        }
+      })
+      .catch(err => showToast('저장 오류: ' + err, true));
+    }
+
+    function testTelegram() {
+      const btn = document.getElementById('tg-test-btn');
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+
+      fetch('/api/telegram/test', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.textContent = '연결 테스트';
+          if (data.success) {
+            showToast('테스트 메시지 전송 완료! 텔레그램을 확인하세요');
+          } else {
+            showToast('전송 실패: ' + (data.error || '토큰/Chat ID 확인'), true);
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.textContent = '연결 테스트';
+          showToast('오류: ' + err, true);
+        });
+    }
+
+    function toggleTgField(inputId, toggleId) {
+      const inp = document.getElementById(inputId);
+      const icon = document.getElementById(toggleId);
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.innerHTML = '&#128064;';
+        icon.title = '숨기기';
+      } else {
+        inp.type = 'password';
+        icon.innerHTML = '&#128065;';
+        icon.title = '보기';
+      }
+    }
+
+    loadTelegramSettings();
   </script>
 </body>
 </html>

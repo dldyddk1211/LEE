@@ -295,6 +295,24 @@ def migrate_from_nas():
         print(f"  [OK] NAS -> local migration: {', '.join(migrated)}")
 
 
+def get_telegram_settings():
+    """텔레그램 설정 반환"""
+    settings = _load_settings()
+    return settings.get('telegram', {
+        'bot_token': '',
+        'chat_id': '',
+        'anthropic_api_key': '',
+    })
+
+
+def save_telegram_settings(telegram_config):
+    """텔레그램 설정 저장"""
+    settings = _load_settings()
+    settings['telegram'] = telegram_config
+    _save_settings(settings)
+    return settings
+
+
 def get_settings():
     """전체 설정 반환 (API용)"""
     settings = _load_settings()

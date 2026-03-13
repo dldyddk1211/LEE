@@ -14,11 +14,35 @@ import requests
 import threading
 
 # ──────────────────────────────────────
-# 환경변수 우선 → 없으면 아래 직접 입력값 사용
-BOT_TOKEN         = os.environ.get('TELEGRAM_BOT_TOKEN',  '8771610716:AAEVKdw6GU97fNzir18rbWrVeA_ItD2be0E')
-CHAT_ID           = os.environ.get('TELEGRAM_CHAT_ID',    '6382036414')
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+# 기본값 (settings.json에 저장된 값이 있으면 그걸 우선 사용)
+_DEFAULT_BOT_TOKEN  = '8771610716:AAEVKdw6GU97fNzir18rbWrVeA_ItD2be0E'
+_DEFAULT_CHAT_ID    = '6382036414'
+
+def _load_telegram_config():
+    """settings.json → 환경변수 → 기본값 순서로 텔레그램 설정 로드"""
+    try:
+        from config.paths import get_telegram_settings
+        cfg = get_telegram_settings()
+    except Exception:
+        cfg = {}
+    bot_token = (cfg.get('bot_token', '').strip()
+                 or os.environ.get('TELEGRAM_BOT_TOKEN', '')
+                 or _DEFAULT_BOT_TOKEN)
+    chat_id   = (cfg.get('chat_id', '').strip()
+                 or os.environ.get('TELEGRAM_CHAT_ID', '')
+                 or _DEFAULT_CHAT_ID)
+    api_key   = (cfg.get('anthropic_api_key', '').strip()
+                 or os.environ.get('ANTHROPIC_API_KEY', ''))
+    return bot_token, chat_id, api_key
+
+BOT_TOKEN, CHAT_ID, ANTHROPIC_API_KEY = _load_telegram_config()
 # ──────────────────────────────────────
+
+def reload_config():
+    """설정 변경 후 전역 변수 갱신"""
+    global BOT_TOKEN, CHAT_ID, ANTHROPIC_API_KEY, BASE_URL
+    BOT_TOKEN, CHAT_ID, ANTHROPIC_API_KEY = _load_telegram_config()
+    BASE_URL = f'https://api.telegram.org/bot{BOT_TOKEN}'
 
 BASE_URL = f'https://api.telegram.org/bot{BOT_TOKEN}'
 

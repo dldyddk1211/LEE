@@ -1078,13 +1078,403 @@ def perform_login():
 
 def run_poizon_from_gui(keyword, max_pages=20, callback=None, skip_login=False):
     """GUI에서 호출하는 함수"""
-    
+
     return run(
-        keyword=keyword, 
-        max_pages=max_pages, 
+        keyword=keyword,
+        max_pages=max_pages,
         callback=callback,
         skip_login=skip_login
     )
+
+
+###############################################################
+# ============ 신규 인기 상품 (Merchant Rank Board) ============ #
+###############################################################
+
+RANK_BOARD_URL = "https://seller.poizon.com/main/dataCenter/merchantRankBoard"
+
+
+def run_popular_products(max_items=200, brand='', callback=None):
+    """포이즌 신규 인기 상품 수집 (merchantRankBoard)
+    run_poizon_from_gui와 동일한 브라우저/로그인 패턴 사용
+    brand: 브랜드 필터 (빈 문자열이면 전체)
+    """
+    global LOG_CALLBACK, stop_flag
+    stop_flag = False
+
+    import time as time_module
+    import re
+    total_start_time = time_module.time()
+
+    if callback:
+        LOG_CALLBACK = callback
+
+    brand_msg = f" [브랜드: {brand}]" if brand else " [전체]"
+    log(f"\n🔥 [인기상품] 포이즌 신규 인기 상품 수집 시작{brand_msg}")
+    log(f"  목표: 최대 {max_items}개")
+
+    DATA_BOARD_URL = "https://seller.poizon.com/main/dataBoard"
+
+    # ── run_poizon_from_gui 와 동일한 브라우저 열기 ──
+    with sync_playwright() as p:
+        current_os = platform.system()
+        if current_os == 'Darwin':
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                args=['--window-size=1200,800', '--window-position=0,100',
+                      '--disable-blink-features=AutomationControlled']
+            )
+        else:
+            browser = p.chromium.launch(
+                headless=HEADLESS,
+                channel='chrome',
+                args=['--window-size=1200,800', '--window-position=0,100',
+                      '--disable-blink-features=AutomationControlled']
+            )
+        log("  ✅ 브라우저 열기 성공", 'success')
+
+        context = browser.new_context(viewport=None, no_viewport=True)
+
+        # ── 쿠키 로드 (run_poizon_from_gui 동일) ──
+        need_login = True
+        if os.path.exists(COOKIE_FILE):
+            try:
+                with open(COOKIE_FILE, 'r') as f:
+                    cookies = json.load(f)
+                context.add_cookies(cookies)
+                log("  ✅ 쿠키 로드 완료", 'success')
+                need_login = False
+            except Exception as e:
+                log(f"  ⚠️ 쿠키 로드 실패: {e}", 'warning')
+
+        page = context.new_page()
+
+        try:
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [1] 로그인 (run_poizon_from_gui 동일 패턴)
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            if need_login:
+                log("\n[1] 로그인 필요 - 포이즌 접속...")
+                page.goto(LOGIN_URL, wait_until="domcontentloaded")
+                wait_stable(page, 500)
+
+                lang_success = set_language_korean(page)
+                if not lang_success:
+                    log("  ⚠️ 언어 변경 실패 - 계속 진행", 'warning')
+
+                log("\n[2] 로그인 시작")
+                wait_for_inputs(page)
+                page.locator("input").nth(0).fill(POIZON_ID)
+                log("  → ID 입력 완료")
+                page.locator("input").nth(1).fill(POIZON_PW)
+                log("  → PW 입력 완료")
+
+                try:
+                    click_first(page, ["button:has-text('로그인')"], "로그인")
+                except Exception:
+                    page.locator("input").nth(1).press("Enter")
+
+                wait_stable(page, 3000)
+                log("  ✅ 로그인 완료", 'success')
+
+                # 쿠키 저장
+                try:
+                    cookies = context.cookies()
+                    with open(COOKIE_FILE, 'w') as f:
+                        json.dump(cookies, f)
+                    log("  💾 쿠키 저장 완료", 'success')
+                except Exception as e:
+                    log(f"  ⚠️ 쿠키 저장 실패: {e}", 'warning')
+            else:
+                # 쿠키로 바로 dataBoard 접속
+                log("\n[1] 쿠키로 로그인 건너뛰기 - 데이터보드 접속")
+                page.goto(DATA_BOARD_URL, wait_until="domcontentloaded")
+                wait_stable(page, 2000)
+
+                # 쿠키 만료 체크
+                current_url = page.url
+                if 'login' in current_url.lower() or page.locator("input[type='password']").count() > 0:
+                    log("  ⚠️ 쿠키 만료 → 재로그인", 'warning')
+                    set_language_korean(page)
+                    wait_stable(page, 1500)
+                    wait_for_inputs(page)
+                    page.locator("input").nth(0).fill(POIZON_ID)
+                    page.locator("input").nth(1).fill(POIZON_PW)
+                    try:
+                        click_first(page, ["button:has-text('로그인')"], "로그인")
+                    except Exception:
+                        page.locator("input").nth(1).press("Enter")
+                    wait_stable(page, 3000)
+                    try:
+                        cookies = context.cookies()
+                        with open(COOKIE_FILE, 'w') as f:
+                            json.dump(cookies, f)
+                    except Exception:
+                        pass
+                else:
+                    set_language_korean(page)
+                    wait_stable(page, 2000)
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [2] merchantRankBoard 페이지로 이동
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            log(f"\n[3] 인기 상품 랭킹 페이지 이동...")
+            log(f"  URL: {RANK_BOARD_URL}")
+            page.goto(RANK_BOARD_URL, wait_until="domcontentloaded")
+            wait_stable(page, 3000)
+
+            # 실제 URL 확인
+            current_url = page.url
+            log(f"  현재 URL: {current_url}")
+
+            # 언어 설정
+            set_language_korean(page)
+            wait_stable(page, 2000)
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [3-1] 브랜드 필터 적용
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            if brand:
+                log(f"\n[3-1] 브랜드 필터 적용: {brand}")
+                try:
+                    # "브랜드" 입력 필드 클릭 → 드롭다운 열기
+                    brand_input = page.locator("input[placeholder*='브랜드'], input[placeholder*='brand'], input[placeholder*='Brand']")
+                    if brand_input.count() == 0:
+                        # placeholder가 없으면 "브랜드" 텍스트 근처 input 찾기
+                        brand_input = page.locator("text=브랜드").locator("xpath=ancestor::div[1]//input")
+
+                    if brand_input.count() > 0:
+                        brand_input.first.click()
+                        wait_stable(page, 1000)
+                        brand_input.first.fill(brand)
+                        wait_stable(page, 1500)
+
+                        # 드롭다운에서 브랜드 선택
+                        brand_option = page.locator(f"text='{brand}'").first
+                        if brand_option.count() == 0:
+                            # 부분 매치
+                            brand_option = page.get_by_text(brand, exact=False).first
+                        brand_option.click()
+                        wait_stable(page, 2000)
+                        log(f"  ✅ 브랜드 '{brand}' 선택 완료", 'success')
+                    else:
+                        # JS로 브랜드 필터 시도
+                        log("  -> input 미발견, JS로 브랜드 필터 시도")
+                        page.evaluate(f"""(brandName) => {{
+                            // 브랜드 관련 input/select 찾기
+                            const inputs = document.querySelectorAll('input');
+                            for (const inp of inputs) {{
+                                const ph = (inp.placeholder || '').toLowerCase();
+                                if (ph.includes('브랜드') || ph.includes('brand')) {{
+                                    inp.click();
+                                    inp.value = brandName;
+                                    inp.dispatchEvent(new Event('input', {{bubbles: true}}));
+                                    return true;
+                                }}
+                            }}
+                            return false;
+                        }}""", brand)
+                        wait_stable(page, 2000)
+                except Exception as e:
+                    log(f"  ⚠️ 브랜드 필터 실패: {e} - 전체 수집으로 진행", 'warning')
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [3] "신규 인기상품" 섹션의 확장(↗) 버튼 클릭
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            log("\n[4] '신규 인기상품' 확장 버튼 클릭...")
+            expand_clicked = False
+
+            # 스크린샷 기준: "신규 인기상품" 텍스트가 있는 섹션 헤더 옆에
+            # SPU기준, SKU기준, 새로고침, 확장(↗) 아이콘이 나란히 있음
+            # → "신규 인기상품" 텍스트를 포함하는 부모 컨테이너에서 마지막 SVG(확장 아이콘)를 찾아 클릭
+            try:
+                result = page.evaluate("""() => {
+                    // "신규 인기상품" 또는 "신규 인기 상품" 텍스트를 가진 요소 찾기
+                    const allEls = document.querySelectorAll('*');
+                    let sectionHeader = null;
+                    for (const el of allEls) {
+                        const text = el.childNodes.length <= 3 ? (el.textContent || '').trim() : '';
+                        if (text.includes('신규 인기') && text.length < 30) {
+                            sectionHeader = el;
+                            break;
+                        }
+                    }
+                    if (!sectionHeader) return 'no_header';
+
+                    // 부모를 따라 올라가면서 확장 아이콘(SVG)을 포함하는 컨테이너 찾기
+                    let container = sectionHeader.parentElement;
+                    for (let i = 0; i < 5 && container; i++) {
+                        const svgs = container.querySelectorAll('svg');
+                        if (svgs.length > 0) {
+                            // 마지막 SVG가 확장 아이콘 (SPU/SKU 뒤, 새로고침 뒤의 마지막 것)
+                            const lastSvg = svgs[svgs.length - 1];
+                            const clickTarget = lastSvg.closest('span') || lastSvg.closest('div') || lastSvg.parentElement;
+                            if (clickTarget) {
+                                clickTarget.click();
+                                return 'clicked_last_svg';
+                            }
+                            lastSvg.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                            return 'clicked_svg_direct';
+                        }
+                        container = container.parentElement;
+                    }
+                    return 'no_svg_found';
+                }""")
+                log(f"  -> 확장 버튼 결과: {result}")
+                if result and 'clicked' in str(result):
+                    expand_clicked = True
+                    wait_stable(page, 3000)
+                    log("  ✅ 신규 인기상품 확장 버튼 클릭 성공", 'success')
+            except Exception as e:
+                log(f"  -> 확장 버튼 JS 실패: {e}", 'warning')
+
+            if not expand_clicked:
+                log("  -> 확장 버튼 미발견 - 현재 화면에서 수집 진행", 'warning')
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [4] 테이블 데이터 수집
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            log("\n[5] 인기 상품 데이터 수집 시작...")
+            wait_stable(page, 2000)
+
+            all_data = []
+            prev_count = 0
+            scroll_retry = 0
+            max_scroll_retry = 30
+
+            while len(all_data) < max_items and scroll_retry < max_scroll_retry:
+                if stop_flag:
+                    log("\n  ⚠️ 사용자가 수집을 중단했습니다", 'warning')
+                    break
+
+                new_items = page.evaluate("""(existingCount) => {
+                    const results = [];
+                    const rows = document.querySelectorAll(
+                        'table tbody tr, .ant-table-tbody tr:not(.ant-table-measure-row), [class*="rankItem"], [class*="rank-item"], [class*="product-item"], [class*="list-item"]'
+                    );
+                    for (let i = existingCount; i < rows.length; i++) {
+                        const row = rows[i];
+                        const cells = row.querySelectorAll('td');
+                        const text = row.textContent || '';
+                        let img_url = '';
+                        const img = row.querySelector('img');
+                        if (img) img_url = img.src || '';
+                        if (cells.length >= 3) {
+                            const cellTexts = Array.from(cells).map(c => c.textContent.trim());
+                            results.push({ rank: cellTexts[0] || '', img_url, raw_text: cellTexts.slice(1).join(' | '), cell_texts: cellTexts });
+                        } else if (text.trim()) {
+                            results.push({ rank: String(i + 1), img_url, raw_text: text.trim().substring(0, 200), cell_texts: [text.trim()] });
+                        }
+                    }
+                    return results;
+                }""", len(all_data))
+
+                if new_items:
+                    for item in new_items:
+                        if len(all_data) >= max_items:
+                            break
+
+                        cell_texts = item.get('cell_texts', [])
+                        raw_text = item.get('raw_text', '')
+                        style_id = ''
+                        product_name = ''
+
+                        for ct in cell_texts:
+                            if not ct:
+                                continue
+                            codes = re.findall(r'[A-Z0-9][-A-Z0-9]{4,}', ct.upper())
+                            if codes and not style_id:
+                                style_id = codes[0]
+                            if re.search(r'[가-힣]', ct) and not product_name and len(ct) > 3:
+                                product_name = ct.strip()[:100]
+
+                        if not product_name:
+                            product_name = raw_text[:80]
+
+                        parsed = {
+                            "순위": item.get('rank', ''),
+                            "이미지URL": item.get('img_url', ''),
+                            "상품번호": style_id,
+                            "제품명": product_name,
+                            "SPU_ID": "",
+                            "상태": "",
+                            "최근30일평균거래가": "",
+                            "중국노출": "",
+                            "중국시장최근30일판매량": 0,
+                            "현지판매자최근30일판매량": 0,
+                            "원본데이터": cell_texts,
+                        }
+                        all_data.append(parsed)
+
+                        if LOG_CALLBACK:
+                            try:
+                                LOG_CALLBACK(f"DATA:{json.dumps(parsed, ensure_ascii=False)}", 'data')
+                            except:
+                                pass
+
+                    log(f"  -> 수집 진행: {len(all_data)}/{max_items}개", 'info')
+                    if LOG_CALLBACK:
+                        try:
+                            LOG_CALLBACK(f"PROGRESS:{len(all_data)}/{max_items}|POPULAR", 'progress')
+                        except:
+                            pass
+
+                if len(all_data) == prev_count:
+                    scroll_retry += 1
+                    page.evaluate("window.scrollBy(0, 500)")
+                    wait_stable(page, 1500)
+
+                    if scroll_retry > 3:
+                        try:
+                            next_btn = page.locator("li.ant-pagination-next:not(.ant-pagination-disabled) button, button:has-text('다음'), [class*='next']:not([class*='disabled'])")
+                            if next_btn.count() > 0 and next_btn.first.is_enabled():
+                                next_btn.first.click()
+                                log(f"  -> 다음 페이지로 이동...", 'info')
+                                wait_stable(page, 3000)
+                                scroll_retry = 0
+                                prev_count = 0
+                                continue
+                        except Exception:
+                            pass
+                else:
+                    scroll_retry = 0
+
+                prev_count = len(all_data)
+
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            # [5] 결과
+            # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            total_elapsed = time_module.time() - total_start_time
+            minutes = int(total_elapsed // 60)
+            seconds = int(total_elapsed % 60)
+            time_str = f"{minutes}분 {seconds}초" if minutes > 0 else f"{seconds}초"
+
+            log(f"\n✅ 인기 상품 수집 완료: {len(all_data)}개 ({time_str})", 'success')
+
+            excel_path = None
+            if all_data:
+                excel_path = save_to_excel(all_data, "인기상품")
+
+            return {
+                'success': True,
+                'total_items': len(all_data),
+                'data': all_data,
+                'file_path': os.path.basename(excel_path) if excel_path else None,
+                'stopped': stop_flag
+            }
+
+        except Exception as e:
+            import traceback
+            log(f"  ❌ 인기상품 수집 오류: {e}", 'error')
+            traceback.print_exc()
+            safe_screenshot(page, "popular_error")
+            return {'success': False, 'error': str(e)}
+        finally:
+            try:
+                page.wait_for_timeout(1000)
+                browser.close()
+            except Exception:
+                pass
 
 
 ###############################################################

@@ -92,6 +92,55 @@
       color:#fff;
     }
 
+    /* 로그인 상태 표시 */
+    .login-indicators {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .login-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    .login-indicator .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ccc;
+      transition: all 0.3s;
+    }
+    .login-indicator.checking .dot {
+      background: #ffc107;
+      animation: pulse 1s infinite;
+    }
+    .login-indicator.ok {
+      border-color: #28a745;
+      background: #d4edda;
+    }
+    .login-indicator.ok .dot {
+      background: #28a745;
+    }
+    .login-indicator.fail {
+      border-color: #dc3545;
+      background: #f8d7da;
+    }
+    .login-indicator.fail .dot {
+      background: #dc3545;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
     .mode-selector{
       margin-bottom:20px;
       padding:20px;
@@ -832,7 +881,24 @@
 
   <div class="login-status" id="loginStatus">
     <h3>🚀 STEP 1: 수집 모드 선택</h3>
-    <p id="loginMessage">먼저 아래에서 수집 모드를 선택해주세요. 각 모드 선택 시 자동으로 로그인됩니다.</p>
+    <div class="login-indicators">
+      <div class="login-indicator" id="ind-poizon">
+        <span class="dot"></span>
+        <span>포이즌</span>
+        <span class="ind-label" id="ind-poizon-label">대기</span>
+      </div>
+      <div class="login-indicator" id="ind-kream">
+        <span class="dot"></span>
+        <span>크림</span>
+        <span class="ind-label" id="ind-kream-label">대기</span>
+      </div>
+      <div class="login-indicator" id="ind-musinsa">
+        <span class="dot"></span>
+        <span>무신사</span>
+        <span class="ind-label" id="ind-musinsa-label">대기</span>
+      </div>
+    </div>
+    <p id="loginMessage" style="margin-top:10px; font-size:13px;">페이지 로딩 시 자동 로그인됩니다.</p>
   </div>
     <div class="mode-selector">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
@@ -879,6 +945,29 @@
           <span class="mode-text">서식/양식</span>
         </button>      
       </div>
+    </div>
+
+    <!-- 신규 인기 상품 (포이즌 모드에서 먼저 표시) -->
+    <div class="button-group" id="popularSection" style="display:none;">
+      <select id="brandSelect" style="padding:8px 12px; border-radius:8px; border:2px solid #ff6b6b; font-size:13px; font-weight:600; cursor:pointer; background:#fff; color:#333; min-width:130px;">
+        <option value="">전체 (브랜드 선택)</option>
+        <option value="Jordan">Jordan</option>
+        <option value="New Balance">New Balance</option>
+        <option value="Adidas Originals">Adidas Originals</option>
+        <option value="Nike">Nike</option>
+        <option value="MIU MIU">MIU MIU</option>
+        <option value="Vans">Vans</option>
+        <option value="STONE ISLAND">STONE ISLAND</option>
+        <option value="Converse">Converse</option>
+        <option value="ASICS">ASICS</option>
+        <option value="Polo Ralph Lauren">Polo Ralph Lauren</option>
+        <option value="THE NORTH FACE">THE NORTH FACE</option>
+        <option value="MLB">MLB</option>
+        <option value="PUMA">PUMA</option>
+        <option value="Salomon">Salomon</option>
+        <option value="On">On</option>
+      </select>
+      <button id="popularBtn" onclick="startPopularSearch()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">🔥 신규 인기 상품</button>
     </div>
 
     <div class="input-grid" id="inputSection" style="display:none;">
@@ -1147,6 +1236,99 @@
   let kreamSearchStopped = false;
   let isCollecting = false;  // 수집 중인지 여부
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 페이지 로드 시 3곳 동시 로그인
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function updateIndicator(id, status, label) {
+    const el = document.getElementById(id);
+    const labelEl = document.getElementById(id + '-label');
+    el.className = 'login-indicator ' + status;
+    if (labelEl) labelEl.textContent = label;
+  }
+
+  async function loginAllSites() {
+    addLog('🔄 3곳 동시 로그인 시작...', 'info');
+
+    // 포이즌
+    updateIndicator('ind-poizon', 'checking', '접속 중...');
+    // 크림
+    updateIndicator('ind-kream', 'checking', '접속 중...');
+    // 무신사
+    updateIndicator('ind-musinsa', 'checking', '접속 중...');
+
+    document.getElementById('loginMessage').textContent = '3곳 사이트 동시 접속 중...';
+
+    // 동시 실행
+    const [poizonResult, kreamResult, musinsaResult] = await Promise.allSettled([
+      // 포이즌
+      fetch('/check_poizon_login').then(r => r.json()).catch(e => ({ logged_in: false, message: String(e) })),
+      // 크림 - GET으로 쿠키 체크만 (브라우저 열지 않음)
+      fetch('/kream_login', { method: 'GET' }).then(r => r.json()).catch(e => ({ success: false, message: String(e) })),
+      // 무신사
+      fetch('/check_musinsa_login').then(r => r.json()).catch(e => ({ logged_in: false, message: String(e) })),
+    ]);
+
+    // 포이즌 결과
+    const pz = poizonResult.status === 'fulfilled' ? poizonResult.value : { logged_in: false };
+    if (pz.logged_in) {
+      isLoggedIn = true;
+      updateIndicator('ind-poizon', 'ok', '접속됨');
+      addLog('🟣 포이즌 접속 완료', 'success');
+    } else {
+      updateIndicator('ind-poizon', 'fail', '실패');
+      addLog('🟣 포이즌 접속 실패: ' + (pz.message || ''), 'warning');
+    }
+
+    // 크림 결과 (GET 쿠키 체크 실패시 POST 실제 로그인 시도)
+    let kr = kreamResult.status === 'fulfilled' ? kreamResult.value : { success: false };
+    if (kr.success || kr.logged_in) {
+      isKreamLoggedIn = true;
+      updateIndicator('ind-kream', 'ok', '접속됨');
+      addLog('🛒 크림 접속 완료 (쿠키)', 'success');
+    } else {
+      // 쿠키 없음 → POST로 실제 로그인 시도
+      addLog('🛒 크림 쿠키 없음, 로그인 시도 중...', 'info');
+      updateIndicator('ind-kream', 'checking', '로그인 중...');
+      try {
+        const postRes = await fetch('/kream_login', { method: 'POST' });
+        kr = await postRes.json();
+        if (kr.success) {
+          isKreamLoggedIn = true;
+          updateIndicator('ind-kream', 'ok', '접속됨');
+          addLog('🛒 크림 로그인 성공', 'success');
+        } else {
+          updateIndicator('ind-kream', 'fail', '실패');
+          addLog('🛒 크림 로그인 실패: ' + (kr.message || ''), 'warning');
+        }
+      } catch (e) {
+        updateIndicator('ind-kream', 'fail', '실패');
+        addLog('🛒 크림 로그인 오류: ' + e, 'warning');
+      }
+    }
+
+    // 무신사 결과
+    const ms = musinsaResult.status === 'fulfilled' ? musinsaResult.value : { logged_in: false };
+    if (ms.logged_in) {
+      isMusinsaLoggedIn = true;
+      updateIndicator('ind-musinsa', 'ok', '접속됨');
+      addLog('🟤 무신사 접속 완료', 'success');
+    } else {
+      updateIndicator('ind-musinsa', 'fail', '실패');
+      addLog('🟤 무신사 접속 실패: ' + (ms.message || ''), 'warning');
+    }
+
+    const okCount = [isLoggedIn, isKreamLoggedIn, isMusinsaLoggedIn].filter(Boolean).length;
+    document.getElementById('loginMessage').textContent =
+      `${okCount}/3 사이트 접속 완료. 아래에서 모드를 선택하세요.`;
+
+    if (okCount === 3) {
+      const loginStatus = document.getElementById('loginStatus');
+      loginStatus.classList.add('logged-in');
+      loginStatus.querySelector('h3').textContent = '✅ 모든 사이트 접속 완료!';
+    }
+
+    addLog(`✅ 로그인 완료 (${okCount}/3)`, okCount === 3 ? 'success' : 'warning');
+  }
 
 // ✅ 여기에 추가!
   function applyCompareColor(cell, diff) {
@@ -2032,50 +2214,35 @@
         await new Promise(resolve => setTimeout(resolve, 2000));
         addLog('✅ 브라우저 종료 완료', 'success');
       }
-      // ===== 모드별 처리 =====
-      
+      // ===== 모드별 처리 (자동 로그인 완료 후 빠른 전환) =====
+
       // 🟣 포이즌 모드
       if (mode === 'poizon') {
-        console.log('🟣 포이즌 모드 처리');
-        
         if (!isLoggedIn) {
-          console.log('→ 로그인 필요');
-          addLog('🟣 POIZON 모드 선택 - 로그인 시작', 'info');
+          addLog('🟣 POIZON 로그인 진행 중...', 'info');
           performPoizonLogin(mode);
         } else {
-          console.log('→ 이미 로그인됨, 바로 활성화');
-          addLog('🟣 POIZON 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
         }
         return;
       }
-      
+
       // 🟤 무신사 모드
       if (mode === 'musinsa') {
-        console.log('🟤 무신사 모드 처리');
         if (!isMusinsaLoggedIn) {
-          console.log('→ 로그인 필요');
-          addLog('🟤 무신사 모드 선택 - 로그인 시작', 'info');
+          addLog('🟤 무신사 로그인 진행 중...', 'info');
           performMusinsaLogin(mode);
         } else {
-          console.log('→ 이미 로그인됨, 바로 활성화');
-          addLog('🟤 무신사 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
         }
         return;
       }
-      
+
       // 📋 리스트 비교 모드
       if (mode === 'compare') {
-        console.log('📋 리스트 비교 모드 처리');
-        
         if (!isLoggedIn) {
-          console.log('→ POIZON 로그인 필요');
-          addLog('📋 리스트 비교 - POIZON 로그인 필요', 'info');
           performPoizonLogin(mode);
         } else {
-          console.log('→ 이미 로그인됨, 바로 활성화');
-          addLog('📋 리스트 비교 모드 선택 (로그인 완료)', 'info');
           activateMode(mode);
         }
         return;
@@ -2178,6 +2345,9 @@
       // 무신사 모드일 때만 랭크 버튼 표시
       const rankBtn = document.getElementById('musinsaRankBtn');
       if (rankBtn) rankBtn.style.display = (mode === 'musinsa') ? 'block' : 'none';
+      // 포이즌 모드일 때만 인기 상품 섹션 표시
+      const popularSection = document.getElementById('popularSection');
+      if (popularSection) popularSection.style.display = (mode === 'poizon') ? 'grid' : 'none';
       document.getElementById('inputSection').style.display = 'grid';
       document.getElementById('buttonSection').style.display = 'grid';
       document.getElementById('statusSection').style.display = 'block';
@@ -2669,8 +2839,13 @@
         safeFetch('/shutdown_kream_browser'),
         safeFetch('/shutdown_musinsa_browser')
       ]);
-      
+
       addLog('👋 POIZON 데이터 수집기 시작!', 'info');
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 자동 로그인 (3곳 동시)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      loginAllSites();
       
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 2. 모드 버튼 이벤트 리스너
@@ -3780,6 +3955,97 @@
       document.getElementById('startBtn').textContent = '🟤 무신사 검색 시작';
       rankBtn.disabled = false;
       rankBtn.textContent = '📊 무신사 랭크';
+    };
+  }
+
+  async function startPopularSearch() {
+    // 포이즌 로그인 체크
+    if (!isLoggedIn) {
+      alert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
+      return;
+    }
+
+    if (eventSource) eventSource.close();
+
+    const popBtn = document.getElementById('popularBtn');
+    const brand = document.getElementById('brandSelect').value || '';
+
+    isCollecting = true;
+    collectedData = []; originalData = [];
+
+    setModeButtonsEnabled(false);
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('brandSelect').disabled = true;
+    popBtn.disabled = true;
+    popBtn.textContent = '🔥 인기 상품 수집 중...';
+    document.getElementById('stopBtn').style.display = 'block';
+
+    const brandMsg = brand ? ` [브랜드: ${brand}]` : ' [전체]';
+    addLog('🔥 포이즌 신규 인기 상품 수집 시작 (최대 200개)' + brandMsg, 'info');
+
+    const url = '/start?mode=popular&max_items=200&brand=' + encodeURIComponent(brand);
+    eventSource = new EventSource(url);
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'log') addLog(data.message, data.level || 'info');
+      if (data.type === 'progress') updateProgress(data.current, data.total);
+      if (data.type === 'data') {
+        collectedData.push(data.item);
+        renderTable();
+      }
+      if (data.type === 'error') {
+        addLog('❌ ' + (data.message || '인기 상품 수집 오류'), 'error');
+        isCollecting = false;
+        setModeButtonsEnabled(true);
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('resetBtn').style.display = 'block';
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
+        document.getElementById('brandSelect').disabled = false;
+        popBtn.disabled = false;
+        popBtn.textContent = '🔥 신규 인기 상품';
+        eventSource.close();
+        eventSource = null;
+      }
+      if (data.type === 'complete') {
+        addLog(`✅ 인기 상품 수집 완료! (${data.total_items || collectedData.length}개)`, 'success');
+        isCollecting = false;
+        if (data.data && Array.isArray(data.data)) {
+          collectedData = data.data;
+          renderTable();
+        }
+        document.getElementById('resetBtn').style.display = 'block';
+        setModeButtonsEnabled(true);
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
+        document.getElementById('brandSelect').disabled = false;
+        popBtn.disabled = false;
+        popBtn.textContent = '🔥 신규 인기 상품';
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+
+    eventSource.onerror = (e) => {
+      console.error('popular SSE error:', e);
+      if (eventSource.readyState === EventSource.CONNECTING) {
+        addLog('❌ 인기 상품 수집 연결 실패 - 서버를 재시작한 후 다시 시도하세요', 'error');
+      } else {
+        addLog('❌ 인기 상품 수집 연결 끊김', 'error');
+      }
+      isCollecting = false;
+      eventSource.close();
+      eventSource = null;
+      document.getElementById('stopBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'block';
+      setModeButtonsEnabled(true);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = '🟣 포이즌 검색 시작';
+      document.getElementById('brandSelect').disabled = false;
+      popBtn.disabled = false;
+      popBtn.textContent = '🔥 신규 인기 상품';
     };
   }
 
