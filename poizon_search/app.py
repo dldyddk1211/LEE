@@ -2294,35 +2294,67 @@ def backup_status():
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/api/backup/settings', methods=['POST'])
+def save_backup_settings():
+    """백업 설정 저장 (시간, NAS 계정)"""
+    try:
+        data = request.get_json()
+        paths.save_backup_settings(
+            backup_hour=data.get('backup_hour', 3),
+            backup_minute=data.get('backup_minute', 0),
+            nas_credentials=data.get('nas_credentials')
+        )
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 def _start_daily_backup():
-    """매일 새벽 3시 NAS 자동 백업 스케줄러"""
+    """설정된 시간에 NAS 자동 백업 스케줄러"""
     import time as _t
     from datetime import datetime as _dt, timedelta
 
     def _schedule():
         while True:
+            hour, minute = paths.get_backup_schedule()
             now = _dt.now()
-            target = now.replace(hour=3, minute=0, second=0, microsecond=0)
+            target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
             if target <= now:
                 target += timedelta(days=1)
             wait_sec = (target - now).total_seconds()
-            print(f"⏰ 다음 자동 백업: {target.strftime('%Y-%m-%d %H:%M')} ({int(wait_sec//3600)}시간 후)")
+            print(f"  [backup] next: {target.strftime('%Y-%m-%d %H:%M')} ({int(wait_sec//3600)}h later)")
             _t.sleep(wait_sec)
+
+            # NAS 마운트 확인 및 자동 마운트 시도 (Mac)
+            if not paths.is_nas_connected() and paths.IS_PRODUCTION:
+                try:
+                    creds = paths.get_nas_credentials()
+                    if creds.get('ip') and creds.get('user') and creds.get('password'):
+                        import subprocess
+                        nas_share = creds.get('share', 'LEE')
+                        mount_point = f"/Volumes/{nas_share}"
+                        subprocess.run(['mkdir', '-p', mount_point], capture_output=True)
+                        subprocess.run([
+                            'mount_smbfs',
+                            f"//{creds['user']}:{creds['password']}@{creds['ip']}/{nas_share}",
+                            mount_point
+                        ], capture_output=True, timeout=30)
+                except Exception as e:
+                    print(f"  [backup] NAS auto-mount failed: {e}")
+
             try:
                 result = paths.backup_to_nas()
                 if result['success']:
                     files_str = ', '.join(f['file'] for f in result['files'])
-                    print(f"✅ [자동백업] NAS 백업 완료: {files_str}")
-                    # 텔레그램 알림
+                    print(f"  [backup] OK: {files_str}")
                     try:
                         from utils.telegram import send_telegram_async
-                        send_telegram_async(f"✅ <b>[자동백업] NAS 백업 완료</b>\n파일: {files_str}\n시간: {result['timestamp']}")
+                        send_telegram_async(f"<b>[auto backup] NAS OK</b>\nfiles: {files_str}\ntime: {result['timestamp']}")
                     except Exception:
                         pass
                 else:
-                    print(f"⚠️ [자동백업] 실패: {result.get('error', '알 수 없는 오류')}")
+                    print(f"  [backup] FAIL: {result.get('error', 'unknown')}")
             except Exception as e:
-                print(f"⚠️ [자동백업] 오류: {e}")
+                print(f"  [backup] ERROR: {e}")
 
     t = threading.Thread(target=_schedule, daemon=True)
     t.start()

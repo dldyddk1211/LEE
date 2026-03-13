@@ -233,8 +233,44 @@ def get_backup_status():
         'nas_connected': is_nas_connected(),
         'nas_root': NAS_ROOT,
         'last_backup_time': settings.get('last_backup_time', ''),
+        'backup_hour': settings.get('backup_hour', 3),
+        'backup_minute': settings.get('backup_minute', 0),
+        'nas_credentials': settings.get('nas_credentials', {
+            'ip': '192.168.0.250',
+            'share': 'LEE',
+            'user': 'admin',
+            'password': ''
+        }),
         'local_files': local_files,
     }
+
+
+def save_backup_settings(backup_hour, backup_minute, nas_credentials=None):
+    """백업 시간 및 NAS 접속 정보 저장"""
+    settings = _load_settings()
+    settings['backup_hour'] = max(0, min(23, backup_hour))
+    settings['backup_minute'] = max(0, min(59, backup_minute))
+    if nas_credentials:
+        settings['nas_credentials'] = nas_credentials
+    _save_settings(settings)
+    return settings
+
+
+def get_nas_credentials():
+    """NAS 접속 정보 반환"""
+    settings = _load_settings()
+    return settings.get('nas_credentials', {
+        'ip': '192.168.0.250',
+        'share': 'LEE',
+        'user': 'admin',
+        'password': ''
+    })
+
+
+def get_backup_schedule():
+    """백업 스케줄 시간 반환"""
+    settings = _load_settings()
+    return settings.get('backup_hour', 3), settings.get('backup_minute', 0)
 
 
 def migrate_from_nas():
