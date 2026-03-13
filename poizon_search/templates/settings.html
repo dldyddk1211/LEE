@@ -7,33 +7,41 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f2f5;
       min-height: 100vh;
-      padding: 20px;
     }
+
+    /* 헤더 */
+    .page-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .page-header a { color: #aaa; text-decoration: none; font-size: 14px; }
+    .page-header a:hover { color: #fff; }
+    .page-header h1 { color: #fff; font-size: 20px; font-weight: 700; margin: 0; }
+    .header-sep { color: #555; }
+
+    /* 탭 메뉴 */
+    .top-menu-bar { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .top-menu-inner { display: flex; max-width: 1000px; margin: 0 auto; }
+    .top-menu-btn { padding: 13px 28px; background: none; border: none; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-bottom: -2px; display: flex; align-items: center; gap: 8px; }
+    .top-menu-btn:hover { color: #0f3460; background: #f0f4ff; }
+    .top-menu-btn.active { color: #0f3460; border-bottom-color: #0f3460; }
+
+    /* 탭 콘텐츠 */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     .container {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 40px;
-      max-width: 900px;
+      background: transparent;
+      padding: 20px;
+      max-width: 1000px;
       margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 8px;
-      font-size: 1.8em;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #888;
-      margin-bottom: 30px;
-      font-size: 14px;
     }
 
     /* 사이트 카드 */
@@ -307,9 +315,26 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- 헤더 -->
+  <div class="page-header">
+    <a href="/">&#8592; 메인</a>
+    <span class="header-sep">|</span>
     <h1>&#9881; 설정</h1>
-    <p class="subtitle">계정 관리 및 데이터 저장 경로를 설정합니다</p>
+  </div>
+
+  <!-- 탭 메뉴 -->
+  <div class="top-menu-bar">
+    <div class="top-menu-inner">
+      <button class="top-menu-btn active" onclick="switchTab('accounts')">&#128100; 계정 관리</button>
+      <button class="top-menu-btn" onclick="switchTab('data')">&#128193; 데이터 경로</button>
+      <button class="top-menu-btn" onclick="switchTab('backup')">&#128190; NAS 백업</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ━━ 탭1: 계정 관리 ━━ -->
+    <div class="tab-content active" id="tab-accounts">
 
     <!-- 네이버 -->
     <div class="site-card" data-site="naver">
@@ -415,16 +440,15 @@
       </div>
     </div>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <!-- 데이터 저장 경로 설정 -->
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <div style="margin: 30px 0 10px; border-top: 2px solid #e0e0e0; padding-top: 24px;">
-      <h2 style="font-size: 1.3em; color: #333; margin-bottom: 6px;">&#128193; 데이터 저장 경로</h2>
-      <p style="color: #888; font-size: 13px; margin-bottom: 18px;">
-        거래명세서, 고객정보, 검색기록 등 중요 DB가 저장되는 위치입니다.<br>
-        Mac/Windows 모두 같은 외장 드라이브를 연결하면 동일한 데이터를 볼 수 있습니다.
-      </p>
+    <!-- 계정 저장 버튼 -->
+    <div style="text-align: center; margin-top: 20px;">
+      <button class="save-btn" onclick="saveSettings()">계정 저장</button>
     </div>
+
+    </div><!-- /tab-accounts -->
+
+    <!-- ━━ 탭2: 데이터 경로 ━━ -->
+    <div class="tab-content" id="tab-data">
 
     <div class="site-card" id="data-path-card">
       <div class="site-header">
@@ -456,9 +480,11 @@
       <!-- 경로 변경은 추후 지원 예정 -->
     </div>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <!-- NAS 백업 관리 -->
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    </div><!-- /tab-data -->
+
+    <!-- ━━ 탭3: NAS 백업 ━━ -->
+    <div class="tab-content" id="tab-backup">
+
     <div class="site-card" id="backup-card">
       <div class="site-header">
         <div class="site-title">
@@ -531,15 +557,23 @@
       </div>
     </div>
 
-    <div class="bottom-actions">
-      <button class="cancel-btn" onclick="window.close()">닫기</button>
-      <button class="save-btn" onclick="saveSettings()">계정 저장</button>
-    </div>
-  </div>
+    </div><!-- /tab-backup -->
+
+  </div><!-- /container -->
 
   <div class="toast" id="toast"></div>
 
   <script>
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 탭 전환
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.top-menu-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
     // 기본 계정 데이터
     let settings = {
       naver: {
