@@ -2082,6 +2082,90 @@ def get_active_account(site):
 def settings_page():
     return render_template('settings.html')
 
+# ==========================================
+# 입고 체크
+# ==========================================
+
+@app.route('/receiving')
+def receiving_page():
+    return render_template('receiving.html')
+
+@app.route('/api/receiving/save', methods=['POST'])
+def receiving_save():
+    """입고 스캔 데이터 저장"""
+    try:
+        data = request.get_json()
+        items = data.get('items', [])
+        receiving_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'local_data', 'receiving.json')
+        os.makedirs(os.path.dirname(receiving_file), exist_ok=True)
+        with open(receiving_file, 'w', encoding='utf-8') as f:
+            json.dump({'items': items, 'updated': datetime.now().isoformat()}, f, ensure_ascii=False, indent=2)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/receiving/export', methods=['POST'])
+def receiving_export():
+    """입고 데이터 엑셀 다운로드"""
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill
+        from io import BytesIO
+
+        data = request.get_json()
+        items = data.get('items', [])
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = '입고체크'
+
+        # 헤더
+        headers = ['No.', '상품번호', '수량', '최초스캔', '최종스캔']
+        header_fill = PatternFill(start_color='667eea', end_color='667eea', fill_type='solid')
+        header_font = Font(bold=True, color='FFFFFF', size=11)
+        for col, h in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=h)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='center')
+
+        # 데이터
+        total_qty = 0
+        for idx, item in enumerate(items, 1):
+            ws.cell(row=idx+1, column=1, value=idx)
+            ws.cell(row=idx+1, column=2, value=item.get('code', ''))
+            qty = item.get('qty', 1)
+            ws.cell(row=idx+1, column=3, value=qty)
+            ws.cell(row=idx+1, column=4, value=item.get('firstScan', ''))
+            ws.cell(row=idx+1, column=5, value=item.get('lastScan', ''))
+            total_qty += qty
+
+        # 합계 행
+        sum_row = len(items) + 2
+        ws.cell(row=sum_row, column=1, value='합계')
+        ws.cell(row=sum_row, column=1).font = Font(bold=True)
+        ws.cell(row=sum_row, column=2, value=f'{len(items)}품목')
+        ws.cell(row=sum_row, column=2).font = Font(bold=True)
+        ws.cell(row=sum_row, column=3, value=total_qty)
+        ws.cell(row=sum_row, column=3).font = Font(bold=True)
+
+        # 컬럼 너비
+        ws.column_dimensions['A'].width = 6
+        ws.column_dimensions['B'].width = 22
+        ws.column_dimensions['C'].width = 8
+        ws.column_dimensions['D'].width = 12
+        ws.column_dimensions['E'].width = 12
+
+        buf = BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+
+        from flask import send_file
+        return send_file(buf, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        as_attachment=True, download_name=f'입고체크_{datetime.now().strftime("%Y%m%d")}.xlsx')
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/settings', methods=['GET'])
 def get_settings():
     return jsonify({'status': 'ok', 'settings': load_settings()})

@@ -943,7 +943,12 @@
         <button class="mode-btn" id="modeForms">
           <span class="mode-icon">📝</span>
           <span class="mode-text">서식/양식</span>
-        </button>      
+        </button>
+
+        <button class="mode-btn" id="modeReceiving">
+          <span class="mode-icon">📷</span>
+          <span class="mode-text">입고 체크</span>
+        </button>
       </div>
     </div>
 
@@ -2185,6 +2190,11 @@
         return;
       }
 
+      if (mode === 'receiving') {
+        window.open('/receiving', 'receivingPopup', 'width=500,height=900');
+        return;
+      }
+
       if (mode === 'settings') {
         window.location.href = '/settings';
         return;
@@ -2859,7 +2869,8 @@
       document.getElementById('modeInventory').addEventListener('click', () => selectMode('inventory'));
       document.getElementById('modeSettings').addEventListener('click', () => selectMode('settings'));
       document.getElementById('modeForms').addEventListener('click', () => selectMode('forms'));
-     
+      document.getElementById('modeReceiving').addEventListener('click', () => selectMode('receiving'));
+
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 4. startKreamSearch 함수 정의 (독립!)
