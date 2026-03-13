@@ -479,7 +479,10 @@
           <label style="font-size: 13px; font-weight: 600; color: #666;">아이디</label>
           <input type="text" id="bk-nas-user" placeholder="admin" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px;" />
           <label style="font-size: 13px; font-weight: 600; color: #666;">비밀번호</label>
-          <input type="password" id="bk-nas-pass" placeholder="비밀번호" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px;" />
+          <div style="position:relative; display:flex; align-items:center;">
+            <input type="password" id="bk-nas-pass" placeholder="비밀번호" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; width:100%; padding-right:36px;" />
+            <span onclick="toggleNasPass()" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="bk-pass-toggle" title="비밀번호 보기">&#128065;</span>
+          </div>
         </div>
       </div>
 
@@ -885,6 +888,20 @@
           resultEl.innerHTML = `<b>오류</b><br>${err}`;
           showToast('백업 오류: ' + err, true);
         });
+    }
+
+    function toggleNasPass() {
+      const inp = document.getElementById('bk-nas-pass');
+      const icon = document.getElementById('bk-pass-toggle');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.innerHTML = '&#128064;';
+        icon.title = '비밀번호 숨기기';
+      } else {
+        inp.type = 'password';
+        icon.innerHTML = '&#128065;';
+        icon.title = '비밀번호 보기';
+      }
     }
 
     function saveBackupSettings() {
