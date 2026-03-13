@@ -2273,13 +2273,72 @@ except Exception as e:
     print(f'⚠️ 텔레그램 폴링 시작 실패: {e}')
 
 # ==========================================
+# NAS 백업 API + 자동 백업 스케줄러
+# ==========================================
+
+@app.route('/api/backup/run', methods=['POST'])
+def run_backup():
+    """수동 NAS 백업 실행"""
+    try:
+        result = paths.backup_to_nas()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/backup/status', methods=['GET'])
+def backup_status():
+    """백업 상태 조회"""
+    try:
+        status = paths.get_backup_status()
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+def _start_daily_backup():
+    """매일 새벽 3시 NAS 자동 백업 스케줄러"""
+    import time as _t
+    from datetime import datetime as _dt, timedelta
+
+    def _schedule():
+        while True:
+            now = _dt.now()
+            target = now.replace(hour=3, minute=0, second=0, microsecond=0)
+            if target <= now:
+                target += timedelta(days=1)
+            wait_sec = (target - now).total_seconds()
+            print(f"⏰ 다음 자동 백업: {target.strftime('%Y-%m-%d %H:%M')} ({int(wait_sec//3600)}시간 후)")
+            _t.sleep(wait_sec)
+            try:
+                result = paths.backup_to_nas()
+                if result['success']:
+                    files_str = ', '.join(f['file'] for f in result['files'])
+                    print(f"✅ [자동백업] NAS 백업 완료: {files_str}")
+                    # 텔레그램 알림
+                    try:
+                        from utils.telegram import send_telegram_async
+                        send_telegram_async(f"✅ <b>[자동백업] NAS 백업 완료</b>\n파일: {files_str}\n시간: {result['timestamp']}")
+                    except Exception:
+                        pass
+                else:
+                    print(f"⚠️ [자동백업] 실패: {result.get('error', '알 수 없는 오류')}")
+            except Exception as e:
+                print(f"⚠️ [자동백업] 오류: {e}")
+
+    t = threading.Thread(target=_schedule, daemon=True)
+    t.start()
+
+# Mac 운영서버에서만 자동 백업 실행
+if paths.IS_PRODUCTION:
+    _start_daily_backup()
+
+# ==========================================
 # 서버 시작
 # ==========================================
 
 if __name__ == '__main__':
     app.run(
-        debug=True, 
-        host='0.0.0.0', 
+        debug=True,
+        host='0.0.0.0',
         port=3001,
         use_reloader=False  # ← 재시작 시 포트 충돌 방지
     )

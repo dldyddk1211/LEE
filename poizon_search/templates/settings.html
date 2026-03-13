@@ -456,6 +456,56 @@
       <!-- 경로 변경은 추후 지원 예정 -->
     </div>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- NAS 백업 관리 -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="site-card" id="backup-card">
+      <div class="site-header">
+        <div class="site-title">
+          <div class="site-icon" style="background: linear-gradient(135deg, #28a745, #20c997); font-size: 14px;">NAS</div>
+          <span class="site-name">NAS 백업 관리</span>
+        </div>
+        <span class="site-status" id="nas-status" style="background:#ffeeba; color:#856404;">확인중...</span>
+      </div>
+
+      <!-- 백업 상태 -->
+      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: 13px;">
+          <span style="font-weight: 700; color: #666;">NAS 경로</span>
+          <span id="bk-nas-root" style="color: #333; font-family: monospace; font-size: 12px;">-</span>
+          <span style="font-weight: 700; color: #666;">마지막 백업</span>
+          <span id="bk-last-time" style="color: #333; font-weight: 600;">-</span>
+          <span style="font-weight: 700; color: #666;">자동 백업</span>
+          <span style="color: #333;">매일 새벽 3:00 (운영서버)</span>
+        </div>
+      </div>
+
+      <!-- 로컬 DB 파일 목록 -->
+      <div style="padding: 10px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">로컬 DB 파일</div>
+        <div id="bk-files" style="font-size: 12px;"></div>
+      </div>
+
+      <!-- 백업 결과 메시지 -->
+      <div id="bk-result" style="display:none; padding: 12px 16px; border-radius: 10px; margin-bottom: 14px; font-size: 13px;"></div>
+
+      <!-- 백업 버튼 -->
+      <div style="text-align: center;">
+        <button id="bk-btn" onclick="runBackup()" style="
+          padding: 12px 36px;
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        ">NAS 백업 실행</button>
+      </div>
+    </div>
+
     <div class="bottom-actions">
       <button class="cancel-btn" onclick="window.close()">닫기</button>
       <button class="save-btn" onclick="saveSettings()">계정 저장</button>
@@ -668,9 +718,6 @@
           document.getElementById('dp-env').textContent = `${envLabel}`;
           document.getElementById('dp-default').textContent = data.default_data_root;
           document.getElementById('dp-current').textContent = data.data_root;
-          document.getElementById('dp-input').value = data.custom_data_root || '';
-          document.getElementById('dp-input').placeholder = data.default_data_root;
-
           // 드라이브 연결 상태
           const statusEl = document.getElementById('drive-status');
           if (data.drive_connected) {
@@ -704,6 +751,105 @@
 
     // 페이지 로드 시 데이터 경로 정보 로드
     loadDataPaths();
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // NAS 백업 관련
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    function loadBackupStatus() {
+      fetch('/api/backup/status')
+        .then(r => r.json())
+        .then(data => {
+          // NAS 연결 상태
+          const nasEl = document.getElementById('nas-status');
+          if (data.nas_connected) {
+            nasEl.textContent = '연결됨';
+            nasEl.style.background = '#d4edda';
+            nasEl.style.color = '#155724';
+          } else {
+            nasEl.textContent = '미연결';
+            nasEl.style.background = '#f8d7da';
+            nasEl.style.color = '#721c24';
+          }
+
+          document.getElementById('bk-nas-root').textContent = data.nas_root || '-';
+          document.getElementById('bk-last-time').textContent = data.last_backup_time || '백업 기록 없음';
+
+          // 로컬 파일 목록
+          const filesEl = document.getElementById('bk-files');
+          if (data.local_files && data.local_files.length > 0) {
+            const fileLabels = {
+              'invoices_db': '거래명세서 DB',
+              'inventory_db': '재고관리 DB',
+              'bigdata_db': '빅데이터 DB',
+              'customers_json': '고객 정보',
+              'task_history_json': '검색 기록'
+            };
+            let html = '<table style="width:100%; border-collapse:collapse;">';
+            html += '<tr style="border-bottom:1px solid #eee;"><th style="text-align:left; padding:4px 0; color:#888;">파일</th><th style="text-align:right; padding:4px 0; color:#888;">크기</th><th style="text-align:right; padding:4px 0; color:#888;">수정일</th></tr>';
+            data.local_files.forEach(f => {
+              const label = fileLabels[f.key] || f.file;
+              const sizeKB = (f.size / 1024).toFixed(1);
+              html += `<tr style="border-bottom:1px solid #f5f5f5;">
+                <td style="padding:4px 0; color:#555; font-weight:600;">${label}</td>
+                <td style="padding:4px 0; text-align:right; color:#888;">${sizeKB} KB</td>
+                <td style="padding:4px 0; text-align:right; color:#888;">${f.modified}</td>
+              </tr>`;
+            });
+            html += '</table>';
+            filesEl.innerHTML = html;
+          } else {
+            filesEl.innerHTML = '<div style="color:#aaa; text-align:center; padding:8px;">로컬 DB 파일 없음</div>';
+          }
+        })
+        .catch(err => {
+          document.getElementById('nas-status').textContent = '오류';
+        });
+    }
+
+    function runBackup() {
+      const btn = document.getElementById('bk-btn');
+      const resultEl = document.getElementById('bk-result');
+      btn.disabled = true;
+      btn.textContent = '백업 중...';
+      btn.style.opacity = '0.6';
+      resultEl.style.display = 'none';
+
+      fetch('/api/backup/run', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          btn.disabled = false;
+          btn.textContent = 'NAS 백업 실행';
+          btn.style.opacity = '1';
+
+          resultEl.style.display = 'block';
+          if (data.success) {
+            const fileList = data.files.map(f => `${f.file} (${(f.size/1024).toFixed(1)}KB)`).join(', ');
+            resultEl.style.background = '#d4edda';
+            resultEl.style.color = '#155724';
+            resultEl.innerHTML = `<b>백업 완료!</b><br>파일: ${fileList}<br>시간: ${data.timestamp}`;
+            showToast('NAS 백업 완료');
+            loadBackupStatus();
+          } else {
+            resultEl.style.background = '#f8d7da';
+            resultEl.style.color = '#721c24';
+            resultEl.innerHTML = `<b>백업 실패</b><br>${data.error || '알 수 없는 오류'}`;
+            showToast('백업 실패: ' + (data.error || ''), true);
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.textContent = 'NAS 백업 실행';
+          btn.style.opacity = '1';
+          resultEl.style.display = 'block';
+          resultEl.style.background = '#f8d7da';
+          resultEl.style.color = '#721c24';
+          resultEl.innerHTML = `<b>오류</b><br>${err}`;
+          showToast('백업 오류: ' + err, true);
+        });
+    }
+
+    loadBackupStatus();
   </script>
 </body>
 </html>
