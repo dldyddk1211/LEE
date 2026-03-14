@@ -8,31 +8,33 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0d0d0d;
             min-height: 100vh;
             padding: 20px;
+            color: #ccc;
         }
         .container {
-            background: white;
+            background: #1a1a1a;
             border-radius: 20px;
             padding: 30px;
             max-width: 1600px;
             margin: 0 auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid #2a2a2a;
         }
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #d4a843;
         }
         .header h1 {
             font-size: 2em;
-            color: #333;
+            color: #d4a843;
             margin-bottom: 10px;
         }
         .header p {
-            color: #666;
+            color: #999;
             font-size: 1.1em;
         }
         .controls {
@@ -41,13 +43,14 @@
             align-items: center;
             margin-bottom: 20px;
             padding: 15px 20px;
-            background: #f8f9fa;
+            background: #222;
             border-radius: 12px;
+            border: 1px solid #333;
         }
         .controls .count {
             font-size: 1.1em;
             font-weight: 600;
-            color: #333;
+            color: #ccc;
         }
         .btn {
             padding: 10px 20px;
@@ -59,12 +62,12 @@
             transition: all 0.3s;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #d4a843, #a07c2a);
+            color: #111;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+            box-shadow: 0 4px 12px rgba(212,168,67,0.3);
         }
         .btn-success {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
@@ -92,9 +95,9 @@
         .table-container {
             max-height: 600px;
             overflow: auto;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #333;
             border-radius: 12px;
-            background: white;
+            background: #1a1a1a;
         }
         table {
             width: 100%;
@@ -104,30 +107,31 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #333;
+            color: #ccc;
         }
         th {
-            background: #f8f9fa;
+            background: #222;
             font-weight: 600;
-            color: #333;
+            color: #d4a843;
             position: sticky;
             top: 0;
             z-index: 10;
         }
         tr:hover {
-            background: #f8f9fa;
+            background: #252525;
         }
         .product-img {
             width: 60px;
             height: 60px;
             object-fit: contain;
             border-radius: 6px;
-            background: #f8f9fa;
+            background: #222;
             padding: 3px;
         }
         .kream-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #d4a843, #a07c2a);
+            color: #111;
             border: none;
             padding: 6px 12px;
             border-radius: 6px;
@@ -138,21 +142,21 @@
         }
         .kream-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 3px 12px rgba(245, 87, 108, 0.35);
+            box-shadow: 0 3px 12px rgba(212, 168, 67, 0.35);
         }
         .sort-btn {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 12px;
-            color: #667eea;
+            color: #d4a843;
             margin-left: 5px;
             padding: 2px 5px;
             transition: all 0.2s;
         }
         .sort-btn:hover {
-            background: #667eea;
-            color: white;
+            background: #d4a843;
+            color: #111;
             border-radius: 3px;
         }
         .sort-btn.asc::after {
@@ -164,20 +168,20 @@
         
         /* 비교 열 기본 스타일 */
         td.comparison {
-            background-color: #f8f9fa;
+            background-color: #1e1e1e;
             font-weight: 600;
         }
 
         td.comparison.profit-high {
-            background-color: #e8f5e9;
+            background-color: #1a2e1a;
         }
 
         tr:hover td.comparison {
-            background-color: #e9ecef;
+            background-color: #252525;
         }
 
         tr:hover td.comparison.profit-high {
-            background-color: #d4edda;
+            background-color: #1e3a1e;
         }
         
         /* 디버그 로그 패널 */
@@ -221,6 +225,16 @@
         .debug-time {
             color: #888;
         }
+        /* Black & Gold 커스텀 모달 */
+        .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.7); z-index:99999; justify-content:center; align-items:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:#1a1a1a; border:1px solid #d4a843; border-radius:14px; padding:28px 24px 20px; max-width:400px; width:90%; text-align:center; }
+        .modal-box .modal-msg { font-size:15px; color:#ddd; line-height:1.6; margin-bottom:22px; white-space:pre-line; }
+        .modal-box .modal-actions { display:flex; gap:10px; justify-content:center; }
+        .modal-box .modal-btn { flex:1; padding:10px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+        .modal-btn.primary { background:linear-gradient(135deg,#d4a843,#a07c2a); color:#111; }
+        .modal-btn.secondary { background:#2a2a2a; color:#aaa; border:1px solid #444; }
+        .modal-btn.danger { background:#2a1a1a; color:#ff5252; border:1px solid #ff5252; }
     </style>
 </head>
 <body>
@@ -276,7 +290,7 @@
                 </thead>
                 <tbody id="productTableBody">
                     <tr>
-                        <td colspan="12" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="12" style="text-align: center; padding: 40px; color: #888;">
                             ⏳ 데이터 로딩 중...
                         </td>
                     </tr>
@@ -299,7 +313,27 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalOverlay"><div class="modal-box"><div class="modal-msg" id="modalMsg"></div><div class="modal-actions" id="modalActions"></div></div></div>
+
     <script>
+        // ✅ Black & Gold 커스텀 모달
+        function showModal(msg, buttons) {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalMsg').textContent = msg;
+            const actions = document.getElementById('modalActions');
+            actions.innerHTML = '';
+            buttons.forEach(btn => {
+                const b = document.createElement('button');
+                b.className = 'modal-btn ' + (btn.cls || 'primary');
+                b.textContent = btn.text;
+                b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
+                actions.appendChild(b);
+            });
+            overlay.classList.add('active');
+        }
+        function goldAlert(msg, cb) { showModal(msg, [{ text: '확인', cls: 'primary', cb }]); }
+        function goldConfirm(msg, onOk, isDanger) { showModal(msg, [{ text: '취소', cls: 'secondary' }, { text: '확인', cls: isDanger ? 'danger' : 'primary', cb: onOk }]); }
+
         // ✅ 서버에서 전달된 데이터
         const AUTO_START = {{ auto_start|tojson if auto_start else 'false' }};
         const PRODUCT_CODES = {{ product_codes|tojson if product_codes else '[]' }};
@@ -437,7 +471,7 @@
                         <div style="font-size: 18px; font-weight: 600; color: #dc3545; margin-bottom: 10px;">
                             데이터가 없습니다
                         </div>
-                        <div style="font-size: 14px; color: #666;">
+                        <div style="font-size: 14px; color: #888;">
                             메인 창에서 먼저 키워드 검색을 실행하세요
                         </div>
                     </td>
@@ -521,7 +555,7 @@
         // ==========================================
         async function startKreamSearch() {
             if (collectedData.length === 0) {
-                alert('검색할 상품이 없습니다.');
+                goldAlert('검색할 상품이 없습니다.');
                 return;
             }
             
@@ -551,7 +585,7 @@
                 
                 if (!result.success) {
                     addDebugLog(`❌ 요청 실패: ${result.error}`, '#f00');
-                    alert('검색 시작 실패: ' + result.error);
+                    goldAlert('검색 시작 실패: ' + result.error);
                     btn.disabled = false;
                     btn.textContent = '🔍 크림 검색 시작';
                     return;
@@ -637,7 +671,7 @@
             if (avgPriceEl && result.kream_data.avg_price) {
                 avgPriceEl.textContent = result.kream_data.avg_price;
                 avgPriceEl.style.fontWeight = '600';
-                avgPriceEl.style.color = '#667eea';
+                avgPriceEl.style.color = '#d4a843';
                 
                 const priceStr = result.kream_data.avg_price.replace(/[₩,원\s]/g, '');
                 kreamPrice = parseInt(priceStr) || 0;
@@ -662,7 +696,7 @@
                 
                 salesEl.textContent = salesNum.toLocaleString() + '개';
                 salesEl.style.fontWeight = '600';
-                salesEl.style.color = '#667eea';
+                salesEl.style.color = '#d4a843';
                 salesEl.setAttribute('data-kream-sales', salesNum);
                 
                 // ✅ 엑셀 데이터 업데이트 (문자열로 저장)
@@ -737,7 +771,7 @@
                 const validData = kreamSearchResults.filter(item => item != null);
                 
                 if (validData.length === 0) {
-                    alert('❌ 다운로드할 데이터가 없습니다');
+                    goldAlert('다운로드할 데이터가 없습니다');
                     return;
                 }
                 
@@ -768,16 +802,16 @@
                     
                     // 1초 후 알림
                     setTimeout(() => {
-                        alert(`✅ 엑셀 다운로드 완료!\n\n파일: ${result.filename}\n상품: ${result.count}개`);
+                        goldAlert(`엑셀 다운로드 완료!\n\n파일: ${result.filename}\n상품: ${result.count}개`);
                     }, 500);
                 } else {
-                    alert('❌ 엑셀 생성 실패: ' + result.error);
+                    goldAlert('엑셀 생성 실패: ' + result.error);
                     addDebugLog('❌ 엑셀 생성 실패: ' + result.error, '#f00');
                 }
                 
             } catch (error) {
                 console.error('엑셀 다운로드 오류:', error);
-                alert('❌ 엑셀 다운로드 오류: ' + error);
+                goldAlert('엑셀 다운로드 오류: ' + error);
                 addDebugLog('❌ 엑셀 다운로드 오류: ' + error, '#f00');
             }
         }
@@ -845,21 +879,19 @@
         function closeKreamWindow() {
             addDebugLog('🛑 창 닫기 요청...', '#ff0');
             
-            if (confirm('작업을 중단하고 창을 닫으시겠습니까?\n\n백그라운드 검색도 중단됩니다.')) {
+            goldConfirm('작업을 중단하고 창을 닫으시겠습니까?\n\n백그라운드 검색도 중단됩니다.', () => {
                 addDebugLog('✅ 사용자 확인 완료', '#0f0');
-                
+
                 fetch('/stop_kream_search', { method: 'POST' })
                     .then(response => response.json())
                     .then(data => addDebugLog(`✅ 중단 요청 완료`, '#0f0'))
                     .catch(error => addDebugLog(`⚠️ 중단 요청 실패`, '#ff0'));
-                
+
                 setTimeout(() => {
                     addDebugLog('👋 창을 닫습니다...', '#0f0');
                     window.close();
                 }, 1000);
-            } else {
-                addDebugLog('❌ 사용자가 취소함', '#888');
-            }
+            }, true);
         }
     </script>
 </body>

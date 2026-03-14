@@ -3,66 +3,259 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>POIZON 데이터 수집기</title>
+  <title>브랜드유통 데이터 소싱</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #0d0d0d;
       min-height: 100vh;
-      padding: 20px;
+      padding: 0;
+    }
+
+    /* ━━━ 사이드바 레이아웃 ━━━ */
+    .app-layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      background: #111;
+      border-right: 1px solid #2a2a2a;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .sidebar-header h2 {
+      color: #d4a843;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .sidebar-header p {
+      color: #666;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 8px 0;
+    }
+    .sidebar-menu .menu-item {
+      padding: 11px 18px;
+      color: #999;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-menu .menu-item:hover {
+      background: #1a1a1a;
+      color: #ddd;
+    }
+    .sidebar-menu .menu-item.active {
+      background: #1a1a0a;
+      color: #d4a843;
+      border-left-color: #d4a843;
+    }
+    .sidebar-menu .menu-item .badge {
+      margin-left: auto;
+      background: #2a2210;
+      color: #d4a843;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .menu-group-header {
+      padding: 11px 18px;
+      color: #777;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .menu-group-header:hover { background: #1a1a1a; color: #aaa; }
+    .menu-group-header .arrow {
+      margin-left: auto;
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+    .menu-group-header.open .arrow { transform: rotate(180deg); }
+    .submenu {
+      list-style: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .submenu.open { max-height: 300px; }
+    .submenu .menu-item {
+      padding-left: 44px;
+      font-size: 13px;
+    }
+    .sidebar-footer {
+      padding: 12px 18px;
+      border-top: 1px solid #2a2a2a;
+      position: sticky;
+      bottom: 0;
+      background: #111;
+    }
+    .sidebar-footer .env-badge {
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* ━━━ 메인 컨텐츠 ━━━ */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      padding: 24px;
+      min-height: 100vh;
     }
 
     .container{
-      background:#fff;
-      border-radius:20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding:40px;
-      max-width: 1600px;
-      margin: 0 auto;
+      background:#1a1a1a;
+      border-radius:16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      padding:28px;
+      max-width: 100%;
+      margin: 0;
       width:100%;
+      border: 1px solid #2a2a2a;
+    }
+
+    /* ━━━ 대시보드 ━━━ */
+    .dashboard-panel { display: block; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .dash-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .dash-card h3 {
+      color: #d4a843;
+      font-size: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dash-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #222;
+    }
+    .dash-status-row:last-child { border-bottom: none; }
+    .dash-status-row .label { color: #888; font-size: 13px; }
+    .dash-status-row .value { font-size: 13px; font-weight: 600; }
+    .dash-status-row .value.online { color: #4caf50; }
+    .dash-status-row .value.offline { color: #666; }
+    .dash-status-row .value.gold { color: #d4a843; }
+    .dash-log-box {
+      background: #111;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #888;
+      font-family: monospace;
+      line-height: 1.6;
+    }
+    .dash-log-box::-webkit-scrollbar { width: 4px; }
+    .dash-log-box::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* ━━━ 햄버거 메뉴 (모바일) ━━━ */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 12px; left: 12px;
+      z-index: 1100;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #d4a843;
+      font-size: 22px;
+      width: 40px; height: 40px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+    }
+    .sidebar-overlay.active { display: block; }
+
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 60px 12px 12px; }
+      .dashboard-grid { grid-template-columns: 1fr; }
     }
 
     h1{
       text-align:center;
-      color:#333;
+      color:#d4a843;
       margin-bottom:10px;
       font-size:2em;
     }
 
     .subtitle{
       text-align:center;
-      color:#666;
+      color:#888;
       margin-bottom:30px;
     }
 
     .login-status{
       padding:25px;
-      background:#fff3cd;
+      background:#1e1e1e;
       border-radius:10px;
       margin-bottom:30px;
       text-align:center;
-      border:3px solid #ffc107;
+      border:2px solid #d4a843;
     }
     .login-status.logged-in{
-      background:#d4edda;
-      border-color:#28a745;
+      background:#1a2e1a;
+      border-color:#4caf50;
     }
     .login-status h3{
-      color:#856404;
+      color:#d4a843;
       margin-bottom:10px;
       font-size:1.3em;
     }
-    .login-status.logged-in h3{ color:#155724; }
+    .login-status.logged-in h3{ color:#4caf50; }
     .login-status p{
       margin:10px 0;
       font-size:15px;
-      color:#666;
+      color:#aaa;
     }
 
     #loginCheckBtn{
-      background:#ffc107;
-      color:#333;
+      background: linear-gradient(135deg, #d4a843, #c9a227);
+      color:#111;
       border:none;
       padding:14px 12px;
       border-radius:10px;
@@ -71,24 +264,25 @@
       cursor:pointer;
       margin:15px auto 0;
       transition: all 0.3s;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(212,168,67,0.3);
       min-width:200px;
       max-width:300px;
       display:block;
       min-height: 48px;
     }
     #loginCheckBtn:hover:not(:disabled){
-      background:#ffb300;
+      background: linear-gradient(135deg, #e0b84d, #d4a843);
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 6px 16px rgba(212,168,67,0.4);
     }
     #loginCheckBtn:disabled{
-      background:#ccc;
+      background:#333;
+      color:#666;
       cursor:not-allowed;
       transform:none;
     }
     .login-status.logged-in #loginCheckBtn{
-      background:#28a745;
+      background: linear-gradient(135deg, #4caf50, #388e3c);
       color:#fff;
     }
 
@@ -107,34 +301,37 @@
       border-radius: 20px;
       font-size: 13px;
       font-weight: 600;
-      background: #f8f9fa;
-      border: 2px solid #e0e0e0;
+      background: #252525;
+      border: 2px solid #333;
+      color: #ccc;
       transition: all 0.3s;
     }
     .login-indicator .dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #ccc;
+      background: #555;
       transition: all 0.3s;
     }
     .login-indicator.checking .dot {
-      background: #ffc107;
+      background: #d4a843;
       animation: pulse 1s infinite;
     }
     .login-indicator.ok {
-      border-color: #28a745;
-      background: #d4edda;
+      border-color: #4caf50;
+      background: #1a2e1a;
+      color: #4caf50;
     }
     .login-indicator.ok .dot {
-      background: #28a745;
+      background: #4caf50;
     }
     .login-indicator.fail {
-      border-color: #dc3545;
-      background: #f8d7da;
+      border-color: #ef5350;
+      background: #2e1a1a;
+      color: #ef5350;
     }
     .login-indicator.fail .dot {
-      background: #dc3545;
+      background: #ef5350;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
@@ -144,12 +341,13 @@
     .mode-selector{
       margin-bottom:20px;
       padding:20px;
-      background:#f8f9fa;
+      background:#111;
       border-radius:12px;
+      border: 1px solid #2a2a2a;
     }
     .mode-selector h3{
       margin-bottom:15px;
-      color:#333;
+      color:#d4a843;
       font-size:16px;
     }
     .mode-buttons{
@@ -159,8 +357,8 @@
     }
     .mode-btn{
       padding:18px 16px;
-      border:2px solid #e0e0e0;
-      background:#fff;
+      border:2px solid #333;
+      background:#1e1e1e;
       border-radius:10px;
       cursor:pointer;
       transition: all 0.3s;
@@ -171,75 +369,72 @@
       gap:10px;
       font-size:15px;
       font-weight:600;
-      color:#333;
+      color:#ccc;
       white-space:nowrap;
     }
     .mode-btn:hover:not(:disabled){
-      border-color:#667eea;
+      border-color:#d4a843;
       transform:translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+      box-shadow: 0 4px 12px rgba(212,168,67,0.2);
+      color:#d4a843;
     }
     .mode-btn:disabled{
       opacity:0.5;
       cursor:not-allowed;
       transform:none;
     }
-    /* ===== 모드 버튼 활성화 색상 ===== */
-
-    /* 기본 활성화 (보라색) */
+    /* ===== 모드 버튼 활성화 색상 (블랙 & 골드) ===== */
     .mode-btn.active{
-      border-color:#667eea;
-      background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color:#fff;
+      border-color:#d4a843;
+      background: linear-gradient(135deg, #d4a843 0%, #a07c2a 100%);
+      color:#111;
     }
-
-    /* 크림 모드 (파란색) */
     #modeKream.active{
-      border-color:#4285f4;
-      background:linear-gradient(135deg, #4285f4 0%, #34a853 100%);
-      color:#fff;
+      border-color:#5c9ce6;
+      background: linear-gradient(135deg, #2a2a2a 0%, #1a1a3e 100%);
+      color:#5c9ce6;
+      border-width: 2px;
     }
-
-    /* 포이즌 모드 (보라색 - 기본값 사용) */
     #modePoizon.active{
-      border-color:#667eea;
-      background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color:#fff;
+      border-color:#d4a843;
+      background: linear-gradient(135deg, #d4a843 0%, #a07c2a 100%);
+      color:#111;
     }
-
-    /* 무신사 모드 (갈색) */
     #modeMusinsa.active{
-      border-color:#8b4513;
-      background:linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
-      color:#fff;
+      border-color:#8b6914;
+      background: linear-gradient(135deg, #2a2a1a 0%, #1a1a0a 100%);
+      color:#c9a227;
+      border-width: 2px;
     }
-
-    /* 리스트 비교 모드 (주황색) */
     #modeCompare.active{
-      border-color:#ff6b6b;
-      background:linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-      color:#fff;
+      border-color:#e07a5f;
+      background: linear-gradient(135deg, #2a1a1a 0%, #1a0a0a 100%);
+      color:#e07a5f;
+      border-width: 2px;
     }
-
-    /* 스케줄러 모드 (녹색) */
     #modeScheduler.active{
-      border-color:#28a745;
-      background:linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color:#fff;
+      border-color:#4caf50;
+      background: linear-gradient(135deg, #1a2a1a 0%, #0a1a0a 100%);
+      color:#4caf50;
+      border-width: 2px;
     }
-
-    /* 설정 모드 (회색) */
     #modeSettings.active{
-      border-color:#6c757d;
-      background:linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-      color:#fff;
+      border-color:#888;
+      background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+      color:#aaa;
+      border-width: 2px;
     }
-
-    /* 서식/양식 모드 (청록) */
     #modeForms.active{
-      border-color:#0097a7;
-      background:linear-gradient(135deg, #0097a7 0%, #00695c 100%);
-      color:#fff;
+      border-color:#4db6ac;
+      background: linear-gradient(135deg, #1a2a2a 0%, #0a1a1a 100%);
+      color:#4db6ac;
+      border-width: 2px;
+    }
+    #modeReceiving.active{
+      border-color:#d4a843;
+      background: linear-gradient(135deg, #2a2a1a 0%, #1a1a0a 100%);
+      color:#d4a843;
+      border-width: 2px;
     }
 
 
@@ -263,31 +458,33 @@
     label{
       display:block;
       margin-bottom:8px;
-      color:#333;
+      color:#bbb;
       font-weight:600;
       font-size: 14px;
     }
     input[type="text"], input[type="number"]{
       width:100%;
       padding:12px 16px;
-      border:2px solid #e0e0e0;
+      border:2px solid #333;
       border-radius:10px;
       font-size:16px;
       transition: all 0.3s;
+      background:#1e1e1e;
+      color:#e0e0e0;
     }
     input:focus{
       outline:none;
-      border-color:#667eea;
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+      border-color:#d4a843;
+      box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
     }
     input:disabled{
-      background:#f5f5f5;
+      background:#151515;
       cursor:not-allowed;
-      color:#999;
+      color:#555;
     }
     .hint{
       font-size:12px;
-      color:#999;
+      color:#666;
       margin-top:6px;
       line-height: 1.3;
     }
@@ -318,17 +515,20 @@
       justify-content:center;
     }
     .upload-btn{
-      background:#17a2b8;
+      background:#2a2a2a;
+      border: 1px solid #d4a843;
+      color:#d4a843;
     }
     .upload-btn:hover{
-      background:#138496;
+      background:#333;
       transform: translateY(-2px);
     }
     .compare-start-btn{
-      background:#28a745;
+      background: linear-gradient(135deg, #d4a843, #a07c2a);
+      color:#111;
     }
     .compare-start-btn:hover{
-      background:#218838;
+      background: linear-gradient(135deg, #e0b84d, #b08a30);
       transform: translateY(-2px);
     }
     /* 포이즌 → 크림 검색 레이아웃 */
@@ -344,11 +544,11 @@
       justify-content: center;
       padding-right: 20px;
       margin-right: 20px;
-      border-right: 2px solid #dee2e6;
+      border-right: 2px solid #333;
     }
     .btn-kream-big {
-      background: #4285f4;
-      color: #fff;
+      background: #5c9ce6;
+      color: #111;
       border: none;
       border-radius: 10px;
       padding: 10px 20px !important;
@@ -377,95 +577,92 @@
     }
     
    #startBtn{
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #d4a843 0%, #a07c2a 100%);
+      color: #111;
     }
     #startBtn:hover:not(:disabled){
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
+      box-shadow: 0 10px 20px rgba(212,168,67,0.3);
     }
     #startBtn:disabled{
-      background:#ccc;
+      background:#333;
+      color:#666;
       cursor:not-allowed;
       transform:none;
     }
 
-    /* ✅ 모드별 시작 버튼 색상 */
+    /* 모드별 시작 버튼 색상 (블랙 & 골드) */
     #startBtn.mode-poizon {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #d4a843 0%, #a07c2a 100%);
+      color: #111;
     }
-    #startBtn.mode-poizon:hover:not(:disabled) {
-      box-shadow: 0 10px 20px rgba(102,126,234,0.3);
-    }
-
     #startBtn.mode-musinsa {
-      background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+      background: linear-gradient(135deg, #c9a227 0%, #8b6914 100%);
+      color: #111;
     }
-    #startBtn.mode-musinsa:hover:not(:disabled) {
-      box-shadow: 0 10px 20px rgba(160,82,45,0.3);
-    }
-
     #startBtn.mode-kream {
-      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      background: linear-gradient(135deg, #5c9ce6 0%, #3a7bd5 100%);
+      color: #fff;
     }
-    #startBtn.mode-kream:hover:not(:disabled) {
-      box-shadow: 0 10px 20px rgba(66,133,244,0.3);
-    }
-
     #startBtn.mode-compare {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    }
-    #startBtn.mode-compare:hover:not(:disabled) {
-      box-shadow: 0 10px 20px rgba(255,107,107,0.3);
+      background: linear-gradient(135deg, #e07a5f 0%, #c0503a 100%);
+      color: #fff;
     }
     
     #musinsaRankBtn {
-      background: linear-gradient(135deg, #f09819 0%, #e67e00 100%);
+      background: linear-gradient(135deg, #c9a227 0%, #8b6914 100%);
+      color: #111;
     }
     #musinsaRankBtn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(240,152,25,0.3);
+      box-shadow: 0 10px 20px rgba(201,162,39,0.3);
     }
     #musinsaRankBtn:disabled {
-      background: #ccc;
+      background: #333;
+      color: #666;
       cursor: not-allowed;
       transform: none;
     }
     .stop-btn{
-      background:#dc3545;
+      background:#c0392b;
       display:none;
     }
     .stop-btn:hover{
-      background:#c82333;
+      background:#a93226;
       transform: translateY(-2px);
     }
 
     .download-btn{
-      background:#28a745;
+      background: linear-gradient(135deg, #d4a843, #a07c2a);
+      color:#111;
       display:none;
     }
     .download-btn:hover{
-      background:#218838;
+      background: linear-gradient(135deg, #e0b84d, #b08a30);
       transform: translateY(-2px);
     }
 
     .reset-btn{
-      background:#6c757d;
+      background:#2a2a2a;
+      border: 1px solid #555;
+      color:#aaa;
       display:none;
     }
     .reset-btn:hover{
-      background:#5a6268;
+      background:#333;
       transform: translateY(-2px);
     }
 
     .section{
       width:100%;
       border-radius:14px;
-      background:#f8f9fa;
+      background:#111;
       padding:18px;
       margin-top:18px;
+      border: 1px solid #2a2a2a;
     }
     .section h3{
-      color:#333;
+      color:#d4a843;
       margin-bottom:12px;
       font-size: 16px;
     }
@@ -477,29 +674,30 @@
       gap:12px;
       margin: 0 0 8px;
       padding: 10px 12px;
-      background:#fff;
-      border:1px solid #e0e0e0;
+      background:#1e1e1e;
+      border:1px solid #333;
       border-radius:12px;
     }
     .ctrl-label{
       font-size:13px;
-      color:#555;
+      color:#999;
       font-weight:600;
     }
     #pageSizeSelect{
       padding:8px 10px;
-      border:1px solid #ddd;
+      border:1px solid #444;
       border-radius:10px;
       font-size:14px;
-      background:#fff;
+      background:#1a1a1a;
+      color:#ccc;
       min-height:38px;
     }
     .page-btn{
       padding:4px 6px;
       border:none;
       border-radius:6px;
-      background:#667eea;
-      color:#fff;
+      background:#d4a843;
+      color:#111;
       cursor:pointer;
       font-weight:600;
       min-height: 38px;
@@ -507,10 +705,10 @@
       min-width:60px;
       max-width:80px;
     }
-    .page-btn:disabled{ background:#ccc; cursor:not-allowed; }
+    .page-btn:disabled{ background:#333; color:#666; cursor:not-allowed; }
     .page-info{
       font-size:12px;
-      color:#333;
+      color:#ccc;
       font-weight:700;
       min-width:50px;
       text-align:center;
@@ -521,9 +719,9 @@
       max-height: calc(100vh - 300px);
       min-height: 400px;
       overflow:auto;
-      border:1px solid #e0e0e0;
+      border:1px solid #333;
       border-radius:12px;
-      background:#fff;
+      background:#1a1a1a;
     }
     
     #uploadListSection .table-container{
@@ -533,13 +731,14 @@
     table{
       width:100%;
       border-collapse:collapse;
-      background:#fff;
+      background:#1a1a1a;
       min-width: 850px;
+      color:#ccc;
     }
     th, td{
       padding:10px 8px;
       text-align:left;
-      border-bottom:1px solid #e0e0e0;
+      border-bottom:1px solid #2a2a2a;
       vertical-align:middle;
       white-space: nowrap;
     }
@@ -549,9 +748,9 @@
       text-overflow: ellipsis;
     }
     th{
-      background:#f8f9fa;
+      background:#111;
       font-weight:600;
-      color:#333;
+      color:#d4a843;
       position:sticky;
       top:0;
       z-index:10;
@@ -742,14 +941,15 @@
     }
 
     .log{
-      background:#fff;
-      border:1px solid #e0e0e0;
+      background:#0d0d0d;
+      border:1px solid #333;
       border-radius:12px;
       padding:14px;
       height:360px;
       overflow-y:auto;
       font-family:'Courier New', monospace;
       font-size:13px;
+      color:#aaa;
       line-height:1.6;
       margin-top:12px;
     }
@@ -763,13 +963,13 @@
 
     /* 필터 패널 */
     .filter-panel {
-      background: #f8f9fa;
-      border: 1px solid #e0e0e0;
+      background: #1e1e1e;
+      border: 1px solid #333;
       border-radius: 10px;
       padding: 14px 18px;
       margin-bottom: 14px;
     }
-    .filter-panel h4 { margin: 0 0 10px; font-size: 14px; color: #444; }
+    .filter-panel h4 { margin: 0 0 10px; font-size: 14px; color: #d4a843; }
     .filter-row {
       display: flex;
       flex-wrap: wrap;
@@ -871,16 +1071,204 @@
       text-decoration: underline;
       color: #1a73e8;
     }
+
+    /* 커스텀 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #1a1a1a;
+      border: 1px solid #d4a843;
+      border-radius: 14px;
+      padding: 28px 24px 20px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      animation: modalFadeIn 0.2s;
+    }
+    @keyframes modalFadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .modal-box .modal-msg {
+      font-size: 15px;
+      color: #ddd;
+      line-height: 1.6;
+      margin-bottom: 22px;
+      white-space: pre-line;
+    }
+    .modal-box .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .modal-box .modal-btn {
+      flex: 1;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #d4a843, #a07c2a);
+      color: #111;
+    }
+    .modal-btn.secondary {
+      background: #2a2a2a;
+      color: #aaa;
+      border: 1px solid #444;
+    }
+    .modal-btn.danger {
+      background: #2a1a1a;
+      color: #ff5252;
+      border: 1px solid #ff5252;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>🛍️ 브랜드유통 데이터  소싱</h1>
-    <p class="subtitle">먼저 검색 하고 싶은 사이트를 선택 하세요!</p>
+<div class="app-layout">
 
-  <div class="login-status" id="loginStatus">
-    <h3>🚀 STEP 1: 수집 모드 선택</h3>
+<!-- 햄버거 메뉴 (모바일) -->
+<button class="hamburger" id="hamburgerBtn">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ━━━ 좌측 사이드바 ━━━ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>🛍️ 브랜드유통</h2>
+    <p>데이터 소싱</p>
+  </div>
+  <ul class="sidebar-menu">
+    <li class="menu-item active" data-page="dashboard">📊 대시보드</li>
+
+    <li class="menu-group">
+      <div class="menu-group-header open" data-submenu="sourcing">
+        🛍️ 국내소싱 <span class="arrow">▾</span>
+      </div>
+      <ul class="submenu open" id="submenuSourcing">
+        <li class="menu-item" data-mode="kream">🛒 크림 검색</li>
+        <li class="menu-item" data-mode="poizon">🟣 포이즌 검색</li>
+        <li class="menu-item" data-mode="musinsa">🟤 무신사 검색</li>
+        <li class="menu-item" data-mode="compare">📋 리스트 비교</li>
+      </ul>
+    </li>
+
+    <li class="menu-item" data-action="scheduler">📅 스케줄러</li>
+    <li class="menu-item" data-action="inventory">📦 사무실 재고</li>
+    <li class="menu-item" data-action="settings">⚙️ 설정</li>
+
+    <li class="menu-group">
+      <div class="menu-group-header" data-submenu="forms">
+        📝 서식양식 <span class="arrow">▾</span>
+      </div>
+      <ul class="submenu" id="submenuForms">
+        <li class="menu-item" data-action="forms-invoice">📄 거래명세서</li>
+        <li class="menu-item" data-action="forms-recent">📋 최근거래내역</li>
+        <li class="menu-item" data-action="forms-wholesale">📦 도매리스트</li>
+      </ul>
+    </li>
+
+    <li class="menu-item" data-action="receiving">📷 입고체크</li>
+  </ul>
+  <div class="sidebar-footer">
+    <span class="env-badge" id="envBadge">테스트 서버</span>
+  </div>
+</nav>
+
+<!-- ━━━ 메인 컨텐츠 ━━━ -->
+<main class="main-content" id="mainContent">
+
+<!-- ━━━ 대시보드 패널 ━━━ -->
+<div class="dashboard-panel" id="dashboardPanel">
+  <h1 style="color:#d4a843; font-size:22px; margin-bottom:20px;">📊 대시보드</h1>
+
+  <div class="dashboard-grid">
+    <!-- 접속 상태 -->
+    <div class="dash-card">
+      <h3>🔗 접속 상태</h3>
+      <div class="dash-status-row">
+        <span class="label">포이즌 (POIZON)</span>
+        <span class="value offline" id="dashPoizon">대기</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">크림 (Kream)</span>
+        <span class="value offline" id="dashKream">대기</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">무신사 (Musinsa)</span>
+        <span class="value offline" id="dashMusinsa">대기</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">자동 로그인</span>
+        <span class="value gold" id="dashLoginMsg">로딩 중...</span>
+      </div>
+    </div>
+
+    <!-- 현재 작업 -->
+    <div class="dash-card">
+      <h3>⚡ 현재 작업</h3>
+      <div class="dash-status-row">
+        <span class="label">활성 모드</span>
+        <span class="value gold" id="dashActiveMode">없음</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">수집 상태</span>
+        <span class="value" id="dashCollectStatus" style="color:#666;">대기</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">수집 결과</span>
+        <span class="value gold" id="dashResultCount">0개</span>
+      </div>
+    </div>
+
+    <!-- 텔레그램 -->
+    <div class="dash-card">
+      <h3>📨 텔레그램</h3>
+      <div class="dash-status-row">
+        <span class="label">알림 상태</span>
+        <span class="value" id="dashTelegram" style="color:#666;">확인 중...</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">자동 전송</span>
+        <span class="value" id="dashTgAuto" style="color:#666;">OFF</span>
+      </div>
+    </div>
+
+    <!-- 시스템 -->
+    <div class="dash-card">
+      <h3>🖥️ 시스템</h3>
+      <div class="dash-status-row">
+        <span class="label">환경</span>
+        <span class="value gold" id="dashEnv">테스트</span>
+      </div>
+      <div class="dash-status-row">
+        <span class="label">서버</span>
+        <span class="value online" id="dashServer">연결됨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최근 로그 -->
+  <div class="dash-card">
+    <h3>📋 최근 로그</h3>
+    <div class="dash-log-box" id="dashLogBox">시스템 시작 대기 중...</div>
+  </div>
+</div>
+
+<!-- ━━━ 검색 패널 (기존 콘텐츠) ━━━ -->
+<div id="searchPanel" style="display:none;">
+  <div class="container">
+
+  <div class="login-status" id="loginStatus" style="padding:15px; margin-bottom:16px;">
+    <h3 style="font-size:14px;">🔗 접속 상태</h3>
     <div class="login-indicators">
       <div class="login-indicator" id="ind-poizon">
         <span class="dot"></span>
@@ -900,7 +1288,7 @@
     </div>
     <p id="loginMessage" style="margin-top:10px; font-size:13px;">페이지 로딩 시 자동 로그인됩니다.</p>
   </div>
-    <div class="mode-selector">
+    <div class="mode-selector" style="display:none;">
       <h3>📊 STEP 2: 수집 모드 선택</h3>
       <div class="mode-buttons">
         <!-- ✅ 모든 버튼에서 disabled 제거! -->
@@ -954,7 +1342,7 @@
 
     <!-- 신규 인기 상품 (포이즌 모드에서 먼저 표시) -->
     <div class="button-group" id="popularSection" style="display:none;">
-      <select id="brandSelect" style="padding:8px 12px; border-radius:8px; border:2px solid #ff6b6b; font-size:13px; font-weight:600; cursor:pointer; background:#fff; color:#333; min-width:130px;">
+      <select id="brandSelect" style="padding:8px 12px; border-radius:8px; border:2px solid #d4a843; font-size:13px; font-weight:600; cursor:pointer; background:#1e1e1e; color:#d4a843; min-width:130px;">
         <option value="">전체 (브랜드 선택)</option>
         <option value="Jordan">Jordan</option>
         <option value="New Balance">New Balance</option>
@@ -972,7 +1360,7 @@
         <option value="Salomon">Salomon</option>
         <option value="On">On</option>
       </select>
-      <button id="popularBtn" onclick="startPopularSearch()" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);">🔥 신규 인기 상품</button>
+      <button id="popularBtn" onclick="startPopularSearch()" style="background:linear-gradient(135deg,#d4a843,#a07c2a); color:#111;">🔥 신규 인기 상품</button>
     </div>
 
     <div class="input-grid" id="inputSection" style="display:none;">
@@ -1177,9 +1565,41 @@
       <div class="log" id="logBox"></div>
     </div>
 </div><!-- /.result-status-wrapper -->
-  </div>
+  </div><!-- /.container -->
+</div><!-- /#searchPanel -->
+</main><!-- /.main-content -->
+</div><!-- /.app-layout -->
 
 <script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 커스텀 모달 (Black & Gold)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showModal(msg, buttons) {
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalMsg').textContent = msg;
+  const actions = document.getElementById('modalActions');
+  actions.innerHTML = '';
+  buttons.forEach(btn => {
+    const b = document.createElement('button');
+    b.className = 'modal-btn ' + (btn.cls || 'primary');
+    b.textContent = btn.text;
+    b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
+    actions.appendChild(b);
+  });
+  overlay.classList.add('active');
+}
+
+function goldAlert(msg, cb) {
+  showModal(msg, [{ text: '확인', cls: 'primary', cb }]);
+}
+
+function goldConfirm(msg, onOk, isDanger) {
+  showModal(msg, [
+    { text: '취소', cls: 'secondary' },
+    { text: '확인', cls: isDanger ? 'danger' : 'primary', cb: onOk }
+  ]);
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 1️⃣ 전역 유틸리티 함수 (최상단!)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1995,7 +2415,7 @@
   function sendBestToTelegram() {
     const source = collectedData;
     if (!source || source.length === 0) {
-      alert('전송할 데이터가 없습니다.');
+      goldAlert('전송할 데이터가 없습니다.');
       return;
     }
     // 정렬: 가격차이 내림차순
@@ -2015,10 +2435,10 @@
     })
     .then(r => r.json())
     .then(d => {
-      if (d.ok) alert('✅ 텔레그램으로 베스트 10 전송 완료!');
-      else alert('❌ 전송 실패: ' + (d.error || '알 수 없는 오류'));
+      if (d.ok) goldAlert('✅ 텔레그램으로 베스트 10 전송 완료!');
+      else goldAlert('❌ 전송 실패: ' + (d.error || '알 수 없는 오류'));
     })
-    .catch(e => alert('❌ 오류: ' + e));
+    .catch(e => goldAlert('❌ 오류: ' + e));
   }
 
   // ===== 크림 자동 텔레그램 (판매량 100+, 마진 10000+, 베스트 10) =====
@@ -2160,9 +2580,12 @@
     addLog(`🔄 ${column} ${sortDirection === 'desc' ? '내림차순' : '오름차순'} 정렬`, 'info');
   }
   async function selectMode(mode) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log(`📊 모드 선택: ${mode}`);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+      // 검색 모드 진입 시 searchPanel 표시
+      if (['poizon', 'musinsa', 'compare'].includes(mode)) {
+        showSearchPanel();
+      }
       
       if (isCollecting && selectedMode !== mode) {
         let modeName = selectedMode;
@@ -2170,7 +2593,7 @@
         if (selectedMode === 'musinsa') modeName = '무신사';
         if (selectedMode === 'compare') modeName = '리스트 비교';
         
-        alert(`⚠️ ${modeName} 모드 수집 중입니다!\n\n수집이 완료되거나 중단된 후에 모드를 변경할 수 있습니다.`);
+        goldAlert(`⚠️ ${modeName} 모드 수집 중입니다!\n\n수집이 완료되거나 중단된 후에 모드를 변경할 수 있습니다.`);
         return;
       }
       // 재고관리 모드
@@ -2201,7 +2624,7 @@
       }
       
       if (mode === 'kream') {
-        alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
+        goldAlert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
         return;
       }
       
@@ -2341,11 +2764,20 @@
     }
     // ✅ 모드 활성화 함수 
   function activateMode(mode) {
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log(`✅ activateMode 실행: ${mode}`);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      
+
       selectedMode = mode;
+
+      // 사이드바 활성 메뉴 동기화
+      const sidebarItem = document.querySelector(`.sidebar-menu .menu-item[data-mode="${mode}"]`);
+      if (sidebarItem) setActiveMenuItem(sidebarItem);
+
+      // 대시보드 상태 업데이트
+      const modeNames = { poizon: '포이즌 검색', kream: '크림 검색', musinsa: '무신사 검색', compare: '리스트 비교' };
+      const dashMode = document.getElementById('dashActiveMode');
+      if (dashMode) dashMode.textContent = modeNames[mode] || mode;
+      const dashStatus = document.getElementById('dashCollectStatus');
+      if (dashStatus) { dashStatus.textContent = '대기'; dashStatus.style.color = '#d4a843'; }
       updateTableHeader(mode);
       // 포이즌 모드 전환 시 크림 검색 버튼 숨김
       if (mode !== 'poizon') {
@@ -2488,7 +2920,7 @@
       // 모드가 선택되지 않았으면 알림
       if (!selectedMode) {
         console.error('❌ 모드가 선택되지 않음!');
-        alert('⚠️ 먼저 수집 모드를 선택해주세요!');
+        goldAlert('⚠️ 먼저 수집 모드를 선택해주세요!');
         return;
       }
       
@@ -2500,7 +2932,7 @@
         
         const maxPages = parseInt(maxPagesValue, 10);
         if (isNaN(maxPages) || maxPages < 1) {
-          alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
+          goldAlert('⚠️ 페이지 수는 1 이상이어야 합니다!');
           document.getElementById('maxPages').focus();
           return;
         }
@@ -2516,15 +2948,15 @@
         
       } else if (selectedMode === 'kream') {
         console.log('→ 크림 모드 (비활성)');
-        alert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
+        goldAlert('🛒 크림 검색은 POIZON 수집 결과에서 사용할 수 있습니다.');
         
       } else if (selectedMode === 'compare') {
         console.log('→ 리스트 비교 모드');
-        alert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
+        goldAlert('📋 리스트 비교는 엑셀 파일을 업로드해주세요.');
         
       } else {
         console.error('❌ 알 수 없는 모드:', selectedMode);
-        alert('⚠️ 알 수 없는 모드입니다.');
+        goldAlert('⚠️ 알 수 없는 모드입니다.');
       }
       
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -2535,20 +2967,20 @@
     function startPoizonSearch(keyword, maxPages) {
       // 로그인 체크
       if (!isLoggedIn) {
-        alert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
+        goldAlert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
         return;
       }
       
       // 키워드 체크
       if (!keyword) {
-        alert('⚠️ 검색 키워드를 입력해주세요!');
+        goldAlert('⚠️ 검색 키워드를 입력해주세요!');
         return;
       }
       
       // ✅ POIZON은 기존 방식 유지 (페이지 단위)
       const numPages = parseInt(maxPages);
       if (isNaN(numPages) || numPages < 1) {
-        alert('⚠️ 페이지 수는 1 이상이어야 합니다!');
+        goldAlert('⚠️ 페이지 수는 1 이상이어야 합니다!');
         return;
       }
       // 기존 이벤트 소스 닫기
@@ -2839,6 +3271,184 @@
         });
     }
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 사이드바 네비게이션
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function initSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburger = document.getElementById('hamburgerBtn');
+
+    // 햄버거 메뉴 토글
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    });
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+
+    // 서브메뉴 토글
+    document.querySelectorAll('.menu-group-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const submenuId = header.dataset.submenu;
+        const submenu = document.getElementById('submenu' + submenuId.charAt(0).toUpperCase() + submenuId.slice(1));
+        header.classList.toggle('open');
+        submenu.classList.toggle('open');
+      });
+    });
+
+    // 메뉴 아이템 클릭
+    document.querySelectorAll('.sidebar-menu .menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        const mode = item.dataset.mode;
+        const action = item.dataset.action;
+
+        // 모바일 사이드바 닫기
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+
+        if (page === 'dashboard') {
+          showDashboard();
+          setActiveMenuItem(item);
+          return;
+        }
+
+        if (mode) {
+          showSearchPanel();
+          setActiveMenuItem(item);
+          selectMode(mode);
+          return;
+        }
+
+        if (action) {
+          handleSidebarAction(action);
+          return;
+        }
+      });
+    });
+  }
+
+  function setActiveMenuItem(activeItem) {
+    document.querySelectorAll('.sidebar-menu .menu-item').forEach(el => el.classList.remove('active'));
+    activeItem.classList.add('active');
+  }
+
+  function showDashboard() {
+    document.getElementById('dashboardPanel').style.display = 'block';
+    document.getElementById('searchPanel').style.display = 'none';
+    updateDashboard();
+  }
+
+  function showSearchPanel() {
+    document.getElementById('dashboardPanel').style.display = 'none';
+    document.getElementById('searchPanel').style.display = 'block';
+  }
+
+  function handleSidebarAction(action) {
+    switch(action) {
+      case 'scheduler':
+        window.open('/api/scheduler/page', 'scheduler', 'width=1200,height=800');
+        break;
+      case 'inventory':
+        window.open('/api/inventory/page', 'inventory', 'width=1400,height=900');
+        break;
+      case 'settings':
+        window.location.href = '/settings';
+        break;
+      case 'forms-invoice':
+        window.open('/forms', 'forms', 'width=1200,height=800');
+        break;
+      case 'forms-recent':
+        window.open('/forms#recent', 'forms', 'width=1200,height=800');
+        break;
+      case 'forms-wholesale':
+        window.open('/forms#wholesale', 'forms', 'width=1200,height=800');
+        break;
+      case 'receiving':
+        window.open('/receiving', 'receiving', 'width=500,height=900');
+        break;
+    }
+  }
+
+  // 대시보드 상태 업데이트
+  function updateDashboard() {
+    // 접속 상태 동기화
+    const poizonLabel = document.getElementById('ind-poizon-label');
+    const kreamLabel = document.getElementById('ind-kream-label');
+    const musinsaLabel = document.getElementById('ind-musinsa-label');
+
+    const dashP = document.getElementById('dashPoizon');
+    const dashK = document.getElementById('dashKream');
+    const dashM = document.getElementById('dashMusinsa');
+
+    if (poizonLabel) {
+      const txt = poizonLabel.textContent;
+      dashP.textContent = txt;
+      dashP.className = 'value ' + (txt === '접속됨' || txt === '로그인됨' ? 'online' : 'offline');
+    }
+    if (kreamLabel) {
+      const txt = kreamLabel.textContent;
+      dashK.textContent = txt;
+      dashK.className = 'value ' + (txt === '접속됨' || txt === '로그인됨' ? 'online' : 'offline');
+    }
+    if (musinsaLabel) {
+      const txt = musinsaLabel.textContent;
+      dashM.textContent = txt;
+      dashM.className = 'value ' + (txt === '접속됨' || txt === '로그인됨' ? 'online' : 'offline');
+    }
+
+    // 로그인 메시지
+    const loginMsg = document.getElementById('loginMessage');
+    if (loginMsg) {
+      document.getElementById('dashLoginMsg').textContent = loginMsg.textContent;
+    }
+
+    // 활성 모드
+    const modeNames2 = { poizon: '포이즌 검색', kream: '크림 검색', musinsa: '무신사 검색', compare: '리스트 비교' };
+    document.getElementById('dashActiveMode').textContent = selectedMode ? (modeNames2[selectedMode] || selectedMode) : '없음';
+
+    // 수집 상태
+    const dashCollect = document.getElementById('dashCollectStatus');
+    if (typeof isCollecting !== 'undefined' && isCollecting) {
+      dashCollect.textContent = '수집 중...';
+      dashCollect.style.color = '#4caf50';
+    } else {
+      dashCollect.textContent = '대기';
+      dashCollect.style.color = '#666';
+    }
+
+    // 수집 결과
+    document.getElementById('dashResultCount').textContent = (typeof collectedData !== 'undefined' && collectedData ? collectedData.length : 0) + '개';
+
+    // 텔레그램 상태 확인
+    fetch('/api/telegram/settings').then(r => r.json()).then(data => {
+      const hasTg = data.bot_token && data.chat_id;
+      document.getElementById('dashTelegram').textContent = hasTg ? '설정됨' : '미설정';
+      document.getElementById('dashTelegram').style.color = hasTg ? '#4caf50' : '#666';
+    }).catch(() => {});
+
+    // 최근 로그 동기화
+    const logBox = document.getElementById('logBox');
+    const dashLog = document.getElementById('dashLogBox');
+    if (logBox && dashLog) {
+      const lines = logBox.querySelectorAll('.log-line');
+      if (lines.length > 0) {
+        const recent = Array.from(lines).slice(-10).map(l => l.textContent).join('\n');
+        dashLog.textContent = recent;
+      }
+    }
+  }
+
+  // 주기적으로 대시보드 업데이트
+  setInterval(() => {
+    if (document.getElementById('dashboardPanel').style.display !== 'none') {
+      updateDashboard();
+    }
+  }, 3000);
+
   window.onload = async () => {  // ✅ async 추가!
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 1. 초기화
@@ -2850,7 +3460,19 @@
         safeFetch('/shutdown_musinsa_browser')
       ]);
 
-      addLog('👋 POIZON 데이터 수집기 시작!', 'info');
+      addLog('👋 브랜드유통 데이터 소싱 시작!', 'info');
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // 사이드바 초기화
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      initSidebar();
+
+      // 환경 뱃지
+      fetch('/api/data_paths').then(r => r.json()).then(d => {
+        const env = d.platform === 'Darwin' ? '운영 서버' : '테스트 서버';
+        document.getElementById('envBadge').textContent = env;
+        document.getElementById('dashEnv').textContent = d.platform === 'Darwin' ? '운영 (Mac)' : '테스트 (Windows)';
+      }).catch(() => {});
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 자동 로그인 (3곳 동시)
@@ -2881,7 +3503,7 @@
         const originalBtnText = btn.textContent;
 
         if (collectedData.length === 0) {
-          alert('❌ 수집된 데이터가 없습니다.');
+          goldAlert('❌ 수집된 데이터가 없습니다.');
           return;
         }
 
@@ -2890,7 +3512,7 @@
           .filter(code => code && code !== '-');
 
         if (productCodes.length === 0) {
-          alert('❌ 검색 가능한 품번이 없습니다.');
+          goldAlert('❌ 검색 가능한 품번이 없습니다.');
           return;
         }
 
@@ -2898,7 +3520,7 @@
         if (checkboxId !== null) {
           const searchKream = document.getElementById(checkboxId).checked;
           if (!searchKream) {
-            alert('⚠️ 크림 검색을 선택해주세요!');
+            goldAlert('⚠️ 크림 검색을 선택해주세요!');
             return;
           }
         }
@@ -3140,7 +3762,7 @@
       if (musinsaSearchBtn) {
         musinsaSearchBtn.addEventListener('click', async () => {
           if (collectedData.length === 0) {
-            alert('❌ 수집된 데이터가 없습니다.');
+            goldAlert('❌ 수집된 데이터가 없습니다.');
             return;
           }
           
@@ -3148,7 +3770,7 @@
           const searchPoizon = document.getElementById('musinsaSearchPoizon').checked;
           
           if (!searchKream && !searchPoizon) {
-            alert('⚠️ 크림 또는 포이즌 중 하나 이상 선택해주세요!');
+            goldAlert('⚠️ 크림 또는 포이즌 중 하나 이상 선택해주세요!');
             return;
           }
           
@@ -3175,7 +3797,7 @@
       if (compareSearchBtn) {
         compareSearchBtn.addEventListener('click', async () => {
           if (collectedData.length === 0) {
-            alert('❌ 업로드된 데이터가 없습니다.');
+            goldAlert('❌ 업로드된 데이터가 없습니다.');
             return;
           }
           
@@ -3183,7 +3805,7 @@
           const searchPoizon = document.getElementById('compareSearchPoizon').checked;
           
           if (!searchKream && !searchPoizon) {
-            alert('⚠️ 크림 또는 포이즌 중 하나 이상 선택해주세요!');
+            goldAlert('⚠️ 크림 또는 포이즌 중 하나 이상 선택해주세요!');
             return;
           }
           
@@ -3192,7 +3814,7 @@
             .filter(code => code && code !== '-');
           
           if (productCodes.length === 0) {
-            alert('❌ 검색 가능한 품번이 없습니다.');
+            goldAlert('❌ 검색 가능한 품번이 없습니다.');
             return;
           }
           
@@ -3219,7 +3841,7 @@
         console.log('🟣 무신사→포이즌 검색 시작!');
         
         if (collectedData.length === 0) {
-          alert('❌ 수집된 데이터가 없습니다.');
+          goldAlert('❌ 수집된 데이터가 없습니다.');
           return;
         }
         
@@ -3230,7 +3852,7 @@
         console.log(`📦 추출된 품번: ${productCodes.length}개`, productCodes);
         
         if (productCodes.length === 0) {
-          alert('❌ 검색 가능한 품번이 없습니다.');
+          goldAlert('❌ 검색 가능한 품번이 없습니다.');
           return;
         }
         
@@ -3422,7 +4044,7 @@
         console.log('🟣 리스트비교→포이즌 검색 시작!');
         
         if (collectedData.length === 0) {
-          alert('❌ 데이터가 없습니다.');
+          goldAlert('❌ 데이터가 없습니다.');
           return;
         }
         
@@ -3433,7 +4055,7 @@
         console.log(`📦 추출된 품번: ${productCodes.length}개`, productCodes);
         
         if (productCodes.length === 0) {
-          alert('❌ 검색 가능한 품번이 없습니다.');
+          goldAlert('❌ 검색 가능한 품번이 없습니다.');
           return;
         }
         
@@ -3752,19 +4374,19 @@
     
     // 로그인 체크
     if (!isMusinsaLoggedIn) {
-      alert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
+      goldAlert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
       return;
     }
     
     // 키워드 체크
     if (!keyword || keyword.trim() === '') {
-      alert('⚠️ 검색 키워드를 입력해주세요!');
+      goldAlert('⚠️ 검색 키워드를 입력해주세요!');
       return;
     }
     
     // ✅ 검색 수량 빈칸 체크
     if (!maxPagesValue || maxPagesValue.trim() === '') {
-      alert('⚠️ 검색 수량을 입력해주세요!\n\n"max" = 전체 수집\n숫자 = 해당 개수만 수집');
+      goldAlert('⚠️ 검색 수량을 입력해주세요!\n\n"max" = 전체 수집\n숫자 = 해당 개수만 수집');
       document.getElementById('maxPages').focus();
       return;
     }
@@ -3782,7 +4404,7 @@
       // 숫자인 경우
       const numPages = parseInt(maxPagesInput);
       if (isNaN(numPages) || numPages < 1) {
-        alert('⚠️ 검색 수량은 "max" 또는 1 이상의 숫자여야 합니다!\n\n예시:\n- max (전체 수집)\n- 5 (100개 수집)\n- 10 (200개 수집)');
+        goldAlert('⚠️ 검색 수량은 "max" 또는 1 이상의 숫자여야 합니다!\n\n예시:\n- max (전체 수집)\n- 5 (100개 수집)\n- 10 (200개 수집)');
         document.getElementById('maxPages').focus();
         return;
       }
@@ -3882,13 +4504,13 @@
 
   function startMusinsaRankSearch() {
     if (!isMusinsaLoggedIn) {
-      alert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
+      goldAlert('⚠️ 무신사 로그인이 필요합니다!\n먼저 무신사 모드를 선택해주세요.');
       return;
     }
 
     const maxPagesValue = document.getElementById('maxPages').value.trim();
     if (!maxPagesValue) {
-      alert('⚠️ 수집 수량을 입력해주세요!\n\n"max" = 전체 / 숫자 = 해당 개수');
+      goldAlert('⚠️ 수집 수량을 입력해주세요!\n\n"max" = 전체 / 숫자 = 해당 개수');
       document.getElementById('maxPages').focus();
       return;
     }
@@ -3899,7 +4521,7 @@
     } else {
       const num = parseInt(maxPagesValue);
       if (isNaN(num) || num < 1) {
-        alert('⚠️ "max" 또는 1 이상의 숫자를 입력하세요');
+        goldAlert('⚠️ "max" 또는 1 이상의 숫자를 입력하세요');
         return;
       }
       targetCount = num * 20;
@@ -3972,7 +4594,7 @@
   async function startPopularSearch() {
     // 포이즌 로그인 체크
     if (!isLoggedIn) {
-      alert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
+      goldAlert('⚠️ POIZON 로그인이 필요합니다!\n먼저 POIZON 모드를 선택해주세요.');
       return;
     }
 
@@ -4239,11 +4861,11 @@
         addLog(`💡 다운로드된 파일을 "엑셀 업로드"로 업로드하세요`, 'info');
       } else {
         addLog(`❌ 변환 실패: ${result.error}`, 'error');
-        alert(`❌ 변환 실패: ${result.error}`);
+        goldAlert(`❌ 변환 실패: ${result.error}`);
       }
     } catch (error) {
       addLog(`❌ 변환 오류: ${error.message}`, 'error');
-      alert(`❌ 변환 오류: ${error.message}`);
+      goldAlert(`❌ 변환 오류: ${error.message}`);
     }
 
     event.target.value = '';
@@ -4253,7 +4875,7 @@
     const file = event.target.files[0];
     
     if (!file) {
-        alert('⚠️ 파일을 선택해주세요!');
+        goldAlert('⚠️ 파일을 선택해주세요!');
         return;
     }
     
@@ -4323,13 +4945,13 @@
                       
         } else {
             addLog(`❌ 업로드 실패: ${result.error}`, 'error');
-            alert(`❌ 업로드 실패: ${result.error}`);
+            goldAlert(`❌ 업로드 실패: ${result.error}`);
         }
         
     } catch (error) {
         console.error('업로드 오류:', error);
         addLog(`❌ 업로드 오류: ${error.message}`, 'error');
-        alert(`❌ 업로드 오류: ${error.message}`);
+        goldAlert(`❌ 업로드 오류: ${error.message}`);
     }
   }
   function renderUploadList(products) {
@@ -4365,7 +4987,7 @@
 
   async function downloadExcel() {
     if (collectedData.length === 0) {
-      alert('⚠️ 다운로드할 데이터가 없습니다!');
+      goldAlert('⚠️ 다운로드할 데이터가 없습니다!');
       return;
     }
 
@@ -4404,15 +5026,24 @@
         addLog(`📊 ${result.count}개 데이터 저장 완료`, 'success');
       } else {
         addLog(`❌ 엑셀 생성 실패: ${result.error}`, 'error');
-        alert(`❌ 엑셀 생성 실패: ${result.error}`);
+        goldAlert(`❌ 엑셀 생성 실패: ${result.error}`);
       }
 
     } catch (error) {
       addLog(`❌ 다운로드 오류: ${error.message}`, 'error');
-      alert(`❌ 다운로드 오류: ${error.message}`);
+      goldAlert(`❌ 다운로드 오류: ${error.message}`);
     }
   }
 
  </script>
+
+<!-- 커스텀 모달 -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-msg" id="modalMsg"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
 </body>
 </html>

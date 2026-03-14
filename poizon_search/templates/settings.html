@@ -8,30 +8,32 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f2f5;
+      background: #0d0d0d;
+      color: #ccc;
       min-height: 100vh;
     }
 
     /* 헤더 */
     .page-header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 50%, #0d0d0d 100%);
+      border-bottom: 1px solid #d4a843;
       padding: 16px 24px;
       display: flex;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
     }
-    .page-header a { color: #aaa; text-decoration: none; font-size: 14px; }
-    .page-header a:hover { color: #fff; }
-    .page-header h1 { color: #fff; font-size: 20px; font-weight: 700; margin: 0; }
+    .page-header a { color: #d4a843; text-decoration: none; font-size: 14px; }
+    .page-header a:hover { color: #f0d080; }
+    .page-header h1 { color: #d4a843; font-size: 20px; font-weight: 700; margin: 0; }
     .header-sep { color: #555; }
 
     /* 탭 메뉴 */
-    .top-menu-bar { background: #fff; border-bottom: 2px solid #e0e0e0; padding: 0 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .top-menu-bar { background: #1a1a1a; border-bottom: 2px solid #2a2a2a; padding: 0 24px; }
     .top-menu-inner { display: flex; max-width: 1000px; margin: 0 auto; }
-    .top-menu-btn { padding: 13px 28px; background: none; border: none; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 700; color: #888; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-bottom: -2px; display: flex; align-items: center; gap: 8px; }
-    .top-menu-btn:hover { color: #0f3460; background: #f0f4ff; }
-    .top-menu-btn.active { color: #0f3460; border-bottom-color: #0f3460; }
+    .top-menu-btn { padding: 13px 28px; background: none; border: none; border-bottom: 3px solid transparent; font-size: 14px; font-weight: 700; color: #777; cursor: pointer; font-family: inherit; transition: all 0.2s; margin-bottom: -2px; display: flex; align-items: center; gap: 8px; }
+    .top-menu-btn:hover { color: #d4a843; background: rgba(212,168,67,0.08); }
+    .top-menu-btn.active { color: #d4a843; border-bottom-color: #d4a843; }
 
     /* 탭 콘텐츠 */
     .tab-content { display: none; }
@@ -46,15 +48,16 @@
 
     /* 사이트 카드 */
     .site-card {
-      border: 2px solid #e0e0e0;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
       border-radius: 14px;
       padding: 24px;
       margin-bottom: 20px;
       transition: all 0.3s;
     }
     .site-card:hover {
-      border-color: #adb5bd;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border-color: #3a3a3a;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .site-header {
@@ -87,7 +90,7 @@
     .site-name {
       font-size: 18px;
       font-weight: 700;
-      color: #333;
+      color: #ddd;
     }
 
     .site-status {
@@ -97,8 +100,8 @@
       font-weight: 600;
     }
     .site-status.active {
-      background: #d4edda;
-      color: #155724;
+      background: rgba(212,168,67,0.15);
+      color: #d4a843;
     }
 
     /* 계정 선택 라디오 */
@@ -113,18 +116,19 @@
       align-items: center;
       gap: 12px;
       padding: 14px 18px;
-      border: 2px solid #e9ecef;
+      border: 1px solid #333;
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s;
+      background: #111;
     }
     .account-item:hover {
-      border-color: #adb5bd;
-      background: #f8f9fa;
+      border-color: #555;
+      background: #1a1a1a;
     }
     .account-item.selected {
-      border-color: #667eea;
-      background: #f0f2ff;
+      border-color: #d4a843;
+      background: rgba(212,168,67,0.08);
     }
 
     /* 라디오 버튼 커스텀 */
@@ -132,7 +136,7 @@
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      border: 2px solid #ccc;
+      border: 2px solid #555;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -147,20 +151,20 @@
       transition: all 0.2s;
     }
     .account-item.selected .radio-circle {
-      border-color: #667eea;
+      border-color: #d4a843;
     }
     .account-item.selected .radio-circle .inner {
-      background: #667eea;
+      background: #d4a843;
     }
     .account-item.empty {
       border-style: dashed;
-      opacity: 0.6;
+      opacity: 0.5;
     }
     .account-item.empty:hover {
-      opacity: 0.85;
+      opacity: 0.75;
     }
     .account-id.placeholder {
-      color: #bbb;
+      color: #666;
       font-style: italic;
     }
 
@@ -173,8 +177,8 @@
     .account-label {
       font-size: 12px;
       font-weight: 700;
-      color: #888;
-      background: #f1f3f5;
+      color: #999;
+      background: #222;
       padding: 2px 10px;
       border-radius: 6px;
       flex-shrink: 0;
@@ -182,22 +186,22 @@
     .account-id {
       font-size: 14px;
       font-weight: 600;
-      color: #333;
+      color: #ccc;
       flex: 1;
     }
     .account-pw {
       font-size: 13px;
-      color: #999;
+      color: #777;
       font-family: monospace;
     }
 
     /* 수정 버튼 */
     .edit-btn {
       padding: 6px 14px;
-      border: 1px solid #dee2e6;
+      border: 1px solid #444;
       border-radius: 8px;
-      background: #fff;
-      color: #495057;
+      background: #222;
+      color: #aaa;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -205,8 +209,9 @@
       flex-shrink: 0;
     }
     .edit-btn:hover {
-      background: #f8f9fa;
-      border-color: #adb5bd;
+      background: #333;
+      border-color: #d4a843;
+      color: #d4a843;
     }
 
     /* 수정 모드 인풋 */
@@ -214,9 +219,9 @@
       display: none;
       margin-top: 12px;
       padding: 16px;
-      background: #f8f9fa;
+      background: #111;
       border-radius: 10px;
-      border: 1px solid #e9ecef;
+      border: 1px solid #333;
     }
     .edit-inputs.show {
       display: block;
@@ -234,19 +239,21 @@
     .edit-row label {
       font-size: 13px;
       font-weight: 600;
-      color: #666;
+      color: #999;
     }
     .edit-row input {
       padding: 8px 12px;
-      border: 2px solid #e0e0e0;
+      border: 1px solid #333;
       border-radius: 8px;
       font-size: 13px;
       transition: border-color 0.2s;
       width: 100%;
+      background: #111;
+      color: #ccc;
     }
     .edit-row input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #d4a843;
     }
 
     /* 하단 버튼 */
@@ -259,26 +266,26 @@
 
     .save-btn {
       padding: 14px 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
+      background: linear-gradient(135deg, #d4a843, #a07c2a);
+      color: #111;
       border: none;
       border-radius: 12px;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+      box-shadow: 0 4px 12px rgba(212,168,67,0.3);
     }
     .save-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+      box-shadow: 0 8px 20px rgba(212,168,67,0.4);
     }
 
     .cancel-btn {
       padding: 14px 30px;
-      background: #fff;
-      color: #666;
-      border: 2px solid #dee2e6;
+      background: #1a1a1a;
+      color: #aaa;
+      border: 1px solid #444;
       border-radius: 12px;
       font-size: 16px;
       font-weight: 600;
@@ -286,8 +293,8 @@
       transition: all 0.3s;
     }
     .cancel-btn:hover {
-      background: #f8f9fa;
-      border-color: #adb5bd;
+      background: #222;
+      border-color: #666;
     }
 
     /* 토스트 메시지 */
@@ -296,12 +303,12 @@
       top: 20px;
       right: 20px;
       padding: 14px 24px;
-      background: #28a745;
-      color: #fff;
+      background: #d4a843;
+      color: #111;
       border-radius: 10px;
       font-weight: 600;
       font-size: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       transform: translateX(120%);
       transition: transform 0.3s;
       z-index: 9999;
@@ -311,7 +318,18 @@
     }
     .toast.error {
       background: #dc3545;
+      color: #fff;
     }
+
+    .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.7); z-index:99999; justify-content:center; align-items:center; }
+    .modal-overlay.active { display:flex; }
+    .modal-box { background:#1a1a1a; border:1px solid #d4a843; border-radius:14px; padding:28px 24px 20px; max-width:400px; width:90%; text-align:center; }
+    .modal-box .modal-msg { font-size:15px; color:#ddd; line-height:1.6; margin-bottom:22px; white-space:pre-line; }
+    .modal-box .modal-actions { display:flex; gap:10px; justify-content:center; }
+    .modal-box .modal-btn { flex:1; padding:10px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+    .modal-btn.primary { background:linear-gradient(135deg,#d4a843,#a07c2a); color:#111; }
+    .modal-btn.secondary { background:#2a2a2a; color:#aaa; border:1px solid #444; }
+    .modal-btn.danger { background:#2a1a1a; color:#ff5252; border:1px solid #ff5252; }
   </style>
 </head>
 <body>
@@ -454,27 +472,27 @@
     <div class="site-card" id="data-path-card">
       <div class="site-header">
         <div class="site-title">
-          <div class="site-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); font-size: 16px;">DB</div>
+          <div class="site-icon" style="background: linear-gradient(135deg, #d4a843, #a07c2a); font-size: 16px;">DB</div>
           <span class="site-name">데이터 경로</span>
         </div>
-        <span class="site-status" id="drive-status" style="background:#ffeeba; color:#856404;">확인중...</span>
+        <span class="site-status" id="drive-status" style="background:rgba(212,168,67,0.15); color:#d4a843;">확인중...</span>
       </div>
 
       <!-- 현재 상태 -->
-      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+      <div style="padding: 12px 16px; background: #111; border-radius: 10px; margin-bottom: 14px; border: 1px solid #333;">
         <div style="display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; font-size: 13px;">
-          <span style="font-weight: 700; color: #666;">환경</span>
-          <span id="dp-env" style="color: #333;">-</span>
-          <span style="font-weight: 700; color: #666;">기본 경로</span>
-          <span id="dp-default" style="color: #999; font-family: monospace; font-size: 12px;">-</span>
-          <span style="font-weight: 700; color: #666;">현재 경로</span>
-          <span id="dp-current" style="color: #333; font-family: monospace; font-size: 12px; font-weight: 600;">-</span>
+          <span style="font-weight: 700; color: #999;">환경</span>
+          <span id="dp-env" style="color: #ccc;">-</span>
+          <span style="font-weight: 700; color: #999;">기본 경로</span>
+          <span id="dp-default" style="color: #777; font-family: monospace; font-size: 12px;">-</span>
+          <span style="font-weight: 700; color: #999;">현재 경로</span>
+          <span id="dp-current" style="color: #d4a843; font-family: monospace; font-size: 12px; font-weight: 600;">-</span>
         </div>
       </div>
 
       <!-- DB 파일 목록 -->
-      <div style="padding: 10px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">저장되는 데이터</div>
+      <div style="padding: 10px 16px; background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 8px;">저장되는 데이터</div>
         <div id="dp-files" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;"></div>
       </div>
 
@@ -489,52 +507,52 @@
     <div class="site-card" id="backup-card">
       <div class="site-header">
         <div class="site-title">
-          <div class="site-icon" style="background: linear-gradient(135deg, #28a745, #20c997); font-size: 14px;">NAS</div>
+          <div class="site-icon" style="background: linear-gradient(135deg, #d4a843, #a07c2a); font-size: 14px;">NAS</div>
           <span class="site-name">NAS 백업 관리</span>
         </div>
-        <span class="site-status" id="nas-status" style="background:#ffeeba; color:#856404;">확인중...</span>
+        <span class="site-status" id="nas-status" style="background:rgba(212,168,67,0.15); color:#d4a843;">확인중...</span>
       </div>
 
       <!-- NAS 접속 정보 -->
-      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 10px;">NAS 접속 정보</div>
+      <div style="padding: 12px 16px; background: #111; border-radius: 10px; margin-bottom: 14px; border: 1px solid #333;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 10px;">NAS 접속 정보</div>
         <div style="display: grid; grid-template-columns: 80px 1fr 80px 1fr; gap: 8px; align-items: center;">
-          <label style="font-size: 13px; font-weight: 600; color: #666;">IP</label>
-          <input type="text" id="bk-nas-ip" placeholder="192.168.0.250" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace;" />
-          <label style="font-size: 13px; font-weight: 600; color: #666;">공유폴더</label>
-          <input type="text" id="bk-nas-share" placeholder="LEE" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace;" />
-          <label style="font-size: 13px; font-weight: 600; color: #666;">아이디</label>
-          <input type="text" id="bk-nas-user" placeholder="admin" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px;" />
-          <label style="font-size: 13px; font-weight: 600; color: #666;">비밀번호</label>
+          <label style="font-size: 13px; font-weight: 600; color: #999;">IP</label>
+          <input type="text" id="bk-nas-ip" placeholder="192.168.0.250" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; font-family:monospace; background:#111; color:#ccc;" />
+          <label style="font-size: 13px; font-weight: 600; color: #999;">공유폴더</label>
+          <input type="text" id="bk-nas-share" placeholder="LEE" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; font-family:monospace; background:#111; color:#ccc;" />
+          <label style="font-size: 13px; font-weight: 600; color: #999;">아이디</label>
+          <input type="text" id="bk-nas-user" placeholder="admin" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; background:#111; color:#ccc;" />
+          <label style="font-size: 13px; font-weight: 600; color: #999;">비밀번호</label>
           <div style="position:relative; display:flex; align-items:center;">
-            <input type="password" id="bk-nas-pass" placeholder="비밀번호" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; width:100%; padding-right:36px;" />
+            <input type="password" id="bk-nas-pass" placeholder="비밀번호" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; width:100%; padding-right:36px; background:#111; color:#ccc;" />
             <span onclick="toggleNasPass()" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="bk-pass-toggle" title="비밀번호 보기">&#128065;</span>
           </div>
         </div>
       </div>
 
       <!-- 백업 상태 + 시간 설정 -->
-      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
+      <div style="padding: 12px 16px; background: #111; border-radius: 10px; margin-bottom: 14px; border: 1px solid #333;">
         <div style="display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: 13px;">
-          <span style="font-weight: 700; color: #666;">NAS 경로</span>
-          <span id="bk-nas-root" style="color: #333; font-family: monospace; font-size: 12px;">-</span>
-          <span style="font-weight: 700; color: #666;">마지막 백업</span>
-          <span id="bk-last-time" style="color: #333; font-weight: 600;">-</span>
-          <span style="font-weight: 700; color: #666;">자동 백업</span>
-          <span style="color: #333; display: flex; align-items: center; gap: 8px;">
+          <span style="font-weight: 700; color: #999;">NAS 경로</span>
+          <span id="bk-nas-root" style="color: #ccc; font-family: monospace; font-size: 12px;">-</span>
+          <span style="font-weight: 700; color: #999;">마지막 백업</span>
+          <span id="bk-last-time" style="color: #d4a843; font-weight: 600;">-</span>
+          <span style="font-weight: 700; color: #999;">자동 백업</span>
+          <span style="color: #ccc; display: flex; align-items: center; gap: 8px;">
             매일
-            <input type="number" id="bk-hour" min="0" max="23" value="3" style="width:50px; padding:4px 8px; border:2px solid #e0e0e0; border-radius:6px; font-size:13px; text-align:center;" />
+            <input type="number" id="bk-hour" min="0" max="23" value="3" style="width:50px; padding:4px 8px; border:1px solid #333; border-radius:6px; font-size:13px; text-align:center; background:#111; color:#ccc;" />
             시
-            <input type="number" id="bk-minute" min="0" max="59" value="0" style="width:50px; padding:4px 8px; border:2px solid #e0e0e0; border-radius:6px; font-size:13px; text-align:center;" />
+            <input type="number" id="bk-minute" min="0" max="59" value="0" style="width:50px; padding:4px 8px; border:1px solid #333; border-radius:6px; font-size:13px; text-align:center; background:#111; color:#ccc;" />
             분
-            <button onclick="saveBackupSettings()" style="padding:4px 12px; background:#667eea; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">저장</button>
+            <button onclick="saveBackupSettings()" style="padding:4px 12px; background:linear-gradient(135deg,#d4a843,#a07c2a); color:#111; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">저장</button>
           </span>
         </div>
       </div>
 
       <!-- 로컬 DB 파일 목록 -->
-      <div style="padding: 10px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">로컬 DB 파일</div>
+      <div style="padding: 10px 16px; background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 8px;">로컬 DB 파일</div>
         <div id="bk-files" style="font-size: 12px;"></div>
       </div>
 
@@ -545,15 +563,15 @@
       <div style="text-align: center;">
         <button id="bk-btn" onclick="runBackup()" style="
           padding: 12px 36px;
-          background: linear-gradient(135deg, #28a745, #20c997);
-          color: #fff;
+          background: linear-gradient(135deg, #d4a843, #a07c2a);
+          color: #111;
           border: none;
           border-radius: 10px;
           font-size: 15px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
-          box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+          box-shadow: 0 4px 12px rgba(212,168,67,0.3);
         ">NAS 백업 실행</button>
       </div>
     </div>
@@ -566,43 +584,43 @@
     <div class="site-card">
       <div class="site-header">
         <div class="site-title">
-          <div class="site-icon" style="background: linear-gradient(135deg, #0088cc, #229ED9); font-size: 16px;">T</div>
+          <div class="site-icon" style="background: linear-gradient(135deg, #d4a843, #a07c2a); font-size: 16px;">T</div>
           <span class="site-name">텔레그램 봇 설정</span>
         </div>
-        <span class="site-status" id="tg-status" style="background:#ffeeba; color:#856404;">미확인</span>
+        <span class="site-status" id="tg-status" style="background:rgba(212,168,67,0.15); color:#d4a843;">미확인</span>
       </div>
 
       <!-- 봇 토큰 -->
-      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 10px;">봇 설정</div>
+      <div style="padding: 12px 16px; background: #111; border-radius: 10px; margin-bottom: 14px; border: 1px solid #333;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 10px;">봇 설정</div>
         <div style="display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;">
-          <label style="font-size: 13px; font-weight: 600; color: #666;">Bot Token</label>
+          <label style="font-size: 13px; font-weight: 600; color: #999;">Bot Token</label>
           <div style="position:relative; display:flex; align-items:center;">
-            <input type="password" id="tg-bot-token" placeholder="@BotFather에서 발급받은 토큰" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px;" />
+            <input type="password" id="tg-bot-token" placeholder="@BotFather에서 발급받은 토큰" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px; background:#111; color:#ccc;" />
             <span onclick="toggleTgField('tg-bot-token','tg-token-toggle')" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="tg-token-toggle" title="보기">&#128065;</span>
           </div>
-          <label style="font-size: 13px; font-weight: 600; color: #666;">Chat ID</label>
-          <input type="text" id="tg-chat-id" placeholder="알림 받을 채팅 ID" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%;" />
+          <label style="font-size: 13px; font-weight: 600; color: #999;">Chat ID</label>
+          <input type="text" id="tg-chat-id" placeholder="알림 받을 채팅 ID" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; font-family:monospace; width:100%; background:#111; color:#ccc;" />
         </div>
       </div>
 
       <!-- Claude API Key -->
-      <div style="padding: 12px 16px; background: #f8f9fa; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 10px;">Claude AI 챗봇 (텔레그램 대화용)</div>
+      <div style="padding: 12px 16px; background: #111; border-radius: 10px; margin-bottom: 14px; border: 1px solid #333;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 10px;">Claude AI 챗봇 (텔레그램 대화용)</div>
         <div style="display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;">
-          <label style="font-size: 13px; font-weight: 600; color: #666;">API Key</label>
+          <label style="font-size: 13px; font-weight: 600; color: #999;">API Key</label>
           <div style="position:relative; display:flex; align-items:center;">
-            <input type="password" id="tg-api-key" placeholder="Anthropic API Key (선택사항)" style="padding:6px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px;" />
+            <input type="password" id="tg-api-key" placeholder="Anthropic API Key (선택사항)" style="padding:6px 10px; border:1px solid #333; border-radius:8px; font-size:13px; font-family:monospace; width:100%; padding-right:36px; background:#111; color:#ccc;" />
             <span onclick="toggleTgField('tg-api-key','tg-key-toggle')" style="position:absolute; right:8px; cursor:pointer; font-size:16px; user-select:none;" id="tg-key-toggle" title="보기">&#128065;</span>
           </div>
         </div>
-        <div style="margin-top: 8px; font-size: 11px; color: #aaa;">* API Key가 없으면 텔레그램 Claude 챗봇 기능이 비활성화됩니다</div>
+        <div style="margin-top: 8px; font-size: 11px; color: #666;">* API Key가 없으면 텔레그램 Claude 챗봇 기능이 비활성화됩니다</div>
       </div>
 
       <!-- 안내 -->
-      <div style="padding: 12px 16px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 14px;">
-        <div style="font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px;">사용 가능한 명령어</div>
-        <div style="font-size: 12px; color: #666; line-height: 1.8;">
+      <div style="padding: 12px 16px; background: #111; border: 1px solid #333; border-radius: 10px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #999; margin-bottom: 8px;">사용 가능한 명령어</div>
+        <div style="font-size: 12px; color: #888; line-height: 1.8;">
           <code>/status</code> - 현재 작업 상태 확인<br>
           <code>/stop</code> - 진행 중인 작업 중지<br>
           <code>/musinsa [키워드] [개수]</code> - 통합 검색 시작<br>
@@ -618,21 +636,21 @@
       <div style="display: flex; gap: 12px; justify-content: center;">
         <button onclick="saveTelegramSettings()" style="
           padding: 12px 36px;
-          background: linear-gradient(135deg, #0088cc, #229ED9);
-          color: #fff;
+          background: linear-gradient(135deg, #d4a843, #a07c2a);
+          color: #111;
           border: none;
           border-radius: 10px;
           font-size: 15px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.3s;
-          box-shadow: 0 4px 12px rgba(0,136,204,0.3);
+          box-shadow: 0 4px 12px rgba(212,168,67,0.3);
         ">설정 저장</button>
         <button onclick="testTelegram()" id="tg-test-btn" style="
           padding: 12px 24px;
-          background: #fff;
-          color: #0088cc;
-          border: 2px solid #0088cc;
+          background: #1a1a1a;
+          color: #d4a843;
+          border: 1px solid #d4a843;
           border-radius: 10px;
           font-size: 15px;
           font-weight: 700;
@@ -649,6 +667,26 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // Gold Modal
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function showModal(msg, buttons) {
+      const overlay = document.getElementById('modalOverlay');
+      document.getElementById('modalMsg').textContent = msg;
+      const actions = document.getElementById('modalActions');
+      actions.innerHTML = '';
+      buttons.forEach(btn => {
+        const b = document.createElement('button');
+        b.className = 'modal-btn ' + (btn.cls || 'primary');
+        b.textContent = btn.text;
+        b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
+        actions.appendChild(b);
+      });
+      overlay.classList.add('active');
+    }
+    function goldAlert(msg, cb) { showModal(msg, [{ text: '확인', cls: 'primary', cb }]); }
+    function goldConfirm(msg, onOk, isDanger) { showModal(msg, [{ text: '취소', cls: 'secondary' }, { text: '확인', cls: isDanger ? 'danger' : 'primary', cb: onOk }]); }
+
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 탭 전환
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -769,17 +807,20 @@
 
     function removeAccount(site, idx) {
       const acc = settings[site].accounts[idx];
-      if (acc.id && !confirm(`"${acc.id}" 계정을 삭제하시겠습니까?`)) return;
-
-      settings[site].accounts[idx] = { id: '', pw: '' };
-
-      // 선택된 계정이 삭제되면 첫번째로 변경
-      if (settings[site].selected === idx) {
-        const firstValid = settings[site].accounts.findIndex(a => a.id);
-        settings[site].selected = firstValid >= 0 ? firstValid : 0;
+      const doRemove = () => {
+        settings[site].accounts[idx] = { id: '', pw: '' };
+        // 선택된 계정이 삭제되면 첫번째로 변경
+        if (settings[site].selected === idx) {
+          const firstValid = settings[site].accounts.findIndex(a => a.id);
+          settings[site].selected = firstValid >= 0 ? firstValid : 0;
+        }
+        renderAccounts(site);
+      };
+      if (acc.id) {
+        goldConfirm(`"${acc.id}" 계정을 삭제하시겠습니까?`, doRemove, true);
+      } else {
+        doRemove();
       }
-
-      renderAccounts(site);
     }
 
     function saveSettings() {
@@ -866,12 +907,12 @@
           const statusEl = document.getElementById('drive-status');
           if (data.drive_connected) {
             statusEl.textContent = '연결됨';
-            statusEl.style.background = '#d4edda';
-            statusEl.style.color = '#155724';
+            statusEl.style.background = 'rgba(212,168,67,0.15)';
+            statusEl.style.color = '#d4a843';
           } else {
             statusEl.textContent = '미연결';
-            statusEl.style.background = '#f8d7da';
-            statusEl.style.color = '#721c24';
+            statusEl.style.background = 'rgba(255,82,82,0.1)';
+            statusEl.style.color = '#ff5252';
           }
 
           // DB 파일 목록
@@ -881,15 +922,15 @@
             for (const [key, path] of Object.entries(data.paths)) {
               const label = fileLabels[key] || key;
               const shortPath = path.split('/').slice(-2).join('/');
-              html += `<div style="color:#555;"><span style="font-weight:600;">${label}</span> <span style="color:#aaa;">- ${shortPath}</span></div>`;
+              html += `<div style="color:#aaa;"><span style="font-weight:600; color:#ccc;">${label}</span> <span style="color:#666;">- ${shortPath}</span></div>`;
             }
           }
           filesEl.innerHTML = html;
         })
         .catch(err => {
           document.getElementById('drive-status').textContent = '오류';
-          document.getElementById('drive-status').style.background = '#f8d7da';
-          document.getElementById('drive-status').style.color = '#721c24';
+          document.getElementById('drive-status').style.background = 'rgba(255,82,82,0.1)';
+          document.getElementById('drive-status').style.color = '#ff5252';
         });
     }
 
@@ -908,12 +949,12 @@
           const nasEl = document.getElementById('nas-status');
           if (data.nas_connected) {
             nasEl.textContent = '연결됨';
-            nasEl.style.background = '#d4edda';
-            nasEl.style.color = '#155724';
+            nasEl.style.background = 'rgba(212,168,67,0.15)';
+            nasEl.style.color = '#d4a843';
           } else {
             nasEl.textContent = '미연결';
-            nasEl.style.background = '#f8d7da';
-            nasEl.style.color = '#721c24';
+            nasEl.style.background = 'rgba(255,82,82,0.1)';
+            nasEl.style.color = '#ff5252';
           }
 
           document.getElementById('bk-nas-root').textContent = data.nas_root || '-';
@@ -946,12 +987,12 @@
               'task_history_json': '검색 기록'
             };
             let html = '<table style="width:100%; border-collapse:collapse;">';
-            html += '<tr style="border-bottom:1px solid #eee;"><th style="text-align:left; padding:4px 0; color:#888;">파일</th><th style="text-align:right; padding:4px 0; color:#888;">크기</th><th style="text-align:right; padding:4px 0; color:#888;">수정일</th></tr>';
+            html += '<tr style="border-bottom:1px solid #333;"><th style="text-align:left; padding:4px 0; color:#999;">파일</th><th style="text-align:right; padding:4px 0; color:#999;">크기</th><th style="text-align:right; padding:4px 0; color:#999;">수정일</th></tr>';
             data.local_files.forEach(f => {
               const label = fileLabels[f.key] || f.file;
               const sizeKB = (f.size / 1024).toFixed(1);
-              html += `<tr style="border-bottom:1px solid #f5f5f5;">
-                <td style="padding:4px 0; color:#555; font-weight:600;">${label}</td>
+              html += `<tr style="border-bottom:1px solid #222;">
+                <td style="padding:4px 0; color:#ccc; font-weight:600;">${label}</td>
                 <td style="padding:4px 0; text-align:right; color:#888;">${sizeKB} KB</td>
                 <td style="padding:4px 0; text-align:right; color:#888;">${f.modified}</td>
               </tr>`;
@@ -985,14 +1026,14 @@
           resultEl.style.display = 'block';
           if (data.success) {
             const fileList = data.files.map(f => `${f.file} (${(f.size/1024).toFixed(1)}KB)`).join(', ');
-            resultEl.style.background = '#d4edda';
-            resultEl.style.color = '#155724';
+            resultEl.style.background = 'rgba(212,168,67,0.1)';
+            resultEl.style.color = '#d4a843';
             resultEl.innerHTML = `<b>백업 완료!</b><br>파일: ${fileList}<br>시간: ${data.timestamp}`;
             showToast('NAS 백업 완료');
             loadBackupStatus();
           } else {
-            resultEl.style.background = '#f8d7da';
-            resultEl.style.color = '#721c24';
+            resultEl.style.background = 'rgba(255,82,82,0.1)';
+            resultEl.style.color = '#ff5252';
             resultEl.innerHTML = `<b>백업 실패</b><br>${data.error || '알 수 없는 오류'}`;
             showToast('백업 실패: ' + (data.error || ''), true);
           }
@@ -1070,12 +1111,12 @@
             const statusEl = document.getElementById('tg-status');
             if (data.telegram.bot_token && data.telegram.chat_id) {
               statusEl.textContent = '설정됨';
-              statusEl.style.background = '#d4edda';
-              statusEl.style.color = '#155724';
+              statusEl.style.background = 'rgba(212,168,67,0.15)';
+              statusEl.style.color = '#d4a843';
             } else {
               statusEl.textContent = '미설정';
-              statusEl.style.background = '#f8d7da';
-              statusEl.style.color = '#721c24';
+              statusEl.style.background = 'rgba(255,82,82,0.1)';
+              statusEl.style.color = '#ff5252';
             }
           }
         })
@@ -1145,5 +1186,7 @@
 
     loadTelegramSettings();
   </script>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal-box"><div class="modal-msg" id="modalMsg"></div><div class="modal-actions" id="modalActions"></div></div></div>
 </body>
 </html>

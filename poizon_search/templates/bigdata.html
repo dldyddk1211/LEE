@@ -334,6 +334,16 @@
     .loading { display: flex; align-items: center; justify-content: center; height: 160px; color: #999; gap: 8px; font-size: 13px; }
     .spinner { width: 18px; height: 18px; border: 2px solid #ddd; border-top-color: #0f3460; border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .gold-modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.7); z-index:99999; justify-content:center; align-items:center; }
+    .gold-modal-overlay.active { display:flex; }
+    .gold-modal-box { background:#1a1a1a; border:1px solid #d4a843; border-radius:14px; padding:28px 24px 20px; max-width:400px; width:90%; text-align:center; }
+    .gold-modal-box .modal-msg { font-size:15px; color:#ddd; line-height:1.6; margin-bottom:22px; white-space:pre-line; }
+    .gold-modal-box .modal-actions { display:flex; gap:10px; justify-content:center; }
+    .gold-modal-box .modal-btn { flex:1; padding:10px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+    .modal-btn.primary { background:linear-gradient(135deg,#d4a843,#a07c2a); color:#111; }
+    .modal-btn.secondary { background:#2a2a2a; color:#aaa; border:1px solid #444; }
+    .modal-btn.danger { background:#2a1a1a; color:#ff5252; border:1px solid #ff5252; }
   </style>
 </head>
 <body>
@@ -589,13 +599,14 @@
   async function deleteDataset() {
     if (!currentDatasetId) return;
     const name = document.getElementById('toolbarName').innerText.split('(')[0].trim();
-    if (!confirm(`"${name}" 데이터셋을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
-    await fetch(`/bigdata/api/datasets/${currentDatasetId}`, { method: 'DELETE' });
-    currentDatasetId = null;
-    document.getElementById('tableToolbar').style.display = 'none';
-    document.getElementById('paginationBar').style.display = 'none';
-    document.getElementById('tableWrap').innerHTML = '<div class="no-data"><div class="nd-icon">🗄️</div><p>데이터셋을 선택하거나 업로드하세요</p></div>';
-    await loadDatasets();
+    goldConfirm(`"${name}" 데이터셋을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`, async () => {
+      await fetch(`/bigdata/api/datasets/${currentDatasetId}`, { method: 'DELETE' });
+      currentDatasetId = null;
+      document.getElementById('tableToolbar').style.display = 'none';
+      document.getElementById('paginationBar').style.display = 'none';
+      document.getElementById('tableWrap').innerHTML = '<div class="no-data"><div class="nd-icon">🗄️</div><p>데이터셋을 선택하거나 업로드하세요</p></div>';
+      await loadDatasets();
+    }, true);
   }
 
   // ── 업로드 모달 ──
@@ -672,9 +683,29 @@
 
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeUploadModal(); });
 
+  // ── Gold Modal ──
+  function showModal(msg, buttons) {
+    const overlay = document.getElementById('goldModalOverlay');
+    document.getElementById('goldModalMsg').textContent = msg;
+    const actions = document.getElementById('goldModalActions');
+    actions.innerHTML = '';
+    buttons.forEach(btn => {
+      const b = document.createElement('button');
+      b.className = 'modal-btn ' + (btn.cls || 'primary');
+      b.textContent = btn.text;
+      b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
+      actions.appendChild(b);
+    });
+    overlay.classList.add('active');
+  }
+  function goldAlert(msg, cb) { showModal(msg, [{ text: '확인', cls: 'primary', cb }]); }
+  function goldConfirm(msg, onOk, isDanger) { showModal(msg, [{ text: '취소', cls: 'secondary' }, { text: '확인', cls: isDanger ? 'danger' : 'primary', cb: onOk }]); }
+
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
+
+<div class="gold-modal-overlay" id="goldModalOverlay"><div class="gold-modal-box"><div class="modal-msg" id="goldModalMsg"></div><div class="modal-actions" id="goldModalActions"></div></div></div>
 </body>
 </html>
