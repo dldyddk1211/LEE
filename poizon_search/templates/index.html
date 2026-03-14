@@ -244,94 +244,92 @@
     }
     .os-form-row {
       display: flex;
-      gap: 12px;
-      align-items: flex-end;
+      gap: 10px;
+      align-items: center;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .os-form-group {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      align-items: center;
+      gap: 6px;
     }
     .os-form-group label {
-      font-size: 12px;
-      color: #888;
-      font-weight: 600;
+      font-size: 0.82rem;
+      color: #8a8070;
+      white-space: nowrap;
     }
     .os-form-group select,
     .os-form-group input {
-      background: #111;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #ddd;
-      padding: 8px 12px;
-      font-size: 13px;
+      background: #0d0d0a;
+      border: 1px solid #2a2518;
+      border-radius: 6px;
+      color: #e8e0d0;
+      padding: 6px 10px;
+      font-size: 0.82rem;
       outline: none;
-      transition: border-color 0.2s;
     }
     .os-form-group select:focus,
     .os-form-group input:focus { border-color: #d4a843; }
-    .os-form-group select { min-width: 160px; cursor: pointer; }
-    .os-form-group input { min-width: 180px; }
+    .os-form-group select { min-width: 140px; cursor: pointer; }
+    .os-form-group input { width: 160px; }
     .os-form-hint {
-      font-size: 11px;
-      color: #666;
-      margin-bottom: 14px;
+      font-size: 0.72rem;
+      color: #8a8070;
+      margin-bottom: 8px;
     }
     .os-breadcrumb {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 14px;
+      font-size: 0.75rem;
+      color: #d4a843;
+      margin-bottom: 6px;
     }
-    .os-breadcrumb span { color: #d4a843; }
 
-    /* 컨트롤 버튼들 */
-    .os-buttons {
+    /* 컨트롤 버튼들 — jp_sourcing 스타일 */
+    .os-btn-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .os-btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: 6px;
+      font-size: 0.76rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      transition: opacity .15s, transform .1s;
       white-space: nowrap;
     }
-    .os-btn.primary { background: linear-gradient(135deg, #d4a843, #a07c2a); color: #111; }
-    .os-btn.green { background: linear-gradient(135deg, #4caf50, #388e3c); color: #fff; }
-    .os-btn.red { background: linear-gradient(135deg, #e53935, #c62828); color: #fff; }
-    .os-btn.orange { background: linear-gradient(135deg, #e67e22, #d35400); color: #fff; }
-    .os-btn.blue { background: linear-gradient(135deg, #5a9fd4, #3b7fb8); color: #fff; }
-    .os-btn.dark { background: #222; color: #aaa; border: 1px solid #333; }
-    .os-btn:hover { filter: brightness(1.1); }
-    .os-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+    .os-btn:hover { opacity: .85; }
+    .os-btn:active { transform: scale(.97); }
+    .os-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .os-btn.b-blue   { background: #5a9fd4; color: #fff; }
+    .os-btn.b-green  { background: #4caf50; color: #fff; }
+    .os-btn.b-purple { background: linear-gradient(135deg, #5a9fd4, #b8860b); color: #fff; }
+    .os-btn.b-yellow { background: #d4a843; color: #000; }
+    .os-btn.b-red    { background: #e53935; color: #fff; }
+    .os-btn.b-gray   { background: #2a2d3a; color: #e8e0d0; }
 
-    /* 업로드 개수 */
-    .os-upload-count {
+    /* 업로드 옵션 */
+    .os-opts {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-left: auto;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
     }
-    .os-upload-count label { font-size: 12px; color: #888; }
-    .os-upload-count input {
-      width: 90px;
-      background: #111;
-      border: 1px solid #333;
-      border-radius: 6px;
-      color: #d4a843;
-      padding: 6px 10px;
-      font-size: 14px;
-      font-weight: 700;
-      text-align: center;
+    .os-opts label { font-size: 0.78rem; color: #8a8070; }
+    .os-opts input {
+      background: #0d0d0a;
+      border: 1px solid #2a2518;
+      color: #e8e0d0;
+      padding: 5px 9px;
+      border-radius: 5px;
+      width: 80px;
+      font-size: 0.82rem;
     }
 
     /* 스케줄 뱃지 */
@@ -339,13 +337,13 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #111;
-      border: 1px solid #2a2a2a;
+      background: #1a1710;
+      border: 1px solid #2a2518;
       border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 12px;
-      color: #4caf50;
-      margin-top: 10px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      color: #d4a843;
+      margin-top: 12px;
     }
     .os-schedule-badge .dot {
       width: 6px; height: 6px;
@@ -426,10 +424,9 @@
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 60px 12px 12px; }
       .dashboard-grid { grid-template-columns: 1fr; }
-      .os-form-row { flex-direction: column; }
-      .os-buttons { gap: 6px; }
-      .os-btn { padding: 8px 14px; font-size: 12px; }
-      .os-upload-count { margin-left: 0; }
+      .os-form-row { flex-direction: column; align-items: flex-start; }
+      .os-btn-row { gap: 6px; }
+      .os-btn { padding: 7px 12px; font-size: 0.78rem; }
     }
 
     h1{
@@ -1498,14 +1495,9 @@
 
   <!-- 실행 컨트롤 -->
   <div class="os-control">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-      <h3 style="margin-bottom:0;">⚙️ 실행 컨트롤</h3>
-      <div style="display:flex; gap:6px;">
-        <button class="os-btn red" id="osStopBtn" onclick="osStop()" style="padding:6px 10px; font-size:12px;" disabled>⏹</button>
-        <button class="os-btn orange" id="osPauseBtn" onclick="osPause()" style="padding:6px 10px; font-size:12px;" disabled>⏸</button>
-        <button class="os-btn green" id="osResumeBtn" onclick="osResume()" style="padding:6px 10px; font-size:12px;" disabled>▶</button>
-      </div>
-    </div>
+    <div class="panel-title" style="color:#d4a843;font-size:14px;font-weight:700;margin-bottom:14px;">⚙️ 실행 컨트롤</div>
+
+    <!-- 사이트 / 카테고리 / 키워드 — 인라인 -->
     <div class="os-form-row">
       <div class="os-form-group">
         <label>사이트</label>
@@ -1530,30 +1522,37 @@
         <label>키워드</label>
         <input type="text" id="osKeyword" placeholder="예: adidas, nike">
       </div>
+    </div>
+
+    <!-- 페이지 지정 — 별도 줄 -->
+    <div class="os-form-row">
       <div class="os-form-group">
         <label>페이지 지정</label>
-        <input type="text" id="osPages" placeholder="예: 2-10, 2,3,5, 2" style="min-width:140px;">
+        <input type="text" id="osPages" placeholder="예: 2-10, 2,3,5, 2" style="width:180px;">
       </div>
+      <span class="os-form-hint" style="margin-bottom:0;">※ 비우면 전체 | 2-10: 2~10페이지 | 2,3,5: 특정페이지 | 2: 단일페이지</span>
     </div>
-    <div class="os-form-hint">※ 비우면 전체 | 2-10: 2~10페이지 | 2,3,5: 특정페이지 | 2: 단일페이지</div>
+
     <div class="os-breadcrumb" id="osBreadcrumb">제비오 (Xebio) > <span>세일</span></div>
 
-    <div class="os-buttons">
-      <button class="os-btn primary" id="osStartBtn" onclick="osStartScrape()">🔍 수동 스크래핑</button>
-      <button class="os-btn blue" id="osUploadBtn" onclick="osUploadSelected()" disabled>📦 선택 상품 업로드</button>
-      <button class="os-btn green" id="osAutoBtn" onclick="osAutoRun()">🔥 자동 실행</button>
-      <button class="os-btn red" id="osResetBtn" onclick="osReset()">🗑️ 리셋</button>
-      <button class="os-btn dark" id="osTranslateBtn" onclick="osTranslate()">🌐 한국어 번역</button>
-      <button class="os-btn dark" id="osExcelBtn" onclick="osDownloadExcel()">📊 엑셀 다운로드</button>
+    <!-- 메인 버튼 행 — jp_sourcing 동일 -->
+    <div class="os-btn-row">
+      <button class="os-btn b-blue"   id="osStartBtn" onclick="osStartScrape()">🔍 수동 스크래핑</button>
+      <button class="os-btn b-green"  id="osUploadBtn" onclick="osUploadSelected()">📤 선택 상품 업로드</button>
+      <button class="os-btn b-purple" id="osAutoBtn" onclick="osAutoRun()">⚡ 자동 실행</button>
+      <button class="os-btn b-yellow" id="osPauseBtn" onclick="osPause()" style="display:none">⏸️ 일시정지</button>
+      <button class="os-btn b-red"    id="osResetBtn" onclick="osReset()">🔄 리셋</button>
+      <button class="os-btn b-gray"   id="osTranslateBtn" onclick="osTranslate()">🌐 한국어 번역</button>
+      <button class="os-btn b-gray"   id="osExcelBtn" onclick="osDownloadExcel()">📥 엑셀 다운로드</button>
     </div>
 
-    <div style="display:flex; align-items:center; gap:16px; margin-top:14px; flex-wrap:wrap;">
-      <div class="os-upload-count">
-        <label>업로드 최대 개수</label>
-        <input type="number" id="osMaxUpload" value="638203" min="1">
-      </div>
+    <!-- 업로드 옵션 -->
+    <div class="os-opts">
+      <label>업로드 최대 개수</label>
+      <input type="number" id="osMaxUpload" placeholder="전체" min="1" max="9999" value="" autocomplete="off">
     </div>
 
+    <!-- 스케줄 상태 -->
     <div class="os-schedule-badge" id="osScheduleBadge">
       <span class="dot"></span>
       <span id="osScheduleText">자동 스케줄 활성화 — 매일 09:00 실행</span>
@@ -1564,7 +1563,7 @@
   <div class="os-history">
     <h3>
       📋 수집 이력
-      <button class="os-btn dark" style="padding:5px 12px; font-size:12px;" onclick="osRefreshHistory()">🔄 새로고침</button>
+      <button class="os-btn b-gray" style="padding:5px 12px; font-size:12px;" onclick="osRefreshHistory()">🔄 새로고침</button>
     </h3>
     <div style="max-height:200px; overflow-y:auto;">
       <table class="os-history-table">
@@ -1589,7 +1588,7 @@
   <div class="os-log">
     <h3>
       📋 최근 로그
-      <button class="os-btn dark" style="padding:5px 12px; font-size:12px;" onclick="document.getElementById('osLogBox').innerHTML=''">전체 보기</button>
+      <button class="os-btn b-gray" style="padding:5px 12px; font-size:12px;" onclick="document.getElementById('osLogBox').innerHTML=''">전체 보기</button>
     </h3>
     <div class="os-log-box" id="osLogBox">[시스템] 해외소싱 패널 준비됨.</div>
   </div>
@@ -3697,6 +3696,9 @@ function goldConfirm(msg, onOk, isDanger) {
     }
     osUpdateBreadcrumb();
     osAddLog('[시스템] 해외소싱 패널 활성화됨.');
+    // SSE + 상태 폴링 시작
+    osConnectSSE();
+    osStartStatusPoll();
   }
 
   function handleSidebarAction(action) {
@@ -3829,67 +3831,209 @@ function goldConfirm(msg, onOk, isDanger) {
     document.getElementById('osBreadcrumb').innerHTML = `${siteName} > <span>${catName}</span>`;
   }
 
+  // ── SSE 로그 스트리밍 연결 ──────────────────
+  let osEventSource = null;
+
+  function osConnectSSE() {
+    if (osEventSource) return;
+    osEventSource = new EventSource('/overseas/logs/stream');
+    osEventSource.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.msg && data.msg !== '.') {
+          osAddLog(data.msg);
+        }
+      } catch(err) {}
+    };
+    osEventSource.onerror = () => {
+      osEventSource.close();
+      osEventSource = null;
+      setTimeout(osConnectSSE, 3000);
+    };
+  }
+
   function osAddLog(msg) {
     const box = document.getElementById('osLogBox');
+    if (!box) return;
     const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     box.innerHTML += `\n[${now}] ${msg}`;
     box.scrollTop = box.scrollHeight;
   }
 
-  function osStartScrape() {
+  // ── 상태 폴링 (3초) ──────────────────────────
+  let osStatusInterval = null;
+
+  function osStartStatusPoll() {
+    if (osStatusInterval) return;
+    osStatusInterval = setInterval(async () => {
+      try {
+        const r = await fetch('/overseas/status');
+        const d = await r.json();
+        const pauseBtn = document.getElementById('osPauseBtn');
+        const startBtn = document.getElementById('osStartBtn');
+        const autoBtn = document.getElementById('osAutoBtn');
+
+        if (d.scraping) {
+          // 실행 중 — 일시정지 버튼 표시, 시작/자동 비활성
+          if (pauseBtn) pauseBtn.style.display = 'inline-flex';
+          if (startBtn) startBtn.disabled = true;
+          if (autoBtn) autoBtn.disabled = true;
+
+          if (d.paused && pauseBtn) {
+            pauseBtn.innerHTML = '▶️ 재개';
+          } else if (pauseBtn) {
+            pauseBtn.innerHTML = '⏸️ 일시정지';
+          }
+        } else {
+          // 대기 중 — 일시정지 숨김, 시작/자동 활성
+          if (pauseBtn) pauseBtn.style.display = 'none';
+          if (startBtn) startBtn.disabled = false;
+          if (autoBtn) autoBtn.disabled = false;
+        }
+      } catch(e) {}
+    }, 3000);
+  }
+
+  // ── 수동 스크래핑 ──────────────────────────────
+  async function osStartScrape() {
     const site = document.getElementById('osSiteSelect').value;
     const cat = document.getElementById('osCategorySelect').value;
     const keyword = document.getElementById('osKeyword').value.trim();
     const pages = document.getElementById('osPages').value.trim();
 
-    osAddLog(`🔍 수동 스크래핑 시작: ${OS_SITES[site]?.name} > ${OS_SITES[site]?.categories[cat]}`);
+    osAddLog(`🔍 수동 스크래핑 요청: ${OS_SITES[site]?.name} > ${OS_SITES[site]?.categories[cat]}`);
     if (keyword) osAddLog(`   키워드: ${keyword}`);
     if (pages) osAddLog(`   페이지: ${pages}`);
-    goldAlert('🔍 해외소싱 스크래핑 기능은 곧 연동됩니다.\n\n현재 UI 구성만 완료된 상태입니다.');
+
+    try {
+      const r = await fetch('/overseas/scrape', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ site_id: site, category_id: cat, keyword, pages })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        osAddLog(`✅ ${d.message}`);
+        osConnectSSE();
+        osStartStatusPoll();
+      } else {
+        goldAlert(d.message || '스크래핑 시작 실패');
+      }
+    } catch(e) {
+      goldAlert('서버 연결 오류: ' + e.message);
+    }
   }
 
-  function osUploadSelected() {
-    goldAlert('📦 선택 상품 업로드 기능은 곧 연동됩니다.');
+  // ── 선택 상품 업로드 ───────────────────────────
+  async function osUploadSelected() {
+    goldAlert('📦 선택 상품 업로드 기능은 준비중입니다.');
   }
 
-  function osAutoRun() {
-    goldAlert('🔥 자동 실행 기능은 곧 연동됩니다.');
+  // ── 자동 실행 ──────────────────────────────────
+  async function osAutoRun() {
+    const site = document.getElementById('osSiteSelect').value;
+    const cat = document.getElementById('osCategorySelect').value;
+    const keyword = document.getElementById('osKeyword').value.trim();
+
+    try {
+      const r = await fetch('/overseas/auto', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ site_id: site, category_id: cat, keyword })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        osAddLog(`⚡ ${d.message}`);
+        osConnectSSE();
+        osStartStatusPoll();
+      } else {
+        goldAlert(d.message || '자동 실행 실패');
+      }
+    } catch(e) {
+      goldAlert('서버 연결 오류: ' + e.message);
+    }
   }
 
+  // ── 리셋 ───────────────────────────────────────
   function osReset() {
-    goldConfirm('🗑️ 수집 데이터를 초기화하시겠습니까?', () => {
-      document.getElementById('osLogBox').innerHTML = '[시스템] 리셋 완료.';
-      document.getElementById('osHistoryBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집 이력이 없습니다</td></tr>';
-      osAddLog('🔄 리셋 완료');
+    goldConfirm('🗑️ 수집 데이터를 초기화하시겠습니까?\n브라우저 종료 + 데이터 삭제됩니다.', async () => {
+      try {
+        const r = await fetch('/overseas/reset', { method: 'POST' });
+        const d = await r.json();
+        if (d.ok) {
+          document.getElementById('osLogBox').innerHTML = '[시스템] 리셋 요청 완료.';
+          document.getElementById('osHistoryBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집 이력이 없습니다</td></tr>';
+        }
+      } catch(e) {
+        goldAlert('리셋 오류: ' + e.message);
+      }
     }, true);
   }
 
-  function osStop() {
-    osAddLog('⏹ 수집 중단 요청...');
-    goldAlert('⏹ 수집 중단 기능은 곧 연동됩니다.');
+  // ── 일시정지 토글 ──────────────────────────────
+  async function osPause() {
+    try {
+      const r = await fetch('/overseas/pause', { method: 'POST' });
+      const d = await r.json();
+      if (!d.ok) {
+        goldAlert(d.message || '일시정지 실패');
+      }
+      // 상태 폴링이 UI 업데이트 처리
+    } catch(e) {
+      goldAlert('서버 연결 오류: ' + e.message);
+    }
   }
 
-  function osPause() {
-    osAddLog('⏸ 일시정지 요청...');
-    goldAlert('⏸ 일시정지 기능은 곧 연동됩니다.');
+  // ── 한국어 번역 ────────────────────────────────
+  async function osTranslate() {
+    osAddLog('🌐 한국어 번역 요청...');
+    try {
+      const r = await fetch('/overseas/translate', { method: 'POST' });
+      const d = await r.json();
+      if (d.ok) {
+        osAddLog(`✅ ${d.message}`);
+      } else {
+        goldAlert(d.message || '번역 실패');
+      }
+    } catch(e) {
+      goldAlert('서버 연결 오류: ' + e.message);
+    }
   }
 
-  function osResume() {
-    osAddLog('▶ 재개 요청...');
-    goldAlert('▶ 재개 기능은 곧 연동됩니다.');
-  }
-
-  function osTranslate() {
-    goldAlert('🌐 한국어 번역 기능은 곧 연동됩니다.');
-  }
-
+  // ── 엑셀 다운로드 ──────────────────────────────
   function osDownloadExcel() {
-    goldAlert('📊 엑셀 다운로드 기능은 곧 연동됩니다.');
+    osAddLog('📥 엑셀 다운로드 요청...');
+    window.location.href = '/overseas/download/excel';
   }
 
-  function osRefreshHistory() {
-    osAddLog('🔄 수집 이력 새로고침...');
-    goldAlert('📋 수집 이력 조회 기능은 곧 연동됩니다.');
+  // ── 수집 상품 조회 ─────────────────────────────
+  async function osRefreshHistory() {
+    osAddLog('🔄 수집 상품 조회 중...');
+    try {
+      const r = await fetch('/overseas/products');
+      const products = await r.json();
+      const tbody = document.getElementById('osHistoryBody');
+      if (!products || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집된 상품이 없습니다</td></tr>';
+        osAddLog('📋 수집된 상품 없음');
+        return;
+      }
+      let html = '';
+      products.slice(0, 100).forEach((p, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${p.brand_ko || p.brand || '-'}</td>
+          <td>${p.name_ko || p.name || '-'}</td>
+          <td>${p.product_code || '-'}</td>
+          <td class="count">¥${(p.price_jpy || 0).toLocaleString()}</td>
+          <td class="status">${p.in_stock ? '재고있음' : '품절'}</td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+      osAddLog(`📋 상품 ${products.length}개 조회 완료 (최대 100개 표시)`);
+    } catch(e) {
+      goldAlert('조회 오류: ' + e.message);
+    }
   }
 
   window.onload = async () => {  // ✅ async 추가!

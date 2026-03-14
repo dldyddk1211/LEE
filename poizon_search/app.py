@@ -151,6 +151,14 @@ try:
 except Exception as e:
     print(f"⚠️ 재고관리 로드 실패: {e}")
 
+# ✅ 해외소싱 Blueprint 등록
+try:
+    from overseas_data.overseas_api import overseas_bp
+    app.register_blueprint(overseas_bp)
+    print("✅ 해외소싱 등록 성공")
+except Exception as e:
+    print(f"⚠️ 해외소싱 로드 실패: {e}")
+
 # 캐시 비활성화
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config['TEMPLATES_AUTO_RELOAD'] = True
