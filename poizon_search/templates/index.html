@@ -208,12 +208,226 @@
     }
     .sidebar-overlay.active { display: block; }
 
+    /* ━━━ 해외소싱 패널 ━━━ */
+    .overseas-panel { display: none; }
+    .os-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .os-header h1 { color: #d4a843; font-size: 22px; }
+    .os-header .os-rate {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: #d4a843;
+    }
+
+    /* 실행 컨트롤 카드 */
+    .os-control {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .os-control h3 {
+      color: #d4a843;
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .os-form-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .os-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .os-form-group label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 600;
+    }
+    .os-form-group select,
+    .os-form-group input {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #ddd;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .os-form-group select:focus,
+    .os-form-group input:focus { border-color: #d4a843; }
+    .os-form-group select { min-width: 160px; cursor: pointer; }
+    .os-form-group input { min-width: 180px; }
+    .os-form-hint {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 14px;
+    }
+    .os-breadcrumb {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 14px;
+    }
+    .os-breadcrumb span { color: #d4a843; }
+
+    /* 컨트롤 버튼들 */
+    .os-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .os-btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .os-btn.primary { background: linear-gradient(135deg, #d4a843, #a07c2a); color: #111; }
+    .os-btn.green { background: linear-gradient(135deg, #4caf50, #388e3c); color: #fff; }
+    .os-btn.red { background: linear-gradient(135deg, #e53935, #c62828); color: #fff; }
+    .os-btn.orange { background: linear-gradient(135deg, #e67e22, #d35400); color: #fff; }
+    .os-btn.blue { background: linear-gradient(135deg, #5a9fd4, #3b7fb8); color: #fff; }
+    .os-btn.dark { background: #222; color: #aaa; border: 1px solid #333; }
+    .os-btn:hover { filter: brightness(1.1); }
+    .os-btn:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+
+    /* 업로드 개수 */
+    .os-upload-count {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .os-upload-count label { font-size: 12px; color: #888; }
+    .os-upload-count input {
+      width: 90px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #d4a843;
+      padding: 6px 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* 스케줄 뱃지 */
+    .os-schedule-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #111;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #4caf50;
+      margin-top: 10px;
+    }
+    .os-schedule-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4caf50;
+    }
+
+    /* 수집 이력 */
+    .os-history {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .os-history h3 {
+      color: #d4a843;
+      font-size: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .os-history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .os-history-table th {
+      background: #111;
+      color: #d4a843;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #333;
+    }
+    .os-history-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #222;
+      color: #ccc;
+    }
+    .os-history-table tr:hover { background: #222; }
+    .os-history-table .count { color: #4caf50; font-weight: 700; }
+    .os-history-table .status { color: #d4a843; font-weight: 600; }
+
+    /* 로그 박스 */
+    .os-log {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .os-log h3 {
+      color: #d4a843;
+      font-size: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .os-log-box {
+      background: #111;
+      border-radius: 8px;
+      padding: 14px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #999;
+      font-family: 'Consolas', monospace;
+      line-height: 1.7;
+    }
+    .os-log-box::-webkit-scrollbar { width: 4px; }
+    .os-log-box::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
     @media (max-width: 768px) {
       .hamburger { display: flex; }
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 60px 12px 12px; }
       .dashboard-grid { grid-template-columns: 1fr; }
+      .os-form-row { flex-direction: column; }
+      .os-buttons { flex-direction: column; }
+      .os-upload-count { margin-left: 0; }
     }
 
     h1{
@@ -1161,9 +1375,18 @@
       </ul>
     </li>
 
+    <li class="menu-group">
+      <div class="menu-group-header" data-submenu="overseas">
+        🌏 해외소싱 <span class="arrow">▾</span>
+      </div>
+      <ul class="submenu" id="submenuOverseas">
+        <li class="menu-item" data-action="xebio">🏀 제비오</li>
+        <li class="menu-item" data-action="abc">👟 ABC</li>
+      </ul>
+    </li>
+
     <li class="menu-item" data-action="scheduler">📅 스케줄러</li>
     <li class="menu-item" data-action="inventory">📦 사무실 재고</li>
-    <li class="menu-item" data-action="settings">⚙️ 설정</li>
 
     <li class="menu-group">
       <div class="menu-group-header" data-submenu="forms">
@@ -1177,6 +1400,7 @@
     </li>
 
     <li class="menu-item" data-action="receiving">📷 입고체크</li>
+    <li class="menu-item" data-action="settings" style="margin-top:8px; border-top:1px solid #2a2a2a; padding-top:14px;">⚙️ 설정</li>
   </ul>
   <div class="sidebar-footer">
     <span class="env-badge" id="envBadge">테스트 서버</span>
@@ -1260,6 +1484,104 @@
   <div class="dash-card">
     <h3>📋 최근 로그</h3>
     <div class="dash-log-box" id="dashLogBox">시스템 시작 대기 중...</div>
+  </div>
+</div>
+
+<!-- ━━━ 해외소싱 패널 ━━━ -->
+<div class="overseas-panel" id="overseasPanel">
+  <div class="os-header">
+    <h1>🌏 해외소싱</h1>
+    <div class="os-rate">💱 환율 <strong id="osExRate">---</strong>원 / 1엔</div>
+  </div>
+
+  <!-- 실행 컨트롤 -->
+  <div class="os-control">
+    <h3>⚙️ 실행 컨트롤</h3>
+    <div class="os-form-row">
+      <div class="os-form-group">
+        <label>사이트</label>
+        <select id="osSiteSelect">
+          <option value="xebio">제비오 (Xebio)</option>
+          <option value="abc" disabled>ABC마트 (준비중)</option>
+        </select>
+      </div>
+      <div class="os-form-group">
+        <label>카테고리</label>
+        <select id="osCategorySelect">
+          <option value="sale">세일</option>
+          <option value="running">런닝</option>
+          <option value="soccer-futsal">축구/풋살</option>
+          <option value="basketball">농구</option>
+          <option value="tennis">테니스</option>
+          <option value="golf">골프</option>
+          <option value="training">트레이닝</option>
+        </select>
+      </div>
+      <div class="os-form-group">
+        <label>키워드</label>
+        <input type="text" id="osKeyword" placeholder="예: adidas, nike">
+      </div>
+      <div class="os-form-group">
+        <label>페이지 지정</label>
+        <input type="text" id="osPages" placeholder="예: 2-10, 2,3,5, 2" style="min-width:140px;">
+      </div>
+    </div>
+    <div class="os-form-hint">※ 비우면 전체 | 2-10: 2~10페이지 | 2,3,5: 특정페이지 | 2: 단일페이지</div>
+    <div class="os-breadcrumb" id="osBreadcrumb">제비오 (Xebio) > <span>세일</span></div>
+
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div class="os-buttons">
+        <button class="os-btn primary" id="osStartBtn" onclick="osStartScrape()">🔍 수동 스크래핑</button>
+        <button class="os-btn blue" id="osUploadBtn" onclick="osUploadSelected()" disabled>📦 선택 상품 업로드</button>
+        <button class="os-btn green" id="osAutoBtn" onclick="osAutoRun()" disabled>🔥 자동 실행</button>
+        <button class="os-btn red" id="osResetBtn" onclick="osReset()">🗑️ 리셋</button>
+        <button class="os-btn dark" id="osTranslateBtn" onclick="osTranslate()" disabled>🌐 한국어 번역</button>
+        <button class="os-btn dark" id="osExcelBtn" onclick="osDownloadExcel()" disabled>📊 엑셀 다운로드</button>
+      </div>
+      <div class="os-upload-count">
+        <label>업로드 최대 개수</label>
+        <input type="number" id="osMaxUpload" value="200" min="1">
+      </div>
+    </div>
+
+    <div class="os-schedule-badge" id="osScheduleBadge" style="display:none;">
+      <span class="dot"></span>
+      <span id="osScheduleText">자동 스케줄 비활성화</span>
+    </div>
+  </div>
+
+  <!-- 수집 이력 -->
+  <div class="os-history">
+    <h3>
+      📋 수집 이력
+      <button class="os-btn dark" style="padding:5px 12px; font-size:12px;" onclick="osRefreshHistory()">🔄 새로고침</button>
+    </h3>
+    <div style="max-height:200px; overflow-y:auto;">
+      <table class="os-history-table">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>사이트</th>
+            <th>카테고리</th>
+            <th>수집</th>
+            <th>업로드</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="osHistoryBody">
+          <tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집 이력이 없습니다</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 최근 로그 -->
+  <div class="os-log">
+    <h3>
+      📋 최근 로그
+      <button class="os-btn dark" style="padding:5px 12px; font-size:12px;" onclick="document.getElementById('osLogBox').innerHTML=''">전체 보기</button>
+    </h3>
+    <div class="os-log-box" id="osLogBox">[시스템] 해외소싱 패널 준비됨.</div>
   </div>
 </div>
 
@@ -3336,19 +3658,48 @@ function goldConfirm(msg, onOk, isDanger) {
     activeItem.classList.add('active');
   }
 
-  function showDashboard() {
-    document.getElementById('dashboardPanel').style.display = 'block';
+  function hideAllPanels() {
+    document.getElementById('dashboardPanel').style.display = 'none';
     document.getElementById('searchPanel').style.display = 'none';
+    document.getElementById('overseasPanel').style.display = 'none';
+  }
+
+  function showDashboard() {
+    hideAllPanels();
+    document.getElementById('dashboardPanel').style.display = 'block';
     updateDashboard();
   }
 
   function showSearchPanel() {
-    document.getElementById('dashboardPanel').style.display = 'none';
+    hideAllPanels();
     document.getElementById('searchPanel').style.display = 'block';
+  }
+
+  function showOverseasPanel(site) {
+    hideAllPanels();
+    document.getElementById('overseasPanel').style.display = 'block';
+    // 사이트 선택 동기화
+    const siteSelect = document.getElementById('osSiteSelect');
+    if (site === 'abc') {
+      siteSelect.value = 'xebio'; // ABC는 아직 준비중
+    } else {
+      siteSelect.value = site || 'xebio';
+    }
+    osUpdateBreadcrumb();
+    osAddLog('[시스템] 해외소싱 패널 활성화됨.');
   }
 
   function handleSidebarAction(action) {
     switch(action) {
+      case 'xebio':
+        showOverseasPanel('xebio');
+        setActiveMenuItem(document.querySelector('.menu-item[data-action="xebio"]'));
+        return;
+      case 'abc':
+        showOverseasPanel('abc');
+        setActiveMenuItem(document.querySelector('.menu-item[data-action="abc"]'));
+        goldAlert('👟 ABC마트 기능은 준비 중입니다.\n제비오로 전환됩니다.');
+        return;
       case 'scheduler':
         window.open('/api/scheduler/page', 'scheduler', 'width=1200,height=800');
         break;
@@ -3449,6 +3800,73 @@ function goldConfirm(msg, onOk, isDanger) {
     }
   }, 3000);
 
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 해외소싱 패널 함수
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const OS_SITES = {
+    xebio: { name: '제비오 (Xebio)', categories: {
+      sale: '세일', running: '런닝', 'soccer-futsal': '축구/풋살',
+      basketball: '농구', tennis: '테니스', golf: '골프', training: '트레이닝'
+    }},
+    abc: { name: 'ABC마트', categories: {} }
+  };
+
+  function osUpdateBreadcrumb() {
+    const site = document.getElementById('osSiteSelect').value;
+    const cat = document.getElementById('osCategorySelect').value;
+    const siteName = OS_SITES[site]?.name || site;
+    const catName = OS_SITES[site]?.categories[cat] || cat;
+    document.getElementById('osBreadcrumb').innerHTML = `${siteName} > <span>${catName}</span>`;
+  }
+
+  function osAddLog(msg) {
+    const box = document.getElementById('osLogBox');
+    const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    box.innerHTML += `\n[${now}] ${msg}`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function osStartScrape() {
+    const site = document.getElementById('osSiteSelect').value;
+    const cat = document.getElementById('osCategorySelect').value;
+    const keyword = document.getElementById('osKeyword').value.trim();
+    const pages = document.getElementById('osPages').value.trim();
+
+    osAddLog(`🔍 수동 스크래핑 시작: ${OS_SITES[site]?.name} > ${OS_SITES[site]?.categories[cat]}`);
+    if (keyword) osAddLog(`   키워드: ${keyword}`);
+    if (pages) osAddLog(`   페이지: ${pages}`);
+    goldAlert('🔍 해외소싱 스크래핑 기능은 곧 연동됩니다.\n\n현재 UI 구성만 완료된 상태입니다.');
+  }
+
+  function osUploadSelected() {
+    goldAlert('📦 선택 상품 업로드 기능은 곧 연동됩니다.');
+  }
+
+  function osAutoRun() {
+    goldAlert('🔥 자동 실행 기능은 곧 연동됩니다.');
+  }
+
+  function osReset() {
+    goldConfirm('🗑️ 수집 데이터를 초기화하시겠습니까?', () => {
+      document.getElementById('osLogBox').innerHTML = '[시스템] 리셋 완료.';
+      document.getElementById('osHistoryBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집 이력이 없습니다</td></tr>';
+      osAddLog('🔄 리셋 완료');
+    }, true);
+  }
+
+  function osTranslate() {
+    goldAlert('🌐 한국어 번역 기능은 곧 연동됩니다.');
+  }
+
+  function osDownloadExcel() {
+    goldAlert('📊 엑셀 다운로드 기능은 곧 연동됩니다.');
+  }
+
+  function osRefreshHistory() {
+    osAddLog('🔄 수집 이력 새로고침...');
+    goldAlert('📋 수집 이력 조회 기능은 곧 연동됩니다.');
+  }
+
   window.onload = async () => {  // ✅ async 추가!
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // 1. 초기화
@@ -3466,6 +3884,10 @@ function goldConfirm(msg, onOk, isDanger) {
       // 사이드바 초기화
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       initSidebar();
+
+      // 해외소싱 폼 이벤트
+      document.getElementById('osSiteSelect').addEventListener('change', osUpdateBreadcrumb);
+      document.getElementById('osCategorySelect').addEventListener('change', osUpdateBreadcrumb);
 
       // 환경 뱃지
       fetch('/api/data_paths').then(r => r.json()).then(d => {
