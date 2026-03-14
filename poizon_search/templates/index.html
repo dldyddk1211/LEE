@@ -289,20 +289,21 @@
     /* 컨트롤 버튼들 */
     .os-buttons {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: wrap;
     }
     .os-btn {
-      padding: 9px 18px;
+      padding: 10px 20px;
       border: none;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     .os-btn.primary { background: linear-gradient(135deg, #d4a843, #a07c2a); color: #111; }
     .os-btn.green { background: linear-gradient(135deg, #4caf50, #388e3c); color: #fff; }
@@ -426,7 +427,8 @@
       .main-content { margin-left: 0; padding: 60px 12px 12px; }
       .dashboard-grid { grid-template-columns: 1fr; }
       .os-form-row { flex-direction: column; }
-      .os-buttons { flex-direction: column; }
+      .os-buttons { gap: 6px; }
+      .os-btn { padding: 8px 14px; font-size: 12px; }
       .os-upload-count { margin-left: 0; }
     }
 
@@ -1496,7 +1498,14 @@
 
   <!-- 실행 컨트롤 -->
   <div class="os-control">
-    <h3>⚙️ 실행 컨트롤</h3>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+      <h3 style="margin-bottom:0;">⚙️ 실행 컨트롤</h3>
+      <div style="display:flex; gap:6px;">
+        <button class="os-btn red" id="osStopBtn" onclick="osStop()" style="padding:6px 10px; font-size:12px;" disabled>⏹</button>
+        <button class="os-btn orange" id="osPauseBtn" onclick="osPause()" style="padding:6px 10px; font-size:12px;" disabled>⏸</button>
+        <button class="os-btn green" id="osResumeBtn" onclick="osResume()" style="padding:6px 10px; font-size:12px;" disabled>▶</button>
+      </div>
+    </div>
     <div class="os-form-row">
       <div class="os-form-group">
         <label>사이트</label>
@@ -1529,24 +1538,25 @@
     <div class="os-form-hint">※ 비우면 전체 | 2-10: 2~10페이지 | 2,3,5: 특정페이지 | 2: 단일페이지</div>
     <div class="os-breadcrumb" id="osBreadcrumb">제비오 (Xebio) > <span>세일</span></div>
 
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <div class="os-buttons">
-        <button class="os-btn primary" id="osStartBtn" onclick="osStartScrape()">🔍 수동 스크래핑</button>
-        <button class="os-btn blue" id="osUploadBtn" onclick="osUploadSelected()" disabled>📦 선택 상품 업로드</button>
-        <button class="os-btn green" id="osAutoBtn" onclick="osAutoRun()" disabled>🔥 자동 실행</button>
-        <button class="os-btn red" id="osResetBtn" onclick="osReset()">🗑️ 리셋</button>
-        <button class="os-btn dark" id="osTranslateBtn" onclick="osTranslate()" disabled>🌐 한국어 번역</button>
-        <button class="os-btn dark" id="osExcelBtn" onclick="osDownloadExcel()" disabled>📊 엑셀 다운로드</button>
-      </div>
+    <div class="os-buttons">
+      <button class="os-btn primary" id="osStartBtn" onclick="osStartScrape()">🔍 수동 스크래핑</button>
+      <button class="os-btn blue" id="osUploadBtn" onclick="osUploadSelected()" disabled>📦 선택 상품 업로드</button>
+      <button class="os-btn green" id="osAutoBtn" onclick="osAutoRun()">🔥 자동 실행</button>
+      <button class="os-btn red" id="osResetBtn" onclick="osReset()">🗑️ 리셋</button>
+      <button class="os-btn dark" id="osTranslateBtn" onclick="osTranslate()">🌐 한국어 번역</button>
+      <button class="os-btn dark" id="osExcelBtn" onclick="osDownloadExcel()">📊 엑셀 다운로드</button>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:16px; margin-top:14px; flex-wrap:wrap;">
       <div class="os-upload-count">
         <label>업로드 최대 개수</label>
-        <input type="number" id="osMaxUpload" value="200" min="1">
+        <input type="number" id="osMaxUpload" value="638203" min="1">
       </div>
     </div>
 
-    <div class="os-schedule-badge" id="osScheduleBadge" style="display:none;">
+    <div class="os-schedule-badge" id="osScheduleBadge">
       <span class="dot"></span>
-      <span id="osScheduleText">자동 스케줄 비활성화</span>
+      <span id="osScheduleText">자동 스케줄 활성화 — 매일 09:00 실행</span>
     </div>
   </div>
 
@@ -3852,6 +3862,21 @@ function goldConfirm(msg, onOk, isDanger) {
       document.getElementById('osHistoryBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#666; padding:20px;">수집 이력이 없습니다</td></tr>';
       osAddLog('🔄 리셋 완료');
     }, true);
+  }
+
+  function osStop() {
+    osAddLog('⏹ 수집 중단 요청...');
+    goldAlert('⏹ 수집 중단 기능은 곧 연동됩니다.');
+  }
+
+  function osPause() {
+    osAddLog('⏸ 일시정지 요청...');
+    goldAlert('⏸ 일시정지 기능은 곧 연동됩니다.');
+  }
+
+  function osResume() {
+    osAddLog('▶ 재개 요청...');
+    goldAlert('▶ 재개 기능은 곧 연동됩니다.');
   }
 
   function osTranslate() {
