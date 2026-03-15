@@ -1301,8 +1301,8 @@
       border: 1px solid #d4a843;
       border-radius: 14px;
       padding: 28px 24px 20px;
-      max-width: 400px;
-      width: 90%;
+      max-width: 560px;
+      width: 92%;
       text-align: center;
       animation: modalFadeIn 0.2s;
     }
@@ -1719,6 +1719,7 @@
         🔄 포맷 변환
         <input type="file" id="formatUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleFormatConvert(event)">
       </label>
+      <button id="formatGuideBtn" class="upload-btn" style="display:none; background:#2a2d3a; color:#e8e0d0; border:1px solid #444; cursor:pointer;" onclick="showFormatGuide()">📋 업로드 양식</button>
       <!-- ❌ 이 버튼 제거 또는 숨김 처리 -->
       <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
       <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
@@ -1907,16 +1908,24 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function showModal(msg, buttons) {
   const overlay = document.getElementById('modalOverlay');
-  document.getElementById('modalMsg').textContent = msg;
+  const msgEl = document.getElementById('modalMsg');
+  // HTML 태그가 포함되어 있으면 innerHTML, 아니면 textContent
+  if (typeof msg === 'string' && msg.includes('<')) {
+    msgEl.innerHTML = msg;
+  } else {
+    msgEl.textContent = msg;
+  }
   const actions = document.getElementById('modalActions');
   actions.innerHTML = '';
-  buttons.forEach(btn => {
-    const b = document.createElement('button');
-    b.className = 'modal-btn ' + (btn.cls || 'primary');
-    b.textContent = btn.text;
-    b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
-    actions.appendChild(b);
-  });
+  if (buttons && buttons.length) {
+    buttons.forEach(btn => {
+      const b = document.createElement('button');
+      b.className = 'modal-btn ' + (btn.cls || 'primary');
+      b.textContent = btn.text;
+      b.onclick = () => { overlay.classList.remove('active'); if (btn.cb) btn.cb(); };
+      actions.appendChild(b);
+    });
+  }
   overlay.classList.add('active');
 }
 
@@ -3086,6 +3095,7 @@ function goldConfirm(msg, onOk, isDanger) {
       
       // 8. 업로드 버튼 숨김
       document.getElementById('uploadLabel').style.display = 'none';
+      document.getElementById('formatGuideBtn').style.display = 'none';
       document.getElementById('startCompareBtn').style.display = 'none';
       
       // 9. 모든 모드 버튼 비활성 상태로
@@ -3205,6 +3215,7 @@ function goldConfirm(msg, onOk, isDanger) {
         startBtn.style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
         document.getElementById('formatLabel').style.display = 'block';
+        document.getElementById('formatGuideBtn').style.display = 'block';
 
       } else {
         keywordInput.disabled = false;
@@ -3214,6 +3225,7 @@ function goldConfirm(msg, onOk, isDanger) {
         startBtn.disabled = false;
         document.getElementById('uploadLabel').style.display = 'none';
         document.getElementById('formatLabel').style.display = 'none';
+        document.getElementById('formatGuideBtn').style.display = 'none';
       }
       
       // 로그인 상태 UI 업데이트
@@ -3528,11 +3540,13 @@ function goldConfirm(msg, onOk, isDanger) {
         startBtn.style.display = 'none';
         document.getElementById('uploadLabel').style.display = 'block';
         document.getElementById('formatLabel').style.display = 'block';
+        document.getElementById('formatGuideBtn').style.display = 'block';
       } else {
         document.getElementById('keyword').parentElement.style.display = 'block';
         startBtn.style.display = 'block';
         document.getElementById('uploadLabel').style.display = 'none';
         document.getElementById('formatLabel').style.display = 'none';
+        document.getElementById('formatGuideBtn').style.display = 'none';
       }
 
       // 모드 버튼 활성화 유지
@@ -5419,6 +5433,56 @@ function goldConfirm(msg, onOk, isDanger) {
     console.log('🟣 [EXIT] performPoizonLogin 함수 종료');
     console.log('  (fetch는 비동기로 계속 실행됨)');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  }
+
+  function showFormatGuide() {
+    showModal('<h3 style="color:#d4a843; margin:0 0 12px 0; font-size:16px;">📋 업로드 엑셀 양식 안내</h3>' +
+      `<div style="font-size:13px; line-height:1.8; color:#ccc;">
+        <p style="color:#d4a843; font-weight:700; margin-bottom:10px;">엑셀 파일 컬럼 순서 (A~E열)</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:14px;">
+          <thead>
+            <tr style="background:#1a1710; color:#d4a843;">
+              <th style="padding:8px 10px; border:1px solid #333; text-align:center;">열</th>
+              <th style="padding:8px 10px; border:1px solid #333; text-align:left;">헤더명</th>
+              <th style="padding:8px 10px; border:1px solid #333; text-align:left;">설명</th>
+              <th style="padding:8px 10px; border:1px solid #333; text-align:left;">예시</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:6px 10px; border:1px solid #333; text-align:center; color:#d4a843; font-weight:700;">A</td>
+                <td style="padding:6px 10px; border:1px solid #333;">상품번호</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#aaa;">품번 코드 (필수)</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#8a8;">CW2288-001</td></tr>
+            <tr><td style="padding:6px 10px; border:1px solid #333; text-align:center; color:#d4a843; font-weight:700;">B</td>
+                <td style="padding:6px 10px; border:1px solid #333;">제품명</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#aaa;">상품 이름</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#8a8;">AIR FORCE 1 '07</td></tr>
+            <tr><td style="padding:6px 10px; border:1px solid #333; text-align:center; color:#d4a843; font-weight:700;">C</td>
+                <td style="padding:6px 10px; border:1px solid #333;">정가</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#aaa;">원래 가격 (숫자)</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#8a8;">139000</td></tr>
+            <tr><td style="padding:6px 10px; border:1px solid #333; text-align:center; color:#d4a843; font-weight:700;">D</td>
+                <td style="padding:6px 10px; border:1px solid #333;">할인가</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#aaa;">할인 판매가 (숫자)</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#8a8;">97300</td></tr>
+            <tr><td style="padding:6px 10px; border:1px solid #333; text-align:center; color:#d4a843; font-weight:700;">E</td>
+                <td style="padding:6px 10px; border:1px solid #333;">재고</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#aaa;">재고 수량 (숫자)</td>
+                <td style="padding:6px 10px; border:1px solid #333; color:#8a8;">13</td></tr>
+          </tbody>
+        </table>
+        <div style="background:#1a1710; border:1px solid #2a2518; border-radius:8px; padding:12px; font-size:12px;">
+          <p style="color:#d4a843; margin-bottom:6px;">참고사항</p>
+          <ul style="margin:0; padding-left:18px; color:#aaa;">
+            <li>1행은 반드시 <b style="color:#e8e0d0;">헤더</b> (컬럼명)여야 합니다</li>
+            <li>헤더에 <b style="color:#e8e0d0;">"상품"</b>이 포함된 열을 기준으로 자동 인식</li>
+            <li>다른 양식은 <b style="color:#e67e22;">포맷 변환</b> 버튼으로 변환 후 업로드</li>
+            <li>지원 형식: <b style="color:#e8e0d0;">.xlsx, .xls</b></li>
+          </ul>
+        </div>
+      </div>`,
+      [{ text: '확인', cls: 'primary' }]
+    );
   }
 
   async function handleFormatConvert(event) {
