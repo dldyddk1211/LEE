@@ -1911,9 +1911,9 @@
     <div class="section" id="statusSection" style="display:none;">
       <h3>📊 진행 상황</h3>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:13px; color:#aaa;">
-        <span>⏱️ 경과: <b style="color:#e8e0d0;" id="progressElapsed">0:00</b></span>
+        <span><b style="color:#d4a843;" id="progressLabel"></b> ⏱️ 경과: <b style="color:#e8e0d0;" id="progressElapsed">0:00</b></span>
         <span id="progressPercent" style="color:#d4a843; font-weight:700;">0%</span>
-        <span>⏳ 예상 남은시간: <b style="color:#e8e0d0;" id="progressRemaining">--:--</b></span>
+        <span>⏳ 남은시간: <b style="color:#e8e0d0;" id="progressRemaining">--:--</b></span>
       </div>
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar">0%</div>
@@ -2022,6 +2022,8 @@ function goldConfirm(msg, onOk, isDanger) {
   let pageSize = 20;
   let currentPage = 1;
   let selectedMode = null;  // ✅ 초기값 null로 변경
+  let _pendingKreamAfterPoizon = false;  // 리스트비교: 포이즌 완료 후 크림 자동 시작
+  let _pendingKreamAfterPoizonMusinsa = false;  // 무신사: 포이즌 완료 후 크림 자동 시작
   let sortColumn = null;
   let sortDirection = 'desc';
   let uploadedProducts = [];
@@ -2354,11 +2356,13 @@ function goldConfirm(msg, onOk, isDanger) {
     return `${m}:${String(s).padStart(2,'0')}`;
   }
 
-  function startProgressTimer(total) {
+  function startProgressTimer(total, label) {
     stopProgressTimer();
     _progressStartTime = Date.now();
     _progressTotal = total || 0;
     _progressCurrent = 0;
+    document.getElementById('progressLabel').textContent = label || '';
+    document.getElementById('progressRemaining').textContent = '--:--';
     updateProgressDisplay(0, total);
     _progressTimer = setInterval(() => {
       const elapsed = (Date.now() - _progressStartTime) / 1000;
@@ -3415,7 +3419,7 @@ function goldConfirm(msg, onOk, isDanger) {
       document.getElementById('stopBtn').style.display = 'block';
       
       addLog(`🟣 포이즌 검색 시작: "${keyword}"`, 'info');
-      startProgressTimer(numPages * 10);  // 페이지당 약 10건 추정
+      startProgressTimer(numPages * 10, '🟣 포이즌');
 
       // SSE 시작
       let url = `/start?mode=poizon&max_pages=${maxPages}&skip_login=true`;
@@ -3519,6 +3523,8 @@ function goldConfirm(msg, onOk, isDanger) {
       
       addLog('⏹️ 수집 중단', 'error');
       stopProgressTimer();
+      _pendingKreamAfterPoizon = false;
+      _pendingKreamAfterPoizonMusinsa = false;
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
       // ✅ 모든 버튼 다시 활성화
@@ -4226,7 +4232,7 @@ function goldConfirm(msg, onOk, isDanger) {
         kreamSearchStopped = false;
         
         addLog(`🔍 ${sourceName}→크림 검색 시작: ${productCodes.length}개`, 'info');
-        startProgressTimer(productCodes.length);
+        startProgressTimer(productCodes.length, '🛒 크림');
         
         try {
           const response = await fetch('/start_kream_search', {
@@ -4471,10 +4477,9 @@ function goldConfirm(msg, onOk, isDanger) {
           }
           
           if (searchKream && searchPoizon) {
-            addLog('📊 크림 검색을 먼저 시작합니다...', 'info');
-            await startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
-            addLog('📊 크림 검색 완료. 이제 포이즌 검색을 시작합니다...', 'info');
-            setTimeout(() => startPoizonSearchFromMusinsa(), 2000);
+            addLog('📊 포이즌 → 크림 순차 검색을 시작합니다', 'info');
+            _pendingKreamAfterPoizonMusinsa = true;
+            startPoizonSearchFromMusinsa();
           } else if (searchKream) {
             addLog('🛒 크림 검색만 진행합니다', 'info');
             await startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
@@ -4515,10 +4520,9 @@ function goldConfirm(msg, onOk, isDanger) {
           }
           
           if (searchKream && searchPoizon) {
-            addLog('📊 포이즌 검색을 먼저 시작합니다...', 'info');
-            await startPoizonSearchFromCompare();
-            addLog('📊 포이즌 검색 완료. 이제 크림 검색을 시작합니다...', 'info');
-            setTimeout(() => startKreamSearch('compareSearchBtn', '엑셀_상품번호', 'compareSearchKream', '리스트비교'), 2000);
+            addLog('📊 포이즌 → 크림 순차 검색을 시작합니다', 'info');
+            _pendingKreamAfterPoizon = true;
+            startPoizonSearchFromCompare();
           } else if (searchPoizon) {
             addLog('🟣 포이즌 검색만 진행합니다', 'info');
             startPoizonSearchFromCompare();
@@ -4558,7 +4562,7 @@ function goldConfirm(msg, onOk, isDanger) {
         document.getElementById('stopBtn').style.display = 'block';
         
         addLog(`🟣 무신사→포이즌 검색 시작: ${productCodes.length}개`, 'info');
-        startProgressTimer(productCodes.length);
+        startProgressTimer(productCodes.length, '🟣 포이즌');
         
         try {
           const response = await fetch('/start_poizon_search', {
@@ -4701,16 +4705,26 @@ function goldConfirm(msg, onOk, isDanger) {
 
             // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
             await autoSendPoizonBest();
+
+            // 포이즌 완료 후 크림 자동 시작 (무신사→포이즌+크림)
+            if (_pendingKreamAfterPoizonMusinsa) {
+              _pendingKreamAfterPoizonMusinsa = false;
+              addLog('📊 포이즌 완료 → 크림 검색을 시작합니다...', 'info');
+              setTimeout(() => {
+                startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
+              }, 2000);
+            }
           });
 
           poizonEventSource.addEventListener('ping', (event) => {
             console.log('🏓 PING:', event.data);
           });
-          
+
         } catch (error) {
           console.error('❌ 포이즌 검색 시작 오류:', error);
           addLog('❌ 오류: ' + error.message, 'error');
-          
+          _pendingKreamAfterPoizonMusinsa = false;
+
           btn.disabled = false;
           btn.textContent = '🔍 검색 시작';
           document.getElementById('stopBtn').style.display = 'none';
@@ -4763,7 +4777,7 @@ function goldConfirm(msg, onOk, isDanger) {
         document.getElementById('stopBtn').style.display = 'block';
         
         addLog(`🟣 리스트비교→포이즌 검색 시작: ${productCodes.length}개`, 'info');
-        startProgressTimer(productCodes.length);
+        startProgressTimer(productCodes.length, '🟣 포이즌');
         
         try {
           const response = await fetch('/start_poizon_search', {
@@ -4896,10 +4910,20 @@ function goldConfirm(msg, onOk, isDanger) {
 
             // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
             await autoSendPoizonBest();
+
+            // 포이즌 완료 후 크림 자동 시작 (둘 다 체크된 경우)
+            if (_pendingKreamAfterPoizon) {
+              _pendingKreamAfterPoizon = false;
+              addLog('📊 포이즌 완료 → 크림 검색을 시작합니다...', 'info');
+              setTimeout(() => {
+                startKreamSearch('compareSearchBtn', '엑셀_상품번호', 'compareSearchKream', '리스트비교');
+              }, 2000);
+            }
           });
 
           poizonEventSource.onerror = (error) => {
             console.error('❌ SSE 에러:', error);
+            _pendingKreamAfterPoizon = false;
             addLog('❌ 연결 오류', 'error');
 
             poizonEventSource.close();
@@ -5132,7 +5156,7 @@ function goldConfirm(msg, onOk, isDanger) {
     
     addLog(`🟤 무신사 검색 시작: "${keyword}"`, 'info');
     const estTotal = targetCount === 'max' ? 200 : parseInt(targetCount) || 50;
-    startProgressTimer(estTotal);
+    startProgressTimer(estTotal, '🟤 무신사');
     if (targetCount === 'max') {
       addLog(`📦 수집 모드: 전체 수집`, 'info');
     } else {
@@ -5242,7 +5266,7 @@ function goldConfirm(msg, onOk, isDanger) {
     document.getElementById('stopBtn').style.display = 'block';
 
     addLog('📊 무신사 랭크 검색 시작', 'info');
-    startProgressTimer(targetCount === 'max' ? 200 : parseInt(targetCount) || 50);
+    startProgressTimer(targetCount === 'max' ? 200 : parseInt(targetCount) || 50, '📊 무신사 랭크');
     if (targetCount === 'max') {
       addLog('📦 수집 모드: 전체 수집', 'info');
     } else {
