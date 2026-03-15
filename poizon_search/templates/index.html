@@ -1753,11 +1753,11 @@
       <thead id="uploadTableHead">
         <tr>
           <th>#</th>
-          <th>상품번호</th>
-          <th>제품명</th>
-          <th>정가</th>
-          <th>할인가</th>
-          <th>재고</th>
+          <th>A열</th>
+          <th>B열</th>
+          <th>C열</th>
+          <th>D열</th>
+          <th>E열</th>
         </tr>
       </thead>
       <tbody id="uploadTableBody"></tbody>
@@ -5618,33 +5618,14 @@ function goldConfirm(msg, onOk, isDanger) {
 
             // ✅ "검색 시작" 버튼 숨김
             document.getElementById('startCompareBtn').style.display = 'none';
-            // ✅ collectedData — 헤더 기반 컬럼 매핑
-            // 헤더에서 상품번호/품번/제품명/정가/할인가/재고 위치 자동 탐색
-            let codeIdx = 0, nameIdx = 1, priceIdx = 2, saleIdx = 3, stockIdx = 4;
-            if (result.is_header && result.headers) {
-              const h = result.headers.map(s => s.toLowerCase());
-              const findIdx = (keywords) => h.findIndex(col => keywords.some(k => col.includes(k)));
-              const ci = findIdx(['상품번호', '품번', 'sku', 'code']);
-              const ni = findIdx(['제품명', '상품명', 'name', '품명']);
-              if (ci >= 0) codeIdx = ci;
-              if (ni >= 0) nameIdx = ni;
-              // 정가/할인가/재고: 코드/이름 이후 컬럼 순서대로
-              const usedSet = new Set([codeIdx, nameIdx]);
-              const remaining = [];
-              for (let i = 0; i < result.headers.length; i++) {
-                if (!usedSet.has(i)) remaining.push(i);
-              }
-              if (remaining.length > 0) priceIdx = remaining[0];
-              if (remaining.length > 1) saleIdx = remaining[1];
-              if (remaining.length > 2) stockIdx = remaining[2];
-            }
+            // ✅ collectedData — 엑셀 원본 기반 (첫 번째 열 = 상품번호)
             collectedData = result.products.map(row => ({
-              엑셀_상품번호: row[codeIdx] || '-',
-              상품번호: row[codeIdx] || '-',
-              제품명: row[nameIdx] || '-',
-              엑셀_정가: row[priceIdx] || 0,
-              엑셀_할인가: row[saleIdx] || 0,
-              엑셀_재고: row[stockIdx] || 0,
+              엑셀_상품번호: row[0] || '-',
+              상품번호: row[0] || '-',
+              제품명: row[1] || '-',
+              엑셀_정가: row[2] || 0,
+              엑셀_할인가: row[3] || 0,
+              엑셀_재고: row[4] || 0,
               포이즌노출가: '-',
               포이즌비교: 0,
               포이즌중국판매량: 0,
