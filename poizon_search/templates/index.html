@@ -1910,8 +1910,17 @@
 
     <div class="section" id="statusSection" style="display:none;">
       <h3>📊 진행 상황</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:13px; color:#aaa;">
+        <span>⏱️ 경과: <b style="color:#e8e0d0;" id="progressElapsed">0:00</b></span>
+        <span id="progressPercent" style="color:#d4a843; font-weight:700;">0%</span>
+        <span>⏳ 예상 남은시간: <b style="color:#e8e0d0;" id="progressRemaining">--:--</b></span>
+      </div>
       <div class="progress-bar">
         <div class="progress-fill" id="progressBar">0%</div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:11px; color:#666;">
+        <span id="progressDetail"></span>
+        <span id="progressStep"></span>
       </div>
       <div class="log" id="logBox"></div>
     </div>
@@ -2329,11 +2338,56 @@ function goldConfirm(msg, onOk, isDanger) {
       resetIdleTimer();
     }
 
+  // ── 진행 상황 타이머 ──────────────────────────
+  let _progressTimer = null;
+  let _progressStartTime = 0;
+  let _progressTotal = 0;
+  let _progressCurrent = 0;
+
+  function fmtTime(sec) {
+    if (!sec || sec < 0) return '--:--';
+    sec = Math.round(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function startProgressTimer(total) {
+    stopProgressTimer();
+    _progressStartTime = Date.now();
+    _progressTotal = total || 0;
+    _progressCurrent = 0;
+    updateProgressDisplay(0, total);
+    _progressTimer = setInterval(() => {
+      const elapsed = (Date.now() - _progressStartTime) / 1000;
+      document.getElementById('progressElapsed').textContent = fmtTime(elapsed);
+      if (_progressCurrent > 0 && _progressTotal > 0) {
+        const perItem = elapsed / _progressCurrent;
+        const remaining = perItem * (_progressTotal - _progressCurrent);
+        document.getElementById('progressRemaining').textContent = fmtTime(remaining);
+      }
+    }, 1000);
+  }
+
+  function stopProgressTimer() {
+    if (_progressTimer) { clearInterval(_progressTimer); _progressTimer = null; }
+  }
+
   function updateProgress(current, total) {
+      _progressCurrent = current;
+      if (total > 0) _progressTotal = total;
+      updateProgressDisplay(current, _progressTotal);
+    }
+
+  function updateProgressDisplay(current, total) {
       const percent = Math.round((current / Math.max(1, total)) * 100);
       const progressBar = document.getElementById('progressBar');
       progressBar.style.width = percent + '%';
       progressBar.textContent = percent + '%';
+      document.getElementById('progressPercent').textContent = percent + '%';
+      document.getElementById('progressDetail').textContent = total > 0 ? `${current}/${total}건 완료` : '';
     }
 
   function resetIdleTimer() {
@@ -3361,7 +3415,8 @@ function goldConfirm(msg, onOk, isDanger) {
       document.getElementById('stopBtn').style.display = 'block';
       
       addLog(`🟣 포이즌 검색 시작: "${keyword}"`, 'info');
-      
+      startProgressTimer(numPages * 10);  // 페이지당 약 10건 추정
+
       // SSE 시작
       let url = `/start?mode=poizon&max_pages=${maxPages}&skip_login=true`;
       if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
@@ -3384,6 +3439,7 @@ function goldConfirm(msg, onOk, isDanger) {
 
         if (data.type === 'complete') {
           addLog('✅ 포이즌 검색 완료!', 'success');
+          stopProgressTimer();
            // ✅ 수집 완료
           isCollecting = false;
 
@@ -3462,6 +3518,7 @@ function goldConfirm(msg, onOk, isDanger) {
       }
       
       addLog('⏹️ 수집 중단', 'error');
+      stopProgressTimer();
       document.getElementById('stopBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'block';
       // ✅ 모든 버튼 다시 활성화
@@ -4169,6 +4226,7 @@ function goldConfirm(msg, onOk, isDanger) {
         kreamSearchStopped = false;
         
         addLog(`🔍 ${sourceName}→크림 검색 시작: ${productCodes.length}개`, 'info');
+        startProgressTimer(productCodes.length);
         
         try {
           const response = await fetch('/start_kream_search', {
@@ -4279,6 +4337,7 @@ function goldConfirm(msg, onOk, isDanger) {
               const data = JSON.parse(event.data);
               
               addLog(`✅ 크림 검색 완료! ${updatedCount}개 업데이트`, 'success');
+              stopProgressTimer();
               
               kreamEventSource.close();
               kreamSearchEventSource = null;
@@ -4499,6 +4558,7 @@ function goldConfirm(msg, onOk, isDanger) {
         document.getElementById('stopBtn').style.display = 'block';
         
         addLog(`🟣 무신사→포이즌 검색 시작: ${productCodes.length}개`, 'info');
+        startProgressTimer(productCodes.length);
         
         try {
           const response = await fetch('/start_poizon_search', {
@@ -4607,6 +4667,7 @@ function goldConfirm(msg, onOk, isDanger) {
             console.log('🎉 COMPLETE:', event.data);
 
             addLog(`✅ 포이즌 검색 완료! ${updatedCount}개 업데이트`, 'success');
+            stopProgressTimer();
 
             poizonEventSource.close();
 
@@ -4702,6 +4763,7 @@ function goldConfirm(msg, onOk, isDanger) {
         document.getElementById('stopBtn').style.display = 'block';
         
         addLog(`🟣 리스트비교→포이즌 검색 시작: ${productCodes.length}개`, 'info');
+        startProgressTimer(productCodes.length);
         
         try {
           const response = await fetch('/start_poizon_search', {
@@ -4799,6 +4861,7 @@ function goldConfirm(msg, onOk, isDanger) {
             console.log('🎉 COMPLETE:', event.data);
 
             addLog(`✅ 포이즌 검색 완료! ${updatedCount}개 업데이트`, 'success');
+            stopProgressTimer();
 
             poizonEventSource.close();
 
@@ -5068,12 +5131,14 @@ function goldConfirm(msg, onOk, isDanger) {
     document.getElementById('stopBtn').style.display = 'block';
     
     addLog(`🟤 무신사 검색 시작: "${keyword}"`, 'info');
+    const estTotal = targetCount === 'max' ? 200 : parseInt(targetCount) || 50;
+    startProgressTimer(estTotal);
     if (targetCount === 'max') {
       addLog(`📦 수집 모드: 전체 수집`, 'info');
     } else {
       addLog(`📦 수집 모드: ${targetCount}개`, 'info');
     }
-    
+
     // ✅ SSE URL 생성 (디버깅 추가)
     let url = `/start?mode=musinsa&skip_login=true`;
     url += `&keyword=${encodeURIComponent(keyword)}`;
@@ -5100,6 +5165,7 @@ function goldConfirm(msg, onOk, isDanger) {
       if (data.type === 'complete') {
         console.log('✅ complete 이벤트 수신!');
         addLog('✅ 무신사 검색 완료!', 'success');
+        stopProgressTimer();
         // ✅ 수집 완료
         isCollecting = false;
 
@@ -5176,6 +5242,7 @@ function goldConfirm(msg, onOk, isDanger) {
     document.getElementById('stopBtn').style.display = 'block';
 
     addLog('📊 무신사 랭크 검색 시작', 'info');
+    startProgressTimer(targetCount === 'max' ? 200 : parseInt(targetCount) || 50);
     if (targetCount === 'max') {
       addLog('📦 수집 모드: 전체 수집', 'info');
     } else {
@@ -5195,6 +5262,7 @@ function goldConfirm(msg, onOk, isDanger) {
       }
       if (data.type === 'complete') {
         addLog('✅ 랭크 수집 완료!', 'success');
+        stopProgressTimer();
         isCollecting = false;
         if (data.data && Array.isArray(data.data)) {
           collectedData = data.data;
