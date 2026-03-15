@@ -4655,8 +4655,15 @@ function goldConfirm(msg, onOk, isDanger) {
 
                   updatedCount++;
                   renderTable();
-                  
+
                   addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
+
+                  // 포이즌 2건 완료 후 크림 병행 시작 (무신사)
+                  if (updatedCount === 2 && _pendingKreamAfterPoizonMusinsa) {
+                    _pendingKreamAfterPoizonMusinsa = false;
+                    addLog('📊 포이즌 2건 완료 → 크림 검색 병행 시작!', 'info');
+                    startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
+                  }
                 }
               } else {
                 console.log('검색 실패:', data);
@@ -4666,7 +4673,7 @@ function goldConfirm(msg, onOk, isDanger) {
               console.error('result 파싱 오류:', e);
             }
           });
-          
+
           poizonEventSource.addEventListener('complete', async (event) => {
             console.log('🎉 COMPLETE:', event.data);
 
@@ -4706,13 +4713,11 @@ function goldConfirm(msg, onOk, isDanger) {
             // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
             await autoSendPoizonBest();
 
-            // 포이즌 완료 후 크림 자동 시작 (무신사→포이즌+크림)
+            // 포이즌 2건 미도달 시 (상품 부족) complete에서 크림 시작
             if (_pendingKreamAfterPoizonMusinsa) {
               _pendingKreamAfterPoizonMusinsa = false;
-              addLog('📊 포이즌 완료 → 크림 검색을 시작합니다...', 'info');
-              setTimeout(() => {
-                startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
-              }, 2000);
+              addLog('📊 포이즌 완료 → 크림 검색 시작', 'info');
+              startKreamSearch('musinsaSearchBtn', 'product_code', 'musinsaSearchKream', '무신사');
             }
           });
 
@@ -4859,8 +4864,15 @@ function goldConfirm(msg, onOk, isDanger) {
 
                   updatedCount++;
                   renderTable();
-                  
+
                   addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
+
+                  // 포이즌 2건 완료 후 크림 병행 시작 (리스트비교)
+                  if (updatedCount === 2 && _pendingKreamAfterPoizon) {
+                    _pendingKreamAfterPoizon = false;
+                    addLog('📊 포이즌 2건 완료 → 크림 검색 병행 시작!', 'info');
+                    startKreamSearch('compareSearchBtn', '엑셀_상품번호', 'compareSearchKream', '리스트비교');
+                  }
                 }
               } else {
                 console.log('검색 실패:', data);
@@ -4870,7 +4882,7 @@ function goldConfirm(msg, onOk, isDanger) {
               console.error('result 파싱 오류:', e);
             }
           });
-          
+
           poizonEventSource.addEventListener('complete', async (event) => {
             console.log('🎉 COMPLETE:', event.data);
 
@@ -4911,13 +4923,11 @@ function goldConfirm(msg, onOk, isDanger) {
             // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
             await autoSendPoizonBest();
 
-            // 포이즌 완료 후 크림 자동 시작 (둘 다 체크된 경우)
+            // 포이즌 2건 미도달 시 (상품 부족) complete에서 크림 시작
             if (_pendingKreamAfterPoizon) {
               _pendingKreamAfterPoizon = false;
-              addLog('📊 포이즌 완료 → 크림 검색을 시작합니다...', 'info');
-              setTimeout(() => {
-                startKreamSearch('compareSearchBtn', '엑셀_상품번호', 'compareSearchKream', '리스트비교');
-              }, 2000);
+              addLog('📊 포이즌 완료 → 크림 검색 시작', 'info');
+              startKreamSearch('compareSearchBtn', '엑셀_상품번호', 'compareSearchKream', '리스트비교');
             }
           });
 
