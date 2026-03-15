@@ -1739,6 +1739,7 @@
         <input type="file" id="formatUpload" accept=".xlsx,.xls" style="display:none;" onchange="handleFormatConvert(event)">
       </label>
       <button id="formatGuideBtn" class="upload-btn" style="display:none; background:#2a2d3a; color:#e8e0d0; border:1px solid #444; cursor:pointer;" onclick="showFormatGuide()">📋 업로드 양식</button>
+      <button id="saveSessionBtn" class="upload-btn" style="display:none; background:linear-gradient(135deg,#27ae60,#2ecc71); cursor:pointer;" onclick="saveSessionComplete()">💾 저장</button>
       <!-- ❌ 이 버튼 제거 또는 숨김 처리 -->
       <button id="startCompareBtn" class="compare-start-btn" onclick="startComparisonFromUpload()" style="display:none;">🔍 검색 시작</button>
       <button id="stopBtn" class="stop-btn" onclick="stopCollection()">⏹️ 멈춤</button>
@@ -3174,6 +3175,7 @@ function goldConfirm(msg, onOk, isDanger) {
       document.getElementById('uploadLabel').style.display = 'none';
       document.getElementById('formatGuideBtn').style.display = 'none';
       document.getElementById('startCompareBtn').style.display = 'none';
+      document.getElementById('saveSessionBtn').style.display = 'none';
       
       // 9. 모든 모드 버튼 비활성 상태로
       document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -3293,6 +3295,9 @@ function goldConfirm(msg, onOk, isDanger) {
         document.getElementById('uploadLabel').style.display = 'block';
         document.getElementById('formatLabel').style.display = 'block';
         document.getElementById('formatGuideBtn').style.display = 'block';
+
+        // 세션 복원 시도 (이전 작업 상태가 있으면 표시)
+        restoreSession();
 
       } else {
         keywordInput.disabled = false;
@@ -3557,6 +3562,9 @@ function goldConfirm(msg, onOk, isDanger) {
       uploadedProducts = [];
       currentPage = 1;
       sortColumn = null;
+
+      // 세션 삭제
+      fetch('/api/session/clear', { method: 'POST' }).catch(() => {});
       sortDirection = 'desc';
 
       // ===== 3. UI 초기화 (모드·로그인 유지) =====
@@ -3583,6 +3591,7 @@ function goldConfirm(msg, onOk, isDanger) {
       document.getElementById('downloadBtn').style.display = 'none';
       const rankBtnReset = document.getElementById('musinsaRankBtn');
       if (rankBtnReset) { rankBtnReset.disabled = false; rankBtnReset.textContent = '📊 무신사 랭크'; rankBtnReset.style.display = 'none'; }
+      document.getElementById('saveSessionBtn').style.display = 'none';
 
       const musinsaSearchOptions = document.getElementById('musinsaSearchOptions');
       if (musinsaSearchOptions) musinsaSearchOptions.style.display = 'none';
@@ -4325,8 +4334,11 @@ function goldConfirm(msg, onOk, isDanger) {
                   
                   updatedCount++;
                   renderTable();
-                  
+
                   addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
+
+                  // 5건마다 세션 자동 저장
+                  if (updatedCount % 5 === 0) autoSaveSession();
                 }
               } else if (result && !result.success) {
                 const productCode = productCodes[index];
@@ -4336,7 +4348,7 @@ function goldConfirm(msg, onOk, isDanger) {
               console.error('result 파싱 오류:', e);
             }
           });
-          
+
           // ===== COMPLETE 이벤트 =====
           kreamEventSource.addEventListener('complete', async (event) => {
             try {
@@ -4420,6 +4432,9 @@ function goldConfirm(msg, onOk, isDanger) {
 
               // 크림 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
               await autoSendKreamBest();
+
+              // 세션 자동 저장 (크림 완료)
+              autoSaveSession();
 
             } catch (parseError) {
               console.error('❌ 완료 이벤트 파싱 오류:', parseError);
@@ -4867,6 +4882,9 @@ function goldConfirm(msg, onOk, isDanger) {
 
                   addLog(`✅ [${updatedCount}/${productCodes.length}] ${productCode}`, 'success');
 
+                  // 5건마다 세션 자동 저장
+                  if (updatedCount % 5 === 0) autoSaveSession();
+
                   // 포이즌 2건 완료 후 크림 병행 시작 (리스트비교)
                   if (updatedCount === 2 && _pendingKreamAfterPoizon) {
                     _pendingKreamAfterPoizon = false;
@@ -4922,6 +4940,9 @@ function goldConfirm(msg, onOk, isDanger) {
 
             // 포이즌 베스트 자동 텔레그램 (판매량 100+, 마진 10,000원+ 조건 필터)
             await autoSendPoizonBest();
+
+            // 세션 자동 저장 (리스트비교)
+            autoSaveSession();
 
             // 포이즌 2건 미도달 시 (상품 부족) complete에서 크림 시작
             if (_pendingKreamAfterPoizon) {
@@ -5750,7 +5771,13 @@ function goldConfirm(msg, onOk, isDanger) {
             
             // ✅ 리셋 버튼 표시
             document.getElementById('resetBtn').style.display = 'block';
-            
+
+            // ✅ 저장 버튼 표시
+            document.getElementById('saveSessionBtn').style.display = 'inline-block';
+
+            // ✅ 세션 자동 저장
+            autoSaveSession();
+
             addLog('💡 원하시는 검색 옵션을 선택하고 "🔍 검색 시작" 버튼을 클릭하세요', 'info');
                       
         } else {
@@ -5836,6 +5863,113 @@ function goldConfirm(msg, onOk, isDanger) {
     } catch (error) {
       addLog(`❌ 다운로드 오류: ${error.message}`, 'error');
       goldAlert(`❌ 다운로드 오류: ${error.message}`);
+    }
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 세션 저장/복원 (리스트 비교 모드)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  // 세션 자동 저장
+  async function autoSaveSession() {
+    if (selectedMode !== 'compare') return;
+    if (uploadedProducts.length === 0 && collectedData.length === 0) return;
+    try {
+      // 업로드 테이블 헤더 수집
+      const thead = document.getElementById('uploadTableHead');
+      const ths = thead ? Array.from(thead.querySelectorAll('th')).map(th => th.textContent) : [];
+
+      await fetch('/api/session/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uploadedProducts: uploadedProducts,
+          collectedData: collectedData,
+          uploadHeaders: ths,
+          isHeader: true,
+          colCount: ths.length - 1,
+          isCollecting: isCollecting,
+          progressCurrent: parseInt(document.getElementById('progressPercent')?.textContent) || 0,
+          progressTotal: 100,
+          searchLabel: document.getElementById('progressLabel')?.textContent || '',
+        })
+      });
+    } catch (e) {
+      console.warn('세션 자동저장 실패:', e);
+    }
+  }
+
+  // 세션 복원
+  async function restoreSession() {
+    try {
+      const resp = await fetch('/api/session/load');
+      const result = await resp.json();
+      if (!result.success || !result.session) return false;
+
+      const s = result.session;
+      if ((!s.uploadedProducts || s.uploadedProducts.length === 0) &&
+          (!s.collectedData || s.collectedData.length === 0)) return false;
+
+      // 데이터 복원
+      uploadedProducts = s.uploadedProducts || [];
+      collectedData = s.collectedData || [];
+      originalData = [...collectedData];
+
+      // 업로드 테이블 헤더 복원
+      if (s.uploadHeaders && s.uploadHeaders.length > 0) {
+        const thead = document.getElementById('uploadTableHead');
+        let ths = '';
+        s.uploadHeaders.forEach(h => { ths += `<th>${h}</th>`; });
+        thead.innerHTML = `<tr>${ths}</tr>`;
+      }
+
+      // 업로드 리스트 표시
+      if (uploadedProducts.length > 0) {
+        document.getElementById('uploadListSection').style.display = 'block';
+        document.getElementById('uploadCount').textContent = uploadedProducts.length;
+        renderUploadList(uploadedProducts);
+      }
+
+      // 수집 결과 테이블 표시
+      if (collectedData.length > 0) {
+        updateTableHeader('compare');
+        renderTable();
+        document.getElementById('resultSection').classList.add('active');
+        document.getElementById('resultSection').style.display = '';
+        document.getElementById('resultCount').textContent = collectedData.length;
+        document.getElementById('tableControls').style.display = '';
+
+        // 검색 옵션 패널 표시
+        const compareOpts = document.getElementById('compareSearchOptions');
+        if (compareOpts) compareOpts.style.display = 'block';
+
+        document.getElementById('resetBtn').style.display = 'block';
+        document.getElementById('saveSessionBtn').style.display = 'inline-block';
+      }
+
+      addLog(`📂 이전 작업 복원됨 (업로드 ${uploadedProducts.length}건, 결과 ${collectedData.length}건, ${s.savedAt || ''})`, 'info');
+      return true;
+    } catch (e) {
+      console.warn('세션 복원 실패:', e);
+      return false;
+    }
+  }
+
+  // 저장 완료 (세션 삭제)
+  async function saveSessionComplete() {
+    if (collectedData.length === 0) {
+      goldAlert('⚠️ 저장할 데이터가 없습니다!');
+      return;
+    }
+    // 먼저 엑셀 다운로드
+    await downloadExcel();
+    // 세션 삭제
+    try {
+      await fetch('/api/session/clear', { method: 'POST' });
+      document.getElementById('saveSessionBtn').style.display = 'none';
+      addLog('💾 작업 저장 완료! 세션이 초기화되었습니다.', 'success');
+    } catch (e) {
+      console.warn('세션 삭제 실패:', e);
     }
   }
 

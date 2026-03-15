@@ -2261,6 +2261,67 @@ def update_data_paths():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+# ==========================================
+# 세션 상태 저장/복원 (리스트 비교 모드)
+# ==========================================
+_SESSION_FILE = os.path.join(paths.DATA_ROOT, 'db', 'compare_session.json')
+
+def _load_session():
+    """세션 파일 로드"""
+    try:
+        if os.path.exists(_SESSION_FILE):
+            with open(_SESSION_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return None
+
+def _save_session_file(data):
+    """세션 파일 저장"""
+    os.makedirs(os.path.dirname(_SESSION_FILE), exist_ok=True)
+    with open(_SESSION_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False)
+
+@app.route('/api/session/save', methods=['POST'])
+def save_session():
+    """리스트비교 작업 상태 저장"""
+    try:
+        data = request.get_json()
+        session_data = {
+            'uploadedProducts': data.get('uploadedProducts', []),
+            'collectedData': data.get('collectedData', []),
+            'uploadHeaders': data.get('uploadHeaders', []),
+            'isHeader': data.get('isHeader', True),
+            'colCount': data.get('colCount', 5),
+            'isCollecting': data.get('isCollecting', False),
+            'progressCurrent': data.get('progressCurrent', 0),
+            'progressTotal': data.get('progressTotal', 0),
+            'searchLabel': data.get('searchLabel', ''),
+            'savedAt': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        _save_session_file(session_data)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/session/load', methods=['GET'])
+def load_session():
+    """리스트비교 작업 상태 복원"""
+    session = _load_session()
+    if session:
+        return jsonify({'success': True, 'session': session})
+    return jsonify({'success': False, 'message': '저장된 세션 없음'})
+
+@app.route('/api/session/clear', methods=['POST'])
+def clear_session():
+    """리스트비교 작업 완료 (세션 삭제)"""
+    try:
+        if os.path.exists(_SESSION_FILE):
+            os.remove(_SESSION_FILE)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/api/data_paths/reset', methods=['POST'])
 def reset_data_paths():
     """데이터 경로를 기본값으로 초기화"""
