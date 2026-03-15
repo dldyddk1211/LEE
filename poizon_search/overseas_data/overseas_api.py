@@ -55,7 +55,7 @@ def push_log(msg: str):
 
 # ── 스크래핑 실행 (스레드) ──────────────────────
 
-def _run_scrape(site_id, category_id, keyword, pages):
+def _run_scrape(site_id, category_id, keyword, pages, brand_code=""):
     """백그라운드 스레드에서 비동기 스크래핑 실행"""
     status["scraping"] = True
     status["stop_requested"] = False
@@ -73,6 +73,7 @@ def _run_scrape(site_id, category_id, keyword, pages):
                 category_id=category_id,
                 keyword=keyword,
                 pages=pages,
+                brand_code=brand_code,
             )
         )
         loop.close()
@@ -106,15 +107,20 @@ def manual_scrape():
     category_id = data.get("category_id", "sale")
     keyword = data.get("keyword", "")
     pages = data.get("pages", "")
+    brand_code = data.get("brand_code", "")
 
     thread = threading.Thread(
         target=_run_scrape,
-        args=(site_id, category_id, keyword, pages),
+        args=(site_id, category_id, keyword, pages, brand_code),
         daemon=True,
     )
     thread.start()
 
     desc = f"{site_id} › {category_id}"
+    if brand_code:
+        from overseas_data.site_config import get_brands
+        brand_name = get_brands(site_id).get(brand_code, brand_code)
+        desc += f" › {brand_name}"
     if keyword:
         desc += f" [{keyword}]"
     if pages:
@@ -132,10 +138,11 @@ def auto_run():
     site_id = data.get("site_id", "xebio")
     category_id = data.get("category_id", "sale")
     keyword = data.get("keyword", "")
+    brand_code = data.get("brand_code", "")
 
     thread = threading.Thread(
         target=_run_scrape,
-        args=(site_id, category_id, keyword, ""),
+        args=(site_id, category_id, keyword, "", brand_code),
         daemon=True,
     )
     thread.start()
@@ -345,9 +352,13 @@ def get_sites():
         cats = []
         for cat_id, cat in site["categories"].items():
             cats.append({"id": cat_id, "name": cat["name"]})
+        brands = []
+        for code, name in site.get("brands", {}).items():
+            brands.append({"code": code, "name": name})
         result.append({
             "id": site_id,
             "name": site["name"],
             "categories": cats,
+            "brands": brands,
         })
     return jsonify(result)

@@ -1,6 +1,9 @@
 """
 site_config.py
-사이트 / 카테고리 설정 — 크롤링 대상 관리
+사이트 / 카테고리 / 브랜드 설정 — 크롤링 대상 관리
+
+URL 생성: base_url + "/products/?" + urlencode(params) + (brand 선택 시 &brand=코드)
+예: https://www.supersports.com/ja-jp/xebio/products/?discount=sale&brand=004278
 """
 
 from urllib.parse import urlencode
@@ -47,6 +50,20 @@ SITES = {
                 "params": {"category": "training"},
             },
         },
+        "brands": {
+            "004278": "나이키",
+            "007009": "조던",
+            "004150": "뉴발란스",
+            "004277": "아디다스",
+            "004052": "미즈노",
+            "004048": "아식스",
+            "004065": "노스페이스",
+            "005495": "언더아머",
+            "004059": "푸마",
+            "004044": "데상트",
+            "004069": "요넥스",
+            "009630": "호카",
+        },
     },
 }
 
@@ -62,11 +79,23 @@ def get_category(site_id: str, cat_id: str) -> dict:
     return site["categories"].get(cat_id)
 
 
-def build_url(site_id: str, cat_id: str) -> str:
+def get_brands(site_id: str) -> dict:
+    """사이트의 브랜드 목록 반환 {코드: 이름}"""
+    site = SITES.get(site_id)
+    if not site:
+        return {}
+    return site.get("brands", {})
+
+
+def build_url(site_id: str, cat_id: str, brand_code: str = "") -> str:
+    """사이트 + 카테고리 + 브랜드로 스크래핑 URL 생성"""
     site = SITES.get(site_id)
     if not site:
         return ""
     cat = site["categories"].get(cat_id)
     if not cat:
         return ""
-    return f"{site['base_url']}/products/?{urlencode(cat['params'])}"
+    params = dict(cat["params"])
+    if brand_code:
+        params["brand"] = brand_code
+    return f"{site['base_url']}/products/?{urlencode(params)}"

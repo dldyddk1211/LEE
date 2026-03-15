@@ -91,7 +91,7 @@ def _parse_pages(pages_str: str) -> list:
 
 async def scrape_xebio(status_callback=None,
                        site_id="xebio", category_id="sale",
-                       keyword="", pages=""):
+                       keyword="", pages="", brand_code=""):
     """
     지정 사이트/카테고리에서 상품 수집
 
@@ -138,7 +138,7 @@ async def scrape_xebio(status_callback=None,
             # ── 사이트/카테고리 URL 결정 ─────────────────
             site_info = get_site(site_id)
             cat_info = get_category(site_id, category_id)
-            CATEGORY_URL = build_url(site_id, category_id)
+            CATEGORY_URL = build_url(site_id, category_id, brand_code)
             site_name = site_info["name"] if site_info else "Xebio"
             cat_name = cat_info["name"] if cat_info else "세일"
             base_url = site_info["base_url"] if site_info else "https://www.supersports.com/ja-jp/xebio"

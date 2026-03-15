@@ -1519,6 +1519,24 @@
         </select>
       </div>
       <div class="os-form-group">
+        <label>브랜드</label>
+        <select id="osBrandSelect">
+          <option value="">전체 (브랜드 무관)</option>
+          <option value="004278">나이키</option>
+          <option value="007009">조던</option>
+          <option value="004150">뉴발란스</option>
+          <option value="004277">아디다스</option>
+          <option value="004052">미즈노</option>
+          <option value="004048">아식스</option>
+          <option value="004065">노스페이스</option>
+          <option value="005495">언더아머</option>
+          <option value="004059">푸마</option>
+          <option value="004044">데상트</option>
+          <option value="004069">요넥스</option>
+          <option value="009630">호카</option>
+        </select>
+      </div>
+      <div class="os-form-group">
         <label>키워드</label>
         <input type="text" id="osKeyword" placeholder="예: adidas, nike">
       </div>
@@ -1731,7 +1749,7 @@
   <h3>📋 업로드 리스트 (<span id="uploadCount">0</span>개)</h3>
   <div class="table-container">
     <table>
-      <thead>
+      <thead id="uploadTableHead">
         <tr>
           <th>#</th>
           <th>상품번호</th>
@@ -1741,7 +1759,7 @@
           <th>재고</th>
         </tr>
       </thead>
-      <tbody id="uploadTableBody"></tbody>  <!-- ✅ ID 유지 -->
+      <tbody id="uploadTableBody"></tbody>
     </table>
   </div>
 </div>
@@ -3833,16 +3851,25 @@ function goldConfirm(msg, onOk, isDanger) {
     xebio: { name: '제비오 (Xebio)', categories: {
       sale: '세일', running: '런닝', 'soccer-futsal': '축구/풋살',
       basketball: '농구', tennis: '테니스', golf: '골프', training: '트레이닝'
+    }, brands: {
+      '004278': '나이키', '007009': '조던', '004150': '뉴발란스',
+      '004277': '아디다스', '004052': '미즈노', '004048': '아식스',
+      '004065': '노스페이스', '005495': '언더아머', '004059': '푸마',
+      '004044': '데상트', '004069': '요넥스', '009630': '호카',
     }},
-    abc: { name: 'ABC마트', categories: {} }
+    abc: { name: 'ABC마트', categories: {}, brands: {} }
   };
 
   function osUpdateBreadcrumb() {
     const site = document.getElementById('osSiteSelect').value;
     const cat = document.getElementById('osCategorySelect').value;
+    const brand = document.getElementById('osBrandSelect').value;
     const siteName = OS_SITES[site]?.name || site;
     const catName = OS_SITES[site]?.categories[cat] || cat;
-    document.getElementById('osBreadcrumb').innerHTML = `${siteName} > <span>${catName}</span>`;
+    const brandName = brand ? (OS_SITES[site]?.brands[brand] || brand) : '';
+    let crumb = `${siteName} > <span>${catName}</span>`;
+    if (brandName) crumb += ` > <span>${brandName}</span>`;
+    document.getElementById('osBreadcrumb').innerHTML = crumb;
   }
 
   // ── SSE 로그 스트리밍 연결 ──────────────────
@@ -3912,10 +3939,12 @@ function goldConfirm(msg, onOk, isDanger) {
   async function osStartScrape() {
     const site = document.getElementById('osSiteSelect').value;
     const cat = document.getElementById('osCategorySelect').value;
+    const brand = document.getElementById('osBrandSelect').value;
     const keyword = document.getElementById('osKeyword').value.trim();
     const pages = document.getElementById('osPages').value.trim();
 
-    osAddLog(`🔍 수동 스크래핑 요청: ${OS_SITES[site]?.name} > ${OS_SITES[site]?.categories[cat]}`);
+    const brandName = brand ? (OS_SITES[site]?.brands[brand] || brand) : '전체';
+    osAddLog(`🔍 수동 스크래핑 요청: ${OS_SITES[site]?.name} > ${OS_SITES[site]?.categories[cat]} > ${brandName}`);
     if (keyword) osAddLog(`   키워드: ${keyword}`);
     if (pages) osAddLog(`   페이지: ${pages}`);
 
@@ -3923,7 +3952,7 @@ function goldConfirm(msg, onOk, isDanger) {
       const r = await fetch('/overseas/scrape', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ site_id: site, category_id: cat, keyword, pages })
+        body: JSON.stringify({ site_id: site, category_id: cat, keyword, pages, brand_code: brand })
       });
       const d = await r.json();
       if (d.ok) {
@@ -3947,13 +3976,14 @@ function goldConfirm(msg, onOk, isDanger) {
   async function osAutoRun() {
     const site = document.getElementById('osSiteSelect').value;
     const cat = document.getElementById('osCategorySelect').value;
+    const brand = document.getElementById('osBrandSelect').value;
     const keyword = document.getElementById('osKeyword').value.trim();
 
     try {
       const r = await fetch('/overseas/auto', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ site_id: site, category_id: cat, keyword })
+        body: JSON.stringify({ site_id: site, category_id: cat, keyword, brand_code: brand })
       });
       const d = await r.json();
       if (d.ok) {
@@ -4071,6 +4101,7 @@ function goldConfirm(msg, onOk, isDanger) {
       // 해외소싱 폼 이벤트
       document.getElementById('osSiteSelect').addEventListener('change', osUpdateBreadcrumb);
       document.getElementById('osCategorySelect').addEventListener('change', osUpdateBreadcrumb);
+      document.getElementById('osBrandSelect').addEventListener('change', osUpdateBreadcrumb);
 
       // 환경 뱃지
       fetch('/api/data_paths').then(r => r.json()).then(d => {
@@ -5474,8 +5505,9 @@ function goldConfirm(msg, onOk, isDanger) {
         <div style="background:#1a1710; border:1px solid #2a2518; border-radius:8px; padding:12px; font-size:12px;">
           <p style="color:#d4a843; margin-bottom:6px;">참고사항</p>
           <ul style="margin:0; padding-left:18px; color:#aaa;">
-            <li>1행은 반드시 <b style="color:#e8e0d0;">헤더</b> (컬럼명)여야 합니다</li>
-            <li>헤더에 <b style="color:#e8e0d0;">"상품"</b>이 포함된 열을 기준으로 자동 인식</li>
+            <li>1행이 헤더여도, 바로 데이터여도 <b style="color:#4caf50;">자동 인식</b></li>
+            <li>1행 텍스트가 테이블 헤더에 그대로 표시됩니다</li>
+            <li>헤더에 <b style="color:#e8e0d0;">"상품"</b>이 포함되면 기준 열 자동 인식</li>
             <li>다른 양식은 <b style="color:#e67e22;">포맷 변환</b> 버튼으로 변환 후 업로드</li>
             <li>지원 형식: <b style="color:#e8e0d0;">.xlsx, .xls</b></li>
           </ul>
@@ -5552,13 +5584,28 @@ function goldConfirm(msg, onOk, isDanger) {
         
         if (result.success) {
             uploadedProducts = result.products;
-            
-            addLog(`✅ 엑셀 분석 완료: ${result.count}개 상품`, 'success');
-            
+
+            const headerNote = result.is_header ? '(헤더 자동 인식)' : '(1행부터 데이터)';
+            addLog(`✅ 엑셀 분석 완료: ${result.count}개 상품 ${headerNote}`, 'success');
+
             // 업로드 리스트 테이블 표시
             document.getElementById('uploadListSection').style.display = 'block';
             document.getElementById('uploadCount').textContent = result.count;
-            
+
+            // 엑셀 1행 텍스트로 테이블 헤더 동적 변경
+            if (result.headers && result.headers.length) {
+              const thead = document.getElementById('uploadTableHead');
+              const h = result.headers;
+              thead.innerHTML = `<tr>
+                <th>#</th>
+                <th>${h[0] || 'A열'}</th>
+                <th>${h[1] || 'B열'}</th>
+                <th>${h[2] || 'C열'}</th>
+                <th>${h[3] || 'D열'}</th>
+                <th>${h[4] || 'E열'}</th>
+              </tr>`;
+            }
+
             // 업로드 리스트 테이블 렌더링
             renderUploadList(uploadedProducts);
             

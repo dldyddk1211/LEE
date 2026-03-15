@@ -1065,42 +1065,62 @@ def upload_excel():
     try:
         if 'file' not in request.files:
             return jsonify({'success': False, 'error': '파일이 없습니다'})
-        
+
         file = request.files['file']
         if file.filename == '':
             return jsonify({'success': False, 'error': '파일이 선택되지 않았습니다'})
-        
+
+        import re
+        def safe_int(val):
+            if val is None or val == '':
+                return 0
+            if isinstance(val, (int, float)):
+                return int(val)
+            nums = re.sub(r'[^\d]', '', str(val).strip())
+            return int(nums) if nums else 0
+
         wb = openpyxl.load_workbook(file, data_only=True)
         ws = wb.active
-        
-        products = []
-        header_row = list(next(ws.iter_rows(min_row=1, max_row=1, values_only=True)))
-        
-        code_col_idx = 0
-        for i, header in enumerate(header_row):
-            if header and '상품' in str(header):
-                code_col_idx = i
+
+        all_rows = list(ws.iter_rows(values_only=True))
+        if not all_rows:
+            return jsonify({'success': False, 'error': '빈 파일입니다'})
+
+        first_row = all_rows[0]
+
+        # 1행 텍스트를 헤더 라벨로 반환 (A1, B1, C1...)
+        headers = [str(cell).strip() if cell is not None else '' for cell in first_row]
+
+        # 1행이 헤더인지 데이터인지 자동 판별
+        # 판별 기준: 1행에 숫자(가격/재고)가 있으면 데이터, 텍스트만 있으면 헤더
+        first_row_has_number = False
+        for cell in first_row:
+            if cell is not None and isinstance(cell, (int, float)):
+                first_row_has_number = True
                 break
-        
-        for row in ws.iter_rows(min_row=2, values_only=True):
+
+        is_header = not first_row_has_number  # 숫자가 없으면 헤더로 판단
+        data_start = 1 if is_header else 0  # 헤더면 2행부터, 아니면 1행부터
+
+        # "상품" 키워드로 기준 컬럼 찾기 (헤더가 있을 때만)
+        code_col_idx = 0
+        if is_header:
+            for i, header in enumerate(first_row):
+                if header and '상품' in str(header):
+                    code_col_idx = i
+                    break
+
+        products = []
+        for row in all_rows[data_start:]:
             if not any(row):
                 continue
-            
+
             product_code = str(row[code_col_idx]).strip() if len(row) > code_col_idx and row[code_col_idx] else ''
             product_name = str(row[code_col_idx + 1]).strip() if len(row) > code_col_idx + 1 and row[code_col_idx + 1] else ''
             original_price = row[code_col_idx + 2] if len(row) > code_col_idx + 2 else None
             sale_price = row[code_col_idx + 3] if len(row) > code_col_idx + 3 else None
             stock = row[code_col_idx + 4] if len(row) > code_col_idx + 4 else None
-            
-            import re
-            def safe_int(val):
-                if val is None or val == '':
-                    return 0
-                if isinstance(val, (int, float)):
-                    return int(val)
-                nums = re.sub(r'[^\d]', '', str(val).strip())
-                return int(nums) if nums else 0
-            
+
             if product_code or product_name:
                 products.append({
                     'code': product_code,
@@ -1109,9 +1129,15 @@ def upload_excel():
                     'sale_price': safe_int(sale_price),
                     'stock': safe_int(stock)
                 })
-        
-        return jsonify({'success': True, 'count': len(products), 'products': products})
-    
+
+        return jsonify({
+            'success': True,
+            'count': len(products),
+            'products': products,
+            'headers': headers[:5],  # A~E열 헤더 텍스트
+            'is_header': is_header,  # 1행이 헤더였는지
+        })
+
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
