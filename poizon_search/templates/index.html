@@ -1403,6 +1403,7 @@
   </ul>
   <div class="sidebar-footer">
     <span class="env-badge" id="envBadge">테스트 서버</span>
+    <span class="env-badge" style="display:block; margin-top:4px; color:#555;">v3.16 브랜드필터·엑셀원본</span>
   </div>
 </nav>
 
@@ -4105,9 +4106,9 @@ function goldConfirm(msg, onOk, isDanger) {
 
       // 환경 뱃지
       fetch('/api/data_paths').then(r => r.json()).then(d => {
-        const env = d.platform === 'Darwin' ? '운영 서버' : '테스트 서버';
-        document.getElementById('envBadge').textContent = env;
-        document.getElementById('dashEnv').textContent = d.platform === 'Darwin' ? '운영 (Mac)' : '테스트 (Windows)';
+        const isMac = d.system === 'Darwin';
+        document.getElementById('envBadge').textContent = isMac ? '운영 서버' : '테스트 서버';
+        document.getElementById('dashEnv').textContent = isMac ? '운영 (Mac)' : '테스트 (Windows)';
       }).catch(() => {});
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
