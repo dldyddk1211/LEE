@@ -1070,15 +1070,6 @@ def upload_excel():
         if file.filename == '':
             return jsonify({'success': False, 'error': '파일이 선택되지 않았습니다'})
 
-        import re
-        def safe_int(val):
-            if val is None or val == '':
-                return 0
-            if isinstance(val, (int, float)):
-                return int(val)
-            nums = re.sub(r'[^\d]', '', str(val).strip())
-            return int(nums) if nums else 0
-
         wb = openpyxl.load_workbook(file, data_only=True)
         ws = wb.active
 
@@ -1088,7 +1079,10 @@ def upload_excel():
 
         first_row = all_rows[0]
 
-        # 1행 텍스트를 헤더 라벨로 반환 (A1, B1, C1...)
+        # 최대 컬럼 수 (빈 열 제외)
+        max_cols = max(len(r) for r in all_rows) if all_rows else 0
+
+        # 1행 텍스트를 헤더 라벨로 반환
         headers = [str(cell).strip() if cell is not None else '' for cell in first_row]
 
         # 1행이 헤더인지 데이터인지 자동 판별
@@ -1099,43 +1093,29 @@ def upload_excel():
                 first_row_has_number = True
                 break
 
-        is_header = not first_row_has_number  # 숫자가 없으면 헤더로 판단
-        data_start = 1 if is_header else 0  # 헤더면 2행부터, 아니면 1행부터
+        is_header = not first_row_has_number
+        data_start = 1 if is_header else 0
 
-        # "상품" 키워드로 기준 컬럼 찾기 (헤더가 있을 때만)
-        code_col_idx = 0
-        if is_header:
-            for i, header in enumerate(first_row):
-                if header and '상품' in str(header):
-                    code_col_idx = i
-                    break
-
+        # 엑셀 원본 그대로 행 데이터 구성 (컬럼 변환 없음)
         products = []
         for row in all_rows[data_start:]:
             if not any(row):
                 continue
-
-            product_code = str(row[code_col_idx]).strip() if len(row) > code_col_idx and row[code_col_idx] else ''
-            product_name = str(row[code_col_idx + 1]).strip() if len(row) > code_col_idx + 1 and row[code_col_idx + 1] else ''
-            original_price = row[code_col_idx + 2] if len(row) > code_col_idx + 2 else None
-            sale_price = row[code_col_idx + 3] if len(row) > code_col_idx + 3 else None
-            stock = row[code_col_idx + 4] if len(row) > code_col_idx + 4 else None
-
-            if product_code or product_name:
-                products.append({
-                    'code': product_code,
-                    'name': product_name,
-                    'original_price': safe_int(original_price),
-                    'sale_price': safe_int(sale_price),
-                    'stock': safe_int(stock)
-                })
+            cells = []
+            for cell in row:
+                if cell is None:
+                    cells.append('')
+                else:
+                    cells.append(str(cell).strip())
+            products.append(cells)
 
         return jsonify({
             'success': True,
             'count': len(products),
             'products': products,
-            'headers': headers[:5],  # A~E열 헤더 텍스트
-            'is_header': is_header,  # 1행이 헤더였는지
+            'headers': headers[:max_cols],
+            'is_header': is_header,
+            'col_count': max_cols,
         })
 
     except Exception as e:

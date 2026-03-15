@@ -5595,31 +5595,28 @@ function goldConfirm(msg, onOk, isDanger) {
             // 엑셀 1행 텍스트로 테이블 헤더 동적 변경
             if (result.headers && result.headers.length) {
               const thead = document.getElementById('uploadTableHead');
-              const h = result.headers;
-              thead.innerHTML = `<tr>
-                <th>#</th>
-                <th>${h[0] || 'A열'}</th>
-                <th>${h[1] || 'B열'}</th>
-                <th>${h[2] || 'C열'}</th>
-                <th>${h[3] || 'D열'}</th>
-                <th>${h[4] || 'E열'}</th>
-              </tr>`;
+              const colLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+              let ths = '<th>#</th>';
+              result.headers.forEach((h, i) => {
+                ths += `<th>${h || (colLabels[i] || i+1) + '열'}</th>`;
+              });
+              thead.innerHTML = `<tr>${ths}</tr>`;
             }
 
             // 업로드 리스트 테이블 렌더링
             renderUploadList(uploadedProducts);
-            
+
             // ✅ "검색 시작" 버튼 숨김
             document.getElementById('startCompareBtn').style.display = 'none';
-            // ✅ collectedData에 바로 저장 (포이즌 검색 없이)
-            collectedData = result.products.map(product => ({
-              엑셀_상품번호: product.code || '-',
-              상품번호: product.code || '-',
-              제품명: product.name || '-',
-              엑셀_정가: product.original_price || 0,
-              엑셀_할인가: product.sale_price || 0,
-              엑셀_재고: product.stock || 0,
-              // 포이즌/크림 정보는 검색 후 추가됨
+            // ✅ collectedData에 바로 저장 — 엑셀 원본 기반
+            // 첫 번째 열을 상품번호, 두 번째 열을 제품명으로 사용
+            collectedData = result.products.map(row => ({
+              엑셀_상품번호: row[0] || '-',
+              상품번호: row[0] || '-',
+              제품명: row[1] || '-',
+              엑셀_정가: row[2] || 0,
+              엑셀_할인가: row[3] || 0,
+              엑셀_재고: row[4] || 0,
               포이즌노출가: '-',
               포이즌비교: 0,
               포이즌중국판매량: 0,
@@ -5659,31 +5656,25 @@ function goldConfirm(msg, onOk, isDanger) {
   function renderUploadList(products) {
       const tbody = document.getElementById('uploadTableBody');
       tbody.innerHTML = '';
-      
-      products.forEach((product, idx) => {
-          const row = tbody.insertRow();
-          
-          // #
-          row.insertCell().textContent = idx + 1;
-          
-          // 상품번호
-          row.insertCell().textContent = product.code || '-';
-          
-          // 제품명
-          row.insertCell().textContent = product.name || '-';
-          
-          // 정가
-          const originalPrice = product.original_price || 0;
-          row.insertCell().textContent = originalPrice ? originalPrice.toLocaleString() + '원' : '-';
-          
-          // 할인가
-          const salePrice = product.sale_price || 0;
-          row.insertCell().textContent = salePrice ? salePrice.toLocaleString() + '원' : '-';
-          
-          // 재고
-          row.insertCell().textContent = product.stock || '0';
+
+      products.forEach((row, idx) => {
+          const tr = tbody.insertRow();
+          tr.insertCell().textContent = idx + 1;
+          // row는 배열 — 각 셀 그대로 출력
+          if (Array.isArray(row)) {
+            row.forEach(cell => {
+              tr.insertCell().textContent = cell || '-';
+            });
+          } else {
+            // 하위 호환: 기존 객체 형태
+            tr.insertCell().textContent = row.code || '-';
+            tr.insertCell().textContent = row.name || '-';
+            tr.insertCell().textContent = row.original_price || '-';
+            tr.insertCell().textContent = row.sale_price || '-';
+            tr.insertCell().textContent = row.stock || '0';
+          }
       });
-      
+
       addLog(`📋 업로드 리스트 표시 완료: ${products.length}개`, 'success');
     }
 
